@@ -21,19 +21,21 @@
 
 ## Índice
 
-1. [Qué es Anclora EnergyScan](#1-qué-es-anclora-energyscan)
-2. [Antes de empezar](#2-antes-de-empezar)
-3. [Acceso, cuenta y preferencias](#3-acceso-cuenta-y-preferencias)
-4. [Uso residencial paso a paso](#4-uso-residencial-paso-a-paso)
-5. [Mi panel EnergyScan](#5-mi-panel-energyscan)
-6. [Informe Premium y pagos](#6-informe-premium-y-pagos)
-7. [Segunda opinión de presupuesto](#7-segunda-opinión-de-presupuesto)
-8. [Área profesional beta](#8-área-profesional-beta)
-9. [Área de proveedores](#9-área-de-proveedores)
-10. [Cookies, privacidad y datos personales](#10-cookies-privacidad-y-datos-personales)
-11. [Preguntas frecuentes](#11-preguntas-frecuentes)
-12. [Glosario rápido](#12-glosario-rápido)
-13. [Aviso legal](#13-aviso-legal)
+| Nº | Sección |
+| --- | --- |
+| 1 | [Qué es Anclora EnergyScan](#1-qué-es-anclora-energyscan) |
+| 2 | [Antes de empezar](#2-antes-de-empezar) |
+| 3 | [Acceso, cuenta y preferencias](#3-acceso-cuenta-y-preferencias) |
+| 4 | [Uso residencial paso a paso](#4-uso-residencial-paso-a-paso) |
+| 5 | [Mi panel EnergyScan](#5-mi-panel-energyscan) |
+| 6 | [Informe Premium y pagos](#6-informe-premium-y-pagos) |
+| 7 | [Segunda opinión de presupuesto](#7-segunda-opinión-de-presupuesto) |
+| 8 | [Área profesional beta](#8-área-profesional-beta) |
+| 9 | [Área de proveedores](#9-área-de-proveedores) |
+| 10 | [Cookies, privacidad y datos personales](#10-cookies-privacidad-y-datos-personales) |
+| 11 | [Preguntas frecuentes](#11-preguntas-frecuentes) |
+| 12 | [Glosario rápido](#12-glosario-rápido) |
+| 13 | [Aviso legal](#13-aviso-legal) |
 
 <div class="page-break"></div>
 
