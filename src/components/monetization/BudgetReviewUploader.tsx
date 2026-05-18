@@ -1,7 +1,8 @@
 'use client';
 
-import { FormEvent, useRef, useState } from 'react';
-import { FileText, UploadCloud } from 'lucide-react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Download, FileText, UploadCloud } from 'lucide-react';
 import { usePreferences } from '@/components/AppPreferencesProvider';
 import { getMonetizationCopy } from '@/lib/monetization/i18n';
 
@@ -16,6 +17,8 @@ type AdvancedFinding = {
 
 type ReviewSummary = {
   id: string;
+  status?: string;
+  paid?: boolean;
   summary?: {
     detectedItems?: number;
     totalAmount?: number;
@@ -33,12 +36,72 @@ type ReviewSummary = {
 
 export function BudgetReviewUploader() {
   const { language } = usePreferences();
+  const searchParams = useSearchParams();
   const copy = getMonetizationCopy(language).budgetReview;
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [review, setReview] = useState<ReviewSummary | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [sourceFileName, setSourceFileName] = useState('');
+  const [verifyingPayment, setVerifyingPayment] = useState(false);
+
+  useEffect(() => {
+    const reviewId = searchParams.get('review');
+    const sessionId = searchParams.get('session_id');
+    const returnedFromCheckout = searchParams.get('paid') === '1';
+    if (!reviewId) return;
+
+    let cancelled = false;
+    let retryTimer: number | undefined;
+
+    async function loadReview() {
+      setLoading(true);
+      setError('');
+      setVerifyingPayment(returnedFromCheckout);
+      try {
+        const query = sessionId ? `?session_id=${encodeURIComponent(sessionId)}` : '';
+        const response = await fetch(`/api/budget-review/${reviewId}${query}`, { cache: 'no-store' });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || copy.analyzeFailed);
+        if (cancelled) return;
+        setReview(data);
+        setSourceFileName('');
+        setVerifyingPayment(returnedFromCheckout && !data.paid);
+
+        if (returnedFromCheckout && !data.paid) {
+          let attempts = 0;
+          const poll = async () => {
+            attempts += 1;
+            const statusQuery = sessionId ? `?session_id=${encodeURIComponent(sessionId)}` : '';
+            const statusResponse = await fetch(`/api/budget-review/${reviewId}/status${statusQuery}`, { cache: 'no-store' });
+            const statusData = await statusResponse.json().catch(() => null);
+            if (cancelled) return;
+            if (statusResponse.ok && statusData?.paid) {
+              const refreshed = await fetch(`/api/budget-review/${reviewId}`, { cache: 'no-store' });
+              const refreshedData = await refreshed.json();
+              if (!cancelled && refreshed.ok) {
+                setReview(refreshedData);
+                setVerifyingPayment(false);
+              }
+              return;
+            }
+            if (attempts < 8) retryTimer = window.setTimeout(poll, 2000);
+          };
+          retryTimer = window.setTimeout(poll, 1500);
+        }
+      } catch (err) {
+        if (!cancelled) setError(err instanceof Error ? err.message : copy.analyzeFailed);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    loadReview();
+    return () => {
+      cancelled = true;
+      if (retryTimer) window.clearTimeout(retryTimer);
+    };
+  }, [copy.analyzeFailed, searchParams]);
 
   async function analyze(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -102,7 +165,7 @@ export function BudgetReviewUploader() {
 
   return (
     <section className="surface border rounded-3xl p-6 lg:p-8">
-      <form onSubmit={analyze} className="space-y-4">
+      {!review && <form onSubmit={analyze} className="space-y-4">
         <textarea name="text" rows={10} className="w-full rounded-2xl border border-white/10 bg-black/20 p-4 text-sm" placeholder={copy.placeholder} />
         <input
           ref={fileInputRef}
@@ -130,11 +193,16 @@ export function BudgetReviewUploader() {
             {loading ? copy.analyzing : copy.uploadPdf}
           </button>
         </div>
-      </form>
+      </form>}
       {error && <p className="mt-4 text-sm text-[#EF4444]">{error}</p>}
+      {verifyingPayment && (
+        <div className="mt-4 rounded-2xl border border-[#FFB020]/30 bg-[#FFB020]/10 p-4 text-sm text-[#FFB020]">
+          {copy.paymentVerifying}
+        </div>
+      )}
       {review && (
         <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-5 space-y-4">
-          <h2 className="font-heading text-xl font-bold">{copy.freeResult}</h2>
+          <h2 className="font-heading text-xl font-bold">{review.paid ? copy.paidResult : copy.freeResult}</h2>
           {sourceFileName && <p className="text-xs text-muted">{copy.pdfImported}: {sourceFileName}</p>}
           <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-muted">
             <span>{copy.detectedItems}: <strong className="text-foreground">{review.summary?.detectedItems || 0}</strong></span>
@@ -198,7 +266,18 @@ export function BudgetReviewUploader() {
           )}
 
           <div className="flex flex-col gap-3 sm:flex-row pt-2">
-            <button onClick={checkout} disabled={loading} className="rounded-full bg-[#00DC82] px-6 py-3 font-bold text-[#07140f]">{copy.unlock}</button>
+            {review.paid ? (
+              <a
+                href={`/api/budget-review/${review.id}/pdf?lang=${language}`}
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#00DC82] px-6 py-3 font-bold text-[#07140f]"
+                download
+              >
+                <Download className="h-4 w-4" />
+                {copy.downloadPdf}
+              </a>
+            ) : (
+              <button onClick={checkout} disabled={loading || verifyingPayment} className="rounded-full bg-[#00DC82] px-6 py-3 font-bold text-[#07140f] disabled:opacity-60">{copy.unlock}</button>
+            )}
             <a href="/dashboard" className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/10 px-6 py-3 font-bold text-premium">{copy.dashboardCta}</a>
           </div>
           <p className="text-xs text-muted">{copy.legal}</p>

@@ -59,7 +59,12 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen app-shell">
-      <Navbar />
+      <Navbar
+        mode="app"
+        userEmail={session.user.email}
+        providerHref={providerAccount ? '/provider/dashboard' : '/provider/register'}
+        professionalHref={professionalRequest?.status === 'APPROVED' ? '/profesional/dashboard' : '/profesional/solicitar'}
+      />
       <main className="mx-auto max-w-5xl px-4 pb-16 pt-28">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
@@ -179,20 +184,47 @@ export default async function DashboardPage() {
           </div>
         </section>
 
-        <section className="mt-10 grid gap-4 lg:grid-cols-2">
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-            <h2 className="font-heading text-2xl font-bold text-premium">{copy.providerTitle}</h2>
-            <p className="mt-2 text-sm text-muted">{providerAccount ? copy.providerConnected : copy.providerNotConnected}</p>
-            <Link href={providerAccount ? '/provider/dashboard' : '/provider/register'} className="mt-5 inline-flex rounded-full border border-[#00DC82]/30 px-5 py-3 font-heading font-bold text-[#00DC82]">
-              {providerAccount ? copy.providerArea : copy.providerRegister}
-            </Link>
+        <section className="mt-10">
+          <div className="max-w-3xl">
+            <p className="text-xs font-bold uppercase text-[#00DC82]">{copy.rolesTitle}</p>
+            <h2 className="mt-2 font-heading text-2xl font-bold text-premium">{copy.providerTitle} / {copy.professionalTitle}</h2>
+            <p className="mt-3 text-sm leading-6 text-muted">{copy.rolesIntro}</p>
           </div>
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-            <h2 className="font-heading text-2xl font-bold text-premium">{copy.professionalTitle}</h2>
-            <p className="mt-2 text-sm text-muted">{professionalRequest ? copy.professionalStatus(professionalRequest.status) : copy.professionalNotRequested}</p>
-            <Link href={professionalRequest?.status === 'APPROVED' ? '/profesional/dashboard' : '/profesional/solicitar'} className="mt-5 inline-flex rounded-full border border-[#00DC82]/30 px-5 py-3 font-heading font-bold text-[#00DC82]">
-              {professionalRequest?.status === 'APPROVED' ? copy.professionalDashboard : copy.professionalRequest}
-            </Link>
+          <div className="mt-5 grid gap-4 lg:grid-cols-2">
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h3 className="font-heading text-2xl font-bold text-premium">{copy.providerTitle}</h3>
+                </div>
+                <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-bold text-premium">
+                  {providerAccount ? `${copy.roleStatusActive} · ${providerAccount.provider.status}` : copy.roleStatusInactive}
+                </span>
+              </div>
+              <p className="mt-4 text-sm font-semibold text-premium">{copy.providerRoleFor}</p>
+              <p className="mt-2 text-sm leading-6 text-muted">{copy.providerRoleManages}</p>
+              <p className="mt-3 text-xs leading-5 text-muted">{providerAccount ? copy.providerConnected : copy.providerNotConnected}</p>
+              <Link href={providerAccount ? '/provider/dashboard' : '/provider/register'} className="mt-5 inline-flex rounded-full border border-[#00DC82]/30 px-5 py-3 font-heading font-bold text-[#00DC82]">
+                {providerAccount ? copy.providerArea : copy.providerRegister}
+              </Link>
+            </div>
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h3 className="font-heading text-2xl font-bold text-premium">{copy.professionalTitle}</h3>
+                </div>
+                <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-bold text-premium">
+                  {professionalRequest ? (
+                    professionalRequest.status === 'APPROVED' ? copy.roleStatusActive : professionalRequest.status === 'PENDING' ? copy.roleStatusPending : professionalRequest.status === 'REJECTED' ? copy.roleStatusRejected : professionalRequest.status
+                  ) : copy.roleStatusInactive}
+                </span>
+              </div>
+              <p className="mt-4 text-sm font-semibold text-premium">{copy.professionalRoleFor}</p>
+              <p className="mt-2 text-sm leading-6 text-muted">{copy.professionalRoleManages}</p>
+              <p className="mt-3 text-xs leading-5 text-muted">{professionalRequest ? copy.professionalStatus(professionalRequest.status) : copy.professionalNotRequested}</p>
+              <Link href={professionalRequest?.status === 'APPROVED' ? '/profesional/dashboard' : '/profesional/solicitar'} className="mt-5 inline-flex rounded-full border border-[#00DC82]/30 px-5 py-3 font-heading font-bold text-[#00DC82]">
+                {professionalRequest?.status === 'APPROVED' ? copy.professionalDashboard : copy.professionalRequest}
+              </Link>
+            </div>
           </div>
         </section>
 

@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from 'react';
 import Link from 'next/link';
+import { Info } from 'lucide-react';
 import { calculateSavingsRange } from '@/lib/calculator/savings';
 import { trackEvent } from '@/lib/analytics';
 import { usePreferences } from '@/components/AppPreferencesProvider';
@@ -12,6 +13,7 @@ export function SavingsCalculator() {
   const copy = getMonetizationCopy(language).calculator;
   const [result, setResult] = useState<ReturnType<typeof calculateSavingsRange> | null>(null);
   const [error, setError] = useState('');
+  const [monthlySpendHelpOpen, setMonthlySpendHelpOpen] = useState(false);
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -57,7 +59,33 @@ export function SavingsCalculator() {
           <option value="pv">{copy.measurePv}</option>
           <option value="deep_retrofit">{copy.measureDeepRetrofit}</option>
         </select>
-        <input name="monthlySpend" type="number" min="20" max="2000" placeholder={copy.monthlySpendPlaceholder} className="rounded-xl border border-white/10 bg-black/20 p-3 md:col-span-2" />
+        <div className="relative md:col-span-2">
+          <input
+            name="monthlySpend"
+            type="number"
+            min="20"
+            max="2000"
+            placeholder={copy.monthlySpendPlaceholder}
+            aria-describedby="monthly-spend-help"
+            className="w-full rounded-xl border border-white/10 bg-black/20 p-3 pr-12"
+          />
+          <button
+            type="button"
+            aria-label={copy.monthlySpendHelpLabel}
+            aria-expanded={monthlySpendHelpOpen}
+            aria-controls="monthly-spend-help"
+            onClick={() => setMonthlySpendHelpOpen((open) => !open)}
+            className="absolute right-3 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 text-muted transition hover:border-[#00DC82]/50 hover:text-[#00DC82] focus:outline-none focus:ring-2 focus:ring-[#00DC82]/40"
+          >
+            <Info className="h-4 w-4" />
+          </button>
+          {monthlySpendHelpOpen && (
+            <div id="monthly-spend-help" role="status" className="monthly-spend-help absolute left-0 right-0 top-[calc(100%+0.5rem)] z-20 rounded-2xl border border-[#00DC82]/30 bg-[#07140f] p-4 text-sm text-[#d8e7df] shadow-2xl shadow-black/40">
+              <p className="font-heading font-bold text-[#00DC82]">{copy.monthlySpendHelpTitle}</p>
+              <p className="mt-2 text-muted">{copy.monthlySpendHelpText}</p>
+            </div>
+          )}
+        </div>
         <button className="min-h-12 rounded-full bg-[#00DC82] px-6 font-bold text-[#07140f] md:col-span-2">{copy.submit}</button>
       </form>
       {error && <p className="mt-4 text-sm text-[#EF4444]">{error}</p>}

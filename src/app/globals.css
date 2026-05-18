@@ -284,6 +284,26 @@ body {
   background-color: var(--accent);
 }
 
+select {
+  color-scheme: dark;
+}
+
+select option,
+select optgroup {
+  background-color: #101412;
+  color: #F0EDE8;
+}
+
+select option:checked {
+  background-color: #00DC82;
+  color: #07140f;
+}
+
+.monthly-spend-help {
+  background-color: #07140f;
+  color: #d8e7df;
+}
+
 .light .text-\[\#F0EDE8\] {
   color: var(--fg) !important;
 }
@@ -334,6 +354,25 @@ body {
   background-color: var(--elevated) !important;
   border-color: var(--border) !important;
   color: var(--fg) !important;
+  color-scheme: light;
+}
+
+.light select option,
+.light select optgroup {
+  background-color: var(--elevated);
+  color: var(--fg);
+}
+
+.light select option:checked {
+  background-color: var(--accent);
+  color: #07110D;
+}
+
+.light .monthly-spend-help {
+  background-color: var(--elevated) !important;
+  color: var(--fg) !important;
+  border-color: color-mix(in srgb, var(--accent) 42%, var(--border)) !important;
+  box-shadow: 0 18px 40px rgba(23, 21, 18, 0.12);
 }
 
 .light input::placeholder,
