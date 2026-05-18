@@ -23,8 +23,17 @@ export interface BillImporterCopy {
   billImportDesc: string;
 }
 
+export interface SerializableBill {
+  supplyType: 'electricity' | 'gas';
+  amountEur?: number;
+  consumptionValue?: number; // kWh for electricity, m³ for gas
+  billingDays?: number;
+  distributorName?: string;
+}
+
 interface BillImporterProps {
   onMonthlySpendChange: (value: number) => void;
+  onBillsChange?: (bills: SerializableBill[]) => void;
   copy: BillImporterCopy;
 }
 
@@ -67,7 +76,19 @@ function computeMonthlyAmount(entry: BillEntry): number | undefined {
   return amount / (days / 30.44);
 }
 
-export function BillImporter({ onMonthlySpendChange, copy }: BillImporterProps) {
+function toSerializable(bills: BillEntry[]): SerializableBill[] {
+  return bills
+    .filter((b) => b.status !== 'error')
+    .map((b) => ({
+      supplyType: b.supplyType,
+      amountEur: getAmountEur(b),
+      consumptionValue: getConsumptionValue(b),
+      billingDays: getBillingDays(b),
+      distributorName: b.extracted.distributorName,
+    }));
+}
+
+export function BillImporter({ onMonthlySpendChange, onBillsChange, copy }: BillImporterProps) {
   const [bills, setBills] = useState<BillEntry[]>([]);
   const [avgResult, setAvgResult] = useState<number | null>(null);
   const electricityInputRef = useRef<HTMLInputElement>(null);
@@ -75,6 +96,10 @@ export function BillImporter({ onMonthlySpendChange, copy }: BillImporterProps) 
 
   const electricityBills = bills.filter((b) => b.supplyType === 'electricity');
   const gasBills = bills.filter((b) => b.supplyType === 'gas');
+
+  function notifyBillsChange(nextBills: BillEntry[]) {
+    onBillsChange?.(toSerializable(nextBills));
+  }
 
   async function handleFileAdd(supplyType: 'electricity' | 'gas', file: File) {
     const id = generateId();
@@ -84,7 +109,8 @@ export function BillImporter({ onMonthlySpendChange, copy }: BillImporterProps) 
       status: 'processing',
       extracted: {},
     };
-    setBills((prev) => [...prev, entry]);
+    const withEntry = (prev: BillEntry[]) => [...prev, entry];
+    setBills(withEntry);
 
     try {
       const formData = new FormData();
@@ -98,20 +124,26 @@ export function BillImporter({ onMonthlySpendChange, copy }: BillImporterProps) 
       const json = await res.json() as { ok: boolean; data?: ParsedBillData; error?: string };
 
       if (json.ok && json.data) {
-        setBills((prev) =>
-          prev.map((b) =>
-            b.id === id ? { ...b, status: 'done', extracted: json.data! } : b,
-          ),
-        );
+        setBills((prev) => {
+          const next = prev.map((b) =>
+            b.id === id ? { ...b, status: 'done' as const, extracted: json.data! } : b,
+          );
+          notifyBillsChange(next);
+          return next;
+        });
       } else {
-        setBills((prev) =>
-          prev.map((b) => (b.id === id ? { ...b, status: 'error' } : b)),
-        );
+        setBills((prev) => {
+          const next = prev.map((b) => (b.id === id ? { ...b, status: 'error' as const } : b));
+          notifyBillsChange(next);
+          return next;
+        });
       }
     } catch {
-      setBills((prev) =>
-        prev.map((b) => (b.id === id ? { ...b, status: 'error' } : b)),
-      );
+      setBills((prev) => {
+        const next = prev.map((b) => (b.id === id ? { ...b, status: 'error' as const } : b));
+        notifyBillsChange(next);
+        return next;
+      });
     }
   }
 
@@ -126,15 +158,21 @@ export function BillImporter({ onMonthlySpendChange, copy }: BillImporterProps) 
   }
 
   function removeBill(id: string) {
-    setBills((prev) => prev.filter((b) => b.id !== id));
+    setBills((prev) => {
+      const next = prev.filter((b) => b.id !== id);
+      notifyBillsChange(next);
+      return next;
+    });
     setAvgResult(null);
   }
 
   function updateBillField(id: string, field: 'amountEur' | 'consumptionValue' | 'billingDays', raw: string) {
     const value = raw === '' ? undefined : parseFloat(raw);
-    setBills((prev) =>
-      prev.map((b) => (b.id === id ? { ...b, [field]: value } : b)),
-    );
+    setBills((prev) => {
+      const next = prev.map((b) => (b.id === id ? { ...b, [field]: value } : b));
+      notifyBillsChange(next);
+      return next;
+    });
   }
 
   function calculateAvg() {

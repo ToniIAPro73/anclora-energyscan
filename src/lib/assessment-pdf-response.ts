@@ -20,6 +20,8 @@ import { assertCanDownloadPremiumPdf, canAccessPremiumContent } from '@/lib/prem
 import { trackEvent } from '@/lib/analytics';
 import { buildEvidenceMatrix } from '@/lib/evidence/evidence-matrix';
 import { buildConditionRiskItems } from '@/lib/condition-risk/rules';
+import { fetchCatastroImages } from '@/lib/catastro/images';
+import type { UtilityBillData } from '@/lib/domain/energy-assessment';
 
 let cachedLogoDataUri: string | undefined;
 
@@ -167,7 +169,7 @@ function formatDownloadTimestamp(date = new Date()) {
 export async function buildAssessmentPdfResponse(
   req: Request,
   assessmentId: string,
-  options: { allowDemoPremium?: boolean } = {}
+  options: { allowDemoPremium?: boolean; utilityBills?: UtilityBillData[] } = {}
 ) {
   try {
     const cookieHeader = req.headers.get('cookie') || '';
@@ -356,6 +358,21 @@ export async function buildAssessmentPdfResponse(
           reportData.brandName = branding.brandName;
         }
       }
+    }
+
+    // Inject session utility bills if provided (from calculator, same browser session)
+    if (options.utilityBills?.length) {
+      reportData.utilityBills = options.utilityBills;
+    }
+
+    // Fetch Catastro images on-demand for PDF — never stored in DB
+    if (reportData.cadastralRecord) {
+      const cr = reportData.cadastralRecord;
+      reportData.catastroImages = await fetchCatastroImages(
+        cr.cadastralReference,
+        cr.lat,
+        cr.lng,
+      );
     }
 
     reportData.attachments = await enrichAttachmentsForPdf(reportData.attachments || []);

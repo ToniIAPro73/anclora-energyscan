@@ -121,6 +121,21 @@ const labels = {
       'Cumplimiento técnico definitivo de soluciones propuestas',
     ],
     unknownWithoutVisitDisclaimer: 'Este informe es un prediagnóstico orientativo. No sustituye la inspección de un técnico competente ni el Certificado de Eficiencia Energética oficial.',
+    utilityBillsTitle: 'Facturas de suministros (sesión)',
+    utilityBillsSubtitle: 'Datos de consumo introducidos por el usuario en la calculadora. No se almacenan en base de datos.',
+    utilityElectricity: 'Electricidad',
+    utilityGas: 'Gas',
+    utilityAmount: 'Importe',
+    utilityConsumption: 'Consumo',
+    utilityDays: 'Días facturación',
+    utilityDistributor: 'Distribuidora',
+    utilityMonthlyEst: 'Estimación mensual',
+    utilityBillDisclaimer: 'Valores introducidos por el usuario o extraídos automáticamente de facturas. Son orientativos y no han sido validados técnicamente.',
+    catastroImagesTitle: 'Imágenes catastrales',
+    catastroImagesSubtitle: 'Obtenidas de la Sede Electrónica del Catastro en el momento de generación del informe. No se almacenan.',
+    catastroFacadeLabel: 'Foto de fachada (Catastro)',
+    catastroMapLabel: 'Cartografía catastral',
+    catastroDisclaimer: 'Fuente: Sede Electrónica del Catastro (Ministerio de Hacienda). Imágenes obtenidas en tiempo real para este informe y no almacenadas en los sistemas de Anclora EnergyScan.',
   },
   en: {
     title: 'Anclora EnergyScan Premium Report',
@@ -229,6 +244,21 @@ const labels = {
       'Definitive technical compliance of proposed solutions',
     ],
     unknownWithoutVisitDisclaimer: 'This report is an indicative pre-assessment. It does not replace an inspection by a qualified technician or the official Energy Performance Certificate.',
+    utilityBillsTitle: 'Session utility bills',
+    utilityBillsSubtitle: 'Consumption data entered by the user in the calculator. Not stored in the database.',
+    utilityElectricity: 'Electricity',
+    utilityGas: 'Gas',
+    utilityAmount: 'Amount',
+    utilityConsumption: 'Consumption',
+    utilityDays: 'Billing days',
+    utilityDistributor: 'Distributor',
+    utilityMonthlyEst: 'Monthly estimate',
+    utilityBillDisclaimer: 'Values entered by the user or automatically extracted from bills. Indicative and not technically validated.',
+    catastroImagesTitle: 'Cadastral images',
+    catastroImagesSubtitle: 'Retrieved from the Spanish Cadastre (Catastro) at report generation time. Not stored.',
+    catastroFacadeLabel: 'Facade photo (Catastro)',
+    catastroMapLabel: 'Cadastral map',
+    catastroDisclaimer: 'Source: Spanish Electronic Cadastre (Ministry of Finance). Images retrieved in real time for this report and not stored in Anclora EnergyScan systems.',
   },
   de: {
     title: 'Anclora EnergyScan Premium-Bericht',
@@ -337,6 +367,21 @@ const labels = {
       'Endgültige technische Konformität der vorgeschlagenen Lösungen',
     ],
     unknownWithoutVisitDisclaimer: 'Dieser Bericht ist eine orientierende Voreinschätzung. Er ersetzt weder die Prüfung durch qualifizierte Fachleute noch den offiziellen Energieausweis.',
+    utilityBillsTitle: 'Verbrauchsrechnungen der Sitzung',
+    utilityBillsSubtitle: 'Vom Nutzer im Rechner eingegebene Verbrauchsdaten. Nicht in der Datenbank gespeichert.',
+    utilityElectricity: 'Strom',
+    utilityGas: 'Gas',
+    utilityAmount: 'Betrag',
+    utilityConsumption: 'Verbrauch',
+    utilityDays: 'Abrechnungstage',
+    utilityDistributor: 'Versorger',
+    utilityMonthlyEst: 'Monatliche Schätzung',
+    utilityBillDisclaimer: 'Vom Nutzer eingegebene oder automatisch aus Rechnungen extrahierte Werte. Orientierend und nicht technisch validiert.',
+    catastroImagesTitle: 'Katasterbilder',
+    catastroImagesSubtitle: 'Zum Zeitpunkt der Berichterstellung vom spanischen Kataster abgerufen. Nicht gespeichert.',
+    catastroFacadeLabel: 'Fassadenfoto (Kataster)',
+    catastroMapLabel: 'Katasterkarte',
+    catastroDisclaimer: 'Quelle: Spanisches elektronisches Kataster (Finanzministerium). Bilder wurden für diesen Bericht in Echtzeit abgerufen und nicht in Anclora EnergyScan-Systemen gespeichert.',
   },
 } as const;
 
@@ -793,6 +838,113 @@ export const EnerScanReport = ({ data }: { data: PremiumReportData }) => {
         <Text>{getLegalDisclaimer(language)}</Text>
       </View>
     </Page>
+
+    {/* Catastro images page — only rendered when images are available */}
+    {(data.catastroImages?.facadeDataUri || data.catastroImages?.mapDataUri) && (
+      <Page size="A4" style={styles.page}>
+        <View style={styles.header} fixed>
+          <View style={styles.brandHeader}>
+            {data.logoDataUri && (
+              // eslint-disable-next-line jsx-a11y/alt-text
+              <Image src={data.logoDataUri} style={styles.logo} />
+            )}
+            <View style={styles.headerText}>
+              <Text style={styles.title}>{reportTitle}</Text>
+              <Text style={styles.subtitle}>{t.catastroImagesTitle}</Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t.catastroImagesTitle}</Text>
+          <Text style={{ ...styles.text, marginBottom: 10 }}>{t.catastroImagesSubtitle}</Text>
+
+          {data.catastroImages.facadeDataUri && (
+            <View style={{ marginBottom: 14 }}>
+              <Text style={{ ...styles.text, fontWeight: 'bold', marginBottom: 4 }}>{t.catastroFacadeLabel}</Text>
+              {/* eslint-disable-next-line jsx-a11y/alt-text */}
+              <Image src={data.catastroImages.facadeDataUri} style={{ width: '100%', maxHeight: 220, objectFit: 'contain', borderRadius: 4 }} />
+            </View>
+          )}
+
+          {data.catastroImages.mapDataUri && (
+            <View style={{ marginBottom: 10 }}>
+              <Text style={{ ...styles.text, fontWeight: 'bold', marginBottom: 4 }}>{t.catastroMapLabel}</Text>
+              {/* eslint-disable-next-line jsx-a11y/alt-text */}
+              <Image src={data.catastroImages.mapDataUri} style={{ width: '100%', maxHeight: 200, objectFit: 'contain', borderRadius: 4 }} />
+            </View>
+          )}
+        </View>
+
+        <View style={styles.disclaimer}>
+          <Text style={{ fontSize: 7, color: '#6B7280' }}>{t.catastroDisclaimer}</Text>
+        </View>
+      </Page>
+    )}
+
+    {/* Utility bills page — only rendered when session bills were provided */}
+    {data.utilityBills && data.utilityBills.length > 0 && (() => {
+      const electricityBills = data.utilityBills!.filter((b) => b.supplyType === 'electricity');
+      const gasBills = data.utilityBills!.filter((b) => b.supplyType === 'gas');
+
+      function renderBillTable(bills: typeof data.utilityBills, supplyLabel: string) {
+        if (!bills?.length) return null;
+        return (
+          <View style={{ marginBottom: 12 }}>
+            <Text style={{ ...styles.text, fontWeight: 'bold', marginBottom: 4 }}>{supplyLabel}</Text>
+            <View style={{ flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: '#D1FAE5', paddingBottom: 2, marginBottom: 3 }}>
+              {[t.utilityDistributor, t.utilityAmount, t.utilityConsumption, t.utilityDays, t.utilityMonthlyEst].map((col) => (
+                <Text key={col} style={{ flex: 1, fontSize: 7, fontWeight: 'bold', color: '#374151' }}>{col}</Text>
+              ))}
+            </View>
+            {bills.map((bill, idx) => {
+              const monthly = bill.amountEur != null && bill.billingDays
+                ? (bill.amountEur / (bill.billingDays / 30.44)).toFixed(2)
+                : bill.amountEur != null
+                ? bill.amountEur.toFixed(2)
+                : '—';
+              return (
+                <View key={idx} style={{ flexDirection: 'row', paddingVertical: 2, borderBottomWidth: 0.5, borderBottomColor: '#F3F4F6' }}>
+                  <Text style={{ flex: 1, fontSize: 8, color: '#374151' }}>{bill.distributorName ?? '—'}</Text>
+                  <Text style={{ flex: 1, fontSize: 8, color: '#374151' }}>{bill.amountEur != null ? `${bill.amountEur.toFixed(2)} €` : '—'}</Text>
+                  <Text style={{ flex: 1, fontSize: 8, color: '#374151' }}>{bill.consumptionValue != null ? `${bill.consumptionValue}` : '—'}</Text>
+                  <Text style={{ flex: 1, fontSize: 8, color: '#374151' }}>{bill.billingDays ?? '—'}</Text>
+                  <Text style={{ flex: 1, fontSize: 8, color: '#008F5A', fontWeight: 'bold' }}>{monthly} €/mes</Text>
+                </View>
+              );
+            })}
+          </View>
+        );
+      }
+
+      return (
+        <Page size="A4" style={styles.page}>
+          <View style={styles.header} fixed>
+            <View style={styles.brandHeader}>
+              {data.logoDataUri && (
+                // eslint-disable-next-line jsx-a11y/alt-text
+                <Image src={data.logoDataUri} style={styles.logo} />
+              )}
+              <View style={styles.headerText}>
+                <Text style={styles.title}>{reportTitle}</Text>
+                <Text style={styles.subtitle}>{t.utilityBillsTitle}</Text>
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{t.utilityBillsTitle}</Text>
+            <Text style={{ ...styles.text, marginBottom: 10 }}>{t.utilityBillsSubtitle}</Text>
+            {renderBillTable(electricityBills, t.utilityElectricity)}
+            {renderBillTable(gasBills, t.utilityGas)}
+          </View>
+
+          <View style={styles.disclaimer}>
+            <Text style={{ fontSize: 7, color: '#6B7280' }}>{t.utilityBillDisclaimer}</Text>
+          </View>
+        </Page>
+      );
+    })()}
 
     {/* Evidence Matrix + Checklist + Unknown without visit */}
     <Page size="A4" style={styles.page}>

@@ -7,7 +7,7 @@ import { calculateSavingsRange, HEATING_SYSTEMS } from '@/lib/calculator/savings
 import { trackEvent } from '@/lib/analytics';
 import { usePreferences } from '@/components/AppPreferencesProvider';
 import { getMonetizationCopy } from '@/lib/monetization/i18n';
-import { BillImporter } from '@/components/monetization/BillImporter';
+import { BillImporter, type SerializableBill } from '@/components/monetization/BillImporter';
 
 type HeatingSystem = (typeof HEATING_SYSTEMS)[number];
 
@@ -215,6 +215,15 @@ export function SavingsCalculator() {
               <div className="md:col-span-2 rounded-2xl border border-white/10 bg-black/10 p-4">
                 <BillImporter
                   onMonthlySpendChange={(val) => setBillsMonthlySpend(Math.round(val))}
+                  onBillsChange={(bills: SerializableBill[]) => {
+                    try {
+                      if (bills.length > 0) {
+                        sessionStorage.setItem('enerscan_bills', JSON.stringify(bills));
+                      } else {
+                        sessionStorage.removeItem('enerscan_bills');
+                      }
+                    } catch { /* sessionStorage unavailable (SSR / private mode) */ }
+                  }}
                   copy={copy}
                 />
               </div>

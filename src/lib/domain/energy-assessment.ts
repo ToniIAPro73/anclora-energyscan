@@ -210,6 +210,14 @@ export interface SubsidyInfoItem {
   referenceUrl?: string;
 }
 
+export interface UtilityBillData {
+  supplyType: 'electricity' | 'gas';
+  amountEur?: number;
+  consumptionValue?: number; // kWh for electricity, m³ for gas
+  billingDays?: number;
+  distributorName?: string;
+}
+
 export interface PremiumReportData {
   id: string;
   publicRef?: string;
@@ -235,4 +243,8 @@ export interface PremiumReportData {
   currency?: AppCurrency;
   measurementSystem?: MeasurementSystem;
   isDemo?: boolean;
+  // Session utility bills from calculator (not stored in DB)
+  utilityBills?: UtilityBillData[];
+  // Catastro images fetched on-demand for PDF (not stored in DB)
+  catastroImages?: { facadeDataUri?: string; mapDataUri?: string };
 }
