@@ -36,7 +36,7 @@ export async function POST(req: Request) {
 
   const session = await getStripeClient().checkout.sessions.create({
     mode: 'payment',
-    success_url: `${getAppUrl(req)}/budget-review?review=${review.id}&paid=1`,
+    success_url: `${getAppUrl(req)}/budget-review?review=${review.id}&paid=1&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${getAppUrl(req)}/budget-review?review=${review.id}`,
     line_items: [lineItem],
     metadata: {

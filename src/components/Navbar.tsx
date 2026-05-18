@@ -2,21 +2,44 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { ChevronDown } from 'lucide-react';
+import { BriefcaseBusiness, ChevronDown, FileText, LayoutDashboard, ReceiptText, UserRound } from 'lucide-react';
 import { useState } from 'react';
 import { PreferenceToggles } from './PreferenceToggles';
 import { usePreferences } from './AppPreferencesProvider';
 
-export default function Navbar() {
+type NavbarMode = 'public' | 'app';
+
+type NavbarProps = {
+  mode?: NavbarMode;
+  userEmail?: string | null;
+  providerHref?: string;
+  professionalHref?: string;
+};
+
+export default function Navbar({
+  mode = 'public',
+  userEmail,
+  providerHref = '/provider/register',
+  professionalHref = '/profesional',
+}: NavbarProps) {
   const { dictionary: t } = usePreferences();
   const [productOpen, setProductOpen] = useState(false);
-  const productLinks = [
-    { href: '/#como-funciona', label: t.navHow },
-    { href: '/calculadora-ahorro', label: t.navCalculator },
-    { href: '/budget-review', label: t.navBudgetReview },
-    { href: '/proveedores', label: t.navProviders },
-    { href: '/profesional', label: t.navProfessional },
-  ];
+  const isAppMode = mode === 'app';
+  const productLinks = isAppMode
+    ? [
+        { href: '/dashboard', label: t.navDashboard, Icon: LayoutDashboard },
+        { href: '/wizard', label: t.navAssessment, Icon: FileText },
+        { href: '/budget-review', label: t.navBudgetReview, Icon: ReceiptText },
+        { href: providerHref, label: t.navProviders, Icon: BriefcaseBusiness },
+        { href: professionalHref, label: t.navProfessional, Icon: UserRound },
+      ]
+    : [
+        { href: '/#como-funciona', label: t.navHow },
+        { href: '/calculadora-ahorro', label: t.navCalculator },
+        { href: '/budget-review', label: t.navBudgetReview },
+        { href: '/proveedores', label: t.navProviders },
+        { href: '/profesional', label: t.navProfessional },
+      ];
 
   return (
     <header className="fixed top-0 left-0 right-0 z-[8500] glass border-b border-white/5">
@@ -41,7 +64,7 @@ export default function Navbar() {
               aria-expanded={productOpen}
               aria-haspopup="menu"
             >
-              {t.navProduct}
+              {isAppMode ? t.navWorkspace : t.navProduct}
               <ChevronDown className={`h-4 w-4 transition ${productOpen ? 'rotate-180' : ''}`} />
             </button>
             {productOpen && (
@@ -51,26 +74,44 @@ export default function Navbar() {
                     key={item.href}
                     href={item.href}
                     onClick={() => setProductOpen(false)}
-                    className="block rounded-xl px-3 py-2 text-sm text-muted transition hover:bg-white/5 hover:text-premium"
+                    className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-muted transition hover:bg-white/5 hover:text-premium"
                   >
+                    {'Icon' in item && item.Icon ? <item.Icon className="h-4 w-4 text-[#00DC82]" /> : null}
                     {item.label}
                   </Link>
                 ))}
               </div>
             )}
           </div>
-          <Link href="/#normativa" className="inline-flex min-h-9 items-center whitespace-nowrap rounded-full px-3 font-semibold transition hover:bg-white/5 hover:text-premium">{t.navRegulation}</Link>
-          <Link href="/pricing" className="inline-flex min-h-9 items-center whitespace-nowrap rounded-full px-3 font-semibold transition hover:bg-white/5 hover:text-premium">{t.navPricing}</Link>
+          {isAppMode ? (
+            <>
+              <Link href="/dashboard" className="inline-flex min-h-9 items-center whitespace-nowrap rounded-full px-3 font-semibold transition hover:bg-white/5 hover:text-premium">{t.navDashboard}</Link>
+              <Link href="/budget-review" className="inline-flex min-h-9 items-center whitespace-nowrap rounded-full px-3 font-semibold transition hover:bg-white/5 hover:text-premium">{t.navBudgetReview}</Link>
+              <Link href="/pricing" className="inline-flex min-h-9 items-center whitespace-nowrap rounded-full px-3 font-semibold transition hover:bg-white/5 hover:text-premium">{t.navPricing}</Link>
+            </>
+          ) : (
+            <>
+              <Link href="/#normativa" className="inline-flex min-h-9 items-center whitespace-nowrap rounded-full px-3 font-semibold transition hover:bg-white/5 hover:text-premium">{t.navRegulation}</Link>
+              <Link href="/pricing" className="inline-flex min-h-9 items-center whitespace-nowrap rounded-full px-3 font-semibold transition hover:bg-white/5 hover:text-premium">{t.navPricing}</Link>
+            </>
+          )}
         </div>
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           <div className="hidden md:block">
             <PreferenceToggles compact variant="popover" />
           </div>
-          <Link href="/auth" className="hidden rounded-full border border-white/10 px-4 py-2 text-sm font-heading font-semibold text-premium transition hover:border-[#00DC82]/40 lg:inline-flex">
-            {t.access}
-          </Link>
+          {isAppMode ? (
+            <Link href="/dashboard" className="hidden max-w-[13rem] items-center gap-2 rounded-full border border-white/10 px-4 py-2 text-sm font-heading font-semibold text-premium transition hover:border-[#00DC82]/40 lg:inline-flex">
+              <UserRound className="h-4 w-4 text-[#00DC82]" />
+              <span className="truncate">{userEmail || t.navAccount}</span>
+            </Link>
+          ) : (
+            <Link href="/auth" className="hidden rounded-full border border-white/10 px-4 py-2 text-sm font-heading font-semibold text-premium transition hover:border-[#00DC82]/40 lg:inline-flex">
+              {t.access}
+            </Link>
+          )}
           <Link href="/wizard" className="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-[#00DC82] px-4 py-2.5 text-sm font-heading font-semibold text-[#0A0A0A] transition hover:brightness-110 sm:px-5">
-            {t.start}
+            {isAppMode ? t.navNewAssessment : t.start}
           </Link>
         </div>
       </nav>
