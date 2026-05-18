@@ -21,19 +21,21 @@
 
 ## Índice
 
-1. [Qué es Anclora EnergyScan](#1-qué-es-anclora-energyscan)
-2. [Antes de empezar](#2-antes-de-empezar)
-3. [Acceso, cuenta y preferencias](#3-acceso-cuenta-y-preferencias)
-4. [Uso residencial paso a paso](#4-uso-residencial-paso-a-paso)
-5. [Mi panel EnergyScan](#5-mi-panel-energyscan)
-6. [Informe Premium y pagos](#6-informe-premium-y-pagos)
-7. [Segunda opinión de presupuesto](#7-segunda-opinión-de-presupuesto)
-8. [Área profesional beta](#8-área-profesional-beta)
-9. [Área de proveedores](#9-área-de-proveedores)
-10. [Cookies, privacidad y datos personales](#10-cookies-privacidad-y-datos-personales)
-11. [Preguntas frecuentes](#11-preguntas-frecuentes)
-12. [Glosario rápido](#12-glosario-rápido)
-13. [Aviso legal](#13-aviso-legal)
+| Nº | Sección |
+| --- | --- |
+| 1 | [Qué es Anclora EnergyScan](#1-qué-es-anclora-energyscan) |
+| 2 | [Antes de empezar](#2-antes-de-empezar) |
+| 3 | [Acceso, cuenta y preferencias](#3-acceso-cuenta-y-preferencias) |
+| 4 | [Uso residencial paso a paso](#4-uso-residencial-paso-a-paso) |
+| 5 | [Mi panel EnergyScan](#5-mi-panel-energyscan) |
+| 6 | [Informe Premium y pagos](#6-informe-premium-y-pagos) |
+| 7 | [Segunda opinión de presupuesto](#7-segunda-opinión-de-presupuesto) |
+| 8 | [Área profesional beta](#8-área-profesional-beta) |
+| 9 | [Área de proveedores](#9-área-de-proveedores) |
+| 10 | [Cookies, privacidad y datos personales](#10-cookies-privacidad-y-datos-personales) |
+| 11 | [Preguntas frecuentes](#11-preguntas-frecuentes) |
+| 12 | [Glosario rápido](#12-glosario-rápido) |
+| 13 | [Aviso legal](#13-aviso-legal) |
 
 <div class="page-break"></div>
 
@@ -52,6 +54,20 @@ La herramienta genera una **estimación orientativa** basada en los datos declar
 | Usuario residencial | Crear un prediagnóstico, consultar el historial, desbloquear PDF Premium y analizar presupuestos |
 | Profesional | Solicitar acceso beta y gestionar expedientes propios desde un panel profesional |
 | Proveedor | Registrar empresa, ver leads asignados, comprar créditos y desbloquear contactos con trazabilidad |
+
+### Mejoras incluidas en esta versión
+
+Esta edición del manual incorpora las superficies conectadas más recientes de la aplicación:
+
+| Área | Mejora visible para el usuario |
+| --- | --- |
+| Dashboard residencial | KPIs, historial de análisis, estados Premium, presupuestos, accesos a proveedor/profesional y próximos pasos |
+| Informe Premium | Acceso al PDF desde el resultado o desde el dashboard cuando el pago está confirmado |
+| Budget Review | Historial de presupuestos con estado, total detectado y acción para abrir o desbloquear el análisis completo |
+| Profesional beta | Solicitud de acceso, estados de revisión y panel inicial de expedientes |
+| Proveedor | Panel operativo con créditos, leads, contacto bloqueado, desbloqueo trazable y seguimiento comercial |
+
+Las pantallas mostradas se han actualizado con la versión conectada de EnergyScan, manteniendo el estilo premium oscuro/claro y la navegación principal de la aplicación cuando corresponde.
 
 ### Qué no hace EnergyScan
 
@@ -96,7 +112,7 @@ Para obtener una estimación más útil, ten a mano:
 
 ![Pantalla de acceso](screenshots/auth-dark.png)
 
-Desde **Entrar** puedes acceder con:
+La pantalla de acceso permite entrar a tu espacio privado o crear una cuenta nueva. Desde **Entrar** puedes acceder con:
 
 | Opción | Uso |
 | --- | --- |
@@ -106,7 +122,7 @@ Desde **Entrar** puedes acceder con:
 | GitHub | Acceso social si está configurado |
 | Recuperar contraseña | Solicitud de enlace de restablecimiento |
 
-La cuenta permite guardar el historial, recuperar análisis anteriores y acceder a productos pagados desde el dashboard.
+La cuenta permite guardar el historial, recuperar análisis anteriores, consultar presupuestos analizados y acceder a productos pagados desde el dashboard. La barra de navegación principal se mantiene en el resto de áreas de producto para que puedas volver a precios, wizard, proveedor o preferencias sin perder contexto.
 
 ### 3.2 Preferencias de idioma, tema, moneda y unidades
 
@@ -162,7 +178,7 @@ La calculadora es pública y rápida. Sirve para estimar rangos generales antes 
 
 ![Wizard de prediagnóstico](screenshots/wizard-dark.png)
 
-El wizard es el flujo principal para crear un análisis.
+El wizard es el flujo principal para crear un análisis nuevo. La captura muestra el primer paso real del flujo, con la navegación premium superior y las opciones de objetivo del diagnóstico.
 
 | Paso | Qué debes indicar |
 | --- | --- |
@@ -268,7 +284,7 @@ El dashboard también muestra accesos a:
 
 ![Dashboard conectado en móvil](screenshots/dashboard-connected-mobile.png)
 
-En móvil, las tablas se convierten en tarjetas. Los CTAs principales permanecen visibles y no es necesario hacer scroll horizontal.
+En móvil, el dashboard prioriza lectura rápida: primero muestra identidad, KPIs y acciones principales; después el historial baja a tarjetas. No hay tablas comprimidas ni scroll horizontal, y el menú conserva la entrada directa a preferencias e inicio de análisis.
 
 ---
 
