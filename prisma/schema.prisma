@@ -450,6 +450,23 @@ model ProfessionalAccessRequest {
   status    String   @default("PENDING")
 }
 
+model KnowledgeEntry {
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  category    String    // 'regulation' | 'subsidy' | 'price_reference' | 'faq' | 'other'
+  region      String?   // null = national; CCAA code: AND, ARA, AST, BAL, CAN, CAT, CLE, CLM, CNT, EXT, GAL, LRI, MAD, MUR, NAV, PVA, VAL, CEU, MEL
+  title       String
+  content     String
+  tags        String?   // comma-separated keywords
+  validFrom   DateTime?
+  validUntil  DateTime?
+  sourceUrl   String?
+  sourceLabel String?
+  active      Boolean   @default(true)
+  createdBy   String?
+}
+
 model ProfessionalBranding {
   id                String    @id @default(cuid())
   createdAt         DateTime  @default(now())

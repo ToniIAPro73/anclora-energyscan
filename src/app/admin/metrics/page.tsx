@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { cookies } from 'next/headers';
 import Navbar from '@/components/Navbar';
 import { auth } from '@/auth';
@@ -44,7 +45,13 @@ export default async function AdminMetricsPage() {
     <div className="min-h-screen app-shell">
       <Navbar />
       <main className="mx-auto max-w-6xl px-4 pb-16 pt-28">
-        <h1 className="font-heading text-4xl font-bold">{copy.title}</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="font-heading text-4xl font-bold">{copy.title}</h1>
+          <nav className="flex gap-2">
+            <Link href="/admin/providers" className="rounded-full border border-white/10 px-4 py-2 text-sm font-heading font-semibold text-premium hover:border-[#00DC82]/40">{copy.navProviders}</Link>
+            <Link href="/admin/knowledge" className="rounded-full border border-white/10 px-4 py-2 text-sm font-heading font-semibold text-premium hover:border-[#00DC82]/40">{copy.navKnowledge}</Link>
+          </nav>
+        </div>
         <div className="mt-8 grid gap-4 md:grid-cols-4">
           {[
             [copy.assessments7, assessments7],

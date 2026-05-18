@@ -398,6 +398,8 @@ const es = {
     budgetReviews30: 'Budget reviews 30d',
     budgetReviewsPaid: 'Budget reviews pagadas',
     pdfDownloads30: 'PDFs descargados 30d',
+    navProviders: 'Proveedores',
+    navKnowledge: 'Base de conocimiento',
   },
 };
 
@@ -801,6 +803,8 @@ const en: typeof es = {
     providers: 'Providers',
     budgetReviewsPaid: 'Paid budget reviews',
     pdfDownloads30: 'PDF downloads 30d',
+    navProviders: 'Providers',
+    navKnowledge: 'Knowledge base',
   },
 };
 
@@ -1206,6 +1210,8 @@ const de: typeof es = {
     providers: 'Anbieter',
     budgetReviewsPaid: 'Bezahlte Budget Reviews',
     pdfDownloads30: 'PDF-Downloads 30T',
+    navProviders: 'Anbieter',
+    navKnowledge: 'Wissensdatenbank',
   },
 };
 

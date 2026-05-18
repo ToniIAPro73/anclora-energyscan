@@ -28,6 +28,7 @@ const headings = {
     registered: 'Alta',
     back: 'Volver a métricas',
     noProviders: 'No hay proveedores registrados.',
+    navKnowledge: 'Base de conocimiento',
     save: 'Guardar',
     saving: '…',
     saved: '✓',
@@ -47,6 +48,7 @@ const headings = {
     registered: 'Registered',
     back: 'Back to metrics',
     noProviders: 'No providers registered.',
+    navKnowledge: 'Knowledge base',
     save: 'Save',
     saving: '…',
     saved: '✓',
@@ -66,6 +68,7 @@ const headings = {
     registered: 'Registriert',
     back: 'Zurück zu Metriken',
     noProviders: 'Keine Anbieter registriert.',
+    navKnowledge: 'Wissensdatenbank',
     save: 'Speichern',
     saving: '…',
     saved: '✓',
@@ -118,9 +121,10 @@ export default async function AdminProvidersPage() {
             <p className="text-xs font-heading font-semibold uppercase tracking-wider text-[#00DC82]">Admin</p>
             <h1 className="mt-2 font-heading text-4xl font-bold text-premium">{copy.title}</h1>
           </div>
-          <a href="/admin/metrics" className="rounded-full border border-white/10 px-4 py-2 text-sm font-heading font-semibold text-premium hover:border-[#00DC82]/40">
-            {copy.back}
-          </a>
+          <div className="flex gap-2">
+            <a href="/admin/metrics" className="rounded-full border border-white/10 px-4 py-2 text-sm font-heading font-semibold text-premium hover:border-[#00DC82]/40">{copy.back}</a>
+            <a href="/admin/knowledge" className="rounded-full border border-white/10 px-4 py-2 text-sm font-heading font-semibold text-premium hover:border-[#00DC82]/40">{copy.navKnowledge}</a>
+          </div>
         </div>
 
         <div className="mt-8 flex flex-wrap gap-3 text-sm font-bold">
