@@ -293,6 +293,15 @@ export function buildAdvancedFindings(lineItems: BudgetLineItem[]): AdvancedFind
   });
 }
 
+// --- KB price references (sourced from KnowledgeEntry) ---
+export type KbPriceRef = {
+  title: string;
+  content: string;
+  sourceUrl: string | null;
+  sourceLabel: string | null;
+  region: string | null;
+};
+
 // --- Consolidated advanced analysis ---
 export type BudgetAdvancedAnalysis = {
   category: BudgetCategory;
@@ -301,6 +310,7 @@ export type BudgetAdvancedAnalysis = {
   suggestedQuestions: string[];
   legalNotice: string;
   alertKey: string;
+  priceReferences?: KbPriceRef[];
 };
 
 const legalNotices: Record<AppLanguage, string> = {
@@ -313,6 +323,7 @@ export function buildBudgetAdvancedAnalysis(
   lineItems: BudgetLineItem[],
   totalAmount: number | undefined,
   lang: AppLanguage = 'es',
+  kbPriceRefs?: KbPriceRef[],
 ): BudgetAdvancedAnalysis {
   const descriptions = lineItems.map((i) => i.description).filter(Boolean) as string[];
   const category = detectBudgetCategory(descriptions);
@@ -329,5 +340,6 @@ export function buildBudgetAdvancedAnalysis(
     suggestedQuestions: questions,
     legalNotice: legalNotices[lang] ?? legalNotices.es,
     alertKey: isHighTotal ? 'budget.alert_high_total' : 'budget.alert_general',
+    priceReferences: kbPriceRefs,
   };
 }

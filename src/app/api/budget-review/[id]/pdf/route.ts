@@ -5,6 +5,7 @@ import { BudgetReviewReport } from '@/lib/pdf/BudgetReviewReport';
 import { normalizeLanguage } from '@/lib/preferences';
 import { getMonetizationCopy } from '@/lib/monetization/i18n';
 import type { BudgetLineItem } from '@/lib/ingestion/types';
+import type { KbPriceRef } from '@/lib/budget-review/advanced-analysis';
 import React from 'react';
 
 export const dynamic = 'force-dynamic';
@@ -25,6 +26,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 
   const lineItems = Array.isArray(review.lineItemsJson) ? review.lineItemsJson as BudgetLineItem[] : [];
   const summaryJson = review.summaryJson as { totalAmount?: number; confidence?: number } | null;
+  const findingsJson = review.findingsJson as { kbPriceRefs?: KbPriceRef[] } | null;
 
   const reportData = {
     id: review.id,
@@ -35,6 +37,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     extractionConfidence: review.extractionConfidence ?? undefined,
     lineItems,
     language,
+    kbPriceRefs: findingsJson?.kbPriceRefs,
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

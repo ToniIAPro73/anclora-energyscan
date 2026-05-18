@@ -2,7 +2,7 @@ import React from 'react';
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 import type { AppLanguage } from '@/lib/preferences';
 import { getMonetizationCopy } from '@/lib/monetization/i18n';
-import { buildBudgetAdvancedAnalysis } from '@/lib/budget-review/advanced-analysis';
+import { buildBudgetAdvancedAnalysis, type KbPriceRef } from '@/lib/budget-review/advanced-analysis';
 import type { BudgetLineItem } from '@/lib/ingestion/types';
 
 const styles = StyleSheet.create({
@@ -51,11 +51,12 @@ export type BudgetReviewReportData = {
   extractionConfidence?: number;
   lineItems: BudgetLineItem[];
   language: AppLanguage;
+  kbPriceRefs?: KbPriceRef[];
 };
 
 export function BudgetReviewReport({ data }: { data: BudgetReviewReportData }) {
   const t = getMonetizationCopy(data.language).budgetReview;
-  const analysis = buildBudgetAdvancedAnalysis(data.lineItems, data.totalAmount, data.language);
+  const analysis = buildBudgetAdvancedAnalysis(data.lineItems, data.totalAmount, data.language, data.kbPriceRefs);
   const confPct = data.extractionConfidence !== undefined ? `${Math.round(data.extractionConfidence * 100)}%` : '—';
 
   return (
@@ -140,6 +141,22 @@ export function BudgetReviewReport({ data }: { data: BudgetReviewReportData }) {
               <View key={i} style={styles.bullet}>
                 <Text style={styles.bulletDot}>{i + 1}.</Text>
                 <Text style={styles.bulletText}>{q}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* KB price references */}
+        {analysis.priceReferences && analysis.priceReferences.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{t.pdfPriceRefs}</Text>
+            {analysis.priceReferences.map((ref, i) => (
+              <View key={i} style={{ marginBottom: 6 }}>
+                <Text style={[styles.text, styles.bold]}>{ref.title}</Text>
+                <Text style={styles.text}>{ref.content}</Text>
+                {ref.sourceLabel && (
+                  <Text style={[styles.text, { color: '#008F5A' }]}>{t.priceRefSource}: {ref.sourceLabel}</Text>
+                )}
               </View>
             ))}
           </View>

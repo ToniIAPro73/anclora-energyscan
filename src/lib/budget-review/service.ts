@@ -2,8 +2,10 @@ import { createHash } from 'crypto';
 import { prisma } from '@/lib/prisma';
 import { parseBudgetAnalysisText } from '@/lib/ocr/budget-parser';
 import type { BudgetLineItem } from '@/lib/ingestion/types';
-import { buildBudgetAdvancedAnalysis, type BudgetAdvancedAnalysis } from './advanced-analysis';
+import { buildBudgetAdvancedAnalysis, detectBudgetCategory, type BudgetAdvancedAnalysis, type BudgetCategory, type KbPriceRef } from './advanced-analysis';
 import type { AppLanguage } from '@/lib/preferences';
+import { searchKnowledge } from '@/lib/knowledge/search';
+import { extractZipFromText, zipToRegion } from '@/lib/knowledge/zip-to-region';
 
 export function hashBudgetText(text: string) {
   return createHash('sha256').update(text).digest('hex');
@@ -41,6 +43,15 @@ export type CreateBudgetReviewResult = {
   advancedAnalysis: BudgetAdvancedAnalysis;
 };
 
+const CATEGORY_TO_KB_KEYWORDS: Record<BudgetCategory, string[]> = {
+  windows: ['ventana', 'carpintería', 'window', 'fenster'],
+  aerothermia: ['aerotermia', 'bomba de calor', 'heat pump', 'wärmepumpe'],
+  insulation: ['aislamiento', 'SATE', 'insulation', 'dämmung'],
+  photovoltaic: ['fotovoltaica', 'solar', 'paneles', 'photovoltaik'],
+  full_renovation: ['reforma', 'rehabilitación', 'renovation', 'renovierung'],
+  general: [],
+};
+
 export async function createBudgetReviewFromText(input: {
   text: string;
   source?: string;
@@ -51,7 +62,39 @@ export async function createBudgetReviewFromText(input: {
   const analysis = parseBudgetAnalysisText(input.text);
   const reviewFindings = buildBudgetReviewFindings(analysis.lineItems, analysis.totalAmount);
   const totalAmountCents = analysis.totalAmount ? Math.round(analysis.totalAmount * 100) : undefined;
-  const advancedAnalysis = buildBudgetAdvancedAnalysis(analysis.lineItems, analysis.totalAmount, input.lang ?? 'es');
+
+  // Detect budget category early so we can query KB with meaningful keywords
+  const descriptions = analysis.lineItems.map((i) => i.description).filter(Boolean) as string[];
+  const budgetCategory = detectBudgetCategory(descriptions);
+
+  // Derive CCAA region from first ZIP found in budget text for regional KB entries
+  const zip = extractZipFromText(input.text);
+  const region = zip ? zipToRegion(zip) : null;
+  const keywords = CATEGORY_TO_KB_KEYWORDS[budgetCategory];
+
+  // Search KB for price references matching detected category + region (non-blocking on error)
+  const kbResults = await searchKnowledge({
+    category: 'price_reference',
+    region: region ?? undefined,
+    includeNational: true,
+    keywords: keywords.length ? keywords : undefined,
+    limit: 5,
+  }).catch(() => []);
+
+  const kbPriceRefs: KbPriceRef[] = kbResults.map((r) => ({
+    title: r.title,
+    content: r.content,
+    sourceUrl: r.sourceUrl,
+    sourceLabel: r.sourceLabel,
+    region: r.region,
+  }));
+
+  const advancedAnalysis = buildBudgetAdvancedAnalysis(
+    analysis.lineItems,
+    analysis.totalAmount,
+    input.lang ?? 'es',
+    kbPriceRefs.length ? kbPriceRefs : undefined,
+  );
 
   const review = await prisma.budgetReview.create({
     data: {
@@ -71,7 +114,7 @@ export async function createBudgetReviewFromText(input: {
         alert: reviewFindings.alert,
       },
       lineItemsJson: analysis.lineItems,
-      findingsJson: reviewFindings,
+      findingsJson: { ...reviewFindings, kbPriceRefs: kbPriceRefs.length ? kbPriceRefs : undefined },
     },
   });
 

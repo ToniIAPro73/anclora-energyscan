@@ -15,6 +15,14 @@ type AdvancedFinding = {
   status: FindingStatus;
 };
 
+type KbPriceRef = {
+  title: string;
+  content: string;
+  sourceUrl?: string | null;
+  sourceLabel?: string | null;
+  region?: string | null;
+};
+
 type ReviewSummary = {
   id: string;
   status?: string;
@@ -31,6 +39,7 @@ type ReviewSummary = {
     omissions: { item: string }[];
     suggestedQuestions: string[];
     legalNotice: string;
+    priceReferences?: KbPriceRef[];
   };
 };
 
@@ -260,6 +269,31 @@ export function BudgetReviewUploader() {
                       <li key={i}>{q}</li>
                     ))}
                   </ol>
+                </div>
+              )}
+
+              {/* KB price references */}
+              {review.advancedAnalysis.priceReferences && review.advancedAnalysis.priceReferences.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold mb-2">{copy.priceRefsLabel}</p>
+                  <div className="space-y-2">
+                    {review.advancedAnalysis.priceReferences.map((ref, i) => (
+                      <div key={i} className="rounded-lg border border-white/10 bg-black/10 p-2.5 text-xs">
+                        <p className="font-semibold text-premium mb-1">{ref.title}</p>
+                        <p className="text-muted leading-relaxed">{ref.content}</p>
+                        {ref.sourceUrl && (
+                          <a
+                            href={ref.sourceUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-1 inline-block text-[#00DC82] underline"
+                          >
+                            {ref.sourceLabel ?? copy.priceRefSource}
+                          </a>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

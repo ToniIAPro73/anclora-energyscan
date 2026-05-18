@@ -138,6 +138,10 @@ const es = {
     pdfLegal: 'Análisis automático orientativo. No es un informe técnico ni sustituye la revisión presencial de un técnico, arquitecto, aparejador ni asesor legal. Los rangos de precios son orientativos y varían por zona, calidades y alcance.',
     pdfBrand: 'Anclora EnergyScan',
     pdfFilename: 'energyscan-presupuesto',
+    priceRefsLabel: 'Referencias de precio — base de conocimiento',
+    priceRefSource: 'Fuente',
+    priceRefNoData: 'No hay referencias de precio disponibles para esta categoría y zona en la base de conocimiento.',
+    pdfPriceRefs: 'Referencias de precio orientativas',
   },
   provider: {
     landingTitle: 'Marketplace de proveedores EnergyScan',
@@ -545,6 +549,10 @@ const en: typeof es = {
     pdfLegal: 'Indicative automated analysis. Not a technical report and does not replace in-person review by a qualified technician, architect, surveyor or legal adviser. Price ranges are indicative and vary by area, quality and scope.',
     pdfBrand: 'Anclora EnergyScan',
     pdfFilename: 'energyscan-quote',
+    priceRefsLabel: 'Price references — knowledge base',
+    priceRefSource: 'Source',
+    priceRefNoData: 'No price references available for this category and region in the knowledge base.',
+    pdfPriceRefs: 'Indicative price references',
   },
   provider: {
     ...es.provider,
@@ -950,6 +958,10 @@ const de: typeof es = {
     pdfLegal: 'Orientierende automatische Analyse. Kein technischer Bericht und ersetzt nicht die persoenliche Pruefung durch qualifizierte Fachleute. Preisspannen sind orientierend.',
     pdfBrand: 'Anclora EnergyScan',
     pdfFilename: 'energyscan-angebot',
+    priceRefsLabel: 'Preisreferenzen — Wissensdatenbank',
+    priceRefSource: 'Quelle',
+    priceRefNoData: 'Keine Preisreferenzen fuer diese Kategorie und Region in der Wissensdatenbank.',
+    pdfPriceRefs: 'Orientierende Preisreferenzen',
   },
   provider: {
     ...es.provider,
