@@ -463,6 +463,22 @@ model ProfessionalBranding {
   activatedAt       DateTime?
 }
 
+model EnergyBillDataPoint {
+  id               String   @id @default(cuid())
+  createdAt        DateTime @default(now())
+  supplyType       String   // 'electricity' | 'gas'
+  amountEur        Float
+  consumptionKwh   Float?
+  consumptionM3    Float?
+  billingDays      Int?
+  monthlyAmountEur Float?
+  zipCode          String?
+  distributorName  String?
+  billingYear      Int?
+  billingMonth     Int?
+  source           String   @default("calculator_import")
+}
+
 model User {
   id                  String               @id @default(cuid())
   name                String?
