@@ -9,6 +9,7 @@ import { prisma } from '@/lib/prisma';
 import { getMonetizationCopy } from '@/lib/monetization/i18n';
 import { normalizeLanguage, PREFERENCE_COOKIE_NAMES } from '@/lib/preferences';
 import { canAccessPremiumContent } from '@/lib/premium-access';
+import { IncludeInMarketplaceButton } from '@/components/professional/IncludeInMarketplaceButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -109,6 +110,7 @@ export default async function ProfessionalDashboardPage() {
                           ) : (
                             <CheckoutButton assessmentId={item.id} label={copy.unlockPremium} loadingLabel={copy.checkoutLoading} errorLabel={copy.checkoutError} />
                           )}
+                          <IncludeInMarketplaceButton assessmentId={item.id} />
                         </div>
                       </div>
                     </article>

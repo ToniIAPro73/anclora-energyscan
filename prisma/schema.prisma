@@ -328,8 +328,16 @@ model Lead {
   closedValueCents   Int?
   commissionCents    Int?
 
-  consentAccepted Boolean @default(false)
-  notes           String?
+  consentAccepted      Boolean   @default(false)
+  consentObtainedBy    String?   // 'user' | 'professional'
+  consentMethod        String?   // 'in_app' | 'professional_offline'
+  consentObtainedAt    DateTime?
+  consentText          String?   // texto exacto aceptado, para auditoría RGPD
+  consentWithdrawToken String?   @unique
+  clientEmail          String?   // email del cliente final (puede diferir de userEmail)
+  clientName           String?
+  clientPhone          String?
+  notes                String?
 }
 
 model EmailLog {

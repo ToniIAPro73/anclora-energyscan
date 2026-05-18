@@ -2,7 +2,7 @@ import { createHash } from 'crypto';
 import { prisma } from '@/lib/prisma';
 
 export type EmailLanguage = 'es' | 'en' | 'de';
-export type EmailType = 'premium_purchase' | 'checkout_recovery' | 'provider_lead_notification';
+export type EmailType = 'premium_purchase' | 'checkout_recovery' | 'provider_lead_notification' | 'consent_confirmation';
 
 export function hashEmail(email: string) {
   return createHash('sha256').update(email.trim().toLowerCase()).digest('hex');
@@ -217,6 +217,31 @@ export async function sendProviderLeadNotificationEmail(input: {
     subject: copy.subject,
     html: layout(copy.title, copy.copy, `${appUrl}/provider/leads`, copy.cta, copy.legal),
     metadata: { leadId: input.leadId, providerId: input.providerId },
+  });
+}
+
+export async function sendConsentConfirmationEmail(input: {
+  to: string;
+  withdrawToken: string;
+  professionalName?: string;
+  language?: EmailLanguage;
+}) {
+  const { getMonetizationCopy } = await import('@/lib/monetization/i18n');
+  const language = input.language || 'es';
+  const copy = getMonetizationCopy(language).professional;
+  const appUrl = getAppUrl();
+  const withdrawUrl = `${appUrl}/api/leads/withdraw?token=${input.withdrawToken}`;
+  return sendTransactionalEmail({
+    type: 'consent_confirmation',
+    to: input.to,
+    subject: copy.consentEmailSubject,
+    html: layout(
+      copy.consentEmailTitle,
+      copy.consentEmailCopy,
+      withdrawUrl,
+      copy.consentEmailWithdrawCta,
+      copy.consentEmailLegal
+    ),
   });
 }
 
