@@ -10,6 +10,7 @@ import { getMonetizationCopy } from '@/lib/monetization/i18n';
 import { normalizeLanguage, PREFERENCE_COOKIE_NAMES } from '@/lib/preferences';
 import { canAccessPremiumContent } from '@/lib/premium-access';
 import { IncludeInMarketplaceButton } from '@/components/professional/IncludeInMarketplaceButton';
+import { WhiteLabelAddonCard } from '@/components/professional/WhiteLabelAddonCard';
 
 export const dynamic = 'force-dynamic';
 
@@ -147,6 +148,7 @@ export default async function ProfessionalDashboardPage() {
           </div>
           <p className="mt-4 text-xs text-muted">{copy.plansSoon} · <a href="/profesional/solicitar" className="text-[#00DC82] underline">{copy.planRequestLabel}</a></p>
           <p className="mt-2 text-xs text-muted">{copy.planLegal}</p>
+          {accessStatus === 'APPROVED' && <WhiteLabelAddonCard />}
         </section>
 
         <section className="mt-6 rounded-3xl border border-white/10 bg-white/5 p-6">

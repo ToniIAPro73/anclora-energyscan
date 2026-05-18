@@ -450,6 +450,19 @@ model ProfessionalAccessRequest {
   status    String   @default("PENDING")
 }
 
+model ProfessionalBranding {
+  id                String    @id @default(cuid())
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  userId            String    @unique
+  brandName         String?
+  brandLogoUrl      String?
+  brandContactEmail String?
+  addonActive       Boolean   @default(false)
+  interestedAt      DateTime?
+  activatedAt       DateTime?
+}
+
 model User {
   id                  String               @id @default(cuid())
   name                String?

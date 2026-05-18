@@ -345,6 +345,17 @@ export async function buildAssessmentPdfResponse(
         measurementSystem,
         isDemo: assessment.isDemo,
       };
+
+      // Inject white label branding if the assessment owner has an active addon
+      if (assessment.userId) {
+        const branding = await prisma.professionalBranding.findUnique({
+          where: { userId: assessment.userId },
+          select: { brandName: true, addonActive: true },
+        }).catch(() => null);
+        if (branding?.addonActive && branding.brandName != null) {
+          reportData.brandName = branding.brandName;
+        }
+      }
     }
 
     reportData.attachments = await enrichAttachmentsForPdf(reportData.attachments || []);

@@ -230,6 +230,7 @@ export interface PremiumReportData {
   // Condition & Risk Light (derived at PDF generation time)
   conditionRiskItems?: import('@/lib/condition-risk/types').ConditionRiskItem[];
   logoDataUri?: string;
+  brandName?: string;
   language?: AppLanguage;
   currency?: AppCurrency;
   measurementSystem?: MeasurementSystem;

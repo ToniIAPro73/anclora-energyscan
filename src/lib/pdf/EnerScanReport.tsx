@@ -675,6 +675,8 @@ export const EnerScanReport = ({ data }: { data: PremiumReportData }) => {
   const currency = data.currency || defaults.currency;
   const measurementSystem = data.measurementSystem || defaults.measurementSystem;
   const t = labels[language];
+  const appName = data.brandName ?? 'Anclora EnergyScan';
+  const reportTitle = t.title.replace('Anclora EnergyScan', appName);
   const reportRef = data.publicRef || getPublicAssessmentRef(data.id);
   const scenarios = localizeScenarios(data.scenarios, language);
   const subsidies = localizeSubsidies(data.subsidies || [], language);
@@ -696,7 +698,7 @@ export const EnerScanReport = ({ data }: { data: PremiumReportData }) => {
             <Image src={data.logoDataUri} style={styles.logo} />
           )}
           <View style={styles.headerText}>
-            <Text style={styles.title}>{t.title}</Text>
+            <Text style={styles.title}>{reportTitle}</Text>
             <Text style={styles.subtitle}>{t.subtitle}</Text>
             <Text style={{ ...styles.text, marginTop: 5 }}>{t.id}: {reportRef} | {t.date}: {data.date}</Text>
             {data.isDemo && <Text style={{ ...styles.text, color: '#B96F00' }}>{t.demo}</Text>}
@@ -801,7 +803,7 @@ export const EnerScanReport = ({ data }: { data: PremiumReportData }) => {
             <Image src={data.logoDataUri} style={styles.logo} />
           )}
           <View style={styles.headerText}>
-            <Text style={styles.title}>{t.title}</Text>
+            <Text style={styles.title}>{reportTitle}</Text>
             <Text style={{ ...styles.text }}>{t.id}: {reportRef} | {t.date}: {data.date}</Text>
           </View>
         </View>
