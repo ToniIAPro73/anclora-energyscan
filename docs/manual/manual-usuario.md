@@ -31,13 +31,13 @@ Una guía ordenada para recorrer EnergyScan desde la primera estimación hasta l
 | 04 | [Uso residencial paso a paso](#4-uso-residencial-paso-a-paso) | 8 |
 | 05 | [Mi panel EnergyScan](#5-mi-panel-energyscan) | 13 |
 | 06 | [Informe Premium y pagos](#6-informe-premium-y-pagos) | 16 |
-| 07 | [Segunda opinión de presupuesto](#7-segunda-opinión-de-presupuesto) | 19 |
-| 08 | [Área profesional beta](#8-área-profesional-beta) | 21 |
-| 09 | [Área de proveedores](#9-área-de-proveedores) | 24 |
-| 10 | [Cookies, privacidad y datos personales](#10-cookies-privacidad-y-datos-personales) | 30 |
-| 11 | [Preguntas frecuentes](#11-preguntas-frecuentes) | 32 |
-| 12 | [Glosario rápido](#12-glosario-rápido) | 33 |
-| 13 | [Aviso legal](#13-aviso-legal) | 34 |
+| 07 | [Segunda opinión de presupuesto](#7-segunda-opinión-de-presupuesto) | 20 |
+| 08 | [Área profesional beta](#8-área-profesional-beta) | 22 |
+| 09 | [Área de proveedores](#9-área-de-proveedores) | 25 |
+| 10 | [Cookies, privacidad y datos personales](#10-cookies-privacidad-y-datos-personales) | 31 |
+| 11 | [Preguntas frecuentes](#11-preguntas-frecuentes) | 33 |
+| 12 | [Glosario rápido](#12-glosario-rápido) | 34 |
+| 13 | [Aviso legal](#13-aviso-legal) | 35 |
 
 <div class="page-break"></div>
 

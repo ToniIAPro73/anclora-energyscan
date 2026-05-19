@@ -120,7 +120,7 @@ async function stampPageNumbers(input, output) {
     const label = `${index + 1}`;
     page.drawText('Anclora EnergyScan', {
       x: 54,
-      y: 8,
+      y: 20,
       size: 7.5,
       font: bold,
       color: navy,
@@ -128,7 +128,7 @@ async function stampPageNumbers(input, output) {
     });
     page.drawText(label, {
       x: width - 54 - font.widthOfTextAtSize(label, 8),
-      y: 8,
+      y: 20,
       size: 8,
       font,
       color: navy,
@@ -157,6 +157,8 @@ function buildHtml(sectionPages) {
     </section>
   `).join('\n');
 
+  const cover = injectCoverVisual(sections.cover);
+
   return `<!doctype html>
 <html lang="es">
 <head>
@@ -168,7 +170,7 @@ ${styles()}
 </style>
 </head>
 <body>
-${sections.cover}
+${cover}
 <section class="toc-page">
   <p class="kicker">Manual de Usuario</p>
   <h1>Índice</h1>
@@ -178,6 +180,27 @@ ${sections.cover}
 ${body}
 </body>
 </html>`;
+}
+
+function injectCoverVisual(coverHtml) {
+  const bars = [
+    ['A', '#00dc82', '92%'],
+    ['B', '#28c76f', '86%'],
+    ['C', '#a2c653', '80%'],
+    ['D', '#e4c449', '74%'],
+    ['E', '#f0a33a', '68%'],
+    ['F', '#df7049', '62%'],
+    ['G', '#d94b52', '56%'],
+  ].map(([letter, color, width]) => `<div class="rating-row"><span style="width:${width}; background:${color};">${letter}</span></div>`).join('');
+
+  return coverHtml.replace(/\n<\/div>\s*$/, `
+<div class="cover-rating" aria-hidden="true">
+  <div class="rating-card">
+    <div class="rating-head">Energy class</div>
+    ${bars}
+  </div>
+</div>
+</div>`);
 }
 
 function markdownToHtml(markdown) {
@@ -309,7 +332,8 @@ function escapeAttribute(value) {
 
 function styles() {
   return `
-@page { size: A4; margin: 0; }
+@page { size: A4; margin: 24mm 18mm 27mm; }
+@page cover { size: A4; margin: 0; }
 * { box-sizing: border-box; }
 body {
   margin: 0;
@@ -321,6 +345,7 @@ body {
 }
 a { color: inherit; text-decoration: none; }
 .cover-page {
+  page: cover;
   min-height: 297mm;
   margin: 0;
   padding: 33mm 30mm 26mm;
@@ -349,6 +374,57 @@ a { color: inherit; text-decoration: none; }
   height: 110mm;
   border: 1px solid rgba(0, 220, 130, 0.22);
   transform: rotate(18deg);
+}
+.cover-rating {
+  position: absolute;
+  z-index: 0;
+  right: -6mm;
+  top: 82mm;
+  width: 82mm;
+  padding: 8mm;
+  border-radius: 7mm;
+  background: rgba(5, 16, 25, 0.42);
+  border: 1px solid rgba(216, 184, 107, 0.2);
+  box-shadow: 0 20mm 45mm rgba(0, 0, 0, 0.4);
+  transform: rotate(-6deg);
+  opacity: 0.38;
+  filter: blur(0.45px);
+}
+.rating-card {
+  width: 100%;
+}
+.rating-head {
+  margin: 0 0 4mm;
+  color: rgba(244, 232, 200, 0.82);
+  font-size: 7pt;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.rating-row {
+  height: 7.2mm;
+  margin: 1.5mm 0;
+}
+.rating-row span {
+  display: block;
+  height: 100%;
+  padding-right: 3mm;
+  color: rgba(255, 255, 255, 0.9);
+  border-radius: 0 999px 999px 0;
+  font-size: 8pt;
+  font-weight: 900;
+  line-height: 7.2mm;
+  text-align: right;
+  box-shadow: 0 1mm 3mm rgba(0, 0, 0, 0.24);
+}
+.cover-logo,
+.cover-brand,
+.cover-title,
+.cover-subtitle,
+.cover-meta,
+.cover-disclaimer {
+  position: relative;
+  z-index: 2;
 }
 .cover-logo img {
   width: 46mm;
@@ -407,9 +483,10 @@ a { color: inherit; text-decoration: none; }
   text-align: center;
 }
 .toc-page {
+  page: auto;
   page-break-after: always;
-  min-height: 297mm;
-  padding: 27mm 18mm 25mm;
+  min-height: auto;
+  padding: 0;
 }
 .kicker {
   color: #9a7a31;
@@ -464,9 +541,10 @@ a { color: inherit; text-decoration: none; }
   text-align: right;
 }
 .manual-section {
+  page: auto;
   page-break-before: always;
-  min-height: 297mm;
-  padding: 25mm 18mm 25mm;
+  min-height: auto;
+  padding: 0;
 }
 .manual-section h2 {
   margin: 0 0 8mm;
