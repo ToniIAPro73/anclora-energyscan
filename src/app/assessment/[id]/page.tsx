@@ -22,6 +22,9 @@ import { prismaCertificateToDto } from '@/lib/ingestion/persistence';
 import type { RehabBudgetAnalysis } from '@/lib/ingestion/types';
 import { canAccessPremiumContent } from '@/lib/premium-access';
 import { trackEvent } from '@/lib/analytics';
+import { auth } from '@/auth';
+import { computeFeasibility } from '@/lib/feasibility/feasibility-engine';
+import { getScenarioCostEstimate } from '@/lib/costs/cost-engine';
 import { buildEvidenceMatrix, getEvidenceFieldLabel, getEvidenceSourceLabel, getEvidenceConfidenceLabel } from '@/lib/evidence/evidence-matrix';
 import { buildConditionRiskItems } from '@/lib/condition-risk/rules';
 import { getCategoryLabel, getElementLabel, getModuleDisclaimer } from '@/lib/condition-risk/types';
@@ -50,6 +53,9 @@ export default async function AssessmentResultsPage({ params }: { params: { id: 
   const measurementSystem = normalizeMeasurementSystem(cookieStore.get('enerscan-measurement-system')?.value || defaults.measurementSystem);
   const t = getDictionary(language);
   trackEvent('assessment_viewed', { assessmentId: params.id });
+
+  const session = await auth().catch(() => null);
+  const isLoggedIn = Boolean(session?.user?.id);
 
   const statelessPayload = parseStatelessAssessmentId(params.id);
   const assessment = statelessPayload ? null : await prisma.assessment.findUnique({
@@ -115,9 +121,20 @@ export default async function AssessmentResultsPage({ params }: { params: { id: 
   };
 
 
-  const scenarios = localizeScenarios(generateScenarios(propertyData, scoreResult), language);
+  const rawScenarios = generateScenarios(propertyData, scoreResult);
+  const scenarios = localizeScenarios(rawScenarios, language);
   const regulatoryTimeline = localizeRegulatoryTimeline(language);
   const subsidies = localizeSubsidies(getRelevantSubsidies(propertyData), language);
+
+  // Feasibility engine — only computed when objective is target_letter
+  const scenarioCostEstimates = propertyData.objective === 'target_letter'
+    ? rawScenarios.map(s => getScenarioCostEstimate(s.id, propertyData))
+    : [];
+  const rehabBudgetTotals = premiumSources.rehabBudgets
+    .map(b => b.totalAmount)
+    .filter((v): v is number => typeof v === 'number' && v > 0);
+  const feasibility = computeFeasibility(propertyData, scoreResult, rawScenarios, scenarioCostEstimates, rehabBudgetTotals);
+
   const isDemo = statelessPayload?.isDemo || assessment?.isDemo || false;
   const premiumAccess = canAccessPremiumContent({
     paidAt: assessment?.paidAt,
@@ -222,6 +239,91 @@ export default async function AssessmentResultsPage({ params }: { params: { id: 
 
       <main className="pt-24 pb-16 px-4">
         <div className="max-w-6xl mx-auto space-y-12">
+
+          {/* FREE ANALYSIS COMPLETED BANNER */}
+          {!isDemo && !canViewPremium && (
+            <div className="flex items-start gap-3 rounded-2xl border border-[#00DC82]/30 bg-[#00DC82]/5 px-5 py-4">
+              <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[#00DC82]" />
+              <div>
+                <p className="font-heading font-bold text-sm text-[#00DC82]">
+                  {language === 'en' ? 'Your free pre-assessment is ready' : language === 'de' ? 'Ihre kostenlose Voreinschätzung ist fertig' : 'Tu prediagnóstico gratuito está listo'}
+                </p>
+                <p className="mt-0.5 text-xs text-muted">
+                  {language === 'en'
+                    ? 'Below you will find your indicative energy rating, key weaknesses and strengths, and data traceability. The Premium report adds scenarios, costs, grants and a downloadable PDF.'
+                    : language === 'de'
+                    ? 'Unten finden Sie Ihre orientierende Energieklasse, die wichtigsten Schwächen und Stärken sowie die Datennachvollziehbarkeit. Der Premium-Bericht ergänzt Szenarien, Kosten, Förderungen und ein PDF.'
+                    : 'A continuación encontrarás tu calificación energética orientativa, las principales debilidades y fortalezas, y la trazabilidad de los datos. El informe Premium añade escenarios, costes, ayudas y un PDF descargable.'}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* FEASIBILITY NOTICE — only when objective is target_letter */}
+          {feasibility && (
+            <div className={`flex items-start gap-3 rounded-2xl border px-5 py-4 ${
+              feasibility.verdict === 'feasible'
+                ? 'border-[#00DC82]/30 bg-[#00DC82]/5'
+                : feasibility.verdict === 'feasible_costly'
+                ? 'border-[#FFB020]/30 bg-[#FFB020]/5'
+                : 'border-[#EF4444]/30 bg-[#EF4444]/5'
+            }`}>
+              {feasibility.verdict === 'feasible' && <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[#00DC82]" />}
+              {feasibility.verdict === 'feasible_costly' && <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-[#FFB020]" />}
+              {feasibility.verdict === 'infeasible_gap' && <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-[#EF4444]" />}
+              <div>
+                <p className={`font-heading font-bold text-sm ${
+                  feasibility.verdict === 'feasible' ? 'text-[#00DC82]'
+                  : feasibility.verdict === 'feasible_costly' ? 'text-[#FFB020]'
+                  : 'text-[#EF4444]'
+                }`}>
+                  {feasibility.verdict === 'feasible' && (
+                    language === 'en' ? `Reaching letter ${feasibility.targetLetter} looks feasible with your data`
+                    : language === 'de' ? `Klasse ${feasibility.targetLetter} erscheint mit Ihren Daten erreichbar`
+                    : `Alcanzar la letra ${feasibility.targetLetter} parece viable con tus datos`
+                  )}
+                  {feasibility.verdict === 'feasible_costly' && (
+                    language === 'en' ? `Letter ${feasibility.targetLetter} is reachable, but the cost exceeds your stated budget`
+                    : language === 'de' ? `Klasse ${feasibility.targetLetter} ist erreichbar, aber die Kosten übersteigen Ihr Budget`
+                    : `La letra ${feasibility.targetLetter} es alcanzable, pero el coste supera tu presupuesto declarado`
+                  )}
+                  {feasibility.verdict === 'infeasible_gap' && (
+                    language === 'en' ? `Reaching letter ${feasibility.targetLetter} is not achievable with the available interventions`
+                    : language === 'de' ? `Klasse ${feasibility.targetLetter} ist mit den verfügbaren Maßnahmen nicht erreichbar`
+                    : `Alcanzar la letra ${feasibility.targetLetter} no es posible con las intervenciones disponibles`
+                  )}
+                </p>
+                <p className="mt-1 text-xs text-muted">
+                  {feasibility.verdict === 'feasible' && feasibility.minCostToReachTarget !== null && (
+                    language === 'en'
+                      ? `The most cost-effective path starts at approximately €${feasibility.minCostToReachTarget.toLocaleString('en-US', { maximumFractionDigits: 0 })}. The Premium report details the full plan.`
+                      : language === 'de'
+                      ? `Der günstigste Weg beginnt bei ca. ${feasibility.minCostToReachTarget.toLocaleString('de-DE', { maximumFractionDigits: 0 })} €. Der Premium-Bericht enthält den vollständigen Plan.`
+                      : `La ruta más económica parte de aproximadamente ${feasibility.minCostToReachTarget.toLocaleString('es-ES', { maximumFractionDigits: 0 })} €. El informe Premium detalla el plan completo.`
+                  )}
+                  {feasibility.verdict === 'feasible_costly' && (
+                    (() => {
+                      const minStr = feasibility.minCostToReachTarget?.toLocaleString(language === 'en' ? 'en-US' : language === 'de' ? 'de-DE' : 'es-ES', { maximumFractionDigits: 0 });
+                      const budgetStr = feasibility.effectiveBudgetCeiling?.toLocaleString(language === 'en' ? 'en-US' : language === 'de' ? 'de-DE' : 'es-ES', { maximumFractionDigits: 0 });
+                      const bestStr = feasibility.bestReachableLetter;
+                      return language === 'en'
+                        ? `The minimum estimated investment is €${minStr} vs. your budget of €${budgetStr}. With your current budget, the most you could reach is approximately letter ${bestStr}. The Premium report explains the options.`
+                        : language === 'de'
+                        ? `Die geschätzte Mindestinvestition beträgt ${minStr} € gegenüber Ihrem Budget von ${budgetStr} €. Mit Ihrem Budget ist maximal Klasse ${bestStr} erreichbar. Der Premium-Bericht erläutert die Optionen.`
+                        : `La inversión mínima estimada es de ${minStr} € frente a tu presupuesto de ${budgetStr} €. Con tu presupuesto actual, lo máximo alcanzable sería aproximadamente la letra ${bestStr}. El informe Premium explica las opciones.`;
+                    })()
+                  )}
+                  {feasibility.verdict === 'infeasible_gap' && (
+                    language === 'en'
+                      ? `Even with a full deep retrofit, the best achievable letter for this property is approximately ${feasibility.bestReachableLetter}. The Premium report explains what IS achievable and what would be needed to go further.`
+                      : language === 'de'
+                      ? `Selbst mit einer umfassenden Sanierung ist die beste erreichbare Klasse für diese Immobilie ca. ${feasibility.bestReachableLetter}. Der Premium-Bericht erklärt, was erreichbar ist und was darüber hinaus nötig wäre.`
+                      : `Incluso con una reforma integral, la letra máxima alcanzable para esta vivienda es aproximadamente ${feasibility.bestReachableLetter}. El informe Premium explica qué sí es alcanzable y qué requeriría ir más lejos.`
+                  )}
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* HEADER / SCORING */}
           <div className="grid lg:grid-cols-2 gap-8 items-center surface border rounded-3xl p-8 lg:p-12 glow-green">
@@ -406,7 +508,7 @@ export default async function AssessmentResultsPage({ params }: { params: { id: 
               </div>
                   {scoreResult.penalties.length > 0 ? (
                 <ul className="space-y-3">
-                  {scoreResult.penalties.slice(0, canViewPremium ? undefined : 3).map((p, i) => (
+                  {scoreResult.penalties.map((p, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm text-[#7A7A7A]">
                       <div className="w-1.5 h-1.5 rounded-full bg-[#EF4444] mt-1.5 shrink-0" />
                       {translateScoreText(p, language)}
@@ -425,7 +527,7 @@ export default async function AssessmentResultsPage({ params }: { params: { id: 
               </div>
                   {scoreResult.strengths.length > 0 ? (
                 <ul className="space-y-3">
-                  {scoreResult.strengths.slice(0, canViewPremium ? undefined : 2).map((s, i) => (
+                  {scoreResult.strengths.map((s, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm text-[#7A7A7A]">
                       <div className="w-1.5 h-1.5 rounded-full bg-[#00DC82] mt-1.5 shrink-0" />
                       {translateScoreText(s, language)}
@@ -444,7 +546,7 @@ export default async function AssessmentResultsPage({ params }: { params: { id: 
               </div>
                   {scoreResult.missingData.length > 0 ? (
                 <ul className="space-y-3">
-                  {scoreResult.missingData.slice(0, canViewPremium ? undefined : 3).map((m, i) => (
+                  {scoreResult.missingData.map((m, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm text-[#7A7A7A]">
                       <div className="w-1.5 h-1.5 rounded-full bg-[#FFB020] mt-1.5 shrink-0" />
                       {translateScoreText(m, language)}
@@ -459,9 +561,13 @@ export default async function AssessmentResultsPage({ params }: { params: { id: 
 
           {!canViewPremium && (
             <section className="surface border rounded-3xl p-6 lg:p-8 space-y-6">
-              <div className="text-center">
-                <h2 className="font-heading font-bold text-2xl text-[#F0EDE8] mb-2">{t.premiumLockedTitle}</h2>
-                <p className="mx-auto max-w-2xl text-sm text-[#7A7A7A]">{t.premiumLockedCopy}</p>
+              {/* What Premium adds — preview of locked scenarios */}
+              <div>
+                <p className="text-xs font-heading font-semibold uppercase tracking-wider text-[#FFB020] mb-1">
+                  {language === 'en' ? 'Premium report preview' : language === 'de' ? 'Premium-Bericht – Vorschau' : 'Vista previa del informe Premium'}
+                </p>
+                <h2 className="font-heading font-bold text-2xl text-[#F0EDE8] mb-1">{t.premiumLockedTitle}</h2>
+                <p className="max-w-2xl text-sm text-[#7A7A7A]">{t.premiumLockedCopy}</p>
               </div>
               <div className="grid md:grid-cols-3 gap-4">
                 {scenarios.slice(0, 3).map((scenario) => (
@@ -588,11 +694,55 @@ export default async function AssessmentResultsPage({ params }: { params: { id: 
             </div>
           </section>
 
+          {/* FREE PDF DOWNLOAD — always available, no payment required */}
+          {!canViewPremium && !isDemo && (
+            <section className="surface border border-[#00DC82]/20 rounded-3xl p-6 lg:p-8">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                <div>
+                  <p className="text-xs font-heading font-semibold uppercase tracking-wider text-[#00DC82] mb-1">
+                    {language === 'en' ? 'Free report' : language === 'de' ? 'Kostenloser Bericht' : 'Informe gratuito'}
+                  </p>
+                  <h2 className="font-heading font-bold text-xl text-premium mb-1">
+                    {language === 'en' ? 'Download your free pre-assessment' : language === 'de' ? 'Kostenlose Voreinschätzung herunterladen' : 'Descarga tu prediagnóstico gratuito'}
+                  </h2>
+                  <p className="text-sm text-muted">
+                    {language === 'en'
+                      ? 'A 2-page PDF with your indicative rating, main weaknesses and strengths.'
+                      : language === 'de'
+                      ? 'Ein 2-seitiges PDF mit Ihrer orientierenden Klasse, Hauptschwächen und -stärken.'
+                      : 'Un PDF de 2 páginas con tu calificación orientativa, principales debilidades y fortalezas.'}
+                  </p>
+                </div>
+                <a
+                  href={`/api/assessment/${params.id}/pdf/basic?lang=${language}`}
+                  className="inline-flex shrink-0 items-center gap-2 rounded-full bg-[#00DC82] px-6 py-3 font-heading font-bold text-sm text-[#0A0A0A] hover:brightness-110 transition"
+                >
+                  {language === 'en' ? 'Download free PDF' : language === 'de' ? 'Kostenloses PDF laden' : 'Descargar PDF gratuito'}
+                </a>
+              </div>
+            </section>
+          )}
+
           <section className="surface border rounded-3xl p-6">
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              <Link href="/dashboard" className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/10 px-5 py-2 font-heading text-sm font-bold text-premium hover:border-[#00DC82]/40">{t.backToDashboard}</Link>
-              <Link href="/budget-review" className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/10 px-5 py-2 font-heading text-sm font-bold text-premium hover:border-[#00DC82]/40">{t.analyzeBudgetCta}</Link>
-              <Link href="/proveedores" className="inline-flex min-h-11 items-center justify-center rounded-full border border-[#00DC82]/30 px-5 py-2 font-heading text-sm font-bold text-[#00DC82]">{t.requestProviderCta}</Link>
+              {isLoggedIn && (
+                <Link href="/dashboard" className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/10 px-5 py-2 font-heading text-sm font-bold text-premium hover:border-[#00DC82]/40">
+                  {t.backToDashboard}
+                </Link>
+              )}
+              {canViewPremium && (
+                <Link href="/budget-review" className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/10 px-5 py-2 font-heading text-sm font-bold text-premium hover:border-[#00DC82]/40">
+                  {t.analyzeBudgetCta}
+                </Link>
+              )}
+              <Link href="/proveedores" className="inline-flex min-h-11 items-center justify-center rounded-full border border-[#00DC82]/30 px-5 py-2 font-heading text-sm font-bold text-[#00DC82]">
+                {t.requestProviderCta}
+              </Link>
+              {!isLoggedIn && (
+                <Link href="/wizard" className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/10 px-5 py-2 font-heading text-sm font-bold text-premium hover:border-[#00DC82]/40">
+                  {language === 'en' ? 'New assessment' : language === 'de' ? 'Neue Analyse' : 'Nuevo análisis'}
+                </Link>
+              )}
             </div>
           </section>
 

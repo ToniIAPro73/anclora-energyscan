@@ -134,7 +134,8 @@ const labels = {
     catastroImagesTitle: 'Imágenes catastrales',
     catastroImagesSubtitle: 'Obtenidas de la Sede Electrónica del Catastro en el momento de generación del informe. No se almacenan.',
     catastroFacadeLabel: 'Foto de fachada (Catastro)',
-    catastroMapLabel: 'Cartografía catastral',
+    catastroSchemeLabel: 'Esquema de parcela catastral',
+    catastroMapLabel: 'Cartografía catastral (entorno)',
     catastroDisclaimer: 'Fuente: Sede Electrónica del Catastro (Ministerio de Hacienda). Imágenes obtenidas en tiempo real para este informe y no almacenadas en los sistemas de Anclora EnergyScan.',
   },
   en: {
@@ -257,7 +258,8 @@ const labels = {
     catastroImagesTitle: 'Cadastral images',
     catastroImagesSubtitle: 'Retrieved from the Spanish Cadastre (Catastro) at report generation time. Not stored.',
     catastroFacadeLabel: 'Facade photo (Catastro)',
-    catastroMapLabel: 'Cadastral map',
+    catastroSchemeLabel: 'Cadastral parcel scheme',
+    catastroMapLabel: 'Cadastral map (surroundings)',
     catastroDisclaimer: 'Source: Spanish Electronic Cadastre (Ministry of Finance). Images retrieved in real time for this report and not stored in Anclora EnergyScan systems.',
   },
   de: {
@@ -380,7 +382,8 @@ const labels = {
     catastroImagesTitle: 'Katasterbilder',
     catastroImagesSubtitle: 'Zum Zeitpunkt der Berichterstellung vom spanischen Kataster abgerufen. Nicht gespeichert.',
     catastroFacadeLabel: 'Fassadenfoto (Kataster)',
-    catastroMapLabel: 'Katasterkarte',
+    catastroSchemeLabel: 'Katasterparzellenschema',
+    catastroMapLabel: 'Katasterkarte (Umgebung)',
     catastroDisclaimer: 'Quelle: Spanisches elektronisches Kataster (Finanzministerium). Bilder wurden für diesen Bericht in Echtzeit abgerufen und nicht in Anclora EnergyScan-Systemen gespeichert.',
   },
 } as const;
@@ -840,7 +843,7 @@ export const EnerScanReport = ({ data }: { data: PremiumReportData }) => {
     </Page>
 
     {/* Catastro images page — only rendered when images are available */}
-    {(data.catastroImages?.facadeDataUri || data.catastroImages?.mapDataUri) && (
+    {(data.catastroImages?.facadeDataUri || data.catastroImages?.schemeDataUri || data.catastroImages?.mapDataUri) && (
       <Page size="A4" style={styles.page}>
         <View style={styles.header} fixed>
           <View style={styles.brandHeader}>
@@ -859,12 +862,37 @@ export const EnerScanReport = ({ data }: { data: PremiumReportData }) => {
           <Text style={styles.sectionTitle}>{t.catastroImagesTitle}</Text>
           <Text style={{ ...styles.text, marginBottom: 10 }}>{t.catastroImagesSubtitle}</Text>
 
-          {data.catastroImages.facadeDataUri && (
-            <View style={{ marginBottom: 14 }}>
-              <Text style={{ ...styles.text, fontWeight: 'bold', marginBottom: 4 }}>{t.catastroFacadeLabel}</Text>
-              {/* eslint-disable-next-line jsx-a11y/alt-text */}
-              <Image src={data.catastroImages.facadeDataUri} style={{ width: '100%', maxHeight: 220, objectFit: 'contain', borderRadius: 4 }} />
+          {/* Facade photo and parcel scheme side by side when both available */}
+          {data.catastroImages.facadeDataUri && data.catastroImages.schemeDataUri ? (
+            <View style={{ flexDirection: 'row', gap: 10, marginBottom: 14 }}>
+              <View style={{ flex: 1 }}>
+                <Text style={{ ...styles.text, fontWeight: 'bold', marginBottom: 4 }}>{t.catastroFacadeLabel}</Text>
+                {/* eslint-disable-next-line jsx-a11y/alt-text */}
+                <Image src={data.catastroImages.facadeDataUri} style={{ width: '100%', maxHeight: 180, objectFit: 'contain', borderRadius: 4 }} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ ...styles.text, fontWeight: 'bold', marginBottom: 4 }}>{t.catastroSchemeLabel}</Text>
+                {/* eslint-disable-next-line jsx-a11y/alt-text */}
+                <Image src={data.catastroImages.schemeDataUri} style={{ width: '100%', maxHeight: 180, objectFit: 'contain', borderRadius: 4 }} />
+              </View>
             </View>
+          ) : (
+            <>
+              {data.catastroImages.facadeDataUri && (
+                <View style={{ marginBottom: 14 }}>
+                  <Text style={{ ...styles.text, fontWeight: 'bold', marginBottom: 4 }}>{t.catastroFacadeLabel}</Text>
+                  {/* eslint-disable-next-line jsx-a11y/alt-text */}
+                  <Image src={data.catastroImages.facadeDataUri} style={{ width: '100%', maxHeight: 220, objectFit: 'contain', borderRadius: 4 }} />
+                </View>
+              )}
+              {data.catastroImages.schemeDataUri && (
+                <View style={{ marginBottom: 14 }}>
+                  <Text style={{ ...styles.text, fontWeight: 'bold', marginBottom: 4 }}>{t.catastroSchemeLabel}</Text>
+                  {/* eslint-disable-next-line jsx-a11y/alt-text */}
+                  <Image src={data.catastroImages.schemeDataUri} style={{ width: '60%', maxHeight: 220, objectFit: 'contain', borderRadius: 4 }} />
+                </View>
+              )}
+            </>
           )}
 
           {data.catastroImages.mapDataUri && (

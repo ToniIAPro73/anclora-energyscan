@@ -246,5 +246,5 @@ export interface PremiumReportData {
   // Session utility bills from calculator (not stored in DB)
   utilityBills?: UtilityBillData[];
   // Catastro images fetched on-demand for PDF (not stored in DB)
-  catastroImages?: { facadeDataUri?: string; mapDataUri?: string };
+  catastroImages?: { facadeDataUri?: string; schemeDataUri?: string; mapDataUri?: string };
 }

@@ -202,8 +202,12 @@ export default function AssessmentWizard() {
   });
 
   const objective = watch('objective');
+  const targetLetter = watch('targetLetter');
   const lat = watch('latitude');
   const lng = watch('longitude');
+
+  // When user picks target_letter objective, show the letter selector before advancing
+  const [showingLetterPicker, setShowingLetterPicker] = useState(false);
 
   const nextStep = () => setStep(s => s + 1);
   const prevStep = () => setStep(s => s - 1);
@@ -1187,7 +1191,7 @@ export default function AssessmentWizard() {
 
         <form onSubmit={handleSubmit(onSubmit, onInvalid)} className={step === 2 ? 'flex min-h-0 flex-1 flex-col' : 'space-y-8'}>
         {/* STEP 1: OBJECTIVE */}
-        {step === 1 && (
+        {step === 1 && !showingLetterPicker && (
           <div className="space-y-6">
             <h2 className="font-heading font-bold text-2xl text-premium">{t.wizardTitle}</h2>
             <div className="grid gap-4">
@@ -1199,7 +1203,14 @@ export default function AssessmentWizard() {
                 <button
                   key={opt.id}
                   type="button"
-                  onClick={() => { setValue('objective', opt.id); nextStep(); }}
+                  onClick={() => {
+                    setValue('objective', opt.id);
+                    if (opt.id === 'target_letter') {
+                      setShowingLetterPicker(true);
+                    } else {
+                      nextStep();
+                    }
+                  }}
                   className={`flex items-start gap-4 p-4 rounded-xl border text-left transition ${objective === opt.id ? 'border-[#00DC82] bg-[#00DC82]/5' : 'surface border hover:border-[#7A7A7A]'}`}
                 >
                   <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${objective === opt.id ? 'bg-[#00DC82]/20 text-[#00DC82]' : 'bg-white/5 text-[#7A7A7A]'}`}>
@@ -1212,6 +1223,63 @@ export default function AssessmentWizard() {
                 </button>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* STEP 1b: TARGET LETTER PICKER (shown after choosing target_letter objective) */}
+        {step === 1 && showingLetterPicker && (
+          <div className="space-y-6">
+            <button
+              type="button"
+              onClick={() => setShowingLetterPicker(false)}
+              className="flex items-center gap-2 text-sm text-muted hover:text-premium transition"
+            >
+              ← {t.wizardObjectiveTarget}
+            </button>
+            <div>
+              <h2 className="font-heading font-bold text-2xl text-premium">{t.wizardTargetLetterTitle}</h2>
+              <p className="text-sm text-muted mt-2">{t.wizardTargetLetterDesc}</p>
+            </div>
+            <div className="grid grid-cols-7 gap-2">
+              {(['A', 'B', 'C', 'D', 'E', 'F', 'G'] as const).map((letter) => {
+                const colors: Record<string, string> = {
+                  A: 'bg-[#00C853]', B: 'bg-[#64DD17]', C: 'bg-[#AEEA00]',
+                  D: 'bg-[#FFD600]', E: 'bg-[#FF8F00]', F: 'bg-[#E64A19]', G: 'bg-[#B71C1C]',
+                };
+                const isSelected = targetLetter === letter;
+                return (
+                  <button
+                    key={letter}
+                    type="button"
+                    onClick={() => setValue('targetLetter', letter)}
+                    className={`flex flex-col items-center justify-center rounded-xl p-3 border-2 transition font-heading font-bold text-xl
+                      ${isSelected
+                        ? `${colors[letter]} border-white text-white shadow-lg scale-105`
+                        : 'surface border-white/10 text-premium hover:border-white/30'
+                      }`}
+                  >
+                    {letter}
+                  </button>
+                );
+              })}
+            </div>
+            {(targetLetter === 'A' || targetLetter === 'B') && (
+              <p className="text-xs text-[#FFB020]">
+                {language === 'en'
+                  ? 'Ambitious target. Typically requires a deep retrofit (envelope + systems + renewables).'
+                  : language === 'de'
+                  ? 'Anspruchsvolles Ziel. Erfordert in der Regel eine umfassende Sanierung (Hülle + Anlagen + Erneuerbare).'
+                  : 'Objetivo ambicioso. Normalmente requiere reforma integral (envolvente + sistemas + renovables).'}
+              </p>
+            )}
+            <button
+              type="button"
+              disabled={!targetLetter}
+              onClick={() => { setShowingLetterPicker(false); nextStep(); }}
+              className="w-full py-3 rounded-full bg-[#00DC82] text-[#0A0A0A] font-heading font-bold text-sm hover:brightness-110 transition disabled:opacity-50"
+            >
+              {t.wizardTargetLetterContinue} {targetLetter}
+            </button>
           </div>
         )}
 

@@ -63,17 +63,20 @@ export default function LandingPage() {
                 <p className="text-muted text-base sm:text-lg leading-relaxed mb-6 max-w-xl">
                   {t.heroCopy}
                 </p>
-                <div className="flex flex-wrap gap-3 mb-6">
+                <div className="flex flex-wrap gap-3 mb-4">
                   <Link href="/wizard" className="px-6 py-3 rounded-full bg-[#00DC82] text-[#0A0A0A] font-heading font-bold text-sm hover:brightness-110 transition pulse-glow">
                     {t.startFree}
                   </Link>
-                  <Link href="/pricing" className="px-6 py-3 rounded-full bg-[#F0EDE8] text-[#0A0A0A] font-heading font-bold text-sm hover:brightness-110 transition">
+                  <Link href="/pricing" className="px-6 py-3 rounded-full border border-[#00DC82]/40 text-[#00DC82] font-heading font-bold text-sm hover:bg-[#00DC82]/10 transition">
                     {t.pricingPremiumCta}
                   </Link>
-                  <a href={`/api/assessment/demo/pdf?lang=${language}&currency=${currency}&units=${measurementSystem}`} className="px-6 py-3 rounded-full bg-[#FFB020] text-[#0A0A0A] font-heading font-bold text-sm hover:brightness-110 transition">
+                </div>
+                <div className="flex items-center gap-4 mb-6">
+                  <a href={`/api/assessment/demo/pdf?lang=${language}&currency=${currency}&units=${measurementSystem}`} className="text-xs text-muted font-heading font-semibold hover:text-[#00DC82] transition underline underline-offset-2">
                     {t.paywallDemoLink}
                   </a>
-                  <Link href="#como-funciona" className="px-6 py-3 rounded-full border border-[#262626] text-premium font-heading font-medium text-sm hover:border-[#7A7A7A] transition">
+                  <span className="text-[#262626]">·</span>
+                  <Link href="#como-funciona" className="text-xs text-muted font-heading font-semibold hover:text-premium transition">
                     {t.howItWorks}
                   </Link>
                 </div>

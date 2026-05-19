@@ -2,13 +2,17 @@
  * Fetches property images from the Spanish Catastro (OVC) services.
  * Images are used only for PDF generation — never stored in the database.
  *
- * Two image types:
+ * Three image types:
  *  - Facade photo: SOAP service at OVCFotoFachada
- *  - Cartographic map: WMS GetMap with the parcel bounding box
+ *  - Parcel scheme: GeneraMapa.aspx?tipo=G — clearly highlights the specific parcel
+ *  - Cartographic map: WMS GetMap with the parcel bounding box (geographic context)
  */
 
 const FOTO_FACHADA_ENDPOINT =
   'https://ovc.catastro.meh.es/OVCServWeb/OVCWcfLibres/OVCFotoFachada.svc';
+
+const GENERA_MAPA_BASE =
+  'https://www1.sedecatastro.gob.es/Cartografia/GeneraMapa.aspx';
 
 const WMS_ENDPOINT =
   'https://ovc.catastro.meh.es/cartografia/WMS/ServidorWMS.aspx';
@@ -63,6 +67,39 @@ export async function fetchCatastroFacadeImage(
     const base64 = extractRasterBase64(xml);
     if (!base64) return null;
     return `data:image/jpeg;base64,${base64}`;
+  } catch {
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Parcel scheme — GeneraMapa.aspx?tipo=G  (highlights the specific parcel)
+// ---------------------------------------------------------------------------
+
+/**
+ * The RC passed to GeneraMapa must be the 14-character parcel reference
+ * (the first 14 chars of the full 20-char cadastral reference).
+ * Returns a GIF/PNG with the parcel clearly highlighted.
+ */
+export async function fetchCatastroParcelScheme(
+  cadastralReference: string,
+): Promise<string | null> {
+  try {
+    const rc14 = cadastralReference.slice(0, 14);
+    const params = new URLSearchParams({ tipo: 'G', RC: rc14 });
+    const response = await fetch(`${GENERA_MAPA_BASE}?${params.toString()}`, {
+      signal: withTimeout(FETCH_TIMEOUT_MS),
+    });
+
+    if (!response.ok) return null;
+    const contentType = response.headers.get('content-type') ?? '';
+    if (!contentType.includes('image/')) return null;
+
+    const buffer = await response.arrayBuffer();
+    const base64 = Buffer.from(buffer).toString('base64');
+    // Catastro returns GIF or PNG; detect from content-type
+    const mime = contentType.includes('gif') ? 'image/gif' : 'image/png';
+    return `data:${mime};base64,${base64}`;
   } catch {
     return null;
   }
@@ -124,6 +161,8 @@ export async function fetchCatastroMapImage(
 
 export interface CatastroImages {
   facadeDataUri?: string;
+  /** Parcel scheme from GeneraMapa.aspx?tipo=G — clearly highlights the specific parcel. */
+  schemeDataUri?: string;
   mapDataUri?: string;
 }
 
@@ -132,12 +171,14 @@ export async function fetchCatastroImages(
   lat: number | undefined,
   lng: number | undefined,
 ): Promise<CatastroImages> {
-  const [facadeDataUri, mapDataUri] = await Promise.all([
+  const [facadeDataUri, schemeDataUri, mapDataUri] = await Promise.all([
     cadastralReference ? fetchCatastroFacadeImage(cadastralReference) : Promise.resolve(null),
+    cadastralReference ? fetchCatastroParcelScheme(cadastralReference) : Promise.resolve(null),
     lat != null && lng != null ? fetchCatastroMapImage(lat, lng) : Promise.resolve(null),
   ]);
   return {
     facadeDataUri: facadeDataUri ?? undefined,
+    schemeDataUri: schemeDataUri ?? undefined,
     mapDataUri: mapDataUri ?? undefined,
   };
 }
