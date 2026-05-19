@@ -1,129 +1,165 @@
 # Anclora EnergyScan
 
-Anclora EnergyScan es una plataforma de prediagnóstico energético orientativa. Permite a los usuarios introducir datos sobre su vivienda para obtener una estimación de su situación energética y de la normativa vigente aplicable.
+[![CI](https://github.com/ToniIAPro73/anclora-energyscan/actions/workflows/ci.yml/badge.svg)](https://github.com/ToniIAPro73/anclora-energyscan/actions/workflows/ci.yml)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-38bdf8?logo=tailwindcss)](https://tailwindcss.com)
+[![License](https://img.shields.io/badge/license-private-lightgrey)](LICENSE)
 
-**Este proyecto NO genera un Certificado de Eficiencia Energética oficial ni documentación con validez administrativa.**
+**Plataforma de prediagnóstico energético orientativo para viviendas residenciales.**
 
-## Encaje en el ecosistema Anclora
+Anclora EnergyScan permite a usuarios particulares y profesionales introducir datos sobre su inmueble y obtener una estimación de su situación energética, brecha regulatoria aplicable, escenarios de mejora y proveedores cualificados — todo en un informe Premium descargable.
 
-Anclora EnergyScan forma parte de la familia Premium de Anclora Group. Su fuente de verdad documental vive en la Bóveda Anclora y debe mantenerse alineada con los contratos `ANCLORA_PREMIUM_APP_CONTRACT`, `ANCLORA_BRANDING_MASTER_CONTRACT`, `LOCALIZATION_CONTRACT`, `UI_MOTION_CONTRACT` y el Anclora Design System.
+> **Aviso legal:** Este proyecto **no** genera un Certificado de Eficiencia Energética oficial ni documentación con validez administrativa.
 
-Relaciones previstas:
+---
 
-- Nexus: gestión operativa de leads, estados de evaluación y seguimiento.
-- Data Lab: inteligencia agregada y señales territoriales/energéticas.
-- Synergi: proveedores, partners y handoff de oportunidades cualificadas.
-- Private Estates: enriquecimiento energético orientativo de activos inmobiliarios.
+## Contenidos
 
-EnergyScan no sustituye a Anclora Private Estates como plataforma principal del vertical Real Estate. Funciona como app Premium especializada de prediagnóstico energético orientativo.
+- [Características principales](#características-principales)
+- [Stack tecnológico](#stack-tecnológico)
+- [Arquitectura](#arquitectura)
+- [Instalación local](#instalación-local)
+- [Variables de entorno](#variables-de-entorno)
+- [Monetización](#monetización)
+- [Internacionalización](#internacionalización)
+- [Partners y proveedores](#partners-y-proveedores)
+- [Encaje en el ecosistema Anclora](#encaje-en-el-ecosistema-anclora)
+- [Limitaciones legales](#limitaciones-legales)
+- [Roadmap](#roadmap)
 
-## Stack
-- Next.js 14
-- TypeScript
-- Prisma + Neon Postgres en producción, con compatibilidad local heredada para SQLite/libSQL
-- Vercel Blob para adjuntos pesados en producción
-- Auth.js/NextAuth open source para credenciales y OAuth Google/GitHub
-- Tailwind CSS
-- React Hook Form + Zod
-- @react-pdf/renderer
+---
+
+## Características principales
+
+| Módulo | Descripción |
+| ------ | ----------- |
+| **Wizard de captura** | Flujo guiado con datos estructurales, sistemas e imagen del inmueble |
+| **Motor Scoring v2.1** | Reglas trazables por categoría: envolvente, sistemas, renovables, clima, tipología |
+| **Informe PDF Premium** | Generado con `@react-pdf/renderer`; multiidioma (ES/EN/DE), con anexo documental |
+| **Catastro** | Autocompletado de referencia catastral + mapa de parcelas (MapLibre) |
+| **OCR + Vision** | Análisis de adjuntos (CEE, presupuestos) con Tesseract y OpenRouter Vision |
+| **Stripe Checkout** | Pago único para desbloquear informe Premium; webhook idempotente |
+| **Proveedores** | Registro, panel, leads y créditos para instaladores y partners |
+| **i18n** | ES / EN / DE con moneda (EUR / GBP) y unidades (m² / sq ft) |
+| **SEO** | Páginas de ciudad, calculadora de ahorro, sitemap y robots |
+
+---
+
+## Stack tecnológico
+
+- **Framework:** Next.js 14 (App Router)
+- **Lenguaje:** TypeScript 5
+- **Base de datos:** Prisma ORM + Neon Postgres (producción) · SQLite (desarrollo local)
+- **Almacenamiento:** Vercel Blob para adjuntos en producción; fallback local en desarrollo
+- **Autenticación:** Auth.js / NextAuth con Prisma Adapter — credenciales propias + OAuth Google/GitHub
+- **Estilos:** Tailwind CSS 3
+- **Formularios:** React Hook Form + Zod
+- **PDF:** @react-pdf/renderer
+- **Pagos:** Stripe Checkout
+- **Email:** Resend (transaccional)
+- **Analítica:** PostHog (opcional)
+
+---
 
 ## Arquitectura
-La aplicación sigue un flujo Wizard -> API -> Resultados:
-1. **Landing/Wizard**: Captura datos estructurales y de sistemas de la vivienda (`src/components/AssessmentWizard.tsx`).
-2. **API**: Valida la información mediante esquemas estrictos de `Zod` y persiste el análisis inicial (`src/app/api/assessment/route.ts`).
-3. **Scoring**: Un motor propio v2.1 evalúa reglas trazables por categoría: envolvente, sistemas, renovables, clima, tipología y calidad de datos (`src/lib/scoring.ts`).
-4. **Resultados**: Muestra clasificación orientativa, score, confianza, brecha regulatoria, ayudas informativas, escenarios y proveedores recomendados.
-5. **Adjuntos**: Guarda metadatos en Prisma y ficheros aportados en Vercel Blob si está configurado, con fallback local.
-6. **Generador PDF**: Construye y descarga un reporte Premium renderizado mediante `@react-pdf/renderer`.
-7. **Monetización Premium**: Stripe Checkout desbloquea el informe Premium mediante pago único. El PDF queda bloqueado hasta que el webhook confirma `paidAt`.
 
-## Experiencia v0.3
-- **Tema:** selector premium Luna/Sol/Ordenador. La preferencia se guarda en `localStorage` y cookie para evitar flashes visuales.
-- **Idioma, moneda y unidades:** selector ES/EN/DE, EUR/GBP y m²/sq ft. ES y DE activan EUR + m²; EN activa GBP + sq ft. Las preferencias se persisten en `localStorage` y cookies para que el PDF use el mismo contexto.
-- **Demo:** el botón "Ver ejemplo de valoración" crea una valoración ficticia marcada como demo, sin datos personales.
-- **Adjuntos:** el wizard permite arrastrar o seleccionar PDF, JPG, PNG y WEBP. Límite: 6 archivos, 10 MB por archivo y 50 MB acumulados por valoración.
-- **Normativa:** el contexto distingue Real Decreto 390/2021, Directiva (UE) 2024/1275, PNIEC y horizontes europeos sin convertirlos en obligaciones individuales directas.
-
-## Partners y proveedores
-
-Anclora EnergyScan prepara una red de proveedores y partners para conectar diagnósticos orientativos con solicitudes de presupuesto o contacto. El sistema distingue entre partners comerciales, proveedores técnicos y leads trazables. Esta funcionalidad no implica recomendación garantizada ni sustitución de servicios técnicos oficiales.
-
-## Demo enriquecida
-
-La demo incluye una vivienda unifamiliar ficticia, documentación aportada de ejemplo, imágenes interiores/exteriores y un supuesto CEE demo sin validez oficial. Estos assets se usan para mostrar el anexo documental del PDF premium.
-
-El informe premium puede generarse en español, inglés o alemán con moneda y unidades acordes a la preferencia activa. El CEE aportado por el usuario se conserva como documento español: su contenido no se traduce y mantiene euros/m² cuando se anexan sus páginas originales.
-
-## Neon, Blob y autenticación
-
-La base de datos de producción está preparada para Neon Postgres manteniendo Prisma como ORM. Los adjuntos pesados se guardan en Vercel Blob cuando existe `BLOB_READ_WRITE_TOKEN`; en local se conserva el fallback a disco.
-
-La autenticación no usa Neon Auth. Se implementa con Auth.js/NextAuth, Prisma Adapter, credenciales propias con hash `scrypt`, recuperación por token y login social con Google/Gmail y GitHub. Las variables OAuth deben configurarse en Vercel (`AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `AUTH_GITHUB_ID`, `AUTH_GITHUB_SECRET`).
-
-### Configuración OAuth
-
-Callback URLs esperadas:
-- **Google Local:** `http://localhost:3000/api/auth/callback/google`
-- **GitHub Local:** `http://localhost:3000/api/auth/callback/github`
-- **Vercel/Production:** `https://<dominio>/api/auth/callback/<provider>`
-
-Aliases compatibles (opcionales):
-- Google: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
-- GitHub: `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`
-
-Para migrar datos heredados desde SQLite/libSQL a Neon:
-
-```bash
-SQLITE_DATABASE_URL="file:./dev.db" DATABASE_URL="postgresql://..." BLOB_READ_WRITE_TOKEN="..." npm run migrate:neon
+```text
+Landing / Wizard
+      │
+      ▼
+POST /api/assessment   ← validación Zod + persistencia Prisma
+      │
+      ▼
+Motor Scoring v2.1     ← reglas por categoría, score, confianza, brecha
+      │
+      ▼
+Pantalla de resultados ← clasificación, escenarios, proveedores, paywall
+      │
+      ▼
+Stripe Checkout ──→ Webhook /api/webhook/stripe ──→ paidAt
+      │
+      ▼
+GET /api/pdf/:id       ← genera informe Premium con anexo documental
 ```
 
-Si `BLOB_READ_WRITE_TOKEN` está presente, el script sube adjuntos locales existentes a Blob y guarda rutas `blob:...` en Prisma. Si no existe, conserva las rutas locales.
+Adjuntos: guardados en Vercel Blob si `BLOB_READ_WRITE_TOKEN` existe; en disco si no.
 
-## Estimaciones económicas orientativas
+---
 
-El PDF Premium y la pantalla de resultados incluyen una primera estimación económica por escenario de mejora. El motor usa un catálogo interno versionado de partidas, fuentes y medidas energéticas, preparado para futuras ingestas BC3/FIEBDC, BEDEC, CYPE, PREOC/PREMETI, IVE o BCCA. Los importes se muestran siempre como rango orientativo y no constituyen presupuesto cerrado, oferta vinculante, medición profesional ni CEE oficial.
-
-Para sembrar el catálogo en Neon:
+## Instalación local
 
 ```bash
-DATABASE_URL="postgresql://..." npm run db:seed:prices
+# 1. Clonar e instalar
+git clone https://github.com/ToniIAPro73/anclora-energyscan.git
+cd anclora-energyscan
+npm install
+
+# 2. Configurar variables de entorno
+cp .env.example .env
+# Editar .env con tus credenciales
+
+# 3. Inicializar base de datos
+npx prisma migrate dev
+npx prisma generate
+
+# 4. (Opcional) Sembrar catálogo de precios
+npm run db:seed:prices
+
+# 5. Arrancar servidor de desarrollo
+npm run dev
 ```
 
-## Campos del Wizard
-El flujo captura objetivo, tipo de inmueble, año, superficie, código postal, orientación, tipo de cubierta, ventanas, aislamiento de fachada y cubierta, ventilación, calefacción, refrigeración, ACS, renovables, presupuesto orientativo, horizonte temporal y aceptación del carácter orientativo.
+Abre [http://localhost:3000](http://localhost:3000).
 
-## Internacionalización
-Los diccionarios base viven en:
-- `public/locales/es/common.json`
-- `public/locales/en/common.json`
-- `public/locales/de/common.json`
+### Comandos útiles
 
-Para añadir un idioma:
-1. Añadir el código en `src/lib/preferences.ts`.
-2. Crear `public/locales/{lang}/common.json`.
-3. Ampliar `src/lib/i18n.ts` y las etiquetas de PDF en `src/lib/pdf/EnerScanReport.tsx`.
-4. Revisar que el selector de idioma lo muestre.
+```bash
+npm run lint          # ESLint
+npm test              # Jest
+npm run build         # Build de producción
+npx prisma studio     # GUI de base de datos
 
-## Instalación
-1. Clonar el repositorio
-2. `npm install`
-3. Generar cliente Prisma: `npx prisma generate`
-4. Crear la base de datos: `npx prisma migrate dev`
-5. Levantar el entorno local: `npm run dev`
+# Webhook Stripe en local
+stripe listen --forward-to localhost:3000/api/webhook/stripe
 
-## Variables de Entorno
-Crea un archivo `.env` basado en `.env.example`:
+# Recovery de checkouts no completados
+curl -X POST http://localhost:3000/api/cron/checkout-recovery \
+  -H "Authorization: Bearer $CRON_SECRET"
+
+# Migración SQLite → Neon
+SQLITE_DATABASE_URL="file:./dev.db" \
+DATABASE_URL="postgresql://..." \
+BLOB_READ_WRITE_TOKEN="..." \
+npm run migrate:neon
+```
+
+---
+
+## Variables de entorno
+
+Crea `.env` a partir de `.env.example`:
+
 ```env
-DATABASE_URL="postgresql://USER:PASSWORD@HOST-pooler.REGION.aws.neon.tech/DB?sslmode=require&channel_binding=require"
-DIRECT_URL="postgresql://USER:PASSWORD@HOST.REGION.aws.neon.tech/DB?sslmode=require&channel_binding=require"
+# Base de datos
+DATABASE_URL="postgresql://USER:PASS@HOST-pooler.REGION.aws.neon.tech/DB?sslmode=require"
+DIRECT_URL="postgresql://USER:PASS@HOST.REGION.aws.neon.tech/DB?sslmode=require"
+
+# App
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ENABLE_DEMO_PREMIUM="true"
+
+# Stripe
 STRIPE_SECRET_KEY=""
 STRIPE_WEBHOOK_SECRET=""
 STRIPE_PRICE_PREMIUM=""
 NEXT_PUBLIC_PREMIUM_PRICE_EUR="9.90"
 NEXT_PUBLIC_PREMIUM_STANDARD_PRICE_EUR="14.90"
+
+# Almacenamiento
 BLOB_READ_WRITE_TOKEN=""
+
+# Auth
 AUTH_SECRET=""
 AUTH_URL="http://localhost:3000"
 AUTH_TRUST_HOST="true"
@@ -131,62 +167,119 @@ AUTH_GOOGLE_ID=""
 AUTH_GOOGLE_SECRET=""
 AUTH_GITHUB_ID=""
 AUTH_GITHUB_SECRET=""
+
+# Opcionales
 EUR_GBP_RATE="0.86"
 NEXT_PUBLIC_EUR_GBP_RATE="0.86"
 PASSWORD_RESET_WEBHOOK_URL=""
-SQLITE_DATABASE_URL="file:./dev.db"
+RESEND_API_KEY=""
+NEXT_PUBLIC_POSTHOG_KEY=""
+ENABLE_ANALYTICS_EVENT_LOG=""
+CRON_SECRET=""
+ADMIN_EMAILS=""
 ```
 
-`NEXT_PUBLIC_APP_URL` y `AUTH_URL` se usan para construir enlaces absolutos. `EUR_GBP_RATE`/`NEXT_PUBLIC_EUR_GBP_RATE` fijan el cambio orientativo EUR -> GBP usado en UI/PDF. `PASSWORD_RESET_WEBHOOK_URL` es opcional: si no existe, el enlace de recuperación solo se muestra en local y se registra en logs de desarrollo.
+### OAuth — Callback URLs
 
-## Stripe Premium
+**Local:**
 
-El flujo Premium usa `/api/checkout` para crear una sesión de pago único y `/api/webhook/stripe` para confirmar el pago. El cliente nunca marca un análisis como pagado: el desbloqueo real depende de `Assessment.paidAt`, escrito desde el webhook `checkout.session.completed`.
+- Google: `http://localhost:3000/api/auth/callback/google`
+- GitHub: `http://localhost:3000/api/auth/callback/github`
 
-Precio inicial: 9,90 € lanzamiento, con 14,90 € como referencia estándar. Si `STRIPE_PRICE_PREMIUM` está configurado se usa ese Price ID; si no, la API crea `price_data` dinámico por 990 céntimos EUR.
+**Producción:**
 
-Webhook local recomendado:
+- Google: `https://<dominio>/api/auth/callback/google`
+- GitHub: `https://<dominio>/api/auth/callback/github`
 
-```bash
-stripe listen --forward-to localhost:3000/api/webhook/stripe
-```
+---
 
-Configura el secreto recibido en `STRIPE_WEBHOOK_SECRET`. El informe sigue siendo un prediagnóstico orientativo y no sustituye al CEE oficial.
+## Monetización
 
-## Monetización pendiente MVP
+### Informe Premium (consumidor)
 
-Esta rama añade bases operativas para nuevas vías de monetización sin convertir EnergyScan en emisor de CEE oficial:
+Flujo Stripe de pago único:
 
-- Analítica: `src/lib/analytics.ts` envía eventos saneados a PostHog por HTTP si existe `NEXT_PUBLIC_POSTHOG_KEY` y puede persistir eventos críticos si `ENABLE_ANALYTICS_EVENT_LOG=true`.
-- Email: `src/lib/email.ts` envía correos transaccionales con Resend si `RESEND_API_KEY` está configurado. Sin API key, el flujo no falla y se registra `EmailLog`.
-- Recovery: `POST /api/cron/checkout-recovery` usa `Authorization: Bearer $CRON_SECRET` para recuperar checkouts Premium no pagados.
-- SEO: `/ciudad/[slug]`, `/calculadora-ahorro`, `sitemap.ts` y `robots.ts` cubren captación inicial.
-- Budget review: `/budget-review` y APIs `/api/budget-review/*` crean un producto standalone de segunda opinión orientativa de presupuesto.
-- Providers: `/proveedores`, `/provider/register`, `/provider/dashboard`, `/provider/leads` y `/provider/billing` preparan registro, panel, leads y créditos.
-- Partner landing: `/partner/[slug]` propaga atribución al wizard mediante query params.
-- Profesional beta: `/profesional` y `/profesional/solicitar` capturan demanda B2B ligera.
-- Admin metrics: `/admin/metrics` requiere email en `ADMIN_EMAILS`.
+1. `POST /api/checkout` → crea sesión Stripe Checkout
+2. Usuario paga → Stripe envía `checkout.session.completed`
+3. `POST /api/webhook/stripe` → escribe `Assessment.paidAt` (idempotente)
+4. PDF desbloqueado en `GET /api/pdf/:id`
 
-Comandos útiles:
+Precio: **9,90 € (lanzamiento)** · precio estándar de referencia: 14,90 €.
 
-```bash
-npx prisma generate
-npm test
-npm run lint
-npm run build
-stripe listen --forward-to localhost:3000/api/webhook/stripe
-curl -X POST http://localhost:3000/api/cron/checkout-recovery -H "Authorization: Bearer $CRON_SECRET"
-```
+### Proveedores y partners
 
-## Limitaciones Legales
-- **Orientativo:** Anclora EnergyScan solo emite valoraciones automáticas en base a la información declarada.
-- **Sin validez administrativa:** No sustituye al Certificado de Eficiencia Energética oficial regulado en España por el Real Decreto 390/2021, no emite certificados oficiales y no puede registrarse ante administraciones.
-- **Contexto normativo:** Las referencias a la Directiva (UE) 2024/1275, PNIEC, ayudas o subvenciones son informativas y pueden variar según transposición, desarrollo normativo, convocatorias y requisitos oficiales.
-- **Ayudas:** No se garantiza elegibilidad, disponibilidad ni importes. Cualquier ayuda o bonificación debe verificarse en fuentes oficiales estatales, autonómicas o municipales.
+- Registro: `/provider/register`
+- Panel + leads: `/provider/dashboard`, `/provider/leads`
+- Créditos: `/provider/billing`
+- Partner landing con atribución: `/partner/[slug]`
+- Profesional B2B beta: `/profesional`, `/profesional/solicitar`
+
+### Otros módulos
+
+- **Budget Review:** `/budget-review` — segunda opinión orientativa de presupuesto
+- **Admin Metrics:** `/admin/metrics` — requiere email en `ADMIN_EMAILS`
+- **SEO:** `/ciudad/[slug]`, `/calculadora-ahorro`, `sitemap.ts`, `robots.ts`
+
+---
+
+## Internacionalización
+
+Los diccionarios viven en `public/locales/{es,en,de}/common.json`.
+
+Para añadir un idioma:
+
+1. Añadir el código en [src/lib/preferences.ts](src/lib/preferences.ts)
+2. Crear `public/locales/{lang}/common.json`
+3. Ampliar [src/lib/i18n.ts](src/lib/i18n.ts) y las etiquetas PDF en [src/lib/pdf/EnerScanReport.tsx](src/lib/pdf/EnerScanReport.tsx)
+4. Comprobar que el selector de idioma lo muestre
+
+---
+
+## Partners y proveedores
+
+EnergyScan prepara una red de proveedores y partners para conectar diagnósticos orientativos con solicitudes de presupuesto o contacto. El sistema distingue entre partners comerciales, proveedores técnicos y leads trazables. Esta funcionalidad no implica recomendación garantizada ni sustitución de servicios técnicos oficiales.
+
+La demo incluye una vivienda unifamiliar ficticia con documentación de ejemplo, imágenes e informe CEE demo sin validez oficial.
+
+---
+
+## Encaje en el ecosistema Anclora
+
+Anclora EnergyScan es parte de la familia Premium de Anclora Group. Su fuente de verdad documental vive en la Bóveda Anclora, alineada con los contratos `ANCLORA_PREMIUM_APP_CONTRACT`, `ANCLORA_BRANDING_MASTER_CONTRACT`, `LOCALIZATION_CONTRACT`, `UI_MOTION_CONTRACT` y el Anclora Design System.
+
+| Plataforma | Relación |
+| ---------- | -------- |
+| **Nexus** | Gestión operativa de leads, estados de evaluación y seguimiento |
+| **Data Lab** | Inteligencia agregada y señales territoriales/energéticas |
+| **Synergi** | Proveedores, partners y handoff de oportunidades cualificadas |
+| **Private Estates** | Enriquecimiento energético orientativo de activos inmobiliarios |
+
+EnergyScan no sustituye a Anclora Private Estates como plataforma principal del vertical Real Estate. Funciona como app Premium especializada de prediagnóstico energético orientativo.
+
+---
+
+## Limitaciones legales
+
+- **Orientativo:** Solo emite valoraciones automáticas en base a la información declarada.
+- **Sin validez administrativa:** No sustituye al Certificado de Eficiencia Energética oficial regulado por el Real Decreto 390/2021, no emite certificados y no puede registrarse ante administraciones.
+- **Contexto normativo:** Las referencias a la Directiva (UE) 2024/1275, PNIEC, ayudas o subvenciones son informativas y pueden variar según transposición y desarrollo normativo.
+- **Ayudas:** No se garantiza elegibilidad, disponibilidad ni importes. Cualquier ayuda debe verificarse en fuentes oficiales.
+
+---
 
 ## Roadmap
-- [x] Motor Scoring v2 (Más factores).
-- [x] Generador PDF nativo y rápido (`@react-pdf/renderer`).
-- [x] Tema, idioma, adjuntos y demo premium.
-- [x] Integración Stripe Checkout para Premium real.
-- [ ] Panel Admin de Proveedores.
+
+- [x] Motor Scoring v2.1 (envolvente, sistemas, renovables, clima, tipología)
+- [x] Generador PDF Premium multiidioma (`@react-pdf/renderer`)
+- [x] Tema Luna/Sol/Ordenador — preferencias persistidas
+- [x] i18n ES/EN/DE con moneda y unidades
+- [x] Adjuntos (PDF, JPG, PNG, WEBP) con OCR y Vision
+- [x] Integración catastral con autocompletado y mapa de parcelas
+- [x] Stripe Checkout + webhook idempotente
+- [x] Red de proveedores — registro, panel, leads y créditos
+- [x] Budget Review — segunda opinión de presupuesto
+- [x] SEO — páginas de ciudad, calculadora, sitemap
+- [x] Hermes Vision Curator — análisis de imágenes con política de coste
+- [ ] Panel Admin de Proveedores completo
+- [ ] Integración Nexus — sincronización de leads
+- [ ] Data Lab — señales energéticas territoriales

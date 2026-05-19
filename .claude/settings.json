@@ -31,7 +31,14 @@
       "Bash(echo \"Exit: $?\")",
       "Bash(vercel logs *)",
       "Bash(python3 -c ' *)",
-      "Bash(curl -s -X POST https://anclora-energyscan.vercel.app/api/assessment/cmp8azdyj0000kphej7bf4sfh/pdf -H 'Content-Type: application/json' -d '{\"lang\":\"es\"}' --max-time 60 -o /tmp/hermes-final.pdf)"
+      "Bash(curl -s -X POST https://anclora-energyscan.vercel.app/api/assessment/cmp8azdyj0000kphej7bf4sfh/pdf -H 'Content-Type: application/json' -d '{\"lang\":\"es\"}' --max-time 60 -o /tmp/hermes-final.pdf)",
+      "Bash(grep -E '\\\\.\\(png|db|tsbuildinfo\\)$|^Captura|^tmp/|^output/')",
+      "Bash(git -C /home/toni/projects/anclora-energyscan ls-files Captura1.png Captura2.png Captura3.png)",
+      "Bash(git -C /home/toni/projects/anclora-energyscan status)",
+      "Bash(git -C /home/toni/projects/anclora-energyscan diff --stat)",
+      "Bash(git -C /home/toni/projects/anclora-energyscan diff .claude/settings.json)",
+      "Bash(git -C /home/toni/projects/anclora-energyscan add .github/workflows/ci.yml .gitignore README.md package.json LICENSE .claude/settings.json docs/screenshots/)",
+      "Bash(git -C /home/toni/projects/anclora-energyscan rm --cached Captura1.png Captura2.png Captura3.png)"
     ],
     "additionalDirectories": [
       "/home/toni/.claude/projects/-home-toni-projects-anclora-energyscan/memory",

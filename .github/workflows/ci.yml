@@ -9,6 +9,13 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      DATABASE_URL: "file:./dev.db"
+      NEXT_PUBLIC_APP_URL: "http://localhost:3000"
+      AUTH_SECRET: "ci-secret-placeholder"
+      AUTH_TRUST_HOST: "true"
 
     steps:
       - name: Checkout
@@ -21,7 +28,7 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci || npm install
+        run: npm ci
 
       - name: Generate Prisma client
         run: npx prisma generate
@@ -30,7 +37,7 @@ jobs:
         run: npm run lint
 
       - name: Test
-        run: npm test || true
+        run: npm test
 
       - name: Build
         run: npm run build

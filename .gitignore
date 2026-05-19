@@ -27,6 +27,7 @@ yarn-error.log*
 
 # local env files
 .env*
+.env
 
 # vercel
 .vercel
@@ -35,13 +36,26 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# prisma generated client
 /src/generated/prisma
+
+# local database (SQLite dev)
+dev.db
+dev.db-journal
+*.db
+
+# uploads (local blob fallback)
 /uploads
-.env
 
-# prompts
-prompt*.md 
+# temp files
+/tmp
 
-# imagenes
-*.png
+# playwright / test output
+/output
+
+# prompts (development notes)
+prompt*.md
+
+# loose screenshots / captures
+Captura*.png
 
