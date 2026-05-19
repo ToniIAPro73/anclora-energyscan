@@ -16,7 +16,16 @@ export default async function ProviderBillingPage({ searchParams }: { searchPara
   const account = session?.user?.id ? await prisma.providerAccount.findUnique({ where: { userId: session.user.id }, include: { provider: true } }) : null;
   return (
     <div className="min-h-screen app-shell">
-      <Navbar />
+      {session?.user ? (
+        <Navbar
+          mode="app"
+          userEmail={session.user.email}
+          userName={session.user.name}
+          userImage={session.user.image}
+        />
+      ) : (
+        <Navbar />
+      )}
       <main className="mx-auto max-w-4xl px-4 pb-16 pt-28">
         <h1 className="font-heading text-4xl font-bold text-premium">{copy.billingTitle}</h1>
         {searchParams.paid && <p className="mt-4 rounded-2xl border border-[#00DC82]/30 bg-[#00DC82]/10 p-4 text-sm font-semibold text-[#00DC82]">{copy.paymentVerifying}</p>}

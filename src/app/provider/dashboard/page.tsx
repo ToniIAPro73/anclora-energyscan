@@ -24,7 +24,16 @@ export default async function ProviderDashboardPage() {
   const lost = leads.filter((lead) => lead.status === 'LOST' || lead.status === 'CANCELLED').length;
   return (
     <div className="min-h-screen app-shell">
-      <Navbar />
+      {session?.user ? (
+        <Navbar
+          mode="app"
+          userEmail={session.user.email}
+          userName={session.user.name}
+          userImage={session.user.image}
+        />
+      ) : (
+        <Navbar />
+      )}
       <main className="mx-auto max-w-5xl px-4 pb-16 pt-28">
         <h1 className="font-heading text-4xl font-bold text-premium">{copy.dashboardTitle}</h1>
         {!account ? (
