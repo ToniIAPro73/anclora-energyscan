@@ -7,7 +7,11 @@
       "Bash(mkdir -p src/app/api/admin/providers/\\\\[id\\\\]/status)",
       "Bash(grep -v \"^$\")",
       "Bash(mkdir -p src/app/api/admin/knowledge/\\\\[id\\\\] src/lib/knowledge src/components/admin src/app/admin/knowledge)",
-      "Bash(mkdir -p /home/toni/projects/anclora-energyscan/src/app/api/assessment/\\\\[id\\\\]/pdf/basic)"
+      "Bash(mkdir -p /home/toni/projects/anclora-energyscan/src/app/api/assessment/\\\\[id\\\\]/pdf/basic)",
+      "mcp__claude_ai_Vercel__list_teams",
+      "mcp__claude_ai_Vercel__list_projects",
+      "mcp__claude_ai_Vercel__list_deployments",
+      "mcp__claude_ai_Vercel__get_deployment_build_logs"
     ],
     "additionalDirectories": [
       "/home/toni/.claude/projects/-home-toni-projects-anclora-energyscan/memory",
