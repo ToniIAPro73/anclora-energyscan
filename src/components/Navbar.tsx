@@ -14,6 +14,7 @@ type NavbarProps = {
   mode?: NavbarMode;
   userEmail?: string | null;
   userName?: string | null;
+  userImage?: string | null;
   providerHref?: string;
   professionalHref?: string;
 };
@@ -22,9 +23,11 @@ export default function Navbar({
   mode = 'public',
   userEmail,
   userName,
+  userImage,
   providerHref = '/provider/register',
   professionalHref = '/profesional',
 }: NavbarProps) {
+  const initials = userName ? userName.slice(0, 2).toUpperCase() : (userEmail ? userEmail.slice(0, 2).toUpperCase() : '?');
   const { dictionary: t } = usePreferences();
   const [productOpen, setProductOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
@@ -113,8 +116,10 @@ export default function Navbar({
                 aria-expanded={accountOpen}
                 aria-haspopup="menu"
               >
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[#00DC82]/30 bg-[#00DC82]/10">
-                  <UserRound className="h-4 w-4 text-[#00DC82]" />
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#00DC82]/30 bg-[#00DC82]/10">
+                  {userImage
+                    ? <Image src={userImage} alt="" width={28} height={28} className="h-full w-full object-cover" />
+                    : <span className="text-[10px] font-black text-[#00DC82]">{initials}</span>}
                 </span>
                 <span className="truncate">{userName || userEmail || t.navAccount}</span>
                 <ChevronDown className={`h-4 w-4 shrink-0 text-muted transition ${accountOpen ? 'rotate-180' : ''}`} />
@@ -178,8 +183,10 @@ export default function Navbar({
               aria-expanded={accountOpen}
               aria-haspopup="menu"
             >
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[#00DC82]/30 bg-[#00DC82]/10">
-                <UserRound className="h-3.5 w-3.5 text-[#00DC82]" />
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#00DC82]/30 bg-[#00DC82]/10">
+                {userImage
+                  ? <Image src={userImage} alt="" width={24} height={24} className="h-full w-full object-cover" />
+                  : <span className="text-[9px] font-black text-[#00DC82]">{initials}</span>}
               </span>
               <span className="max-w-[8rem] truncate text-xs">{userName || userEmail || t.navAccount}</span>
               <ChevronDown className={`h-3.5 w-3.5 shrink-0 text-muted transition ${accountOpen ? 'rotate-180' : ''}`} />
