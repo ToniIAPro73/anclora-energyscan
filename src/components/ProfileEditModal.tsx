@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Pencil, Upload, X, Zap } from 'lucide-react';
 import { usePreferences } from '@/components/AppPreferencesProvider';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
 type Props = {
   currentName: string | null;
@@ -42,6 +43,7 @@ export function ProfileEditButton({ currentName, currentImage, initials, email }
 function ProfileEditModal({ currentName, currentImage, initials, email, onClose }: Props & { onClose: () => void }) {
   const { dictionary: t } = usePreferences();
   const router = useRouter();
+  const { update: updateSession } = useSession();
   const [name, setName] = useState(currentName || '');
   const [previewUrl, setPreviewUrl] = useState<string | null>(currentImage);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -93,6 +95,7 @@ function ProfileEditModal({ currentName, currentImage, initials, email, onClose 
           return;
         }
 
+        await updateSession();
         router.refresh();
         onClose();
       } catch {

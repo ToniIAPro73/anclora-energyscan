@@ -56,12 +56,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ].filter(Boolean) as any[],
   callbacks: {
-    jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user?.id) token.sub = user.id;
+      if (trigger === 'update' && token.sub) {
+        const fresh = await prisma.user.findUnique({
+          where: { id: token.sub },
+          select: { image: true, name: true },
+        });
+        if (fresh) {
+          token.picture = fresh.image ?? undefined;
+          token.name = fresh.name ?? undefined;
+        }
+      }
       return token;
     },
     session({ session, token }) {
       if (session.user && token.sub) session.user.id = token.sub;
+      if (session.user && token.picture !== undefined) session.user.image = token.picture as string | null;
       return session;
     },
   },
