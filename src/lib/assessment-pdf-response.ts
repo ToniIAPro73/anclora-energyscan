@@ -207,7 +207,7 @@ export async function buildAssessmentPdfResponse(
     } else {
       const assessment = await prisma.assessment.findUnique({
         where: { id: assessmentId },
-        include: { attachments: true, cadastralRecord: true }
+        include: { attachments: { include: { analysis: true } }, cadastralRecord: true }
       });
 
       if (!assessment) {
@@ -278,6 +278,18 @@ export async function buildAssessmentPdfResponse(
         size: att.size,
         path: att.path,
         createdAt: att.createdAt.toISOString(),
+        visionAnalysis: att.analysis?.status === 'DONE' ? {
+          imageType: att.analysis.imageType ?? 'unknown',
+          relevant: att.analysis.imageType !== 'irrelevant',
+          confidence: att.analysis.confidence ?? 'low',
+          findings: Array.isArray(att.analysis.detectedJson)
+            ? []
+            : ((att.analysis.detectedJson as Record<string, unknown> | null)?.findings as string[] | undefined) ?? [],
+          warnings: Array.isArray(att.analysis.warnings)
+            ? (att.analysis.warnings as string[])
+            : [],
+          reportSummary: att.analysis.reportSummary ?? null,
+        } : undefined,
       }));
 
       reportData = {

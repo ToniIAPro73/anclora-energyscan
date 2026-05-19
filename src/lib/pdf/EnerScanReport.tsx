@@ -1310,15 +1310,23 @@ export const EnerScanReport = ({ data }: { data: PremiumReportData }) => {
 
         <View style={styles.imageAnnexGrid}>
           {pageAttachments.map((attachment) => (
-            <View
-              key={attachment.id}
-              style={pageAttachments.length === 1 ? [styles.imageAnnexCard, styles.imageAnnexCardSingle] : styles.imageAnnexCard}
-              wrap={false}
-            >
-              <Text style={styles.imageCaption}>{attachment.caption || attachment.name}</Text>
-              {/* eslint-disable-next-line jsx-a11y/alt-text -- @react-pdf/renderer Image does not expose an alt prop in its typed API. */}
-              <Image src={attachment.previewDataUri!} style={styles.annexImage} />
-              <Text style={styles.imageMeta}>{attachment.category === 'EXTERIOR' ? t.exterior : t.interior} · {attachment.name}</Text>
+            <View key={attachment.id} wrap={false}>
+              <View
+                style={pageAttachments.length === 1 ? [styles.imageAnnexCard, styles.imageAnnexCardSingle] : styles.imageAnnexCard}
+              >
+                <Text style={styles.imageCaption}>{attachment.caption || attachment.name}</Text>
+                {/* eslint-disable-next-line jsx-a11y/alt-text -- @react-pdf/renderer Image does not expose an alt prop in its typed API. */}
+                <Image src={attachment.previewDataUri!} style={styles.annexImage} />
+                <Text style={styles.imageMeta}>{attachment.category === 'EXTERIOR' ? t.exterior : t.interior} · {attachment.name}</Text>
+              </View>
+              {attachment.visionAnalysis?.reportSummary && (
+                <View style={{ backgroundColor: '#F0F4F0', borderRadius: 4, padding: 6, marginTop: -6, marginBottom: 4 }}>
+                  <Text style={{ fontSize: 7.5, color: '#2D4A2D', lineHeight: 1.4 }}>
+                    {language === 'en' ? 'Visual analysis (indicative): ' : language === 'de' ? 'Visuelle Analyse (orientierend): ' : 'Análisis visual (orientativo): '}
+                    {attachment.visionAnalysis.reportSummary}
+                  </Text>
+                </View>
+              )}
             </View>
           ))}
         </View>

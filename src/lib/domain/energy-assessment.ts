@@ -121,6 +121,15 @@ export interface PropertyDataV2 {
   locationSource?: "catastro" | "manual" | "none";
 }
 
+export interface AttachmentVisionAnalysis {
+  imageType: string;
+  relevant: boolean;
+  confidence: string;
+  findings: string[];
+  warnings: string[];
+  reportSummary: string | null;
+}
+
 export interface AssessmentAttachment {
   id: string;
   name: string;
@@ -135,6 +144,7 @@ export interface AssessmentAttachment {
   category?: "EXTERIOR" | "INTERIOR" | "CEE";
   caption?: string;
   ceeLetter?: EnergyLetter;
+  visionAnalysis?: AttachmentVisionAnalysis;
 }
 
 export interface ScoreResultV2 {

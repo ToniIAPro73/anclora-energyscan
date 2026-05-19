@@ -28,6 +28,7 @@ import { getScenarioCostEstimate } from '@/lib/costs/cost-engine';
 import { buildEvidenceMatrix, getEvidenceFieldLabel, getEvidenceSourceLabel, getEvidenceConfidenceLabel } from '@/lib/evidence/evidence-matrix';
 import { buildConditionRiskItems } from '@/lib/condition-risk/rules';
 import { getCategoryLabel, getElementLabel, getModuleDisclaimer } from '@/lib/condition-risk/types';
+import { VisionAnalysisTrigger } from '@/components/VisionAnalysisTrigger';
 
 export const dynamic = 'force-dynamic';
 
@@ -253,6 +254,9 @@ export default async function AssessmentResultsPage({ params }: { params: { id: 
   return (
     <div className="min-h-screen app-shell">
       <Navbar />
+      {canViewPremium && photoCount > 0 && !isDemo && (
+        <VisionAnalysisTrigger assessmentId={params.id} language={language} />
+      )}
 
       <main className="pt-24 pb-16 px-4">
         <div className="max-w-6xl mx-auto space-y-12">

@@ -131,6 +131,26 @@ model AssessmentAttachment {
 
   energyCertificates EnergyCertificate[]
   rehabBudgets        RehabBudget[]
+  analysis            AttachmentAnalysis?
+}
+
+model AttachmentAnalysis {
+  id           String               @id @default(cuid())
+  attachmentId String               @unique
+  attachment   AssessmentAttachment @relation(fields: [attachmentId], references: [id], onDelete: Cascade)
+
+  model          String
+  status         String    @default("PENDING") // PENDING, PROCESSING, DONE, FAILED
+  imageType      String?
+  detectedJson   Json?
+  confidence     String?
+  reportSummary  String?
+  warnings       Json?
+  errorMessage   String?
+  analyzedAt     DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model EnergyCertificate {
