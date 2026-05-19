@@ -56,6 +56,8 @@ dev.db-journal
 # prompts (development notes)
 prompt*.md
 
-# loose screenshots / captures
-Captura*.png
+# screenshots e imágenes locales (no se versiona material binario de capturas)
+*.png
+docs/screenshots/
+docs/manual/screenshots/
 
