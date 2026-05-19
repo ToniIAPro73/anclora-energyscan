@@ -9,8 +9,8 @@
 <div class="cover-subtitle">Guía práctica para usuarios residenciales,<br>profesionales beta y proveedores</div>
 
 <div class="cover-meta">
-  <div class="cover-version">Versión 1.1</div>
-  <div class="cover-date">Mayo 2026</div>
+  <div class="cover-version">Versión 1.2</div>
+  <div class="cover-date">19 mayo 2026</div>
 </div>
 
 <div class="cover-disclaimer">EnergyScan ofrece un prediagnóstico energético orientativo. No emite Certificados de Eficiencia Energética oficiales ni sustituye la revisión de un técnico cualificado.</div>
@@ -51,9 +51,11 @@ La herramienta genera una **estimación orientativa** basada en los datos declar
 
 | Perfil | Qué permite hacer |
 | --- | --- |
-| Usuario residencial | Crear un prediagnóstico, consultar el historial, desbloquear PDF Premium y analizar presupuestos |
-| Profesional | Solicitar acceso beta y gestionar expedientes propios desde un panel profesional |
-| Proveedor | Registrar empresa, ver leads asignados, comprar créditos y desbloquear contactos con trazabilidad |
+| Usuario residencial | Crear un prediagnóstico, consultar el historial, descargar PDF básico, desbloquear PDF Premium y analizar presupuestos |
+| Profesional | Gestionar expedientes de clientes desde una cuenta profesional. Ejemplo: una inmobiliaria que prepara informes orientativos para viviendas de su cartera |
+| Proveedor | Recibir oportunidades comerciales consentidas. Ejemplo: certificadora oficial, empresa de ventanas, solar, aislamiento, climatización o reforma |
+
+Una misma organización puede usar más de un perfil. Por ejemplo, una empresa técnica puede usar el área profesional para preparar expedientes de clientes y, además, registrarse como proveedor para recibir solicitudes comerciales. EnergyScan muestra ambos perfiles como accesos independientes.
 
 ### Mejoras incluidas en esta versión
 
@@ -62,7 +64,9 @@ Esta edición del manual incorpora las superficies conectadas más recientes de 
 | Área | Mejora visible para el usuario |
 | --- | --- |
 | Dashboard residencial | KPIs, historial de análisis, estados Premium, presupuestos, accesos a proveedor/profesional y próximos pasos |
+| Resultado gratuito | PDF básico descargable de 2 páginas y bloque de viabilidad si has indicado una letra objetivo |
 | Informe Premium | Acceso al PDF desde el resultado o desde el dashboard cuando el pago está confirmado |
+| Análisis visual IA | En Premium, las fotos aportadas pueden generar una página de observaciones visuales orientativas |
 | Budget Review | Historial de presupuestos con estado, total detectado y acción para abrir o desbloquear el análisis completo |
 | Profesional beta | Solicitud de acceso, estados de revisión y panel inicial de expedientes |
 | Proveedor | Panel operativo con créditos, leads, contacto bloqueado, desbloqueo trazable y seguimiento comercial |
@@ -199,6 +203,8 @@ Cuando esté disponible, puedes buscar por dirección o referencia catastral par
 - Revisa los datos importados antes de continuar.
 - No subas documentos que no tengan relación con la vivienda.
 - Evita incluir datos personales innecesarios en fotos o presupuestos.
+- Si importas un CEE y la letra actual ya iguala o supera tu objetivo, el wizard mostrará un aviso ámbar para revisar la meta y sugerirá una letra más ambiciosa.
+- La barra de progreso de fotografías solo aparece cuando hay imágenes en la cola de subida. Si subes únicamente documentos, como CEE o presupuesto, no se muestra esa barra.
 
 ### 4.5 Resultado gratuito
 
@@ -210,12 +216,35 @@ Al terminar el wizard verás el resultado preliminar:
 - Datos capturados.
 - Penalizaciones, fortalezas y datos faltantes.
 - Vista previa de contenido Premium.
+- Descarga de PDF básico gratuito si el análisis no es demo.
+- Banner ámbar si has subido fotos y todavía no has desbloqueado Premium.
+
+![Viabilidad de objetivo de letra](screenshots/assessment-target-viability-dark.png)
+
+Si has seleccionado **Quiero alcanzar una letra concreta**, EnergyScan muestra un bloque de viabilidad antes del paywall. Puede indicar:
+
+| Escenario | Qué significa |
+| --- | --- |
+| Objetivo alcanzable con presupuesto | El coste mínimo estimado entra dentro del rango declarado |
+| Objetivo alcanzable fuera de presupuesto | La mejora es posible, pero la inversión orientativa supera el presupuesto indicado |
+| Objetivo no alcanzable | Ni una reforma integral estimada alcanzaría la letra objetivo |
+
+Los importes son orientativos y no sustituyen un presupuesto técnico real.
+
+![Banner de fotografías guardadas como evidencia](screenshots/assessment-photos-premium-banner-dark.png)
+
+Si has subido fotos, se conservan como evidencias. El análisis visual IA de esas imágenes está reservado al informe Premium.
+
+![Descarga de PDF gratuito](screenshots/assessment-free-pdf-dark.png)
+
+El PDF gratuito incluye 2 páginas con la letra estimada, zona climática, confianza y principales debilidades/fortalezas. No incluye escenarios completos, costes, ayudas, análisis visual IA ni anexo premium.
 
 Desde el resultado puedes:
 
 | Acción | Cuándo usarla |
 | --- | --- |
 | Ver resultado | Revisar el análisis básico |
+| Descargar PDF gratuito | Guardar un resumen básico de 2 páginas sin pago |
 | Desbloquear Premium | Obtener escenarios completos y PDF |
 | Analizar presupuesto | Pasar a la segunda opinión de presupuesto |
 | Solicitar proveedor | Compartir datos con proveedores seleccionados cuando exista consentimiento |
@@ -273,12 +302,14 @@ Cada presupuesto muestra:
 
 ### 5.5 Áreas conectadas
 
-El dashboard también muestra accesos a:
+El dashboard también muestra **perfiles conectados**. No son excluyentes:
 
-| Área | Qué verás |
+| Perfil | Para quién es | Qué gestiona |
 | --- | --- |
-| Proveedor | Estado de proveedor, créditos, leads y billing |
-| Profesional | Estado de solicitud beta y panel de expedientes si está aprobado |
+| Proveedor | Empresas que quieren recibir solicitudes de obra, instalación o servicio energético | Leads, créditos, desbloqueo de contacto con consentimiento y seguimiento comercial |
+| Profesional | Técnicos, asesores, inmobiliarias o equipos que preparan casos de clientes | Expedientes, análisis asociados a clientes, PDFs pagados o demo y acceso beta profesional |
+
+Una inmobiliaria que usa EnergyScan para preparar informes de viviendas de clientes encaja como **profesional**. Una empresa certificadora, de paneles solares, ventanas, climatización o aislamiento que busca solicitudes comerciales encaja como **proveedor**. Si una misma empresa necesita ambos usos, puede activar ambos accesos.
 
 ### 5.6 Vista móvil
 
@@ -304,8 +335,52 @@ El **Informe Premium PDF** es un producto de pago único para un análisis concr
 | Normativa | Contexto EPBD y riesgos orientativos |
 | Ayudas/subsidios | Referencias informativas, no garantía de concesión |
 | Anexo documental | Datos aportados y trazabilidad disponible |
+| Imágenes catastrales | Esquema de parcela resaltada y mapa cartográfico del entorno cuando hay datos catastrales |
+| Análisis visual IA | Página final con observaciones sobre hasta 3 fotografías aportadas, si están disponibles |
 
-### 6.2 Cómo desbloquearlo
+### 6.2 Comparativa Free vs Premium
+
+| Función | Gratuito | Premium |
+| --- | --- | --- |
+| Resultado orientativo en pantalla | Sí | Sí |
+| Letra estimada y confianza | Sí | Sí |
+| PDF descargable | PDF básico de 2 páginas | PDF completo profesional |
+| Escenarios de mejora | Vista previa | Detalle completo |
+| Costes orientativos | No | Sí |
+| Ayudas y normativa ampliada | No | Sí |
+| Análisis visual IA de fotos | No | Hasta 3 fotos priorizadas por relevancia energética |
+| Imágenes catastrales en PDF | No | Parcela resaltada y mapa del entorno si hay datos |
+
+### 6.3 PDF gratuito
+
+El PDF gratuito está disponible desde la página de resultado, sin pago, cuando el análisis no es demo. Sirve para guardar un resumen básico o compartir una primera lectura.
+
+Incluye:
+
+- Letra energética estimada.
+- Zona climática.
+- Nivel de confianza.
+- Principales debilidades detectadas.
+- Principales fortalezas.
+- Bloque de invitación a Premium.
+
+No incluye escenarios completos, costes orientativos, ayudas, análisis visual IA, anexo documental ni imágenes catastrales.
+
+### 6.4 Análisis visual IA de fotografías
+
+Si desbloqueas Premium y has subido fotografías, EnergyScan puede analizar automáticamente hasta 3 imágenes, priorizando fachada y carpinterías por relevancia energética.
+
+| Plan | Imágenes analizadas |
+| --- | --- |
+| Gratuito | 0. Las fotos se conservan como evidencias |
+| Premium | Hasta 3 |
+| Pro / B2B | Preparado para hasta 8, no activo para usuario final en esta versión |
+
+El análisis aparece en el PDF Premium como una página de **Análisis visual de imágenes aportadas**. Agrupa hallazgos por categoría, propone verificaciones para un técnico y muestra limitaciones. El lenguaje es prudente: usa expresiones como “se observa”, “podría corresponder a” o “parece contar con”, nunca afirmaciones concluyentes.
+
+> El análisis visual IA no constituye un certificado energético, no sustituye una visita ni una auditoría técnica y puede verse limitado por calidad, encuadre o contenido de las fotografías.
+
+### 6.5 Cómo desbloquearlo
 
 1. Completa un análisis.
 2. En el resultado o en el dashboard, pulsa **Desbloquear Premium**.
@@ -314,7 +389,7 @@ El **Informe Premium PDF** es un producto de pago único para un análisis concr
 5. Vuelve al resultado o al dashboard.
 6. Pulsa **Descargar PDF**.
 
-### 6.3 Estados de pago
+### 6.6 Estados de pago
 
 | Estado | Significado |
 | --- | --- |
@@ -601,7 +676,16 @@ No. EnergyScan solo genera prediagnósticos orientativos. El CEE oficial debe em
 No. Para vender o alquilar necesitas un CEE oficial cuando la normativa aplicable lo exija.
 
 **¿Qué diferencia hay entre resultado gratuito y Premium?**  
-El gratuito muestra una estimación básica. Premium añade escenarios, costes, contexto ampliado y PDF descargable.
+El gratuito muestra una estimación básica y permite descargar un PDF básico de 2 páginas. Premium añade PDF completo, escenarios, costes, contexto ampliado, ayudas, imágenes catastrales y análisis visual IA de fotos si las has aportado.
+
+**¿El PDF gratuito sustituye al informe Premium?**  
+No. El PDF gratuito resume la letra orientativa, confianza y principales hallazgos. No incluye escenarios completos, costes, ayudas, análisis visual IA ni anexo documental.
+
+**¿Qué hace el análisis visual IA?**  
+Revisa de forma orientativa hasta 3 fotografías aportadas en Premium. Puede señalar indicios sobre fachada, ventanas, cubierta, calefacción, aislamiento o interiores, pero no sustituye la inspección de un técnico.
+
+**¿Por qué aparece un aviso sobre mi letra objetivo?**  
+Si eliges una letra objetivo, EnergyScan puede mostrar si parece alcanzable, si exige más presupuesto del declarado o si no parece técnicamente alcanzable con las reglas actuales. Es una estimación, no un presupuesto.
 
 **¿El Budget Review está incluido en Premium?**  
 No. Es un producto independiente para analizar presupuestos de reforma.
@@ -629,12 +713,16 @@ No. Un estado verificado o preferente puede indicar revisión interna, pero no g
 | --- | --- |
 | Assessment | Análisis o prediagnóstico de una vivienda |
 | Budget Review | Segunda opinión de presupuesto |
+| PDF gratuito | Resumen básico descargable de 2 páginas sin pago |
 | Premium | Informe pagado con PDF y contenido ampliado |
+| Análisis visual IA | Observaciones orientativas sobre fotos aportadas, disponibles en Premium |
 | Lead | Solicitud de contacto asignada a proveedor |
 | Crédito | Unidad que permite desbloquear un contacto |
 | Ledger | Registro trazable de compra o consumo de créditos |
 | Profesional beta | Acceso anticipado para técnicos y empresas |
 | CEE | Certificado de Eficiencia Energética oficial |
+| Perfil profesional | Uso B2B para gestionar expedientes o informes de clientes |
+| Perfil proveedor | Uso B2B para recibir leads consentidos y gestionarlos comercialmente |
 
 ---
 
@@ -658,6 +746,7 @@ Anclora EnergyScan proporciona estimaciones orientativas basadas en datos declar
 - No sustituye el Certificado de Eficiencia Energética oficial.
 - No tiene validez administrativa.
 - No garantiza ahorros, costes, subvenciones ni mejoras de letra.
+- El análisis visual IA usa lenguaje orientativo y depende de la calidad de las imágenes.
 - Los presupuestos deben revisarse con técnicos o contratistas cualificados.
 - Las ayudas públicas deben comprobarse siempre en fuentes oficiales vigentes.
 - Los datos personales de leads deben tratarse conforme a RGPD y consentimiento.
@@ -665,6 +754,6 @@ Anclora EnergyScan proporciona estimaciones orientativas basadas en datos declar
 <div class="footer-brand">
 
 *Anclora EnergyScan · Anclora Group*  
-*Manual de usuario v1.1 — mayo 2026*
+*Manual de usuario v1.2 — 19 mayo 2026*
 
 </div>
