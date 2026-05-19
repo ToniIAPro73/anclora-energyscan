@@ -6,12 +6,14 @@
       "Bash(mkdir -p /home/toni/.claude/projects/-home-toni-projects-anclora-energyscan/memory && echo \"dir ok\")",
       "Bash(mkdir -p src/app/api/admin/providers/\\\\[id\\\\]/status)",
       "Bash(grep -v \"^$\")",
-      "Bash(mkdir -p src/app/api/admin/knowledge/\\\\[id\\\\] src/lib/knowledge src/components/admin src/app/admin/knowledge)"
+      "Bash(mkdir -p src/app/api/admin/knowledge/\\\\[id\\\\] src/lib/knowledge src/components/admin src/app/admin/knowledge)",
+      "Bash(mkdir -p /home/toni/projects/anclora-energyscan/src/app/api/assessment/\\\\[id\\\\]/pdf/basic)"
     ],
     "additionalDirectories": [
       "/home/toni/.claude/projects/-home-toni-projects-anclora-energyscan/memory",
       "/home/toni/projects/anclora-energyscan/src/app/api/admin/providers/[id]",
-      "/home/toni/projects/anclora-energyscan/src/app/api/admin/knowledge"
+      "/home/toni/projects/anclora-energyscan/src/app/api/admin/knowledge",
+      "/home/toni/projects/anclora-energyscan/src/app/api/assessment/[id]/pdf"
     ]
   }
 }
