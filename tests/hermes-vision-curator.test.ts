@@ -180,6 +180,22 @@ describe('curateVisionFindingsForReport', () => {
     expect(allText).not.toMatch(/definitivamente/i);
   });
 
+  it('sanitizeFinding replaces concluyente phrases with hedged equivalents', () => {
+    const { sanitizeFinding } = require('@/lib/agents/hermes-vision-curator/safety');
+    expect(sanitizeFinding('La cubierta consta de tejas cerámicas.')).toMatch(/parece estar resuelta con/i);
+    expect(sanitizeFinding('La ventana es de doble acristalamiento.')).toMatch(/podría corresponder a/i);
+    expect(sanitizeFinding('Lo cual es beneficioso para la eficiencia.')).toMatch(/puede ser relevante/i);
+    expect(sanitizeFinding('El sistema está equipado con radiadores.')).toMatch(/podría estar equipad/i);
+    expect(sanitizeFinding('The roof consists of ceramic tiles.')).toMatch(/appears to feature/i);
+    expect(sanitizeFinding('The window is double-glazed.')).toMatch(/may correspond to/i);
+  });
+
+  it('sanitizeFinding still discards fully forbidden findings after hedging', () => {
+    const { sanitizeFinding } = require('@/lib/agents/hermes-vision-curator/safety');
+    expect(sanitizeFinding('Ahorrará 500 € al año.')).toBe('');
+    expect(sanitizeFinding('Definitivamente no tiene aislamiento.')).toBe('');
+  });
+
   it('respects locale (en)', () => {
     const result = curateVisionFindingsForReport({
       assessmentId: 'test',
