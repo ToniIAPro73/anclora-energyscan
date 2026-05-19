@@ -540,7 +540,6 @@ export default function AssessmentWizard() {
     if (certificate.yearBuilt) setValue('year', certificate.yearBuilt);
     if (certificate.usefulAreaM2 || certificate.builtAreaM2) setValue('area', Math.round(certificate.usefulAreaM2 || certificate.builtAreaM2 || 0));
     if (certificate.postalCode) setValue('zipcode', certificate.postalCode);
-    if (certificate.globalLetter) setValue('targetLetter', certificate.globalLetter);
     setAreaNotice(Boolean(certificate.builtAreaM2 && !certificate.usefulAreaM2));
     setCeeAppliedNotice(true);
   };
