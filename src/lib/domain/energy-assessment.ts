@@ -257,4 +257,6 @@ export interface PremiumReportData {
   utilityBills?: UtilityBillData[];
   // Catastro images fetched on-demand for PDF (not stored in DB)
   catastroImages?: { facadeDataUri?: string; schemeDataUri?: string; mapDataUri?: string };
+  // Hermes Vision Curator output (curated from AttachmentAnalysis, generated at PDF time)
+  hermesVision?: import('@/lib/agents/hermes-vision-curator').HermesVisionCuratorResult;
 }

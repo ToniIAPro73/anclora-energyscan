@@ -1337,6 +1337,64 @@ export const EnerScanReport = ({ data }: { data: PremiumReportData }) => {
       </Page>
     ))}
 
+    {/* Hermes Vision Curator — curated visual analysis section (premium only) */}
+    {data.hermesVision && data.hermesVision.groupedFindings.length > 0 && (
+      <Page size="A4" style={styles.page}>
+        <View style={styles.header}>
+          <View style={styles.brandHeader}>
+            {data.logoDataUri && (
+              // eslint-disable-next-line jsx-a11y/alt-text -- @react-pdf/renderer Image does not expose an alt prop in its typed API.
+              <Image src={data.logoDataUri} style={styles.logo} />
+            )}
+            <View style={styles.headerText}>
+              <Text style={styles.title}>
+                {language === 'en' ? 'Visual Analysis of Submitted Images' : language === 'de' ? 'Visuelle Analyse der eingereichten Bilder' : 'Análisis visual de imágenes aportadas'}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.text}>{data.hermesVision.summaryForPdf}</Text>
+        </View>
+
+        {data.hermesVision.groupedFindings.map((group) => (
+          <View key={group.category} style={styles.section} wrap={false}>
+            <Text style={{ ...styles.sectionTitle, fontSize: 11 }}>{group.title}</Text>
+            {group.findings.map((finding, i) => (
+              <Text key={i} style={{ ...styles.text, marginLeft: 10, marginTop: 3 }}>{'• '}{finding}</Text>
+            ))}
+          </View>
+        ))}
+
+        {data.hermesVision.recommendedChecks.length > 0 && (
+          <View style={styles.section} wrap={false}>
+            <Text style={{ ...styles.sectionTitle, fontSize: 11 }}>
+              {language === 'en' ? 'Recommended checks' : language === 'de' ? 'Empfohlene Prüfungen' : 'Verificaciones recomendadas'}
+            </Text>
+            {data.hermesVision.recommendedChecks.map((check, i) => (
+              <Text key={i} style={{ ...styles.text, marginLeft: 10, marginTop: 3 }}>{'• '}{check}</Text>
+            ))}
+          </View>
+        )}
+
+        {data.hermesVision.limitations.length > 0 && (
+          <View style={styles.section} wrap={false}>
+            <Text style={{ ...styles.sectionTitle, fontSize: 11 }}>
+              {language === 'en' ? 'Limitations' : language === 'de' ? 'Einschränkungen' : 'Limitaciones'}
+            </Text>
+            {data.hermesVision.limitations.map((lim, i) => (
+              <Text key={i} style={{ ...styles.text, marginLeft: 10, marginTop: 3 }}>{'• '}{lim}</Text>
+            ))}
+          </View>
+        )}
+
+        <View style={styles.disclaimer}>
+          <Text>{data.hermesVision.safePdfDisclaimer}</Text>
+        </View>
+      </Page>
+    )}
+
     {otherAttachments.map((attachment, index) => (
       <Page key={attachment.id} size="A4" style={styles.page}>
         <View style={styles.header}>

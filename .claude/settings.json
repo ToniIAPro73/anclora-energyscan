@@ -11,13 +11,17 @@
       "mcp__claude_ai_Vercel__list_teams",
       "mcp__claude_ai_Vercel__list_projects",
       "mcp__claude_ai_Vercel__list_deployments",
-      "mcp__claude_ai_Vercel__get_deployment_build_logs"
+      "mcp__claude_ai_Vercel__get_deployment_build_logs",
+      "Bash(env)",
+      "Bash(printenv)",
+      "Bash(mkdir -p /home/toni/projects/anclora-energyscan/src/app/api/assessment/\\\\[id\\\\]/vision/analyze)"
     ],
     "additionalDirectories": [
       "/home/toni/.claude/projects/-home-toni-projects-anclora-energyscan/memory",
       "/home/toni/projects/anclora-energyscan/src/app/api/admin/providers/[id]",
       "/home/toni/projects/anclora-energyscan/src/app/api/admin/knowledge",
-      "/home/toni/projects/anclora-energyscan/src/app/api/assessment/[id]/pdf"
+      "/home/toni/projects/anclora-energyscan/src/app/api/assessment/[id]/pdf",
+      "/home/toni/projects/anclora-energyscan/src/app/api/assessment/[id]/vision"
     ]
   }
 }

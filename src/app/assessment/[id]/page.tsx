@@ -628,6 +628,24 @@ export default async function AssessmentResultsPage({ params }: { params: { id: 
             </section>
           )}
 
+          {!canViewPremium && photoCount > 0 && (
+            <div className="flex items-start gap-3 rounded-2xl border border-[#FFB020]/30 bg-[#FFB020]/5 px-5 py-4">
+              <FileText className="mt-0.5 h-5 w-5 shrink-0 text-[#FFB020]" />
+              <div>
+                <p className="font-heading font-bold text-sm text-[#FFB020]">
+                  {language === 'en' ? 'Your images are saved as evidence' : language === 'de' ? 'Ihre Bilder sind als Belege gespeichert' : 'Tus imágenes se conservan como evidencias'}
+                </p>
+                <p className="mt-0.5 text-xs text-muted">
+                  {language === 'en'
+                    ? 'AI visual analysis of your submitted photos is included in the Premium report. Unlock it to receive indicative observations about the building envelope, windows, heating and more.'
+                    : language === 'de'
+                    ? 'Die KI-Bildanalyse Ihrer Fotos ist im Premium-Bericht enthalten. Schalten Sie ihn frei, um orientierende Beobachtungen zu Gebäudehülle, Fenstern, Heizung und mehr zu erhalten.'
+                    : 'El análisis visual IA de tus fotografías está incluido en el informe Premium. Desbloquéalo para recibir observaciones orientativas sobre la envolvente, carpinterías, calefacción y más.'}
+                </p>
+              </div>
+            </div>
+          )}
+
           {!canViewPremium && <PaywallSection assessmentId={params.id} />}
 
           {/* EVIDENCE MATRIX */}
@@ -857,6 +875,15 @@ export default async function AssessmentResultsPage({ params }: { params: { id: 
               <span className="rounded-full bg-white/5 px-2 py-1 text-muted">{t.interior}: {interiorCount}</span>
               <span className="rounded-full bg-white/5 px-2 py-1 text-muted">CEE: {ceeCount}</span>
             </div>
+            {photoCount > 0 && (
+              <p className="mb-4 text-[11px] text-[#00DC82]/80 leading-relaxed">
+                {language === 'en'
+                  ? `We will analyse up to ${Number(process.env.VISION_MAX_IMAGES_PREMIUM) || 3} relevant images to enrich your Premium report with indicative visual observations.`
+                  : language === 'de'
+                  ? `Wir analysieren bis zu ${Number(process.env.VISION_MAX_IMAGES_PREMIUM) || 3} relevante Bilder, um Ihren Premium-Bericht mit orientierenden visuellen Beobachtungen anzureichern.`
+                  : `Analizaremos hasta ${Number(process.env.VISION_MAX_IMAGES_PREMIUM) || 3} imágenes relevantes para enriquecer tu informe Premium con observaciones visuales orientativas.`}
+              </p>
+            )}
             <AttachmentList assessmentId={params.id} initialAttachments={attachments} />
           </section>}
 

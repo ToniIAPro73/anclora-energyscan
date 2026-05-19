@@ -22,6 +22,10 @@ import { buildEvidenceMatrix } from '@/lib/evidence/evidence-matrix';
 import { buildConditionRiskItems } from '@/lib/condition-risk/rules';
 import { fetchCatastroImages } from '@/lib/catastro/images';
 import type { UtilityBillData } from '@/lib/domain/energy-assessment';
+import { getVisionAnalysisConfig } from '@/lib/vision/vision-config';
+import { resolveVisionEntitlement } from '@/lib/vision/vision-entitlements';
+import { curateVisionFindingsForReport } from '@/lib/agents/hermes-vision-curator';
+import type { VisionAnalysisResult } from '@/lib/vision/types';
 
 let cachedLogoDataUri: string | undefined;
 
@@ -389,6 +393,71 @@ export async function buildAssessmentPdfResponse(
 
     reportData.attachments = await enrichAttachmentsForPdf(reportData.attachments || []);
     reportData.logoDataUri = await getReportLogoDataUri();
+
+    // Hermes Vision Curator — enrich PDF with curated visual analysis (premium only, non-blocking)
+    if (!statelessPayload) {
+      try {
+        const visionConfig = getVisionAnalysisConfig();
+        // Use the assessment object we already loaded (block-scoped above, hoist reference here)
+        const assessment = await prisma.assessment.findUnique({
+          where: { id: reportData.id },
+          select: { paidAt: true, isPremium: true, isDemo: true },
+        });
+        const visionEntitlement = resolveVisionEntitlement({ assessment: assessment ?? {}, config: visionConfig });
+
+        if (visionEntitlement.allowed) {
+          const completedAnalyses = await prisma.attachmentAnalysis.findMany({
+            where: { attachment: { assessmentId: reportData.id }, status: 'DONE' },
+          });
+
+          if (completedAnalyses.length > 0) {
+            const analysisInputs: VisionAnalysisResult[] = completedAnalyses.map((a) => ({
+              imageType: (a.imageType ?? 'unknown') as VisionAnalysisResult['imageType'],
+              relevant: a.imageType !== 'irrelevant',
+              confidence: (a.confidence ?? 'low') as VisionAnalysisResult['confidence'],
+              findings: Array.isArray(
+                (a.detectedJson as Record<string, unknown> | null)?.findings,
+              )
+                ? ((a.detectedJson as Record<string, unknown>).findings as string[])
+                : [],
+              warnings: Array.isArray(a.warnings) ? (a.warnings as string[]) : [],
+              reportSummary: a.reportSummary ?? null,
+              model: a.model,
+            }));
+
+            trackEvent('hermes_vision_curator_started', {
+              assessmentId: reportData.id,
+              entitlementLevel: visionEntitlement.level,
+              inputAnalyses: analysisInputs.length,
+            });
+
+            const curated = curateVisionFindingsForReport({
+              assessmentId: reportData.id,
+              locale: (reportData.language ?? 'es') as 'es' | 'en' | 'de',
+              entitlementLevel: visionEntitlement.level,
+              imageAnalyses: analysisInputs,
+            });
+
+            if (curated) {
+              reportData.hermesVision = curated;
+              trackEvent('hermes_vision_curator_completed', {
+                assessmentId: reportData.id,
+                entitlementLevel: visionEntitlement.level,
+                inputAnalyses: analysisInputs.length,
+                groupedFindings: curated.groupedFindings.length,
+                llmCurationEnabled: false,
+              });
+            } else {
+              trackEvent('hermes_vision_curator_skipped', { assessmentId: reportData.id });
+            }
+          }
+        }
+      } catch (hermesErr) {
+        // Hermes failure must never block PDF generation
+        console.warn('[pdf] hermes-vision-curator failed:', hermesErr instanceof Error ? hermesErr.message : hermesErr);
+        trackEvent('hermes_vision_curator_failed', { assessmentId: reportData.id });
+      }
+    }
 
     // Derive Evidence Matrix and Condition & Risk items for PDF Premium
     const attachmentList = reportData.attachments || [];

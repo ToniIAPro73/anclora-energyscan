@@ -23,7 +23,17 @@ export type AnalyticsEvent =
   | 'seo_cta_clicked'
   | 'calculator_used'
   | 'evidence_matrix_viewed'
-  | 'condition_risk_viewed';
+  | 'condition_risk_viewed'
+  | 'vision_analysis_blocked'
+  | 'vision_analysis_allowed'
+  | 'vision_analysis_started'
+  | 'vision_analysis_completed'
+  | 'vision_analysis_failed'
+  | 'vision_analysis_skipped'
+  | 'hermes_vision_curator_started'
+  | 'hermes_vision_curator_completed'
+  | 'hermes_vision_curator_skipped'
+  | 'hermes_vision_curator_failed';
 
 const SENSITIVE_KEYS = [
   'email',
