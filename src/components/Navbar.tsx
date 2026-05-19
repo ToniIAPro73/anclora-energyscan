@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { BriefcaseBusiness, ChevronDown, FileText, LayoutDashboard, ReceiptText, UserRound } from 'lucide-react';
+import { BriefcaseBusiness, ChevronDown, FileText, LayoutDashboard, LogOut, ReceiptText, Settings, UserRound } from 'lucide-react';
+import { signOut as clientSignOut } from 'next-auth/react';
 import { useState } from 'react';
 import { PreferenceToggles } from './PreferenceToggles';
 import { usePreferences } from './AppPreferencesProvider';
@@ -12,6 +13,7 @@ type NavbarMode = 'public' | 'app';
 type NavbarProps = {
   mode?: NavbarMode;
   userEmail?: string | null;
+  userName?: string | null;
   providerHref?: string;
   professionalHref?: string;
 };
@@ -19,11 +21,13 @@ type NavbarProps = {
 export default function Navbar({
   mode = 'public',
   userEmail,
+  userName,
   providerHref = '/provider/register',
   professionalHref = '/profesional',
 }: NavbarProps) {
   const { dictionary: t } = usePreferences();
   const [productOpen, setProductOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
   const isAppMode = mode === 'app';
   const productLinks = isAppMode
     ? [
@@ -101,10 +105,58 @@ export default function Navbar({
             <PreferenceToggles compact variant="popover" />
           </div>
           {isAppMode ? (
-            <Link href="/dashboard" className="hidden max-w-[13rem] items-center gap-2 rounded-full border border-white/10 px-4 py-2 text-sm font-heading font-semibold text-premium transition hover:border-[#00DC82]/40 lg:inline-flex">
-              <UserRound className="h-4 w-4 text-[#00DC82]" />
-              <span className="truncate">{userEmail || t.navAccount}</span>
-            </Link>
+            <div className="relative hidden lg:block">
+              <button
+                type="button"
+                onClick={() => setAccountOpen((value) => !value)}
+                className="inline-flex max-w-[15rem] items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-2 text-sm font-heading font-semibold text-premium transition hover:border-[#00DC82]/40"
+                aria-expanded={accountOpen}
+                aria-haspopup="menu"
+              >
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[#00DC82]/30 bg-[#00DC82]/10">
+                  <UserRound className="h-4 w-4 text-[#00DC82]" />
+                </span>
+                <span className="truncate">{userName || userEmail || t.navAccount}</span>
+                <ChevronDown className={`h-4 w-4 shrink-0 text-muted transition ${accountOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {accountOpen && (
+                <div className="surface absolute right-0 top-[calc(100%+0.85rem)] z-[8600] w-72 overflow-hidden rounded-3xl border shadow-2xl shadow-black/40">
+                  <div className="border-b border-white/10 p-5">
+                    <p className="text-xs font-heading font-bold uppercase tracking-wider text-[#00DC82]">EnergyScan</p>
+                    <p className="mt-1 truncate font-heading text-lg font-bold text-premium">{userName || t.navAccount}</p>
+                    {userEmail && <p className="truncate text-sm font-semibold text-muted">{userEmail}</p>}
+                  </div>
+                  <div className="p-2">
+                    <Link
+                      href="/profile"
+                      onClick={() => setAccountOpen(false)}
+                      className="flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-heading font-semibold text-muted transition hover:bg-white/5 hover:text-premium"
+                    >
+                      <UserRound className="h-4 w-4 text-[#00DC82]" />
+                      {t.navProfile}
+                    </Link>
+                    <Link
+                      href="/settings"
+                      onClick={() => setAccountOpen(false)}
+                      className="flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-heading font-semibold text-muted transition hover:bg-white/5 hover:text-premium"
+                    >
+                      <Settings className="h-4 w-4 text-[#00DC82]" />
+                      {t.navSettings}
+                    </Link>
+                  </div>
+                  <div className="border-t border-white/10 p-2">
+                    <button
+                      type="button"
+                      onClick={() => clientSignOut({ callbackUrl: '/' })}
+                      className="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left text-sm font-heading font-semibold text-premium transition hover:bg-white/5"
+                    >
+                      <LogOut className="h-4 w-4 text-muted" />
+                      {t.navSignOut}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           ) : (
             <Link href="/auth" className="hidden rounded-full border border-white/10 px-4 py-2 text-sm font-heading font-semibold text-premium transition hover:border-[#00DC82]/40 lg:inline-flex">
               {t.access}
@@ -115,8 +167,62 @@ export default function Navbar({
           </Link>
         </div>
       </nav>
-      <div className="flex justify-center border-t border-white/5 px-3 py-2 md:hidden">
+      <div className="flex items-center justify-between border-t border-white/5 px-3 py-2 md:hidden">
         <PreferenceToggles compact variant="popover" />
+        {isAppMode && (
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setAccountOpen((v) => !v)}
+              className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-sm font-heading font-semibold text-premium"
+              aria-expanded={accountOpen}
+              aria-haspopup="menu"
+            >
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[#00DC82]/30 bg-[#00DC82]/10">
+                <UserRound className="h-3.5 w-3.5 text-[#00DC82]" />
+              </span>
+              <span className="max-w-[8rem] truncate text-xs">{userName || userEmail || t.navAccount}</span>
+              <ChevronDown className={`h-3.5 w-3.5 shrink-0 text-muted transition ${accountOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {accountOpen && (
+              <div className="surface absolute bottom-[calc(100%+0.5rem)] right-0 z-[8600] w-64 overflow-hidden rounded-3xl border shadow-2xl shadow-black/40">
+                <div className="border-b border-white/10 p-4">
+                  <p className="text-xs font-heading font-bold uppercase tracking-wider text-[#00DC82]">EnergyScan</p>
+                  <p className="mt-1 truncate font-heading text-base font-bold text-premium">{userName || t.navAccount}</p>
+                  {userEmail && <p className="truncate text-xs font-semibold text-muted">{userEmail}</p>}
+                </div>
+                <div className="p-2">
+                  <Link
+                    href="/profile"
+                    onClick={() => setAccountOpen(false)}
+                    className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-heading font-semibold text-muted transition hover:bg-white/5 hover:text-premium"
+                  >
+                    <UserRound className="h-4 w-4 text-[#00DC82]" />
+                    {t.navProfile}
+                  </Link>
+                  <Link
+                    href="/settings"
+                    onClick={() => setAccountOpen(false)}
+                    className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-heading font-semibold text-muted transition hover:bg-white/5 hover:text-premium"
+                  >
+                    <Settings className="h-4 w-4 text-[#00DC82]" />
+                    {t.navSettings}
+                  </Link>
+                </div>
+                <div className="border-t border-white/10 p-2">
+                  <button
+                    type="button"
+                    onClick={() => clientSignOut({ callbackUrl: '/' })}
+                    className="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm font-heading font-semibold text-premium transition hover:bg-white/5"
+                  >
+                    <LogOut className="h-4 w-4 text-muted" />
+                    {t.navSignOut}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </header>
   );
