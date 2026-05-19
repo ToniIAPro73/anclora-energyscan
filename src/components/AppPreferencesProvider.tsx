@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   AppCurrency,
   AppLanguage,
@@ -73,6 +74,7 @@ function readStoredPreferences(): AppPreferences {
 
 export function AppPreferencesProvider({ children }: { children: React.ReactNode }) {
   const [preferences, setPreferencesState] = useState<AppPreferences>(DEFAULT_PREFERENCES);
+  const router = useRouter();
 
   useEffect(() => {
     const stored = readStoredPreferences();
@@ -117,6 +119,7 @@ export function AppPreferencesProvider({ children }: { children: React.ReactNode
       setLanguage(nextLanguage) {
         const language = normalizeLanguage(nextLanguage);
         updatePreferences({ language, ...getPreferencesForLanguage(language) });
+        router.refresh();
       },
       setCurrency(nextCurrency) {
         updatePreferences({ currency: normalizeCurrency(nextCurrency) });
