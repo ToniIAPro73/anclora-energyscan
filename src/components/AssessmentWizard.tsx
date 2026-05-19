@@ -1666,7 +1666,7 @@ export default function AssessmentWizard() {
                 <span className="text-xs text-muted">{t.attachmentsLimit}</span>
               </button>
               {fileError && <p className="mt-3 text-xs text-[#EF4444]">{fileError}</p>}
-              {uploadProgress !== null && (
+              {uploadProgress !== null && files.length > 0 && (
                 <div className="mt-3 space-y-1">
                   <div className="h-2 overflow-hidden rounded-full bg-white/10">
                     <div className="h-full rounded-full bg-[#00DC82]" style={{ width: `${uploadProgress}%` }} />
