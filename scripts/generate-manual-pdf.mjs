@@ -193,14 +193,16 @@ function injectCoverVisual(coverHtml) {
     ['G', '#d94b52', '56%'],
   ].map(([letter, color, width]) => `<div class="rating-row"><span style="width:${width}; background:${color};">${letter}</span></div>`).join('');
 
-  return coverHtml.replace(/\n<\/div>\s*$/, `
+  const ratingWidget = `
 <div class="cover-rating" aria-hidden="true">
   <div class="rating-card">
     <div class="rating-head">Energy class</div>
     ${bars}
   </div>
-</div>
-</div>`);
+</div>`;
+
+  // Inject centered below the meta pills, before the disclaimer
+  return coverHtml.replace('<div class="cover-disclaimer">', `${ratingWidget}\n<div class="cover-disclaimer">`);
 }
 
 function markdownToHtml(markdown) {
@@ -228,14 +230,37 @@ function markdownToHtml(markdown) {
 
     const image = trimmed.match(/^!\[(.*?)\]\((.*?)\)$/);
     if (image) {
-      html += `<figure><img src="${escapeAttribute(image[2])}" alt="${escapeAttribute(image[1])}" /><figcaption>${escapeHtml(image[1])}</figcaption></figure>`;
+      const src = image[2];
+      const alt = image[1];
+      const isDark = /dark/i.test(src) || /dark/i.test(alt);
+      const isLight = /light/i.test(src) || /light/i.test(alt);
+      const isMobile = /mobile/i.test(src) || /mobile/i.test(alt);
+      const cls = [isDark ? 'img-dark' : isLight ? 'img-light' : '', isMobile ? 'img-mobile' : ''].filter(Boolean).join(' ');
+      html += `<figure${cls ? ` class="${cls}"` : ''}><img src="${escapeAttribute(src)}" alt="${escapeAttribute(alt)}" /><figcaption>${escapeHtml(alt)}</figcaption></figure>`;
       i += 1;
       continue;
     }
 
     if (/^###\s+/.test(trimmed)) {
-      html += `<h3>${inline(trimmed.replace(/^###\s+/, ''))}</h3>`;
+      const h3Html = `<h3>${inline(trimmed.replace(/^###\s+/, ''))}</h3>`;
       i += 1;
+      // Look ahead: if next non-blank line is an image, keep them on the same page
+      let j = i;
+      while (j < lines.length && !lines[j].trim()) j++;
+      const nextTrimmed = lines[j]?.trim() ?? '';
+      const nextImage = nextTrimmed.match(/^!\[(.*?)\]\((.*?)\)$/);
+      if (nextImage) {
+        const src = nextImage[2];
+        const alt = nextImage[1];
+        const isDark = /dark/i.test(src) || /dark/i.test(alt);
+        const isLight = /light/i.test(src) || /light/i.test(alt);
+        const isMobile = /mobile/i.test(src) || /mobile/i.test(alt);
+        const cls = [isDark ? 'img-dark' : isLight ? 'img-light' : '', isMobile ? 'img-mobile' : ''].filter(Boolean).join(' ');
+        html += `<div class="heading-figure">${h3Html}<figure${cls ? ` class="${cls}"` : ''}><img src="${escapeAttribute(src)}" alt="${escapeAttribute(alt)}" /><figcaption>${escapeHtml(alt)}</figcaption></figure></div>`;
+        i = j + 1;
+      } else {
+        html += h3Html;
+      }
       continue;
     }
 
@@ -344,144 +369,178 @@ body {
   line-height: 1.48;
 }
 a { color: inherit; text-decoration: none; }
+
+/* ─── PORTADA ─────────────────────────────────────────────────────────────── */
 .cover-page {
   page: cover;
-  min-height: 297mm;
+  width: 210mm;
+  height: 297mm;
   margin: 0;
-  padding: 33mm 30mm 26mm;
+  padding: 28mm 30mm 26mm;
   color: #f7f2e7;
   background:
-    repeating-linear-gradient(112deg, rgba(216, 184, 107, 0.045) 0, rgba(216, 184, 107, 0.045) 1px, transparent 1px, transparent 13px),
-    repeating-linear-gradient(22deg, rgba(255, 255, 255, 0.025) 0, rgba(255, 255, 255, 0.025) 1px, transparent 1px, transparent 19px),
-    linear-gradient(145deg, #03111d 0%, #082234 48%, #102f31 100%);
+    radial-gradient(ellipse 90% 60% at 50% 36%, rgba(8, 52, 84, 0.60) 0%, transparent 68%),
+    repeating-linear-gradient(112deg, rgba(216, 184, 107, 0.058) 0, rgba(216, 184, 107, 0.058) 1px, transparent 1px, transparent 13px),
+    repeating-linear-gradient(22deg, rgba(255, 255, 255, 0.028) 0, rgba(255, 255, 255, 0.028) 1px, transparent 1px, transparent 19px),
+    linear-gradient(148deg, #020e18 0%, #07202f 45%, #0d2c2e 100%);
   page-break-after: always;
   position: relative;
   overflow: hidden;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
+/* Marco dorado interior */
 .cover-page::before {
   content: "";
   position: absolute;
-  inset: 18mm 18mm;
-  border: 1px solid rgba(212, 178, 95, 0.55);
+  inset: 14mm 14mm;
+  border: 1px solid rgba(212, 178, 95, 0.62);
+  border-radius: 1.5mm;
+  pointer-events: none;
+  z-index: 1;
 }
+/* Círculo decorativo inferior-derecho */
 .cover-page::after {
   content: "";
   position: absolute;
-  right: -25mm;
-  bottom: -30mm;
-  width: 110mm;
-  height: 110mm;
-  border: 1px solid rgba(0, 220, 130, 0.22);
-  transform: rotate(18deg);
-}
-.cover-rating {
-  position: absolute;
+  right: -22mm;
+  bottom: -28mm;
+  width: 115mm;
+  height: 115mm;
+  border: 1px solid rgba(0, 220, 130, 0.20);
+  border-radius: 50%;
   z-index: 0;
-  right: -6mm;
-  top: 82mm;
-  width: 82mm;
-  padding: 8mm;
-  border-radius: 7mm;
-  background: rgba(5, 16, 25, 0.42);
-  border: 1px solid rgba(216, 184, 107, 0.2);
-  box-shadow: 0 20mm 45mm rgba(0, 0, 0, 0.4);
-  transform: rotate(-6deg);
-  opacity: 0.38;
-  filter: blur(0.45px);
 }
-.rating-card {
-  width: 100%;
-}
-.rating-head {
-  margin: 0 0 4mm;
-  color: rgba(244, 232, 200, 0.82);
-  font-size: 7pt;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-.rating-row {
-  height: 7.2mm;
-  margin: 1.5mm 0;
-}
-.rating-row span {
-  display: block;
-  height: 100%;
-  padding-right: 3mm;
-  color: rgba(255, 255, 255, 0.9);
-  border-radius: 0 999px 999px 0;
-  font-size: 8pt;
-  font-weight: 900;
-  line-height: 7.2mm;
-  text-align: right;
-  box-shadow: 0 1mm 3mm rgba(0, 0, 0, 0.24);
-}
+
+/* Contenido en flujo — posición relativa para z-index */
 .cover-logo,
 .cover-brand,
 .cover-title,
 .cover-subtitle,
 .cover-meta,
+.cover-rating,
 .cover-disclaimer {
   position: relative;
   z-index: 2;
 }
-.cover-logo img {
-  width: 46mm;
-  height: auto;
-  margin-bottom: 24mm;
-  filter: drop-shadow(0 6mm 12mm rgba(0, 0, 0, 0.34));
-}
+
 .cover-logo {
   display: flex;
   justify-content: center;
 }
+.cover-logo img {
+  width: 50mm;
+  height: auto;
+  margin-bottom: 12mm;
+  filter:
+    drop-shadow(0 4mm 14mm rgba(0, 210, 130, 0.32))
+    drop-shadow(0 6mm 14mm rgba(0, 0, 0, 0.50));
+}
+
 .cover-brand {
   color: #d8b86b;
   font-size: 12.5pt;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
 }
-.cover-title {
-  margin: 8mm auto 0;
-  max-width: 142mm;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 45pt;
-  line-height: 0.98;
-  font-weight: 600;
+/* Línea dorada bajo el nombre de marca */
+.cover-brand::after {
+  content: "";
+  display: block;
+  width: 42mm;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(216, 184, 107, 0.70), transparent);
+  margin: 4.5mm auto 0;
 }
+
+.cover-title {
+  margin: 4mm auto 0;
+  max-width: 148mm;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 46pt;
+  line-height: 0.97;
+  font-weight: 600;
+  text-shadow: 0 3mm 10mm rgba(0, 0, 0, 0.35);
+}
+
 .cover-subtitle {
-  margin: 11mm auto 0;
+  margin: 7mm auto 0;
   max-width: 128mm;
-  color: #d8e3e7;
-  font-size: 16pt;
+  color: rgba(220, 235, 240, 0.84);
+  font-size: 15pt;
   line-height: 1.32;
 }
+
 .cover-meta {
   display: flex;
   justify-content: center;
   gap: 7mm;
-  margin-top: 29mm;
+  margin-top: 14mm;
   color: #071726;
   font-size: 9.5pt;
   font-weight: 700;
 }
 .cover-meta div {
   min-width: 43mm;
-  padding: 3.2mm 6mm;
-  background: #d8b86b;
+  padding: 3mm 6mm;
+  background: linear-gradient(135deg, #e0c472, #c7a451);
   border-radius: 999px;
+  box-shadow: 0 2mm 8mm rgba(0, 0, 0, 0.32);
+  letter-spacing: 0.03em;
 }
+
+/* Clasificación energética — centrada bajo los bocadillos */
+.cover-rating {
+  margin: 9mm auto 0;
+  width: 66mm;
+  padding: 5mm 7mm;
+  border-radius: 4mm;
+  background: rgba(4, 13, 22, 0.62);
+  border: 1px solid rgba(216, 184, 107, 0.28);
+  box-shadow: 0 6mm 22mm rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  opacity: 0.84;
+}
+.rating-card { width: 100%; }
+.rating-head {
+  margin: 0 0 3mm;
+  color: rgba(244, 232, 200, 0.84);
+  font-size: 7pt;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.rating-row {
+  height: 5.5mm;
+  margin: 1mm 0;
+}
+.rating-row span {
+  display: block;
+  height: 100%;
+  padding-right: 3mm;
+  color: rgba(255, 255, 255, 0.92);
+  border-radius: 0 999px 999px 0;
+  font-size: 7pt;
+  font-weight: 900;
+  line-height: 5.5mm;
+  text-align: right;
+  box-shadow: 0 1mm 3mm rgba(0, 0, 0, 0.24);
+}
+
 .cover-disclaimer {
   position: absolute;
-  left: 30mm;
-  right: 30mm;
-  bottom: 28mm;
-  color: #bfccd1;
-  font-size: 9pt;
+  left: 28mm;
+  right: 28mm;
+  bottom: 26mm;
+  color: rgba(191, 204, 209, 0.75);
+  font-size: 8.2pt;
   text-align: center;
+  line-height: 1.4;
 }
+
+/* ─── ÍNDICE ──────────────────────────────────────────────────────────────── */
 .toc-page {
   page: auto;
   page-break-after: always;
@@ -508,9 +567,7 @@ a { color: inherit; text-decoration: none; }
   color: #4c5f6b;
   font-size: 10.4pt;
 }
-.toc-list {
-  border-top: 1px solid #c7a451;
-}
+.toc-list { border-top: 1px solid #c7a451; }
 .toc-row {
   display: grid;
   grid-template-columns: 13mm auto 1fr 12mm;
@@ -540,6 +597,8 @@ a { color: inherit; text-decoration: none; }
   font-weight: 800;
   text-align: right;
 }
+
+/* ─── SECCIONES ───────────────────────────────────────────────────────────── */
 .manual-section {
   page: auto;
   page-break-before: always;
@@ -595,6 +654,15 @@ blockquote {
   border-left: 2mm solid #c7a451;
   page-break-inside: avoid;
 }
+
+/* ─── IMÁGENES ────────────────────────────────────────────────────────────── */
+/* Heading + imagen inmediata: no separar entre páginas */
+.heading-figure {
+  page-break-inside: avoid;
+}
+.heading-figure h3 {
+  margin-top: 0;
+}
 figure {
   margin: 5mm 0 7mm;
   page-break-inside: avoid;
@@ -602,17 +670,46 @@ figure {
 figure img {
   display: block;
   width: 100%;
-  max-height: 85mm;
-  object-fit: contain;
-  border: 1px solid #d8e0e4;
+  height: auto;
+  border-radius: 2mm;
+  /* borde y sombra por defecto (sin clase) */
+  border: 1.5px solid #cfd9e0;
+  box-shadow: 0 3mm 10mm rgba(0, 0, 0, 0.11), 0 1mm 3mm rgba(0, 0, 0, 0.07);
 }
-#section-13 figure img {
-  width: 82%;
-  margin: 0 auto;
+/* Pantallazos en modo oscuro — borde verde esmeralda */
+figure.img-dark img {
+  border-color: rgba(0, 185, 105, 0.52);
+  box-shadow: 0 4mm 16mm rgba(0, 0, 0, 0.38), 0 1mm 4mm rgba(0, 0, 0, 0.22);
 }
+/* Pantallazos en modo claro — borde dorado */
+figure.img-light img {
+  border-color: rgba(199, 164, 81, 0.62);
+  box-shadow: 0 3mm 12mm rgba(0, 0, 0, 0.13), 0 1mm 4mm rgba(0, 0, 0, 0.08);
+}
+/* Pantallazos móviles — se centran en columna estrecha */
+figure.img-mobile {
+  display: flex;
+  justify-content: center;
+}
+figure.img-mobile img {
+  width: 52%;
+}
+figcaption {
+  margin-top: 1.8mm;
+  padding: 0 1mm;
+  color: #60727c;
+  font-size: 8pt;
+  line-height: 1.35;
+}
+
+/* ─── SECCIÓN AVISO LEGAL (compacta) ─────────────────────────────────────── */
 #section-13 figure {
+  width: 82%;
+  margin-left: auto;
+  margin-right: auto;
   margin-bottom: 3mm;
 }
+#section-13 figure img { width: 100%; }
 #section-13 {
   font-size: 9.2pt;
   line-height: 1.34;
@@ -626,22 +723,15 @@ figure img {
   font-size: 12pt;
 }
 #section-13 p,
-#section-13 li {
-  margin-bottom: 1.2mm;
-}
+#section-13 li { margin-bottom: 1.2mm; }
 #section-13 table {
   margin: 3mm 0 4mm;
   font-size: 8.5pt;
 }
 #section-13 td,
-#section-13 th {
-  padding: 2mm 2.4mm;
-}
-figcaption {
-  margin-top: 1.6mm;
-  color: #60727c;
-  font-size: 8pt;
-}
+#section-13 th { padding: 2mm 2.4mm; }
+
+/* ─── PIE ─────────────────────────────────────────────────────────────────── */
 .footer-brand {
   margin-top: 14mm;
   padding-top: 5mm;

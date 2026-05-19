@@ -29,15 +29,15 @@ Una guía ordenada para recorrer EnergyScan desde la primera estimación hasta l
 | 02 | [Antes de empezar](#2-antes-de-empezar) | 5 |
 | 03 | [Acceso, cuenta y preferencias](#3-acceso-cuenta-y-preferencias) | 6 |
 | 04 | [Uso residencial paso a paso](#4-uso-residencial-paso-a-paso) | 8 |
-| 05 | [Mi panel EnergyScan](#5-mi-panel-energyscan) | 13 |
-| 06 | [Informe Premium y pagos](#6-informe-premium-y-pagos) | 16 |
-| 07 | [Segunda opinión de presupuesto](#7-segunda-opinión-de-presupuesto) | 20 |
-| 08 | [Área profesional beta](#8-área-profesional-beta) | 22 |
-| 09 | [Área de proveedores](#9-área-de-proveedores) | 25 |
-| 10 | [Cookies, privacidad y datos personales](#10-cookies-privacidad-y-datos-personales) | 31 |
-| 11 | [Preguntas frecuentes](#11-preguntas-frecuentes) | 33 |
-| 12 | [Glosario rápido](#12-glosario-rápido) | 34 |
-| 13 | [Aviso legal](#13-aviso-legal) | 35 |
+| 05 | [Mi panel EnergyScan](#5-mi-panel-energyscan) | 15 |
+| 06 | [Informe Premium y pagos](#6-informe-premium-y-pagos) | 19 |
+| 07 | [Segunda opinión de presupuesto](#7-segunda-opinión-de-presupuesto) | 23 |
+| 08 | [Área profesional beta](#8-área-profesional-beta) | 25 |
+| 09 | [Área de proveedores](#9-área-de-proveedores) | 28 |
+| 10 | [Cookies, privacidad y datos personales](#10-cookies-privacidad-y-datos-personales) | 34 |
+| 11 | [Preguntas frecuentes](#11-preguntas-frecuentes) | 36 |
+| 12 | [Glosario rápido](#12-glosario-rápido) | 38 |
+| 13 | [Aviso legal](#13-aviso-legal) | 39 |
 
 <div class="page-break"></div>
 
@@ -184,7 +184,7 @@ La calculadora es pública y rápida. Sirve para estimar rangos generales antes 
 
 ![Wizard de prediagnóstico](screenshots/wizard-dark.png)
 
-El wizard es el flujo principal para crear un análisis nuevo. La captura muestra el primer paso real del flujo, con la navegación premium superior y las opciones de objetivo del diagnóstico.
+El wizard es el flujo principal para crear un análisis nuevo. Consta de 5 pasos guiados que puedes completar en pocos minutos.
 
 | Paso | Qué debes indicar |
 | --- | --- |
@@ -196,9 +196,17 @@ El wizard es el flujo principal para crear un análisis nuevo. La captura muestr
 | Horizonte y presupuesto | Plazo de actuación y rango económico |
 | Documentación | Fotos, CEE o presupuesto si quieres enriquecer el análisis |
 
-### 4.4 Búsqueda catastral y documentación
+### 4.3.1 Selección de clasificación energética objetivo
 
-Cuando esté disponible, puedes buscar por dirección o referencia catastral para completar datos de ubicación y superficie. También puedes aportar documentos o imágenes.
+![Selección de letra objetivo energética](screenshots/wizard-target-dark.png)
+
+Si eliges **Alcanzar una letra concreta**, el wizard muestra un selector de clasificación A–G. Puedes indicar qué letra quieres conseguir y el análisis tendrá en cuenta si es viable con los datos que introduzcas. EnergyScan mostrará un aviso si el objetivo es muy ambicioso o si ya lo cumples con tu situación actual.
+
+### 4.4 Búsqueda catastral y mapa del inmueble
+
+![Datos de la vivienda con buscador catastral y mapa](screenshots/wizard-map-dark.png)
+
+En el paso de datos de la vivienda puedes usar el **Buscador Catastral** para localizar el inmueble por referencia catastral o dirección. El mapa se actualiza automáticamente y permite seleccionar la ubicación exacta. Los datos obtenidos del Catastro (superficie, año de construcción, tipo) se precargan en el formulario para agilizar el proceso. También puedes aportar documentos o imágenes en este mismo paso.
 
 **Buenas prácticas:**
 
@@ -307,7 +315,7 @@ Cada presupuesto muestra:
 El dashboard también muestra **perfiles conectados**. No son excluyentes:
 
 | Perfil | Para quién es | Qué gestiona |
-| --- | --- |
+| --- | --- | --- |
 | Proveedor | Empresas que quieren recibir solicitudes de obra, instalación o servicio energético | Leads, créditos, desbloqueo de contacto con consentimiento y seguimiento comercial |
 | Profesional | Técnicos, asesores, inmobiliarias o equipos que preparan casos de clientes | Expedientes, análisis asociados a clientes, PDFs pagados o demo y acceso beta profesional |
 
@@ -671,40 +679,52 @@ Los proveedores solo deben usar esos datos para la finalidad solicitada por el u
 
 ## 11. Preguntas frecuentes
 
-**¿EnergyScan emite certificados oficiales?**  
+**¿EnergyScan emite certificados oficiales?**
+
 No. EnergyScan solo genera prediagnósticos orientativos. El CEE oficial debe emitirlo un técnico habilitado.
 
-**¿El resultado gratuito es suficiente para vender o alquilar?**  
+**¿El resultado gratuito es suficiente para vender o alquilar?**
+
 No. Para vender o alquilar necesitas un CEE oficial cuando la normativa aplicable lo exija.
 
-**¿Qué diferencia hay entre resultado gratuito y Premium?**  
+**¿Qué diferencia hay entre resultado gratuito y Premium?**
+
 El gratuito muestra una estimación básica y permite descargar un PDF básico de 2 páginas. Premium añade PDF completo, escenarios, costes, contexto ampliado, ayudas, imágenes catastrales y análisis visual IA de fotos si las has aportado.
 
-**¿El PDF gratuito sustituye al informe Premium?**  
+**¿El PDF gratuito sustituye al informe Premium?**
+
 No. El PDF gratuito resume la letra orientativa, confianza y principales hallazgos. No incluye escenarios completos, costes, ayudas, análisis visual IA ni anexo documental.
 
-**¿Qué hace el análisis visual IA?**  
+**¿Qué hace el análisis visual IA?**
+
 Revisa de forma orientativa hasta 3 fotografías aportadas en Premium. Puede señalar indicios sobre fachada, ventanas, cubierta, calefacción, aislamiento o interiores, pero no sustituye la inspección de un técnico.
 
-**¿Por qué aparece un aviso sobre mi letra objetivo?**  
+**¿Por qué aparece un aviso sobre mi letra objetivo?**
+
 Si eliges una letra objetivo, EnergyScan puede mostrar si parece alcanzable, si exige más presupuesto del declarado o si no parece técnicamente alcanzable con las reglas actuales. Es una estimación, no un presupuesto.
 
-**¿El Budget Review está incluido en Premium?**  
+**¿El Budget Review está incluido en Premium?**
+
 No. Es un producto independiente para analizar presupuestos de reforma.
 
-**¿Puedo recuperar mis análisis?**  
+**¿Puedo recuperar mis análisis?**
+
 Sí, si los hiciste con sesión iniciada. Están en el dashboard.
 
-**¿Puedo cambiar idioma o tema?**  
+**¿Puedo cambiar idioma o tema?**
+
 Sí. Usa el selector de preferencias de la barra superior.
 
-**¿Qué pasa si un pago aparece pendiente?**  
+**¿Qué pasa si un pago aparece pendiente?**
+
 Espera unos segundos y recarga. Stripe confirma el pago mediante webhook.
 
-**¿Un proveedor puede ver mi teléfono automáticamente?**  
+**¿Un proveedor puede ver mi teléfono automáticamente?**
+
 No. Solo cuando exista una solicitud consentida y el proveedor desbloquee el contacto.
 
-**¿Los proveedores están garantizados por EnergyScan?**  
+**¿Los proveedores están garantizados por EnergyScan?**
+
 No. Un estado verificado o preferente puede indicar revisión interna, pero no garantiza obra, precio, ahorro ni resultado.
 
 ---
