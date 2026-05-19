@@ -73,6 +73,7 @@ export default async function ProfilePage() {
         mode="app"
         userEmail={session.user.email}
         userName={session.user.name}
+        userImage={session.user.image}
         providerHref={providerAccount ? '/provider/dashboard' : '/provider/register'}
         professionalHref={professionalRequest?.status === 'APPROVED' ? '/profesional/dashboard' : '/profesional/solicitar'}
       />
