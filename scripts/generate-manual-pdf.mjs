@@ -1,18 +1,78 @@
+/**
+ * Usage:
+ *   node scripts/generate-manual-pdf.mjs [--lang es|en|de]
+ *
+ * Defaults to --lang es when no argument is provided.
+ *
+ * Outputs:
+ *   public/manuals/anclora-energyscan-manual-usuario-es.pdf
+ *   public/manuals/anclora-energyscan-user-manual-en.pdf
+ *   public/manuals/anclora-energyscan-benutzerhandbuch-de.pdf
+ *
+ * Requires: Chrome/Chromium + poppler (pdfinfo, pdftotext) + pdf-lib.
+ */
+
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 
+// ─── CLI argument ──────────────────────────────────────────────────────────────
+const langArg = process.argv.find((a) => a.startsWith('--lang='))?.split('=')[1]
+  ?? process.argv[process.argv.indexOf('--lang') + 1]
+  ?? 'es';
+
+const SUPPORTED_LANGS = ['es', 'en', 'de'];
+if (!SUPPORTED_LANGS.includes(langArg)) {
+  throw new Error(`Unsupported language "${langArg}". Supported: ${SUPPORTED_LANGS.join(', ')}`);
+}
+
+// ─── Language configuration ────────────────────────────────────────────────────
+const LANG_CONFIG = {
+  es: {
+    inputFile: 'manual-usuario.md',
+    outputFile: 'anclora-energyscan-manual-usuario-es.pdf',
+    htmlLang: 'es',
+    tocHeading: '## Índice',
+    kicker: 'Manual de Usuario',
+    tocH1: 'Índice',
+    tocIntro: 'Una guía ordenada para recorrer EnergyScan desde la primera estimación hasta las áreas profesionales y de proveedor.',
+  },
+  en: {
+    inputFile: 'manual-usuario.en.md',
+    outputFile: 'anclora-energyscan-user-manual-en.pdf',
+    htmlLang: 'en',
+    tocHeading: '## Table of contents',
+    kicker: 'User Manual',
+    tocH1: 'Table of contents',
+    tocIntro: 'An ordered guide to walk through EnergyScan from the first estimate to the professional and provider areas.',
+  },
+  de: {
+    inputFile: 'manual-usuario.de.md',
+    outputFile: 'anclora-energyscan-benutzerhandbuch-de.pdf',
+    htmlLang: 'de',
+    tocHeading: '## Inhaltsverzeichnis',
+    kicker: 'Benutzerhandbuch',
+    tocH1: 'Inhaltsverzeichnis',
+    tocIntro: 'Ein geordneter Leitfaden durch EnergyScan – von der ersten Schätzung bis zu den Fach- und Anbieterbereichen.',
+  },
+};
+
+const config = LANG_CONFIG[langArg];
+
+// ─── Paths ─────────────────────────────────────────────────────────────────────
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..');
 const manualDir = path.join(root, 'docs', 'manual');
-const inputPath = path.join(manualDir, 'manual-usuario.md');
-const outputPath = path.join(manualDir, 'manual-usuario.pdf');
+const manualsOutDir = path.join(root, 'public', 'manuals');
+const inputPath = path.join(manualDir, config.inputFile);
+const outputPath = path.join(manualsOutDir, config.outputFile);
 const tmpDir = path.join(root, 'tmp', 'manual-pdf');
-const htmlPath = path.join(tmpDir, 'manual-usuario.html');
-const passPdfPath = path.join(tmpDir, 'manual-usuario-pass.pdf');
+const htmlPath = path.join(tmpDir, `manual-${langArg}.html`);
+const passPdfPath = path.join(tmpDir, `manual-${langArg}-pass.pdf`);
 
+// ─── Chrome detection ──────────────────────────────────────────────────────────
 const chrome = [
   '/usr/bin/google-chrome',
   '/usr/bin/google-chrome-stable',
@@ -24,7 +84,12 @@ if (!chrome) {
   throw new Error('No Chrome/Chromium binary found for PDF rendering.');
 }
 
+if (!existsSync(inputPath)) {
+  throw new Error(`Input file not found: ${inputPath}`);
+}
+
 mkdirSync(tmpDir, { recursive: true });
+mkdirSync(manualsOutDir, { recursive: true });
 
 const source = readFileSync(inputPath, 'utf8');
 const sections = extractSections(source);
@@ -34,8 +99,9 @@ const firstPassPages = extractSectionPages(sections);
 await renderPdf(firstPassPages);
 await stampPageNumbers(passPdfPath, outputPath);
 
-console.log(`Manual generated: ${path.relative(root, outputPath)}`);
+console.log(`Manual generated [${langArg.toUpperCase()}]: ${path.relative(root, outputPath)}`);
 
+// ─── Section extraction ────────────────────────────────────────────────────────
 function extractSections(markdown) {
   const lines = markdown.split(/\r?\n/);
   const coverEnd = lines.findIndex((line) => line.trim() === '<div class="page-break"></div>');
@@ -43,12 +109,12 @@ function extractSections(markdown) {
 
   const cover = lines.slice(0, coverEnd).join('\n');
   const afterCover = lines.slice(coverEnd + 1);
-  const tocIndex = afterCover.findIndex((line) => line.trim() === '## Índice');
-  if (tocIndex === -1) throw new Error('Index heading not found.');
+  const tocIndex = afterCover.findIndex((line) => line.trim() === config.tocHeading);
+  if (tocIndex === -1) throw new Error(`ToC heading not found: "${config.tocHeading}"`);
 
   const afterToc = afterCover.slice(tocIndex + 1);
   const contentStart = afterToc.findIndex((line) => line.trim() === '<div class="page-break"></div>');
-  if (contentStart === -1) throw new Error('Content page break after index not found.');
+  if (contentStart === -1) throw new Error('Content page break after ToC not found.');
 
   const contentLines = afterToc.slice(contentStart + 1);
   const result = [];
@@ -73,6 +139,7 @@ function extractSections(markdown) {
   return { cover, sections: result };
 }
 
+// ─── PDF rendering ─────────────────────────────────────────────────────────────
 async function renderPdf(sectionPages = {}) {
   writeFileSync(htmlPath, buildHtml(sectionPages), 'utf8');
   execFileSync(chrome, [
@@ -105,6 +172,7 @@ function extractSectionPages(manual) {
   return map;
 }
 
+// ─── Page number stamping ──────────────────────────────────────────────────────
 async function stampPageNumbers(input, output) {
   const bytes = readFileSync(input);
   const pdf = await PDFDocument.load(bytes);
@@ -112,7 +180,6 @@ async function stampPageNumbers(input, output) {
   const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
   const pages = pdf.getPages();
   const navy = rgb(0.02, 0.09, 0.16);
-  const gold = rgb(0.73, 0.54, 0.21);
 
   pages.forEach((page, index) => {
     if (index === 0) return;
@@ -139,6 +206,7 @@ async function stampPageNumbers(input, output) {
   writeFileSync(output, await pdf.save());
 }
 
+// ─── HTML builder ──────────────────────────────────────────────────────────────
 function buildHtml(sectionPages) {
   const toc = sections.sections.map((section) => {
     const page = sectionPages[section.number] ?? '';
@@ -160,11 +228,11 @@ function buildHtml(sectionPages) {
   const cover = injectCoverVisual(sections.cover);
 
   return `<!doctype html>
-<html lang="es">
+<html lang="${config.htmlLang}">
 <head>
 <meta charset="utf-8" />
 <base href="file://${manualDir}/" />
-<title>Anclora EnergyScan - Manual de usuario</title>
+<title>Anclora EnergyScan - ${escapeHtml(config.tocH1)}</title>
 <style>
 ${styles()}
 </style>
@@ -172,9 +240,9 @@ ${styles()}
 <body>
 ${cover}
 <section class="toc-page">
-  <p class="kicker">Manual de Usuario</p>
-  <h1>Índice</h1>
-  <p class="toc-intro">Una guía ordenada para recorrer EnergyScan desde la primera estimación hasta las áreas profesionales y de proveedor.</p>
+  <p class="kicker">${escapeHtml(config.kicker)}</p>
+  <h1>${escapeHtml(config.tocH1)}</h1>
+  <p class="toc-intro">${escapeHtml(config.tocIntro)}</p>
   <nav class="toc-list">${toc}</nav>
 </section>
 ${body}
@@ -182,6 +250,7 @@ ${body}
 </html>`;
 }
 
+// ─── Cover visual injection ────────────────────────────────────────────────────
 function injectCoverVisual(coverHtml) {
   const bars = [
     ['A', '#00dc82', '92%'],
@@ -201,10 +270,10 @@ function injectCoverVisual(coverHtml) {
   </div>
 </div>`;
 
-  // Inject centered below the meta pills, before the disclaimer
   return coverHtml.replace('<div class="cover-disclaimer">', `${ratingWidget}\n<div class="cover-disclaimer">`);
 }
 
+// ─── Markdown to HTML ──────────────────────────────────────────────────────────
 function markdownToHtml(markdown) {
   const lines = markdown.split(/\r?\n/);
   let html = '';
@@ -244,7 +313,6 @@ function markdownToHtml(markdown) {
     if (/^###\s+/.test(trimmed)) {
       const h3Html = `<h3>${inline(trimmed.replace(/^###\s+/, ''))}</h3>`;
       i += 1;
-      // Look ahead: if next non-blank line is an image, keep them on the same page
       let j = i;
       while (j < lines.length && !lines[j].trim()) j++;
       const nextTrimmed = lines[j]?.trim() ?? '';
@@ -355,6 +423,7 @@ function escapeAttribute(value) {
   return escapeHtml(value).replace(/'/g, '&#39;');
 }
 
+// ─── Styles ────────────────────────────────────────────────────────────────────
 function styles() {
   return `
 @page { size: A4; margin: 24mm 18mm 27mm; }
@@ -391,7 +460,6 @@ a { color: inherit; text-decoration: none; }
   flex-direction: column;
   align-items: center;
 }
-/* Marco dorado interior */
 .cover-page::before {
   content: "";
   position: absolute;
@@ -401,7 +469,6 @@ a { color: inherit; text-decoration: none; }
   pointer-events: none;
   z-index: 1;
 }
-/* Círculo decorativo inferior-derecho */
 .cover-page::after {
   content: "";
   position: absolute;
@@ -413,8 +480,6 @@ a { color: inherit; text-decoration: none; }
   border-radius: 50%;
   z-index: 0;
 }
-
-/* Contenido en flujo — posición relativa para z-index */
 .cover-logo,
 .cover-brand,
 .cover-title,
@@ -425,7 +490,6 @@ a { color: inherit; text-decoration: none; }
   position: relative;
   z-index: 2;
 }
-
 .cover-logo {
   display: flex;
   justify-content: center;
@@ -438,7 +502,6 @@ a { color: inherit; text-decoration: none; }
     drop-shadow(0 4mm 14mm rgba(0, 210, 130, 0.32))
     drop-shadow(0 6mm 14mm rgba(0, 0, 0, 0.50));
 }
-
 .cover-brand {
   color: #d8b86b;
   font-size: 12.5pt;
@@ -446,7 +509,6 @@ a { color: inherit; text-decoration: none; }
   letter-spacing: 0.15em;
   text-transform: uppercase;
 }
-/* Línea dorada bajo el nombre de marca */
 .cover-brand::after {
   content: "";
   display: block;
@@ -455,7 +517,6 @@ a { color: inherit; text-decoration: none; }
   background: linear-gradient(90deg, transparent, rgba(216, 184, 107, 0.70), transparent);
   margin: 4.5mm auto 0;
 }
-
 .cover-title {
   margin: 4mm auto 0;
   max-width: 148mm;
@@ -465,7 +526,6 @@ a { color: inherit; text-decoration: none; }
   font-weight: 600;
   text-shadow: 0 3mm 10mm rgba(0, 0, 0, 0.35);
 }
-
 .cover-subtitle {
   margin: 7mm auto 0;
   max-width: 128mm;
@@ -473,7 +533,6 @@ a { color: inherit; text-decoration: none; }
   font-size: 15pt;
   line-height: 1.32;
 }
-
 .cover-meta {
   display: flex;
   justify-content: center;
@@ -491,8 +550,6 @@ a { color: inherit; text-decoration: none; }
   box-shadow: 0 2mm 8mm rgba(0, 0, 0, 0.32);
   letter-spacing: 0.03em;
 }
-
-/* Clasificación energética — centrada bajo los bocadillos */
 .cover-rating {
   margin: 9mm auto 0;
   width: 66mm;
@@ -528,7 +585,6 @@ a { color: inherit; text-decoration: none; }
   text-align: right;
   box-shadow: 0 1mm 3mm rgba(0, 0, 0, 0.24);
 }
-
 .cover-disclaimer {
   position: absolute;
   left: 28mm;
@@ -656,7 +712,6 @@ blockquote {
 }
 
 /* ─── IMÁGENES ────────────────────────────────────────────────────────────── */
-/* Heading + imagen inmediata: no separar entre páginas */
 .heading-figure {
   page-break-inside: avoid;
 }
@@ -672,21 +727,17 @@ figure img {
   width: 100%;
   height: auto;
   border-radius: 2mm;
-  /* borde y sombra por defecto (sin clase) */
   border: 1.5px solid #cfd9e0;
   box-shadow: 0 3mm 10mm rgba(0, 0, 0, 0.11), 0 1mm 3mm rgba(0, 0, 0, 0.07);
 }
-/* Pantallazos en modo oscuro — borde verde esmeralda */
 figure.img-dark img {
   border-color: rgba(0, 185, 105, 0.52);
   box-shadow: 0 4mm 16mm rgba(0, 0, 0, 0.38), 0 1mm 4mm rgba(0, 0, 0, 0.22);
 }
-/* Pantallazos en modo claro — borde dorado */
 figure.img-light img {
   border-color: rgba(199, 164, 81, 0.62);
   box-shadow: 0 3mm 12mm rgba(0, 0, 0, 0.13), 0 1mm 4mm rgba(0, 0, 0, 0.08);
 }
-/* Pantallazos móviles — se centran en columna estrecha */
 figure.img-mobile {
   display: flex;
   justify-content: center;

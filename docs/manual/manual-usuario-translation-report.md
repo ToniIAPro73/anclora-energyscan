@@ -158,40 +158,46 @@ All 10 criteria verified:
 
 ## 10. PDF pipeline
 
-**Status:** Pipeline exists but not used for translated manuals.
+**Status:** ✅ All 3 PDFs generated. `scripts/generate-manual-pdf.mjs` now supports `--lang es|en|de`.
 
-The script `scripts/generate-manual-pdf.mjs` generates the PDF from `docs/manual/manual-usuario.md` with hardcoded input/output paths. It requires Chrome/Chromium and poppler tools (`pdfinfo`, `pdftotext`).
+### Generated files
 
-**To generate PDFs for EN and DE in the future:**
+| File | Pages | Size |
+| --- | --- | --- |
+| `public/manuals/anclora-energyscan-manual-usuario-es.pdf` | 39 | ~5.2 MB |
+| `public/manuals/anclora-energyscan-user-manual-en.pdf` | 39 | ~5.2 MB |
+| `public/manuals/anclora-energyscan-benutzerhandbuch-de.pdf` | 39 | ~5.2 MB |
 
-Option A — Duplicate the script:
+### How to generate
+
 ```bash
-cp scripts/generate-manual-pdf.mjs scripts/generate-manual-pdf-en.mjs
-# Edit inputPath → manual-usuario.en.md
-# Edit outputPath → manual-usuario.en.pdf
-# Edit lang attribute → lang="en"
-# Edit toc kicker text
-node scripts/generate-manual-pdf-en.mjs
+npm run manual:pdf:es    # ES only
+npm run manual:pdf:en    # EN only
+npm run manual:pdf:de    # DE only
+npm run manual:pdf       # all 3 in sequence
 ```
 
-Option B — Parameterise the existing script:
+Or directly:
 ```bash
 node scripts/generate-manual-pdf.mjs --lang en
 ```
-This would require adding CLI argument parsing to the script.
 
-**Target output paths (when generated):**
-```
-docs/manual/manual-usuario.en.pdf
-docs/manual/manual-usuario.de.pdf
-```
-Or optionally:
-```
-public/manuals/anclora-energyscan-user-manual-en.pdf
-public/manuals/anclora-energyscan-benutzerhandbuch-de.pdf
-```
+### What was parameterised in the script
 
-No new dependencies are required. Chrome and poppler are already needed by the existing script.
+The following were previously hardcoded to Spanish and are now resolved from a `LANG_CONFIG` object per `--lang` value:
+
+| Item | ES | EN | DE |
+| --- | --- | --- | --- |
+| Input file | `manual-usuario.md` | `manual-usuario.en.md` | `manual-usuario.de.md` |
+| Output file | `public/manuals/anclora-energyscan-manual-usuario-es.pdf` | `public/manuals/anclora-energyscan-user-manual-en.pdf` | `public/manuals/anclora-energyscan-benutzerhandbuch-de.pdf` |
+| HTML `lang` attribute | `es` | `en` | `de` |
+| ToC heading to parse | `## Índice` | `## Table of contents` | `## Inhaltsverzeichnis` |
+| PDF kicker text | `Manual de Usuario` | `User Manual` | `Benutzerhandbuch` |
+| ToC `<h1>` | `Índice` | `Table of contents` | `Inhaltsverzeichnis` |
+| ToC intro paragraph | (original) | (translated) | (translated) |
+| Temp file names | `manual-es.*` | `manual-en.*` | `manual-de.*` |
+
+No new npm or system dependencies required. Chrome/Chromium and poppler (`pdfinfo`, `pdftotext`) were already required by the original script.
 
 ---
 
