@@ -18,30 +18,47 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const contentType = request.headers.get('content-type') || '';
+  const rawContentType = request.headers.get('content-type') || '';
+  // Strip any parameters (e.g. "image/jpeg; charset=utf-8" → "image/jpeg")
+  const contentType = rawContentType.split(';')[0].trim();
+
   if (!ALLOWED_TYPES.includes(contentType)) {
     return NextResponse.json({ error: 'Tipo de imagen no permitido' }, { status: 400 });
   }
 
-  const buffer = await request.arrayBuffer();
-  if (buffer.byteLength > MAX_SIZE) {
-    return NextResponse.json({ error: 'La imagen supera el tamaño máximo de 5 MB' }, { status: 400 });
+  let buffer: ArrayBuffer;
+  try {
+    buffer = await request.arrayBuffer();
+  } catch {
+    return NextResponse.json({ error: 'No se pudo leer el archivo.' }, { status: 400 });
   }
 
-  const ext = contentType.split('/')[1] || 'jpg';
+  if (buffer.byteLength === 0) {
+    return NextResponse.json({ error: 'El archivo está vacío.' }, { status: 400 });
+  }
+  if (buffer.byteLength > MAX_SIZE) {
+    return NextResponse.json({ error: 'La imagen supera el tamaño máximo de 5 MB.' }, { status: 400 });
+  }
+
+  const ext = contentType === 'image/jpeg' ? 'jpg' : contentType.split('/')[1] || 'jpg';
   const pathname = `avatars/${session.user.id}.${ext}`;
 
-  const blob = await put(pathname, buffer, {
-    access: 'public',
-    contentType,
-    allowOverwrite: true,
-    token: process.env.BLOB_READ_WRITE_TOKEN,
-  });
+  try {
+    const blob = await put(pathname, Buffer.from(buffer), {
+      access: 'public',
+      contentType,
+      allowOverwrite: true,
+    });
 
-  await prisma.user.update({
-    where: { id: session.user.id },
-    data: { image: blob.url },
-  });
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: { image: blob.url },
+    });
 
-  return NextResponse.json({ url: blob.url });
+    return NextResponse.json({ url: blob.url });
+  } catch (err) {
+    console.error('[avatar upload]', err);
+    const message = err instanceof Error ? err.message : 'Error desconocido';
+    return NextResponse.json({ error: `No se pudo subir el avatar: ${message}` }, { status: 500 });
+  }
 }
