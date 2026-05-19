@@ -283,9 +283,9 @@ export default async function AssessmentResultsPage({ params }: { params: { id: 
                     : `Alcanzar la letra ${feasibility.targetLetter} parece viable con tus datos`
                   )}
                   {feasibility.verdict === 'feasible_costly' && (
-                    language === 'en' ? `Letter ${feasibility.targetLetter} is reachable, but the cost exceeds your stated budget`
-                    : language === 'de' ? `Klasse ${feasibility.targetLetter} ist erreichbar, aber die Kosten übersteigen Ihr Budget`
-                    : `La letra ${feasibility.targetLetter} es alcanzable, pero el coste supera tu presupuesto declarado`
+                    language === 'en' ? `Your target (letter ${feasibility.targetLetter}) is reachable, but the cost exceeds your stated budget`
+                    : language === 'de' ? `Ihr Ziel (Klasse ${feasibility.targetLetter}) ist erreichbar, aber die Kosten übersteigen Ihr Budget`
+                    : `Tu objetivo (letra ${feasibility.targetLetter}) es alcanzable, pero el coste supera tu presupuesto declarado`
                   )}
                   {feasibility.verdict === 'infeasible_gap' && (
                     language === 'en' ? `Reaching letter ${feasibility.targetLetter} is not achievable with the available interventions`
@@ -305,12 +305,14 @@ export default async function AssessmentResultsPage({ params }: { params: { id: 
                     (() => {
                       const minStr = feasibility.minCostToReachTarget?.toLocaleString(language === 'en' ? 'en-US' : language === 'de' ? 'de-DE' : 'es-ES', { maximumFractionDigits: 0 });
                       const budgetStr = feasibility.effectiveBudgetCeiling?.toLocaleString(language === 'en' ? 'en-US' : language === 'de' ? 'de-DE' : 'es-ES', { maximumFractionDigits: 0 });
+                      const targetStr = feasibility.targetLetter;
                       const bestStr = feasibility.bestReachableLetter;
+                      const hasBetter = bestStr !== targetStr;
                       return language === 'en'
-                        ? `The minimum estimated investment is €${minStr} vs. your budget of €${budgetStr}. With a larger budget, the best technically achievable letter is ${bestStr}. The Premium report explains the options.`
+                        ? `Minimum estimated investment to reach letter ${targetStr}: €${minStr} vs. your budget of €${budgetStr}.${hasBetter ? ` With a higher budget, you could even reach letter ${bestStr} (better than your target).` : ''} The Premium report explains the options.`
                         : language === 'de'
-                        ? `Die geschätzte Mindestinvestition beträgt ${minStr} € gegenüber Ihrem Budget von ${budgetStr} €. Mit höherem Budget wäre die beste erreichbare Klasse ${bestStr}. Der Premium-Bericht erläutert die Optionen.`
-                        : `La inversión mínima estimada es de ${minStr} € frente a tu presupuesto de ${budgetStr} €. Ampliando el presupuesto, la mejor letra técnicamente alcanzable sería la ${bestStr}. El informe Premium explica las opciones.`;
+                        ? `Mindestinvestition für Klasse ${targetStr}: ${minStr} € gegenüber Ihrem Budget von ${budgetStr} €.${hasBetter ? ` Mit höherem Budget wäre sogar Klasse ${bestStr} erreichbar (besser als Ihr Ziel).` : ''} Der Premium-Bericht erläutert die Optionen.`
+                        : `Inversión mínima para alcanzar la letra ${targetStr}: ${minStr} € frente a tu presupuesto de ${budgetStr} €.${hasBetter ? ` Con mayor presupuesto, incluso podrías alcanzar la letra ${bestStr} (mejor que tu objetivo).` : ''} El informe Premium explica las opciones.`;
                     })()
                   )}
                   {feasibility.verdict === 'infeasible_gap' && (
