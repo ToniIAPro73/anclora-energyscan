@@ -9,7 +9,7 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
 
 export async function POST(request: Request): Promise<NextResponse> {
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+  if (!process.env.BLOB_PUBLIC_READ_WRITE_TOKEN) {
     return NextResponse.json({ error: 'Blob storage not configured' }, { status: 503 });
   }
 
@@ -48,6 +48,7 @@ export async function POST(request: Request): Promise<NextResponse> {
       access: 'public',
       contentType,
       allowOverwrite: true,
+      token: process.env.BLOB_PUBLIC_READ_WRITE_TOKEN,
     });
 
     await prisma.user.update({

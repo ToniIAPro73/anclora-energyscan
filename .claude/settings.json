@@ -50,5 +50,37 @@
       "/home/toni/projects/anclora-energyscan/src/app/api/assessment/[id]/pdf",
       "/home/toni/projects/anclora-energyscan/src/app/api/assessment/[id]/vision"
     ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "file=$(echo \"$CLAUDE_TOOL_INPUT\" | jq -r '.file_path // empty' 2>/dev/null); case \"$file\" in */.env|*/.env.*|.env|.env.*|*/prisma/migrations/*|prisma/migrations/*) echo \"BLOCKED: edición de $file requiere confirmación manual\"; exit 2;; esac"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "file=$(echo \"$CLAUDE_TOOL_RESPONSE\" | jq -r '.filePath // empty' 2>/dev/null); case \"$file\" in *.ts|*.tsx) npx next lint --fix --file \"$file\" 2>/dev/null;; esac"
+          },
+          {
+            "type": "command",
+            "command": "file=$(echo \"$CLAUDE_TOOL_RESPONSE\" | jq -r '.filePath // empty' 2>/dev/null); base=$(basename \"$file\" .ts); testfile=\"tests/${base}.test.ts\"; [ -f \"$testfile\" ] && npx jest \"$testfile\" --passWithNoTests 2>&1 | tail -5 || true"
+          },
+          {
+            "type": "command",
+            "command": "file=$(echo \"$CLAUDE_TOOL_RESPONSE\" | jq -r '.filePath // empty' 2>/dev/null); case \"$file\" in tmp/*|output/*) find tmp/ output/ -type f -mtime +1 -delete 2>/dev/null;; esac"
+          }
+        ]
+      }
+    ]
   }
 }
