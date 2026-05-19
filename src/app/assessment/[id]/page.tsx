@@ -307,10 +307,10 @@ export default async function AssessmentResultsPage({ params }: { params: { id: 
                       const budgetStr = feasibility.effectiveBudgetCeiling?.toLocaleString(language === 'en' ? 'en-US' : language === 'de' ? 'de-DE' : 'es-ES', { maximumFractionDigits: 0 });
                       const bestStr = feasibility.bestReachableLetter;
                       return language === 'en'
-                        ? `The minimum estimated investment is €${minStr} vs. your budget of €${budgetStr}. With your current budget, the most you could reach is approximately letter ${bestStr}. The Premium report explains the options.`
+                        ? `The minimum estimated investment is €${minStr} vs. your budget of €${budgetStr}. With a larger budget, the best technically achievable letter is ${bestStr}. The Premium report explains the options.`
                         : language === 'de'
-                        ? `Die geschätzte Mindestinvestition beträgt ${minStr} € gegenüber Ihrem Budget von ${budgetStr} €. Mit Ihrem Budget ist maximal Klasse ${bestStr} erreichbar. Der Premium-Bericht erläutert die Optionen.`
-                        : `La inversión mínima estimada es de ${minStr} € frente a tu presupuesto de ${budgetStr} €. Con tu presupuesto actual, lo máximo alcanzable sería aproximadamente la letra ${bestStr}. El informe Premium explica las opciones.`;
+                        ? `Die geschätzte Mindestinvestition beträgt ${minStr} € gegenüber Ihrem Budget von ${budgetStr} €. Mit höherem Budget wäre die beste erreichbare Klasse ${bestStr}. Der Premium-Bericht erläutert die Optionen.`
+                        : `La inversión mínima estimada es de ${minStr} € frente a tu presupuesto de ${budgetStr} €. Ampliando el presupuesto, la mejor letra técnicamente alcanzable sería la ${bestStr}. El informe Premium explica las opciones.`;
                     })()
                   )}
                   {feasibility.verdict === 'infeasible_gap' && (
