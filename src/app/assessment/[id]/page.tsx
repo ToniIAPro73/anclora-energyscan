@@ -253,7 +253,16 @@ export default async function AssessmentResultsPage({ params }: { params: { id: 
 
   return (
     <div className="min-h-screen app-shell">
-      <Navbar />
+      {session?.user ? (
+        <Navbar
+          mode="app"
+          userEmail={session.user.email}
+          userName={session.user.name}
+          userImage={session.user.image}
+        />
+      ) : (
+        <Navbar />
+      )}
       {canViewPremium && photoCount > 0 && !isDemo && (
         <VisionAnalysisTrigger assessmentId={params.id} language={language} />
       )}
