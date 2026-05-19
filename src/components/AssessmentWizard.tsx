@@ -208,6 +208,8 @@ export default function AssessmentWizard() {
 
   // When user picks target_letter objective, show the letter selector before advancing
   const [showingLetterPicker, setShowingLetterPicker] = useState(false);
+  // Incongruency: CEE current letter already meets or beats the user's stated target
+  const [ceeTargetIncongruency, setCeeTargetIncongruency] = useState<{ ceeLetter: string; targetLetter: string } | null>(null);
 
   const nextStep = () => setStep(s => s + 1);
   const prevStep = () => setStep(s => s - 1);
@@ -542,6 +544,21 @@ export default function AssessmentWizard() {
     if (certificate.postalCode) setValue('zipcode', certificate.postalCode);
     setAreaNotice(Boolean(certificate.builtAreaM2 && !certificate.usefulAreaM2));
     setCeeAppliedNotice(true);
+    // Detect incongruency: if user wants to reach a target letter but the CEE already shows
+    // a current rating equal to or better than that target, flag it
+    const LETTER_ORDER = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+    const currentCeeLetter = certificate.globalLetter;
+    const userTarget = watch('targetLetter');
+    if (
+      watch('objective') === 'target_letter' &&
+      currentCeeLetter &&
+      userTarget &&
+      LETTER_ORDER.indexOf(currentCeeLetter) <= LETTER_ORDER.indexOf(userTarget)
+    ) {
+      setCeeTargetIncongruency({ ceeLetter: currentCeeLetter, targetLetter: userTarget });
+    } else {
+      setCeeTargetIncongruency(null);
+    }
   };
 
   const analyzeBudgetFile = async (file: File) => {
@@ -907,6 +924,22 @@ export default function AssessmentWizard() {
           </div>
           <p className="mt-2 text-[10px] text-[#FFB020]">{t.wizardCeeNeedsReview}</p>
           {ceeAppliedNotice && <p className="mt-2 rounded-lg border border-[#00DC82]/20 bg-[#00DC82]/10 px-2 py-1 text-[10px] font-semibold text-[#00DC82]">{t.wizardCeeApplied}</p>}
+          {ceeTargetIncongruency && (
+            <div className="mt-2 rounded-lg border border-[#FFB020]/30 bg-[#FFB020]/10 px-3 py-2 text-[10px] text-[#FFB020]">
+              <span className="font-bold">
+                {language === 'en'
+                  ? `⚠ Incongruency detected: `
+                  : language === 'de'
+                  ? `⚠ Widerspruch erkannt: `
+                  : `⚠ Incongruencia detectada: `}
+              </span>
+              {language === 'en'
+                ? `The imported CEE shows a current rating of ${ceeTargetIncongruency.ceeLetter}, which is already equal to or better than your target letter ${ceeTargetIncongruency.targetLetter}. Please review your target — you may want to set a more ambitious goal (e.g. ${ceeTargetIncongruency.ceeLetter === 'A' ? 'A' : String.fromCharCode(ceeTargetIncongruency.ceeLetter.charCodeAt(0) - 1)}).`
+                : language === 'de'
+                ? `Das importierte CEE zeigt eine aktuelle Klasse von ${ceeTargetIncongruency.ceeLetter}, die bereits Ihr Ziel (${ceeTargetIncongruency.targetLetter}) erreicht oder übertrifft. Bitte überprüfen Sie Ihr Ziel — ein anspruchsvolleres Ziel wäre sinnvoller.`
+                : `El CEE importado muestra que la vivienda ya tiene letra ${ceeTargetIncongruency.ceeLetter}, que es igual o mejor que tu objetivo (letra ${ceeTargetIncongruency.targetLetter}). Revisa tu objetivo — quizás quieras plantearte una meta más ambiciosa.`}
+            </div>
+          )}
           {ceeImport.warnings.map((warning) => <p key={warning} className="mt-1 text-[10px] text-[#FFB020]">{warning}</p>)}
           <div className="mt-3 flex gap-2">
             <button type="button" onClick={applyCeeData} className="rounded-full bg-[#00DC82] px-3 py-1.5 text-[11px] font-bold text-[#0A0A0A]">

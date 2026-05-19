@@ -135,6 +135,23 @@ export default async function AssessmentResultsPage({ params }: { params: { id: 
     .filter((v): v is number => typeof v === 'number' && v > 0);
   const feasibility = computeFeasibility(propertyData, scoreResult, rawScenarios, scenarioCostEstimates, rehabBudgetTotals);
 
+  // Incongruency check: current estimated letter already meets or beats the target
+  const LETTER_ORDER_CHECK = ['A', 'B', 'C', 'D', 'E', 'F', 'G'] as const;
+  const targetLetterIncongruency: { estimatedLetter: string; targetLetter: string; ceeLetter?: string } | null = (() => {
+    if (propertyData.objective !== 'target_letter' || !propertyData.targetLetter) return null;
+    const tIdx = LETTER_ORDER_CHECK.indexOf(propertyData.targetLetter as typeof LETTER_ORDER_CHECK[number]);
+    const eIdx = LETTER_ORDER_CHECK.indexOf(scoreResult.estimatedLetter as typeof LETTER_ORDER_CHECK[number]);
+    if (tIdx < 0 || eIdx < 0) return null;
+    // Check energy certificates for a better current rating
+    const ceeLetter = premiumSources.energyCertificates[0]?.globalLetter as string | undefined;
+    const cIdx = ceeLetter ? LETTER_ORDER_CHECK.indexOf(ceeLetter as typeof LETTER_ORDER_CHECK[number]) : -1;
+    const bestCurrentIdx = cIdx >= 0 ? Math.min(eIdx, cIdx) : eIdx;
+    if (bestCurrentIdx <= tIdx) {
+      return { estimatedLetter: scoreResult.estimatedLetter, targetLetter: propertyData.targetLetter, ceeLetter: cIdx >= 0 ? ceeLetter : undefined };
+    }
+    return null;
+  })();
+
   const isDemo = statelessPayload?.isDemo || assessment?.isDemo || false;
   const premiumAccess = canAccessPremiumContent({
     paidAt: assessment?.paidAt,
@@ -254,6 +271,29 @@ export default async function AssessmentResultsPage({ params }: { params: { id: 
                     : language === 'de'
                     ? 'Unten finden Sie Ihre orientierende Energieklasse, die wichtigsten Schwächen und Stärken sowie die Datennachvollziehbarkeit. Der Premium-Bericht ergänzt Szenarien, Kosten, Förderungen und ein PDF.'
                     : 'A continuación encontrarás tu calificación energética orientativa, las principales debilidades y fortalezas, y la trazabilidad de los datos. El informe Premium añade escenarios, costes, ayudas y un PDF descargable.'}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* INCONGRUENCY NOTICE — current letter already meets the target */}
+          {targetLetterIncongruency && (
+            <div className="flex items-start gap-3 rounded-2xl border border-[#FFB020]/30 bg-[#FFB020]/5 px-5 py-4">
+              <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-[#FFB020]" />
+              <div>
+                <p className="font-semibold text-sm text-[#FFB020]">
+                  {language === 'en'
+                    ? `Incongruency detected: your property may already meet your target`
+                    : language === 'de'
+                    ? `Widerspruch erkannt: Ihre Immobilie erfüllt möglicherweise bereits Ihr Ziel`
+                    : `Incongruencia detectada: la vivienda podría ya cumplir tu objetivo`}
+                </p>
+                <p className="mt-1 text-xs text-muted">
+                  {language === 'en'
+                    ? `Your target is letter ${targetLetterIncongruency.targetLetter}, but the current estimated rating is ${targetLetterIncongruency.estimatedLetter}${targetLetterIncongruency.ceeLetter ? ` (CEE: ${targetLetterIncongruency.ceeLetter})` : ''}, which is already equal to or better than your target. Consider setting a more ambitious goal, or review whether the objective is correct.`
+                    : language === 'de'
+                    ? `Ihr Ziel ist Klasse ${targetLetterIncongruency.targetLetter}, aber die aktuelle geschätzte Klasse ist ${targetLetterIncongruency.estimatedLetter}${targetLetterIncongruency.ceeLetter ? ` (CEE: ${targetLetterIncongruency.ceeLetter})` : ''}, was Ihr Ziel bereits erreicht oder übertrifft. Erwägen Sie ein anspruchsvolleres Ziel oder überprüfen Sie Ihr Anliegen.`
+                    : `Tu objetivo es la letra ${targetLetterIncongruency.targetLetter}, pero la calificación estimada actual es ${targetLetterIncongruency.estimatedLetter}${targetLetterIncongruency.ceeLetter ? ` (CEE: ${targetLetterIncongruency.ceeLetter})` : ''}, que ya es igual o mejor que tu objetivo. Considera plantearte una meta más ambiciosa o revisa si el objetivo es correcto.`}
                 </p>
               </div>
             </div>
