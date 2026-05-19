@@ -8,7 +8,6 @@ import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { getMonetizationCopy } from '@/lib/monetization/i18n';
 import { normalizeLanguage, PREFERENCE_COOKIE_NAMES } from '@/lib/preferences';
-import { signOut } from '@/app/auth/actions';
 import { canAccessPremiumContent } from '@/lib/premium-access';
 import { getPropertyTypeLabel, getBudgetReviewStatusLabel } from '@/lib/enum-labels';
 
@@ -62,18 +61,14 @@ export default async function DashboardPage() {
       <Navbar
         mode="app"
         userEmail={session.user.email}
+        userName={session.user.name}
         providerHref={providerAccount ? '/provider/dashboard' : '/provider/register'}
         professionalHref={professionalRequest?.status === 'APPROVED' ? '/profesional/dashboard' : '/profesional/solicitar'}
       />
       <main className="mx-auto max-w-5xl px-4 pb-16 pt-28">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <p className="text-xs font-heading font-semibold uppercase tracking-wider text-[#00DC82]">{session.user.email}</p>
-            <h1 className="mt-2 font-heading text-4xl font-bold text-premium">{copy.title}</h1>
-          </div>
-          <form action={signOut}>
-            <button className="rounded-full border border-white/10 px-4 py-2 text-sm font-heading font-semibold text-premium transition hover:border-[#00DC82]/40">{copy.signOut}</button>
-          </form>
+        <div>
+          <p className="text-xs font-heading font-semibold uppercase tracking-wider text-[#00DC82]">{session.user.email}</p>
+          <h1 className="mt-2 font-heading text-4xl font-bold text-premium">{copy.title}</h1>
         </div>
 
         <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

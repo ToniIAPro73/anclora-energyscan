@@ -81,6 +81,7 @@ export default async function ProfilePage() {
         <ProfileHero
           name={session.user.name ?? null}
           email={session.user.email ?? null}
+          image={session.user.image ?? null}
           initials={getInitials(session.user.name, session.user.email)}
           location={location}
           memberSinceISO={memberSinceISO}
