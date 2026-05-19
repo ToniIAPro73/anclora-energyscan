@@ -122,6 +122,8 @@ export default function AssessmentWizard() {
   const [mapSourceLabel, setMapSourceLabel] = useState<string | undefined>();
   const [isMapLoading, setIsMapLoading] = useState(false);
   const [mapResults, setMapResults] = useState<CadastralMatch[] | undefined>();
+  // Per-image vision analysis results keyed by file name + size
+  const [imageAnalysis, setImageAnalysis] = useState<Record<string, { status: 'analysing' | 'done' | 'error'; relevant?: boolean; category?: string; findings?: string[]; warning?: string }>>({});
   const [selectedCadastralReference, setSelectedCadastralReference] = useState<string | undefined>();
   const [selectedMapFeature, setSelectedMapFeature] = useState<CadastralMapFeature | undefined>();
   const [pendingMapMatch, setPendingMapMatch] = useState<CadastralMatch | null>(null);
@@ -489,9 +491,37 @@ export default function AssessmentWizard() {
     input.click();
   };
 
+  const fileKey = (f: File) => `${f.name}-${f.size}`;
+
+  const analyzeImageFile = async (file: File) => {
+    const key = fileKey(file);
+    setImageAnalysis(prev => ({ ...prev, [key]: { status: 'analysing' } }));
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('lang', language);
+      const res = await fetch('/api/ingestion/image/analyze', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || 'Analysis failed');
+      setImageAnalysis(prev => ({
+        ...prev,
+        [key]: {
+          status: 'done',
+          relevant: data.result.relevant,
+          category: data.result.category,
+          findings: data.result.findings,
+          warning: data.result.warning,
+        },
+      }));
+    } catch {
+      setImageAnalysis(prev => ({ ...prev, [key]: { status: 'error' } }));
+    }
+  };
+
   const addFiles = (incoming: FileList | File[]) => {
     setFileError(null);
     const nextFiles = [...files];
+    const newlyAdded: File[] = [];
     for (const file of Array.from(incoming)) {
       if (nextFiles.length >= MAX_ATTACHMENTS) {
         setFileError(`Máximo ${MAX_ATTACHMENTS} archivos por valoración.`);
@@ -506,8 +536,11 @@ export default function AssessmentWizard() {
         continue;
       }
       nextFiles.push(file);
+      newlyAdded.push(file);
     }
     setFiles(nextFiles);
+    // Kick off vision analysis for each new photo (non-blocking)
+    newlyAdded.forEach(analyzeImageFile);
   };
 
   const analyzeCeeFile = async (file: File) => {
@@ -1665,6 +1698,7 @@ export default function AssessmentWizard() {
                 <span className="font-heading text-sm font-bold text-premium">{t.attachmentsHelp}</span>
                 <span className="text-xs text-muted">{t.attachmentsLimit}</span>
               </button>
+              <p className="mt-2 text-[10px] text-[#7A7A7A] leading-relaxed">{t.attachmentsDisclaimer}</p>
               {fileError && <p className="mt-3 text-xs text-[#EF4444]">{fileError}</p>}
               {uploadProgress !== null && files.length > 0 && (
                 <div className="mt-3 space-y-1">
@@ -1676,14 +1710,60 @@ export default function AssessmentWizard() {
               )}
               {files.length > 0 && (
                 <div className="mt-4 space-y-2">
-                  {files.map((file, index) => (
-                    <div key={`${file.name}-${index}`} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs">
-                      <span className="flex items-center gap-2 text-muted"><FileText className="h-4 w-4 text-[#00DC82]" /> {file.name} ({formatFileSize(file.size)})</span>
-                      <button type="button" onClick={() => setFiles(files.filter((_, fileIndex) => fileIndex !== index))} className="text-muted hover:text-[#EF4444]" aria-label="Eliminar archivo">
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ))}
+                  {files.map((file, index) => {
+                    const key = fileKey(file);
+                    const analysis = imageAnalysis[key];
+                    return (
+                      <div key={`${file.name}-${index}`} className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="flex items-center gap-2 text-muted">
+                            <FileText className="h-4 w-4 text-[#00DC82]" />
+                            {file.name} ({formatFileSize(file.size)})
+                          </span>
+                          <button type="button" onClick={() => {
+                            setFiles(files.filter((_, i) => i !== index));
+                            setImageAnalysis(prev => { const next = { ...prev }; delete next[key]; return next; });
+                          }} className="text-muted hover:text-[#EF4444]" aria-label="Eliminar archivo">
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                        {/* Vision analysis badge */}
+                        {analysis?.status === 'analysing' && (
+                          <p className="text-[10px] text-[#7A7A7A] italic">
+                            {language === 'en' ? 'Analysing image…' : language === 'de' ? 'Bild wird analysiert…' : 'Analizando imagen…'}
+                          </p>
+                        )}
+                        {analysis?.status === 'done' && analysis.relevant && analysis.findings && analysis.findings.length > 0 && (
+                          <div className="rounded-lg bg-[#00DC82]/10 border border-[#00DC82]/20 px-2 py-1 space-y-0.5">
+                            <p className="text-[10px] font-semibold text-[#00DC82]">
+                              {language === 'en' ? `✓ Relevant — ${analysis.category}` : language === 'de' ? `✓ Relevant — ${analysis.category}` : `✓ Relevante — ${analysis.category}`}
+                            </p>
+                            {analysis.findings.map((f, i) => (
+                              <p key={i} className="text-[10px] text-[#00DC82]/80">· {f}</p>
+                            ))}
+                          </div>
+                        )}
+                        {analysis?.status === 'done' && analysis.relevant && (!analysis.findings || analysis.findings.length === 0) && (
+                          <p className="text-[10px] text-[#00DC82] font-semibold">
+                            {language === 'en' ? `✓ Relevant — ${analysis.category}` : language === 'de' ? `✓ Relevant — ${analysis.category}` : `✓ Relevante — ${analysis.category}`}
+                          </p>
+                        )}
+                        {analysis?.status === 'done' && !analysis.relevant && (
+                          <div className="rounded-lg bg-[#EF4444]/10 border border-[#EF4444]/20 px-2 py-1">
+                            <p className="text-[10px] font-semibold text-[#EF4444]">
+                              {language === 'en' ? '⚠ Image not relevant to the assessment' : language === 'de' ? '⚠ Bild nicht relevant für die Bewertung' : '⚠ Imagen sin valor para el análisis'}
+                            </p>
+                            {analysis.warning && <p className="text-[10px] text-[#EF4444]/80 mt-0.5">{analysis.warning}</p>}
+                          </div>
+                        )}
+                        {analysis?.status === 'error' && (
+                          <p className="text-[10px] text-[#7A7A7A] italic">
+                            {language === 'en' ? 'Could not analyse image.' : language === 'de' ? 'Bild konnte nicht analysiert werden.' : 'No se pudo analizar la imagen.'}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
