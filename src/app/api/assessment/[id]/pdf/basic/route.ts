@@ -5,7 +5,7 @@ import { renderToStream } from '@react-pdf/renderer';
 import React from 'react';
 import { prisma } from '@/lib/prisma';
 import { parseStatelessAssessmentId, getPublicAssessmentRef } from '@/lib/stateless-assessment';
-import { normalizeLanguage, getPreferencesForLanguage } from '@/lib/preferences';
+import { normalizeLanguage } from '@/lib/preferences';
 import { BasicReport, type BasicReportData } from '@/lib/pdf/BasicReport';
 import type { EnergyLetter, PropertyType, ConfidenceLevel } from '@/lib/domain/energy-assessment';
 

@@ -46,10 +46,6 @@ export interface FeasibilityResult {
 // Letter ordering: A=0, B=1, …, G=6
 const LETTER_ORDER: EnergyLetter[] = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
 
-const LETTER_SCORE_CEILING: Record<EnergyLetter, number> = {
-  A: 15, B: 30, C: 45, D: 60, E: 75, F: 90, G: 100,
-};
-
 // Rough budget ceilings for each BudgetRange selector value
 const BUDGET_RANGE_CEILING: Record<BudgetRange, number | null> = {
   low: 3_000,
