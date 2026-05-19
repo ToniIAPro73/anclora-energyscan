@@ -38,7 +38,10 @@
       "Bash(git -C /home/toni/projects/anclora-energyscan diff --stat)",
       "Bash(git -C /home/toni/projects/anclora-energyscan diff .claude/settings.json)",
       "Bash(git -C /home/toni/projects/anclora-energyscan add .github/workflows/ci.yml .gitignore README.md package.json LICENSE .claude/settings.json docs/screenshots/)",
-      "Bash(git -C /home/toni/projects/anclora-energyscan rm --cached Captura1.png Captura2.png Captura3.png)"
+      "Bash(git -C /home/toni/projects/anclora-energyscan rm --cached Captura1.png Captura2.png Captura3.png)",
+      "Bash(git -C /home/toni/projects/anclora-energyscan ls-files --others docs/screenshots/)",
+      "Bash(git -C /home/toni/projects/anclora-energyscan commit -m ' *)",
+      "Bash(git -C /home/toni/projects/anclora-energyscan push origin main)"
     ],
     "additionalDirectories": [
       "/home/toni/.claude/projects/-home-toni-projects-anclora-energyscan/memory",
