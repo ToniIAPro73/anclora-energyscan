@@ -1,37 +1,17 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm test*)",
-      "Bash(npm run lint*)",
-      "Bash(npm run build*)",
-      "Bash(npm run dev*)",
-      "Bash(npx jest*)",
-      "Bash(npx tsc*)",
-      "Bash(npx prisma*)",
-      "Bash(git status*)",
-      "Bash(git diff*)",
-      "Bash(git log*)",
-      "Bash(git add*)",
-      "Bash(git commit*)",
-      "Bash(git branch*)",
-      "Bash(git checkout*)",
-      "Bash(git pull*)",
-      "Bash(git push*)",
-      "Bash(find src*)",
-      "Bash(find prisma*)",
-      "Bash(find tests*)",
-      "Bash(find sdd*)",
-      "Bash(grep*)",
-      "Bash(rg*)",
-      "Bash(wc*)",
-      "Bash(sed*)",
-      "Bash(ls*)",
-      "Bash(mkdir*)",
-      "Bash(cat package.json*)",
-      "Bash(cat prisma/schema.prisma*)"
+      "Bash(npm test *)",
+      "Bash(npx jest *)",
+      "Bash(mkdir -p /home/toni/.claude/projects/-home-toni-projects-anclora-energyscan/memory && echo \"dir ok\")",
+      "Bash(mkdir -p src/app/api/admin/providers/\\\\[id\\\\]/status)",
+      "Bash(grep -v \"^$\")",
+      "Bash(mkdir -p src/app/api/admin/knowledge/\\\\[id\\\\] src/lib/knowledge src/components/admin src/app/admin/knowledge)"
     ],
     "additionalDirectories": [
-      "/home/toni/.claude/projects/-home-toni-projects-anclora-energyscan/memory"
+      "/home/toni/.claude/projects/-home-toni-projects-anclora-energyscan/memory",
+      "/home/toni/projects/anclora-energyscan/src/app/api/admin/providers/[id]",
+      "/home/toni/projects/anclora-energyscan/src/app/api/admin/knowledge"
     ]
   }
 }
