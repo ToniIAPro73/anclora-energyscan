@@ -2,16 +2,27 @@
 
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { useSession } from 'next-auth/react';
 import { PricingCard } from '@/components/PricingCard';
 import { usePreferences } from '@/components/AppPreferencesProvider';
 import { getLegalDisclaimer } from '@/lib/i18n';
 
 export default function PricingPage() {
   const { dictionary: t, language } = usePreferences();
+  const { data: session } = useSession();
 
   return (
     <div className="min-h-screen app-shell">
-      <Navbar />
+      {session?.user ? (
+        <Navbar
+          mode="app"
+          userEmail={session.user.email}
+          userName={session.user.name}
+          userImage={session.user.image as string | null}
+        />
+      ) : (
+        <Navbar />
+      )}
       <main className="px-4 pb-16 pt-28">
         <section className="mx-auto max-w-6xl space-y-10">
           <div className="text-center">
