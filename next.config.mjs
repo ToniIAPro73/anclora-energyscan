@@ -3,6 +3,10 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['@napi-rs/canvas'],
   },
+  webpack: (config) => {
+    config.resolve.alias['pg-native'] = false;
+    return config;
+  },
   images: {
     remotePatterns: [
       // Vercel Blob (avatars and attachments)
