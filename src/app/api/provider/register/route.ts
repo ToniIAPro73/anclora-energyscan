@@ -56,9 +56,17 @@ export async function POST(req: Request) {
   }
 
   if (userId) {
-    await prisma.providerAccount.create({
-      data: { userId, providerId: provider.id },
-    });
+    // Check if this Provider is already linked to a different user
+    const existingLink = await prisma.providerAccount.findUnique({ where: { providerId: provider.id } });
+    if (existingLink && existingLink.userId !== userId) {
+      // Provider belongs to another user - cannot claim it
+      return NextResponse.json({ error: 'provider_claimed' }, { status: 409 });
+    }
+    if (!existingLink) {
+      await prisma.providerAccount.create({
+        data: { userId, providerId: provider.id },
+      });
+    }
   }
 
   return NextResponse.json({ ok: true, provider: { id: provider.id, status: provider.status } });
