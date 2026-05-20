@@ -4,7 +4,7 @@ import { ArrowUpRight, BriefcaseBusiness, FileText, LockKeyhole } from 'lucide-r
 import Navbar from '@/components/Navbar';
 import { CheckoutButton } from '@/components/CheckoutButton';
 import { PdfDownloadLink } from '@/components/PdfDownloadLink';
-import { auth } from '@/auth';
+import { lightAuth as auth } from '@/auth.config';
 import { prisma } from '@/lib/prisma';
 import { getMonetizationCopy } from '@/lib/monetization/i18n';
 import { normalizeLanguage, PREFERENCE_COOKIE_NAMES } from '@/lib/preferences';

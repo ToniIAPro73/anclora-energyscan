@@ -22,7 +22,7 @@ import { prismaCertificateToDto } from '@/lib/ingestion/persistence';
 import type { RehabBudgetAnalysis } from '@/lib/ingestion/types';
 import { canAccessPremiumContent } from '@/lib/premium-access';
 import { trackEvent } from '@/lib/analytics';
-import { auth } from '@/auth';
+import { lightAuth as auth } from '@/auth.config';
 import { computeFeasibility } from '@/lib/feasibility/feasibility-engine';
 import { getScenarioCostEstimate } from '@/lib/costs/cost-engine';
 import { buildEvidenceMatrix, getEvidenceFieldLabel, getEvidenceSourceLabel, getEvidenceConfidenceLabel } from '@/lib/evidence/evidence-matrix';

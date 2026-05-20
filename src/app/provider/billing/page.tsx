@@ -6,7 +6,7 @@ import { PROVIDER_LEAD_PACK_CREDITS } from '@/lib/monetization/products';
 import { ProviderCreditsCheckoutButton } from '@/components/monetization/ProviderCreditsCheckoutButton';
 import { getMonetizationCopy } from '@/lib/monetization/i18n';
 import { normalizeLanguage, PREFERENCE_COOKIE_NAMES } from '@/lib/preferences';
-import { auth } from '@/auth';
+import { lightAuth as auth } from '@/auth.config';
 import { prisma } from '@/lib/prisma';
 
 export default async function ProviderBillingPage({ searchParams }: { searchParams: { paid?: string } }) {

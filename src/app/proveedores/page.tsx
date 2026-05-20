@@ -4,7 +4,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { getMonetizationCopy } from '@/lib/monetization/i18n';
 import { normalizeLanguage, PREFERENCE_COOKIE_NAMES } from '@/lib/preferences';
-import { auth } from '@/auth';
+import { lightAuth as auth } from '@/auth.config';
 
 export default async function ProvidersLandingPage() {
   const language = normalizeLanguage(cookies().get(PREFERENCE_COOKIE_NAMES.language)?.value);

@@ -4,7 +4,7 @@ import { AccountSettingsPanel } from '@/components/AccountSettingsPanel';
 import { SettingsActions } from '@/components/SettingsActions';
 import { SettingsFootnote } from '@/components/SettingsFootnote';
 import { SettingsHeader, SettingsBackLink } from '@/components/SettingsHeader';
-import { auth } from '@/auth';
+import { lightAuth as auth } from '@/auth.config';
 import { prisma } from '@/lib/prisma';
 import { isAdmin } from '@/lib/is-admin';
 

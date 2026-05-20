@@ -1,7 +1,7 @@
 import AssessmentWizard from '@/components/AssessmentWizard';
 import Navbar from '@/components/Navbar';
 import { Suspense } from 'react';
-import { auth } from '@/auth';
+import { lightAuth as auth } from '@/auth.config';
 
 export default async function WizardPage() {
   const session = await auth().catch(() => null);

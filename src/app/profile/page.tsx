@@ -2,7 +2,7 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import { ProfileHero, ProfileBackLink } from '@/components/ProfileContent';
 import { ProfileStats } from '@/components/ProfileStats';
-import { auth } from '@/auth';
+import { lightAuth as auth } from '@/auth.config';
 import { prisma } from '@/lib/prisma';
 import { canAccessPremiumContent } from '@/lib/premium-access';
 import { isAdmin } from '@/lib/is-admin';
