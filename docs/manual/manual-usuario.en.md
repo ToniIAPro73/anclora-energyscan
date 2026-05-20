@@ -43,7 +43,7 @@ An ordered guide to walk through EnergyScan from the first estimate to the profe
 
 ## 1. What is Anclora EnergyScan
 
-![Home page in dark mode](screenshots/hero-dark.png)
+![Home page in dark mode](screenshots/imagen-pag3-en.png)
 
 **Anclora EnergyScan** is a platform for organising the energy information of a home before making decisions: renovating, comparing quotes, requesting provider contact, or preparing for a technical visit.
 
@@ -116,7 +116,7 @@ For a more useful estimate, have the following to hand:
 
 ### 3.1 Create an account or sign in
 
-![Access screen](screenshots/auth-dark.png)
+![Access screen](screenshots/imagen-pag6-en.png)
 
 The access screen lets you enter your private area or create a new account. From **Sign in** you can access with:
 
@@ -141,7 +141,7 @@ In the top bar you will find the preferences button, for example **EN · EUR · 
 | Currency | EUR, GBP or other configured currencies |
 | Units | Metric or imperial |
 
-![Home page in light mode](screenshots/hero-light.png)
+![Home page in light mode](screenshots/imagen-pag7-en.png)
 
 > New content in the connected product is available in ES/EN/DE. Some data saved by the user, such as file names or original technical values, is shown as originally entered.
 
@@ -151,7 +151,7 @@ In the top bar you will find the preferences button, for example **EN · EUR · 
 
 ### 4.1 Home page
 
-![Full home page](screenshots/home-dark.png)
+![Full home page](screenshots/imagen-pag8-en.png)
 
 The home page summarises the main actions:
 
@@ -162,7 +162,7 @@ The home page summarises the main actions:
 
 ### 4.2 Energy savings calculator
 
-![Energy savings calculator](screenshots/calculadora-dark.png)
+![Energy savings calculator](screenshots/imagen-pag9-en.png)
 
 The calculator is public and quick. It is useful for estimating general ranges before carrying out the full assessment.
 
@@ -182,7 +182,7 @@ The calculator is public and quick. It is useful for estimating general ranges b
 
 ### 4.3 Pre-assessment wizard
 
-![Pre-assessment wizard](screenshots/wizard-dark.png)
+![Pre-assessment wizard](screenshots/imagen-pag10-en.png)
 
 The wizard is the main flow for creating a new assessment. It consists of 5 guided steps that can be completed in a few minutes.
 
@@ -198,13 +198,13 @@ The wizard is the main flow for creating a new assessment. It consists of 5 guid
 
 ### 4.3.1 Target energy class selection
 
-![Target energy class selection](screenshots/wizard-target-dark.png)
+![Target energy class selection](screenshots/imagen-pag11-en.png)
 
 If you choose **Reach a specific class**, the wizard displays an A–G class selector. You can indicate which class you want to achieve and the assessment will consider whether it is feasible given the data you enter. EnergyScan will show a notice if the target is very ambitious or if you already meet it with your current situation.
 
 ### 4.4 Cadastral search and property map
 
-![Property data with cadastral search and map](screenshots/wizard-map-dark.png)
+![Property data with cadastral search and map](screenshots/imagen-pag12-en.png)
 
 In the property data step you can use the **Cadastral Search** to locate the property by cadastral reference or address. The map updates automatically and allows you to select the exact location. Data obtained from the Cadastre (floor area, year of construction, type) is pre-filled in the form to speed up the process. You can also submit documents or images in this step.
 
@@ -264,7 +264,7 @@ From the result page you can:
 
 ## 5. My EnergyScan dashboard
 
-![Connected dashboard on desktop](screenshots/dashboard-connected-dark.png)
+![Connected dashboard on desktop](screenshots/imagen-pag15-en.png)
 
 The dashboard is the work centre for signed-in users. Access it from `/dashboard` or from the application links.
 
@@ -331,7 +331,7 @@ On mobile, the dashboard prioritises quick reading: it shows identity, KPIs and 
 
 ## 6. Premium Report and payments
 
-![Pricing page](screenshots/pricing-dark.png)
+![Pricing page](screenshots/imagen-pag19-en.jpeg)
 
 The **Premium PDF Report** is a one-time paid product for a specific assessment.
 
@@ -414,7 +414,7 @@ The analysis appears in the Premium PDF as an **AI visual analysis of submitted 
 
 ## 7. Second opinion on a renovation quote
 
-![Second opinion on a renovation quote](screenshots/budget-review-dark.png)
+![Second opinion on a renovation quote](screenshots/imagen-pag23-en.jpeg)
 
 The second opinion analyses a renovation quote to detect line items, amounts and possible alerts.
 
@@ -466,7 +466,7 @@ It includes:
 
 ### 8.1 Professional page
 
-![Professional page](screenshots/profesional-dark.png)
+![Professional page](screenshots/imagen-pag25-en.jpeg)
 
 The professional area is designed for EPC issuers, technical architects, energy advisers and real estate agencies that want to pre-evaluate properties before an official review.
 
@@ -482,7 +482,7 @@ Planned features:
 
 ### 8.2 Requesting beta access
 
-![Professional access request form](screenshots/profesional-solicitar-dark.png)
+![Professional access request form](screenshots/imagen-pag26-en.jpeg)
 
 Steps:
 
@@ -502,9 +502,11 @@ If a request for the same email already exists, EnergyScan does not create dupli
 | Approved | You can enter the professional dashboard |
 | Declined | The request has not been approved at this time |
 
+When your request is approved, you will receive a confirmation email. To access the professional dashboard, sign in — or create a new account — on EnergyScan using the same email address you submitted in the request form.
+
 ### 8.4 Professional dashboard
 
-![Beta professional dashboard](screenshots/profesional-dashboard-dark.png)
+![Beta professional dashboard](screenshots/imagen-pag27-en.jpeg)
 
 When access is approved, the dashboard shows:
 
@@ -523,7 +525,7 @@ When access is approved, the dashboard shows:
 
 ### 9.1 Provider marketplace
 
-![Provider marketplace](screenshots/proveedores-dark.png)
+![Provider marketplace](screenshots/imagen-pag28-en.jpeg)
 
 The marketplace connects providers with users who have completed a pre-assessment and have requested contact.
 
@@ -538,7 +540,7 @@ Typical profiles:
 
 ### 9.2 Provider registration
 
-![Provider registration](screenshots/provider-register-dark.png)
+![Provider registration](screenshots/imagen-pag29-en.jpeg)
 
 To register:
 
@@ -555,9 +557,11 @@ To register:
 
 The provider may be in statuses such as **PENDING**, **VERIFIED**, **PREFERRED**, **SUSPENDED** or similar, subject to internal review.
 
+After submitting the form, Anclora reviews the profile internally. When the status changes to **VERIFIED** — or a higher status — you will receive a notification at the email address provided. To access your provider dashboard, create an account or sign in to EnergyScan using that same email address: the link is made automatically on first access.
+
 ### 9.3 Provider dashboard
 
-![Provider dashboard](screenshots/provider-dashboard-dark.png)
+![Provider dashboard](screenshots/imagen-pag30-en.jpeg)
 
 The provider dashboard shows:
 
@@ -575,7 +579,7 @@ If the provider is pending, the dashboard can be prepared, but commercial assign
 
 ### 9.4 Assigned leads
 
-![Provider leads](screenshots/provider-leads-dark.png)
+![Provider leads](screenshots/imagen-pag31-en.jpeg)
 
 Each lead shows non-personal information:
 
@@ -626,7 +630,7 @@ On each lead you can update the status:
 
 ### 9.7 Credits and billing
 
-![Provider credits](screenshots/provider-billing-dark.png)
+![Provider credits](screenshots/imagen-pag33-en.jpeg)
 
 Credits are purchased in packs via Stripe.
 
@@ -645,7 +649,7 @@ Credits are purchased in packs via Stripe.
 
 ### 10.1 Cookie banner
 
-![Cookie panel](screenshots/cookies-banner-dark.png)
+![Cookie panel](screenshots/imagen-pag34-en.png)
 
 The first visit shows a panel with three options:
 
@@ -657,7 +661,7 @@ The first visit shows a panel with three options:
 
 ### 10.2 Detailed settings
 
-![Cookie settings](screenshots/cookies-settings-dark.png)
+![Cookie settings](screenshots/imagen-pag35-en.png)
 
 | Category | Purpose | Required |
 | --- | --- | --- |
@@ -750,7 +754,7 @@ No. A verified or preferred status may indicate internal review, but does not gu
 
 ## 13. Legal notice
 
-![Legal notice](screenshots/legal-dark.png)
+![Legal notice](screenshots/imagen-pag39-en.jpeg)
 
 Anclora EnergyScan provides indicative estimates based on declared data, submitted documents and internal models.
 
