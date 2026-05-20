@@ -1,5 +1,5 @@
-jest.mock('@/auth', () => ({
-  auth: jest.fn(),
+jest.mock('@/auth.config', () => ({
+  lightAuth: jest.fn(),
 }));
 
 jest.mock('@/lib/prisma', () => ({
@@ -25,7 +25,7 @@ const mockPrisma: any = {
 
 import { POST as POST_STATUS } from '@/app/api/provider/leads/[id]/status/route';
 import { POST as POST_UNLOCK } from '@/app/api/provider/leads/[id]/unlock/route';
-import { auth } from '@/auth';
+import { lightAuth } from '@/auth.config';
 import { prisma } from '@/lib/prisma';
 
 const routeParams = { params: { id: 'lead_123' } };
@@ -36,7 +36,7 @@ describe('provider lead unlock and status APIs', () => {
   });
 
   it('rejects anonymous unlock', async () => {
-    (auth as jest.Mock).mockResolvedValue(null);
+    (lightAuth as jest.Mock).mockResolvedValue(null);
 
     const response = await POST_UNLOCK(new Request('http://localhost:3000/api/provider/leads/lead_123/unlock', {
       method: 'POST',
@@ -46,7 +46,7 @@ describe('provider lead unlock and status APIs', () => {
   });
 
   it('unlocks contact and consumes one credit', async () => {
-    (auth as jest.Mock).mockResolvedValue({ user: { id: 'user_123' } });
+    (lightAuth as jest.Mock).mockResolvedValue({ user: { id: 'user_123' } });
     (prisma.providerAccount.findUnique as jest.Mock).mockResolvedValue({
       providerId: 'prov_123',
       provider: { leadCreditsBalance: 2 },
@@ -87,7 +87,7 @@ describe('provider lead unlock and status APIs', () => {
   });
 
   it('does not consume credit twice for an already unlocked lead', async () => {
-    (auth as jest.Mock).mockResolvedValue({ user: { id: 'user_123' } });
+    (lightAuth as jest.Mock).mockResolvedValue({ user: { id: 'user_123' } });
     (prisma.providerAccount.findUnique as jest.Mock).mockResolvedValue({
       providerId: 'prov_123',
       provider: { leadCreditsBalance: 2 },
@@ -114,7 +114,7 @@ describe('provider lead unlock and status APIs', () => {
   });
 
   it('fails unlock without credits', async () => {
-    (auth as jest.Mock).mockResolvedValue({ user: { id: 'user_123' } });
+    (lightAuth as jest.Mock).mockResolvedValue({ user: { id: 'user_123' } });
     (prisma.providerAccount.findUnique as jest.Mock).mockResolvedValue({
       providerId: 'prov_123',
       provider: { leadCreditsBalance: 0 },
@@ -134,7 +134,7 @@ describe('provider lead unlock and status APIs', () => {
   });
 
   it('changes commercial status for own lead', async () => {
-    (auth as jest.Mock).mockResolvedValue({ user: { id: 'user_123' } });
+    (lightAuth as jest.Mock).mockResolvedValue({ user: { id: 'user_123' } });
     (prisma.providerAccount.findUnique as jest.Mock).mockResolvedValue({ providerId: 'prov_123' });
     (prisma.lead.findFirst as jest.Mock).mockResolvedValue({ id: 'lead_123', providerId: 'prov_123' });
     (prisma.lead.update as jest.Mock).mockResolvedValue({
@@ -157,7 +157,7 @@ describe('provider lead unlock and status APIs', () => {
   });
 
   it('rejects arbitrary lead status', async () => {
-    (auth as jest.Mock).mockResolvedValue({ user: { id: 'user_123' } });
+    (lightAuth as jest.Mock).mockResolvedValue({ user: { id: 'user_123' } });
     (prisma.providerAccount.findUnique as jest.Mock).mockResolvedValue({ providerId: 'prov_123' });
 
     const response = await POST_STATUS(new Request('http://localhost:3000/api/provider/leads/lead_123/status', {
@@ -170,7 +170,7 @@ describe('provider lead unlock and status APIs', () => {
   });
 
   it('does not mutate another provider lead', async () => {
-    (auth as jest.Mock).mockResolvedValue({ user: { id: 'user_123' } });
+    (lightAuth as jest.Mock).mockResolvedValue({ user: { id: 'user_123' } });
     (prisma.providerAccount.findUnique as jest.Mock).mockResolvedValue({ providerId: 'prov_123' });
     (prisma.lead.findFirst as jest.Mock).mockResolvedValue(null);
 

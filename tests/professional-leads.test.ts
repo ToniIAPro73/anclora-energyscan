@@ -1,5 +1,5 @@
-jest.mock('@/auth', () => ({
-  auth: jest.fn(),
+jest.mock('@/auth.config', () => ({
+  lightAuth: jest.fn(),
 }));
 
 jest.mock('@/lib/email', () => ({
@@ -24,7 +24,7 @@ jest.mock('@/lib/prisma', () => ({
 }));
 
 import { POST } from '@/app/api/professional/leads/route';
-import { auth } from '@/auth';
+import { lightAuth } from '@/auth.config';
 import { prisma } from '@/lib/prisma';
 import { sendConsentConfirmationEmail } from '@/lib/email';
 
@@ -61,21 +61,21 @@ describe('POST /api/professional/leads', () => {
   });
 
   it('rejects unauthenticated requests', async () => {
-    (auth as jest.Mock).mockResolvedValue(null);
+    (lightAuth as jest.Mock).mockResolvedValue(null);
 
     const res = await POST(makeRequest(validBody));
     expect(res.status).toBe(401);
   });
 
   it('rejects session without email', async () => {
-    (auth as jest.Mock).mockResolvedValue({ user: { id: 'user_123' } });
+    (lightAuth as jest.Mock).mockResolvedValue({ user: { id: 'user_123' } });
 
     const res = await POST(makeRequest(validBody));
     expect(res.status).toBe(401);
   });
 
   it('rejects when professional access is not APPROVED', async () => {
-    (auth as jest.Mock).mockResolvedValue(approvedSession);
+    (lightAuth as jest.Mock).mockResolvedValue(approvedSession);
     (prisma.professionalAccessRequest.findFirst as jest.Mock).mockResolvedValue(null);
 
     const res = await POST(makeRequest(validBody));
@@ -85,7 +85,7 @@ describe('POST /api/professional/leads', () => {
   });
 
   it('rejects invalid body (missing required fields)', async () => {
-    (auth as jest.Mock).mockResolvedValue(approvedSession);
+    (lightAuth as jest.Mock).mockResolvedValue(approvedSession);
     (prisma.professionalAccessRequest.findFirst as jest.Mock).mockResolvedValue(approvedRequest);
 
     const res = await POST(makeRequest({ assessmentId: 'a', clientName: '' }));
@@ -95,7 +95,7 @@ describe('POST /api/professional/leads', () => {
   });
 
   it('rejects when consentConfirmed is false', async () => {
-    (auth as jest.Mock).mockResolvedValue(approvedSession);
+    (lightAuth as jest.Mock).mockResolvedValue(approvedSession);
     (prisma.professionalAccessRequest.findFirst as jest.Mock).mockResolvedValue(approvedRequest);
 
     const res = await POST(makeRequest({ ...validBody, consentConfirmed: false }));
@@ -103,7 +103,7 @@ describe('POST /api/professional/leads', () => {
   });
 
   it('returns 404 when assessment does not belong to professional', async () => {
-    (auth as jest.Mock).mockResolvedValue(approvedSession);
+    (lightAuth as jest.Mock).mockResolvedValue(approvedSession);
     (prisma.professionalAccessRequest.findFirst as jest.Mock).mockResolvedValue(approvedRequest);
     (prisma.assessment.findUnique as jest.Mock).mockResolvedValue(null);
 
@@ -114,7 +114,7 @@ describe('POST /api/professional/leads', () => {
   });
 
   it('returns 409 when lead for that assessment already exists', async () => {
-    (auth as jest.Mock).mockResolvedValue(approvedSession);
+    (lightAuth as jest.Mock).mockResolvedValue(approvedSession);
     (prisma.professionalAccessRequest.findFirst as jest.Mock).mockResolvedValue(approvedRequest);
     (prisma.assessment.findUnique as jest.Mock).mockResolvedValue(validAssessment);
     (prisma.lead.findFirst as jest.Mock).mockResolvedValue({ id: 'lead_existing' });
@@ -127,7 +127,7 @@ describe('POST /api/professional/leads', () => {
   });
 
   it('creates lead with consent fields and fires confirmation email', async () => {
-    (auth as jest.Mock).mockResolvedValue(approvedSession);
+    (lightAuth as jest.Mock).mockResolvedValue(approvedSession);
     (prisma.professionalAccessRequest.findFirst as jest.Mock).mockResolvedValue(approvedRequest);
     (prisma.assessment.findUnique as jest.Mock).mockResolvedValue(validAssessment);
     (prisma.lead.findFirst as jest.Mock).mockResolvedValue(null);
@@ -168,7 +168,7 @@ describe('POST /api/professional/leads', () => {
   });
 
   it('creates lead without optional fields when omitted', async () => {
-    (auth as jest.Mock).mockResolvedValue(approvedSession);
+    (lightAuth as jest.Mock).mockResolvedValue(approvedSession);
     (prisma.professionalAccessRequest.findFirst as jest.Mock).mockResolvedValue(approvedRequest);
     (prisma.assessment.findUnique as jest.Mock).mockResolvedValue(validAssessment);
     (prisma.lead.findFirst as jest.Mock).mockResolvedValue(null);
@@ -190,7 +190,7 @@ describe('POST /api/professional/leads', () => {
   });
 
   it('looks up professional request by session email (lowercased)', async () => {
-    (auth as jest.Mock).mockResolvedValue({ user: { id: 'user_123', email: 'Pro@EXAMPLE.COM', name: 'Pro' } });
+    (lightAuth as jest.Mock).mockResolvedValue({ user: { id: 'user_123', email: 'Pro@EXAMPLE.COM', name: 'Pro' } });
     (prisma.professionalAccessRequest.findFirst as jest.Mock).mockResolvedValue(null);
 
     await POST(makeRequest(validBody));
@@ -201,7 +201,7 @@ describe('POST /api/professional/leads', () => {
   });
 
   it('reads assessment only for the authenticated user', async () => {
-    (auth as jest.Mock).mockResolvedValue(approvedSession);
+    (lightAuth as jest.Mock).mockResolvedValue(approvedSession);
     (prisma.professionalAccessRequest.findFirst as jest.Mock).mockResolvedValue(approvedRequest);
     (prisma.assessment.findUnique as jest.Mock).mockResolvedValue(null);
 

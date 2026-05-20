@@ -1,5 +1,9 @@
-jest.mock('@/auth', () => ({
-  auth: jest.fn(),
+jest.mock('@/auth.config', () => ({
+  lightAuth: jest.fn(),
+}));
+
+jest.mock('@/lib/email', () => ({
+  sendProviderVerifiedEmail: jest.fn(),
 }));
 
 const mockPrisma: any = {
@@ -14,7 +18,7 @@ jest.mock('@/lib/prisma', () => ({
 }));
 
 import { PATCH } from '@/app/api/admin/providers/[id]/status/route';
-import { auth } from '@/auth';
+import { lightAuth } from '@/auth.config';
 import { prisma } from '@/lib/prisma';
 
 const routeParams = { params: { id: 'prov_123' } };
@@ -44,14 +48,14 @@ describe('PATCH /api/admin/providers/[id]/status', () => {
   });
 
   it('rejects unauthenticated requests with 403', async () => {
-    (auth as jest.Mock).mockResolvedValue(null);
+    (lightAuth as jest.Mock).mockResolvedValue(null);
 
     const res = await PATCH(makeRequest({ status: 'VERIFIED' }), routeParams);
     expect(res.status).toBe(403);
   });
 
   it('rejects non-admin email with 403', async () => {
-    (auth as jest.Mock).mockResolvedValue({ user: { email: 'notadmin@test.com' } });
+    (lightAuth as jest.Mock).mockResolvedValue({ user: { email: 'notadmin@test.com' } });
 
     const res = await PATCH(makeRequest({ status: 'VERIFIED' }), routeParams);
     expect(res.status).toBe(403);
@@ -59,7 +63,7 @@ describe('PATCH /api/admin/providers/[id]/status', () => {
   });
 
   it('rejects invalid status with 400', async () => {
-    (auth as jest.Mock).mockResolvedValue({ user: { email: 'admin@test.com' } });
+    (lightAuth as jest.Mock).mockResolvedValue({ user: { email: 'admin@test.com' } });
 
     const res = await PATCH(makeRequest({ status: 'INVALID_STATUS' }), routeParams);
     expect(res.status).toBe(400);
@@ -70,14 +74,14 @@ describe('PATCH /api/admin/providers/[id]/status', () => {
   });
 
   it('returns 400 when status is missing', async () => {
-    (auth as jest.Mock).mockResolvedValue({ user: { email: 'admin@test.com' } });
+    (lightAuth as jest.Mock).mockResolvedValue({ user: { email: 'admin@test.com' } });
 
     const res = await PATCH(makeRequest({}), routeParams);
     expect(res.status).toBe(400);
   });
 
   it('returns 404 when provider does not exist', async () => {
-    (auth as jest.Mock).mockResolvedValue({ user: { email: 'admin@test.com' } });
+    (lightAuth as jest.Mock).mockResolvedValue({ user: { email: 'admin@test.com' } });
     (prisma.provider.findUnique as jest.Mock).mockResolvedValue(null);
 
     const res = await PATCH(makeRequest({ status: 'VERIFIED' }), routeParams);
@@ -88,8 +92,8 @@ describe('PATCH /api/admin/providers/[id]/status', () => {
   it.each([
     'PENDING', 'VERIFIED', 'PREFERRED', 'SUSPENDED', 'EXCLUSIVE',
   ] as const)('accepts valid status %s', async (status) => {
-    (auth as jest.Mock).mockResolvedValue({ user: { email: 'admin@test.com' } });
-    (prisma.provider.findUnique as jest.Mock).mockResolvedValue({ id: 'prov_123' });
+    (lightAuth as jest.Mock).mockResolvedValue({ user: { email: 'admin@test.com' } });
+    (prisma.provider.findUnique as jest.Mock).mockResolvedValue({ id: 'prov_123', email: 'provider@test.com', status: 'PENDING' });
     (prisma.provider.update as jest.Mock).mockResolvedValue({ id: 'prov_123', status });
 
     const res = await PATCH(makeRequest({ status }), routeParams);
@@ -100,8 +104,8 @@ describe('PATCH /api/admin/providers/[id]/status', () => {
   });
 
   it('calls update with correct provider id and status', async () => {
-    (auth as jest.Mock).mockResolvedValue({ user: { email: 'admin@test.com' } });
-    (prisma.provider.findUnique as jest.Mock).mockResolvedValue({ id: 'prov_123' });
+    (lightAuth as jest.Mock).mockResolvedValue({ user: { email: 'admin@test.com' } });
+    (prisma.provider.findUnique as jest.Mock).mockResolvedValue({ id: 'prov_123', email: 'provider@test.com', status: 'PENDING' });
     (prisma.provider.update as jest.Mock).mockResolvedValue({ id: 'prov_123', status: 'PREFERRED' });
 
     await PATCH(makeRequest({ status: 'PREFERRED' }), routeParams);
@@ -114,8 +118,8 @@ describe('PATCH /api/admin/providers/[id]/status', () => {
 
   it('is case-sensitive for admin email matching', async () => {
     process.env.ADMIN_EMAILS = 'Admin@Test.com';
-    (auth as jest.Mock).mockResolvedValue({ user: { email: 'admin@test.com' } });
-    (prisma.provider.findUnique as jest.Mock).mockResolvedValue({ id: 'prov_123' });
+    (lightAuth as jest.Mock).mockResolvedValue({ user: { email: 'admin@test.com' } });
+    (prisma.provider.findUnique as jest.Mock).mockResolvedValue({ id: 'prov_123', email: 'provider@test.com', status: 'PENDING' });
     (prisma.provider.update as jest.Mock).mockResolvedValue({ id: 'prov_123', status: 'VERIFIED' });
 
     const res = await PATCH(makeRequest({ status: 'VERIFIED' }), routeParams);

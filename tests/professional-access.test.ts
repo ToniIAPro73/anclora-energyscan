@@ -1,5 +1,5 @@
-jest.mock('@/auth', () => ({
-  auth: jest.fn(),
+jest.mock('@/auth.config', () => ({
+  lightAuth: jest.fn(),
 }));
 
 jest.mock('@/lib/prisma', () => ({
@@ -13,7 +13,7 @@ jest.mock('@/lib/prisma', () => ({
 
 import { GET as GET_ME } from '@/app/api/professional-access/me/route';
 import { POST } from '@/app/api/professional-access/route';
-import { auth } from '@/auth';
+import { lightAuth } from '@/auth.config';
 import { prisma } from '@/lib/prisma';
 
 describe('professional access API', () => {
@@ -69,7 +69,7 @@ describe('professional access API', () => {
   });
 
   it('requires session for professional status lookup', async () => {
-    (auth as jest.Mock).mockResolvedValue(null);
+    (lightAuth as jest.Mock).mockResolvedValue(null);
 
     const response = await GET_ME();
 
@@ -77,7 +77,7 @@ describe('professional access API', () => {
   });
 
   it('resolves status by session email', async () => {
-    (auth as jest.Mock).mockResolvedValue({ user: { id: 'user_123', email: 'Pro@Example.com' } });
+    (lightAuth as jest.Mock).mockResolvedValue({ user: { id: 'user_123', email: 'Pro@Example.com' } });
     (prisma.professionalAccessRequest.findFirst as jest.Mock).mockResolvedValue({
       id: 'par_123',
       status: 'PENDING',
