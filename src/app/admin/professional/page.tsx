@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import Navbar from '@/components/Navbar';
-import { auth } from '@/auth';
+import { lightAuth as auth } from '@/auth.config';
 import { prisma } from '@/lib/prisma';
 import { normalizeLanguage, PREFERENCE_COOKIE_NAMES } from '@/lib/preferences';
 import { ProfessionalStatusChanger } from '@/components/admin/ProfessionalStatusChanger';
@@ -114,7 +114,7 @@ export default async function AdminProfessionalPage() {
 
   return (
     <div className="min-h-screen app-shell">
-      <Navbar />
+      <Navbar mode="app" userEmail={session?.user?.email} userName={session?.user?.name} userImage={session?.user?.image} isAdmin />
       <main className="mx-auto max-w-7xl px-4 pb-16 pt-28">
         <div className="flex items-start justify-between gap-4">
           <div>
