@@ -4,7 +4,7 @@ import Footer from '@/components/Footer';
 import { BudgetReviewUploader } from '@/components/monetization/BudgetReviewUploader';
 import { getMonetizationCopy } from '@/lib/monetization/i18n';
 import { normalizeLanguage, PREFERENCE_COOKIE_NAMES } from '@/lib/preferences';
-import { auth } from '@/auth';
+import { lightAuth as auth } from '@/auth.config';
 
 export const metadata = {
   title: getMonetizationCopy('es').budgetReview.metadataTitle,

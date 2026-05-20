@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import { AppPreferencesProvider } from "@/components/AppPreferencesProvider";
 import CookieConsent from "@/components/CookieConsent";
 import SessionProviderWrapper from "@/components/SessionProviderWrapper";
+import { lightAuth } from "@/auth.config";
 import "./globals.css";
 
 const geistSans = localFont({
@@ -21,11 +22,12 @@ export const metadata: Metadata = {
   description: "Prediagnóstico energético orientativo para viviendas.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await lightAuth().catch(() => null);
   return (
     <html lang="es" className="dark" suppressHydrationWarning>
       <head>
@@ -58,7 +60,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <SessionProviderWrapper>
+        <SessionProviderWrapper session={session}>
           <AppPreferencesProvider>
             {children}
             <CookieConsent />
