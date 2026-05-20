@@ -13,10 +13,10 @@ const statusColors: Record<ProviderStatus, string> = {
   EXCLUSIVE: 'bg-purple-500/20 text-purple-400',
 };
 
-export function ProviderStatusChanger({ providerId, currentStatus, statusLabel, labels }: {
+export function ProviderStatusChanger({ providerId, currentStatus, statusLabels, labels }: {
   providerId: string;
   currentStatus: string;
-  statusLabel: (s: string) => string;
+  statusLabels: Record<string, string>;
   labels: { save: string; saving: string; saved: string; saveError: string };
 }) {
   const [selected, setSelected] = useState(currentStatus);
@@ -56,7 +56,7 @@ export function ProviderStatusChanger({ providerId, currentStatus, statusLabel, 
         className="rounded-xl border border-white/10 bg-black/30 px-3 py-1.5 text-xs font-bold text-premium"
       >
         {STATUSES.map((s) => (
-          <option key={s} value={s}>{statusLabel(s)}</option>
+          <option key={s} value={s}>{statusLabels[s] ?? s}</option>
         ))}
       </select>
       {selected !== currentStatus && (

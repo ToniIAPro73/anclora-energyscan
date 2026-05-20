@@ -153,7 +153,7 @@ export default async function AdminProvidersPage() {
                         <ProviderStatusChanger
                           providerId={provider.id}
                           currentStatus={provider.status}
-                          statusLabel={(s) => getProviderStatusLabel(s, language)}
+                          statusLabels={Object.fromEntries(['PENDING', 'VERIFIED', 'PREFERRED', 'SUSPENDED', 'EXCLUSIVE'].map((s) => [s, getProviderStatusLabel(s, language)]))}
                           labels={{ save: copy.save, saving: copy.saving, saved: copy.saved, saveError: copy.saveError }}
                         />
                         <span className="text-xs text-muted">{provider.createdAt.toLocaleDateString(locale)}</span>
