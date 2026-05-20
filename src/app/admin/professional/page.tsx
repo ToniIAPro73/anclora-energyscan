@@ -4,13 +4,9 @@ import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { normalizeLanguage, PREFERENCE_COOKIE_NAMES } from '@/lib/preferences';
 import { ProfessionalStatusChanger } from '@/components/admin/ProfessionalStatusChanger';
+import { isAdmin } from '@/lib/is-admin';
 
 export const dynamic = 'force-dynamic';
-
-function isAdmin(email?: string | null) {
-  const allowlist = (process.env.ADMIN_EMAILS || '').split(',').map((e) => e.trim().toLowerCase()).filter(Boolean);
-  return Boolean(email && allowlist.includes(email.toLowerCase()));
-}
 
 const statusColors: Record<string, string> = {
   PENDING: 'bg-[#FFB020]/20 text-[#FFB020]',
@@ -95,7 +91,7 @@ export default async function AdminProfessionalPage() {
   if (!isAdmin(session?.user?.email)) {
     return (
       <div className="min-h-screen app-shell">
-        <Navbar />
+        <Navbar mode="app" userEmail={session?.user?.email} userName={session?.user?.name} userImage={session?.user?.image} isAdmin />
         <main className="mx-auto max-w-3xl px-4 pb-16 pt-28">
           <h1 className="font-heading text-4xl font-bold text-premium">{t.forbidden}</h1>
           <p className="mt-4 text-muted">{t.forbiddenCopy}</p>

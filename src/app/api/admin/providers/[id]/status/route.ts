@@ -1,16 +1,12 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { isAdmin } from '@/lib/is-admin';
 
 export const dynamic = 'force-dynamic';
 
 const ALLOWED_STATUSES = ['PENDING', 'VERIFIED', 'PREFERRED', 'SUSPENDED', 'EXCLUSIVE'] as const;
 type ProviderStatus = typeof ALLOWED_STATUSES[number];
-
-function isAdmin(email?: string | null) {
-  const allowlist = (process.env.ADMIN_EMAILS || '').split(',').map((s) => s.trim().toLowerCase()).filter(Boolean);
-  return Boolean(email && allowlist.includes(email.toLowerCase()));
-}
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   const session = await auth().catch(() => null);

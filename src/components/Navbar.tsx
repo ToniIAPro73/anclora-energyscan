@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { BriefcaseBusiness, ChevronDown, FileText, LayoutDashboard, LogOut, ReceiptText, Settings, UserRound } from 'lucide-react';
+import { BriefcaseBusiness, ChevronDown, FileText, LayoutDashboard, LogOut, ReceiptText, Settings, Shield, UserRound } from 'lucide-react';
 import { signOut as clientSignOut } from 'next-auth/react';
 import { useState } from 'react';
 import { PreferenceToggles } from './PreferenceToggles';
@@ -15,6 +15,7 @@ type NavbarProps = {
   userEmail?: string | null;
   userName?: string | null;
   userImage?: string | null;
+  isAdmin?: boolean;
   providerHref?: string;
   professionalHref?: string;
 };
@@ -24,6 +25,7 @@ export default function Navbar({
   userEmail,
   userName,
   userImage,
+  isAdmin = false,
   providerHref = '/provider/register',
   professionalHref = '/profesional',
 }: NavbarProps) {
@@ -148,6 +150,16 @@ export default function Navbar({
                       <Settings className="h-4 w-4 text-[#00DC82]" />
                       {t.navSettings}
                     </Link>
+                    {isAdmin && (
+                      <Link
+                        href="/admin/metrics"
+                        onClick={() => setAccountOpen(false)}
+                        className="flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-heading font-semibold text-muted transition hover:bg-white/5 hover:text-premium"
+                      >
+                        <Shield className="h-4 w-4 text-[#00DC82]" />
+                        Admin
+                      </Link>
+                    )}
                   </div>
                   <div className="border-t border-white/10 p-2">
                     <button
@@ -215,6 +227,16 @@ export default function Navbar({
                     <Settings className="h-4 w-4 text-[#00DC82]" />
                     {t.navSettings}
                   </Link>
+                  {isAdmin && (
+                    <Link
+                      href="/admin/metrics"
+                      onClick={() => setAccountOpen(false)}
+                      className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-heading font-semibold text-muted transition hover:bg-white/5 hover:text-premium"
+                    >
+                      <Shield className="h-4 w-4 text-[#00DC82]" />
+                      Admin
+                    </Link>
+                  )}
                 </div>
                 <div className="border-t border-white/10 p-2">
                   <button

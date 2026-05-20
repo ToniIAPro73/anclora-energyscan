@@ -149,7 +149,7 @@ export function AppPreferencesProvider({ children }: { children: React.ReactNode
         return convertCurrencyFromEur(valueEur, preferences.currency);
       },
     };
-  }, [preferences]);
+  }, [preferences, router]);
 
   return <PreferencesContext.Provider value={value}>{children}</PreferencesContext.Provider>;
 }

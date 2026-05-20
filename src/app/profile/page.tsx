@@ -5,6 +5,7 @@ import { ProfileStats } from '@/components/ProfileStats';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { canAccessPremiumContent } from '@/lib/premium-access';
+import { isAdmin } from '@/lib/is-admin';
 
 function getInitials(name?: string | null, email?: string | null) {
   const source = (name || email || 'ES').trim();
@@ -74,6 +75,7 @@ export default async function ProfilePage() {
         userEmail={session.user.email}
         userName={session.user.name}
         userImage={session.user.image}
+        isAdmin={isAdmin(session.user.email)}
         providerHref={providerAccount ? '/provider/dashboard' : '/provider/register'}
         professionalHref={professionalRequest?.status === 'APPROVED' ? '/profesional/dashboard' : '/profesional/solicitar'}
       />

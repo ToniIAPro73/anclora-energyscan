@@ -10,6 +10,7 @@ import { getMonetizationCopy } from '@/lib/monetization/i18n';
 import { normalizeLanguage, PREFERENCE_COOKIE_NAMES } from '@/lib/preferences';
 import { canAccessPremiumContent } from '@/lib/premium-access';
 import { getPropertyTypeLabel, getBudgetReviewStatusLabel } from '@/lib/enum-labels';
+import { isAdmin } from '@/lib/is-admin';
 
 function formatMoney(cents: number | null, currency: string | null, locale: string) {
   if (!cents) return null;
@@ -63,6 +64,7 @@ export default async function DashboardPage() {
         userEmail={session.user.email}
         userName={session.user.name}
         userImage={session.user.image}
+        isAdmin={isAdmin(session.user.email)}
         providerHref={providerAccount ? '/provider/dashboard' : '/provider/register'}
         professionalHref={professionalRequest?.status === 'APPROVED' ? '/profesional/dashboard' : '/profesional/solicitar'}
       />

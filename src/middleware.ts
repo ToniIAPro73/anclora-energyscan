@@ -1,7 +1,8 @@
-import { NextResponse, type NextRequest } from 'next/server';
-import { getToken } from 'next-auth/jwt';
+import NextAuth from 'next-auth';
+import { NextResponse } from 'next/server';
+import { authConfig } from './auth.config';
 
-function isAdmin(email?: string | null) {
+function isAdmin(email?: string | null): boolean {
   const allowlist = (process.env.ADMIN_EMAILS || '')
     .split(',')
     .map((item) => item.trim().toLowerCase())
@@ -9,19 +10,16 @@ function isAdmin(email?: string | null) {
   return Boolean(email && allowlist.includes(email.toLowerCase()));
 }
 
-export async function middleware(req: NextRequest) {
-  if (req.nextUrl.pathname.startsWith('/admin/metrics')) {
-    const token = await getToken({
-      req,
-      secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || (!process.env.VERCEL ? 'local-development-only-auth-secret' : undefined),
-    });
-    if (!isAdmin(typeof token?.email === 'string' ? token.email : undefined)) {
-      return NextResponse.json({ error: 'forbidden' }, { status: 403 });
-    }
+const { auth } = NextAuth(authConfig);
+
+export default auth((req) => {
+  const email = req.auth?.user?.email;
+  if (!isAdmin(email)) {
+    return NextResponse.json({ error: 'forbidden' }, { status: 403 });
   }
   return NextResponse.next();
-}
+});
 
 export const config = {
-  matcher: ['/admin/metrics', '/admin/metrics/:path*'],
+  matcher: ['/admin/:path*'],
 };
