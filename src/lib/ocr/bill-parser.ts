@@ -89,20 +89,29 @@ function parseEuropeanNumber(raw: string): number {
 
 // ─── Amount extraction ───────────────────────────────────────────────────────
 
-const AMOUNT_PATTERNS = [
+// Labeled patterns tried first (highest specificity)
+const AMOUNT_LABELED_PATTERNS = [
   /(?:total\s+a\s+pagar|importe\s+total|total\s+factura|total\s+de\s+la\s+factura|importe\s+de\s+la\s+factura|a\s+pagar)\s*[:\s]*(?:€\s*)?(\d[\d. ]*[,.]?\d{0,2})\s*€?/i,
-  /€\s*(\d[\d.]*,\d{2})\b/,
-  /(\d[\d.]*,\d{2})\s*€/,
+  // Bare "Total" on its own line followed by the amount (Endesa, Naturgy format)
+  /^Total\s+(\d[\d.]*,\d{2})\s*€?$/im,
+  /\bTotal\b\s{1,10}(\d[\d.]*,\d{2})\s*€/i,
 ];
 
 function extractAmount(text: string): number | undefined {
-  for (const pattern of AMOUNT_PATTERNS) {
+  // 1. Try labeled patterns
+  for (const pattern of AMOUNT_LABELED_PATTERNS) {
     const match = text.match(pattern);
     if (match?.[1]) {
       const value = parseEuropeanNumber(match[1].trim());
-      if (!isNaN(value) && value > 0) return value;
+      if (!isNaN(value) && value > 0 && value < 100_000) return value;
     }
   }
+
+  // 2. Fallback: collect all EUR amounts and return the largest (total >= any line item)
+  const allAmounts = extractAllNumbers(text, /(\d[\d.]*,\d{2})\s*€/);
+  const reasonable = allAmounts.filter((v) => v >= 1 && v < 100_000);
+  if (reasonable.length > 0) return Math.max(...reasonable);
+
   return undefined;
 }
 
@@ -119,9 +128,43 @@ function extractAllNumbers(text: string, pattern: RegExp): number[] {
   return matches;
 }
 
+// Patterns that explicitly label the billing-period consumption
+const CONSUMPTION_LABELED_PATTERNS = [
+  // "Consumo Total  217,570 kWh" (Endesa — may have tab or spaces between label and value)
+  /Consumo\s+Total\s+(\d[\d.,]*)\s*kWh/i,
+  /(?:consumo\s+del\s+per[ií]odo|consumo\s+facturado|consumo\s+en\s+este\s+per[ií]odo|energia\s+consumida)\s*[:\s]+(\d[\d.,]*)\s*kWh/i,
+];
+
+// Contextual labels that introduce non-period kWh figures to exclude from the fallback
+const CONSUMPTION_EXCLUDE_RE = /(?:último\s+año|últimos\s+\d+\s+meses|consumo\s+medio|consumo\s+promedio|media\s+mensual|anual)\D{0,60}?(\d[\d.,]*)\s*kWh/gi;
+
 function extractConsumptionKwh(text: string): number | undefined {
-  const matches = extractAllNumbers(text, /(\d[\d.,]*)\s*kWh/i);
-  return matches.length > 0 ? Math.max(...matches) : undefined;
+  // 1. Try labeled patterns — highest confidence, directly name the billing-period total
+  for (const pattern of CONSUMPTION_LABELED_PATTERNS) {
+    const match = text.match(pattern);
+    if (match?.[1]) {
+      const value = parseEuropeanNumber(match[1].trim());
+      if (!isNaN(value) && value > 0) return value;
+    }
+  }
+
+  // 2. Fallback: exclude values explicitly labeled as annual/average figures, then take
+  // the maximum of remaining candidates. The billing-period total is always >= any
+  // sub-period breakdown value, and after removing annual/average it should be the top.
+  const excludedValues = new Set<number>();
+  const excludeRe = new RegExp(CONSUMPTION_EXCLUDE_RE.source, 'gi');
+  let excMatch: RegExpExecArray | null;
+  while ((excMatch = excludeRe.exec(text)) !== null) {
+    if (excMatch[1]) {
+      const v = parseEuropeanNumber(excMatch[1]);
+      if (!isNaN(v)) excludedValues.add(v);
+    }
+  }
+
+  const allKwh = extractAllNumbers(text, /(\d[\d.,]*)\s*kWh/i);
+  const candidates = allKwh.filter((v) => v >= 1 && !excludedValues.has(v));
+  if (candidates.length === 0) return undefined;
+  return Math.max(...candidates);
 }
 
 function extractConsumptionM3(text: string): number | undefined {
