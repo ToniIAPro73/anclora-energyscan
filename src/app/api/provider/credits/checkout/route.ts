@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { lightAuth as auth } from '@/auth.config';
 import { prisma } from '@/lib/prisma';
 import { getStripeClient } from '@/lib/stripe';
 import { PROVIDER_LEAD_PACK_CREDITS, PROVIDER_LEAD_PACK_PRICE_CENTS } from '@/lib/monetization/products';

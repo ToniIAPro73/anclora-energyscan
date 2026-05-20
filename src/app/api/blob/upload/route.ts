@@ -5,7 +5,7 @@ import {
   MAX_ATTACHMENT_SIZE,
   sanitizeFilename,
 } from '@/lib/attachments';
-import { auth } from '@/auth';
+import { lightAuth as auth } from '@/auth.config';
 
 export const dynamic = 'force-dynamic';
 

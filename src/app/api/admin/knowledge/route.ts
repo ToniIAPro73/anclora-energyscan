@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { auth } from '@/auth';
+import { lightAuth as auth } from '@/auth.config';
 import { prisma } from '@/lib/prisma';
 import { KNOWLEDGE_CATEGORIES, SPAIN_REGIONS } from '@/lib/knowledge/constants';
 import { isAdmin } from '@/lib/is-admin';

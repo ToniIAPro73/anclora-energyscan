@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { calculateAttributionExpiry, parseJsonArray, scoreProviderMatch } from '@/lib/domain/partners';
 import { leadRequestSchema } from '@/lib/lead-validation';
 import { isStatelessAssessmentId } from '@/lib/stateless-assessment';
-import { auth } from '@/auth';
+import { lightAuth as auth } from '@/auth.config';
 import { sendProviderLeadNotificationEmail } from '@/lib/email';
 import { trackEvent } from '@/lib/analytics';
 
