@@ -5,13 +5,9 @@ import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { getMonetizationCopy } from '@/lib/monetization/i18n';
 import { normalizeLanguage, PREFERENCE_COOKIE_NAMES } from '@/lib/preferences';
+import { isAdmin } from '@/lib/is-admin';
 
 export const dynamic = 'force-dynamic';
-
-function isAdmin(email?: string | null) {
-  const allowlist = (process.env.ADMIN_EMAILS || '').split(',').map((item) => item.trim().toLowerCase()).filter(Boolean);
-  return Boolean(email && allowlist.includes(email.toLowerCase()));
-}
 
 export default async function AdminMetricsPage() {
   const session = await auth().catch(() => null);
@@ -43,7 +39,7 @@ export default async function AdminMetricsPage() {
   const conversion = assessments30 ? Math.round((payments30 / assessments30) * 1000) / 10 : 0;
   return (
     <div className="min-h-screen app-shell">
-      <Navbar />
+      <Navbar mode="app" userEmail={session?.user?.email} userName={session?.user?.name} userImage={session?.user?.image} isAdmin />
       <main className="mx-auto max-w-6xl px-4 pb-16 pt-28">
         <div className="flex items-center justify-between">
           <h1 className="font-heading text-4xl font-bold">{copy.title}</h1>

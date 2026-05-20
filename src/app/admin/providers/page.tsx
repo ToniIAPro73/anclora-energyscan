@@ -5,13 +5,9 @@ import { prisma } from '@/lib/prisma';
 import { normalizeLanguage, PREFERENCE_COOKIE_NAMES } from '@/lib/preferences';
 import { getProviderStatusLabel } from '@/lib/enum-labels';
 import { ProviderStatusChanger } from '@/components/admin/ProviderStatusChanger';
+import { isAdmin } from '@/lib/is-admin';
 
 export const dynamic = 'force-dynamic';
-
-function isAdmin(email?: string | null) {
-  const allowlist = (process.env.ADMIN_EMAILS || '').split(',').map((item) => item.trim().toLowerCase()).filter(Boolean);
-  return Boolean(email && allowlist.includes(email.toLowerCase()));
-}
 
 const headings = {
   es: {
@@ -92,7 +88,7 @@ export default async function AdminProvidersPage() {
   if (!isAdmin(session?.user?.email)) {
     return (
       <div className="min-h-screen app-shell">
-        <Navbar />
+        <Navbar mode="app" userEmail={session?.user?.email} userName={session?.user?.name} userImage={session?.user?.image} isAdmin />
         <main className="mx-auto max-w-3xl px-4 pb-16 pt-28">
           <h1 className="font-heading text-4xl font-bold text-premium">{copy.forbidden}</h1>
           <p className="mt-4 text-muted">{copy.forbiddenCopy}</p>

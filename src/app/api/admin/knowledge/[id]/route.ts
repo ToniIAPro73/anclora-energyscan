@@ -3,15 +3,11 @@ import { z } from 'zod';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { KNOWLEDGE_CATEGORIES, SPAIN_REGIONS } from '@/lib/knowledge/constants';
+import { isAdmin } from '@/lib/is-admin';
 
 export const dynamic = 'force-dynamic';
 
 const REGION_CODES = SPAIN_REGIONS.map((r) => r.code);
-
-function isAdmin(email?: string | null) {
-  const allowlist = (process.env.ADMIN_EMAILS || '').split(',').map((s) => s.trim().toLowerCase()).filter(Boolean);
-  return Boolean(email && allowlist.includes(email.toLowerCase()));
-}
 
 const updateSchema = z.object({
   title: z.string().trim().min(1).max(200).optional(),

@@ -6,6 +6,7 @@ import { SettingsFootnote } from '@/components/SettingsFootnote';
 import { SettingsHeader, SettingsBackLink } from '@/components/SettingsHeader';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { isAdmin } from '@/lib/is-admin';
 
 export default async function SettingsPage() {
   const session = await auth().catch(() => null);
@@ -42,6 +43,7 @@ export default async function SettingsPage() {
         userEmail={session.user.email}
         userName={session.user.name}
         userImage={session.user.image}
+        isAdmin={isAdmin(session.user.email)}
         providerHref={providerAccount ? '/provider/dashboard' : '/provider/register'}
         professionalHref={professionalRequest?.status === 'APPROVED' ? '/profesional/dashboard' : '/profesional/solicitar'}
       />

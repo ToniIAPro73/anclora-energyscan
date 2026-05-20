@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { isAdmin } from '@/lib/is-admin';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
-
-function isAdmin(email?: string | null) {
-  const allowlist = (process.env.ADMIN_EMAILS || '').split(',').map((e) => e.trim().toLowerCase()).filter(Boolean);
-  return Boolean(email && allowlist.includes(email.toLowerCase()));
-}
 
 const VALID_STATUSES = ['PENDING', 'APPROVED', 'REJECTED'];
 
