@@ -1,13 +1,16 @@
+import NextAuth from 'next-auth';
 import { NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { authConfig } from './auth.config';
 
-function isAdmin(email?: string | null) {
+function isAdmin(email?: string | null): boolean {
   const allowlist = (process.env.ADMIN_EMAILS || '')
     .split(',')
     .map((item) => item.trim().toLowerCase())
     .filter(Boolean);
   return Boolean(email && allowlist.includes(email.toLowerCase()));
 }
+
+const { auth } = NextAuth(authConfig);
 
 export default auth((req) => {
   const email = req.auth?.user?.email;
