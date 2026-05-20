@@ -31,7 +31,16 @@ export default async function ProfessionalDashboardPage() {
   if (!session?.user?.id || !session.user.email) {
     return (
       <div className="min-h-screen app-shell">
+        {session?.user ? (
+        <Navbar
+          mode="app"
+          userEmail={session.user.email}
+          userName={session.user.name}
+          userImage={session.user.image}
+        />
+      ) : (
         <Navbar />
+      )}
         <main className="mx-auto max-w-3xl px-4 pb-16 pt-28">
           <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
             <h1 className="font-heading text-3xl font-bold text-premium">{copy.dashboardTitle}</h1>
@@ -55,7 +64,16 @@ export default async function ProfessionalDashboardPage() {
 
   return (
     <div className="min-h-screen app-shell">
-      <Navbar />
+      {session?.user ? (
+        <Navbar
+          mode="app"
+          userEmail={session.user.email}
+          userName={session.user.name}
+          userImage={session.user.image}
+        />
+      ) : (
+        <Navbar />
+      )}
       <main className="mx-auto max-w-6xl px-4 pb-16 pt-28">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>

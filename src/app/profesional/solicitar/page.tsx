@@ -3,10 +3,12 @@
 import { FormEvent, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import { usePreferences } from '@/components/AppPreferencesProvider';
+import { useSession } from 'next-auth/react';
 import { getMonetizationCopy } from '@/lib/monetization/i18n';
 
 export default function ProfessionalRequestPage() {
   const { language } = usePreferences();
+  const { data: session } = useSession();
   const copy = getMonetizationCopy(language).professional;
   const [message, setMessage] = useState('');
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -22,7 +24,11 @@ export default function ProfessionalRequestPage() {
   }
   return (
     <div className="min-h-screen app-shell">
-      <Navbar />
+      {session?.user ? (
+        <Navbar mode="app" userEmail={session.user.email} userName={session.user.name} userImage={session.user.image as string | null} />
+      ) : (
+        <Navbar />
+      )}
       <main className="mx-auto max-w-3xl px-4 pb-16 pt-28">
         <h1 className="font-heading text-4xl font-bold">{copy.requestTitle}</h1>
         <p className="mt-3 text-sm text-muted">{copy.requestIntro}</p>

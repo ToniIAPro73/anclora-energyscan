@@ -123,6 +123,7 @@ export default async function AdminProvidersPage() {
           </div>
           <div className="flex gap-2">
             <a href="/admin/metrics" className="rounded-full border border-white/10 px-4 py-2 text-sm font-heading font-semibold text-premium hover:border-[#00DC82]/40">{copy.back}</a>
+            <a href="/admin/professional" className="rounded-full border border-white/10 px-4 py-2 text-sm font-heading font-semibold text-premium hover:border-[#00DC82]/40">Profesional</a>
             <a href="/admin/knowledge" className="rounded-full border border-white/10 px-4 py-2 text-sm font-heading font-semibold text-premium hover:border-[#00DC82]/40">{copy.navKnowledge}</a>
           </div>
         </div>

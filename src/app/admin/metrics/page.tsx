@@ -49,6 +49,7 @@ export default async function AdminMetricsPage() {
           <h1 className="font-heading text-4xl font-bold">{copy.title}</h1>
           <nav className="flex gap-2">
             <Link href="/admin/providers" className="rounded-full border border-white/10 px-4 py-2 text-sm font-heading font-semibold text-premium hover:border-[#00DC82]/40">{copy.navProviders}</Link>
+            <Link href="/admin/professional" className="rounded-full border border-white/10 px-4 py-2 text-sm font-heading font-semibold text-premium hover:border-[#00DC82]/40">{'Profesional'}</Link>
             <Link href="/admin/knowledge" className="rounded-full border border-white/10 px-4 py-2 text-sm font-heading font-semibold text-premium hover:border-[#00DC82]/40">{copy.navKnowledge}</Link>
           </nav>
         </div>

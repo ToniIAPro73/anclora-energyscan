@@ -4,13 +4,19 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { getMonetizationCopy } from '@/lib/monetization/i18n';
 import { normalizeLanguage, PREFERENCE_COOKIE_NAMES } from '@/lib/preferences';
+import { auth } from '@/auth';
 
-export default function ProvidersLandingPage() {
+export default async function ProvidersLandingPage() {
   const language = normalizeLanguage(cookies().get(PREFERENCE_COOKIE_NAMES.language)?.value);
   const copy = getMonetizationCopy(language).provider;
+  const session = await auth().catch(() => null);
   return (
     <div className="min-h-screen app-shell">
-      <Navbar />
+      {session?.user ? (
+        <Navbar mode="app" userEmail={session.user.email} userName={session.user.name} userImage={session.user.image} />
+      ) : (
+        <Navbar />
+      )}
       <main className="mx-auto max-w-5xl px-4 pb-16 pt-28">
         <h1 className="font-heading text-4xl font-bold text-premium">{copy.landingTitle}</h1>
         <p className="mt-4 max-w-3xl text-muted">{copy.landingIntro}</p>

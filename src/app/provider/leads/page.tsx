@@ -18,7 +18,16 @@ export default async function ProviderLeadsPage() {
   const locale = language === 'en' ? 'en-GB' : language === 'de' ? 'de-DE' : 'es-ES';
   return (
     <div className="min-h-screen app-shell">
-      <Navbar />
+      {session?.user ? (
+        <Navbar
+          mode="app"
+          userEmail={session.user.email}
+          userName={session.user.name}
+          userImage={session.user.image}
+        />
+      ) : (
+        <Navbar />
+      )}
       <main className="mx-auto max-w-6xl px-4 pb-16 pt-28">
         <h1 className="font-heading text-4xl font-bold text-premium">{copy.leadsTitle}</h1>
         <p className="mt-2 max-w-3xl text-sm text-muted">{copy.leadsNotice}</p>
