@@ -130,13 +130,16 @@ function extractAllNumbers(text: string, pattern: RegExp): number[] {
 
 // Patterns that explicitly label the billing-period consumption
 const CONSUMPTION_LABELED_PATTERNS = [
-  /(?:consumo\s+total|consumo\s+del\s+per[ií]odo|consumo\s+facturado|consumo\s+en\s+este\s+per[ií]odo|energia\s+consumida|energia\s+activa)\s*[:\s]+(\d[\d.,]*)\s*kWh/i,
-  // "Consumo Total    217,570 kWh" (Endesa format with many spaces)
-  /^Consumo\s+Total\s+(\d[\d.,]*)\s*kWh/im,
+  // "Consumo Total  217,570 kWh" (Endesa — may have tab or spaces between label and value)
+  /Consumo\s+Total\s+(\d[\d.,]*)\s*kWh/i,
+  /(?:consumo\s+del\s+per[ií]odo|consumo\s+facturado|consumo\s+en\s+este\s+per[ií]odo|energia\s+consumida)\s*[:\s]+(\d[\d.,]*)\s*kWh/i,
 ];
 
+// Contextual labels that introduce non-period kWh figures to exclude from the fallback
+const CONSUMPTION_EXCLUDE_RE = /(?:último\s+año|últimos\s+\d+\s+meses|consumo\s+medio|consumo\s+promedio|media\s+mensual|anual)\D{0,60}?(\d[\d.,]*)\s*kWh/gi;
+
 function extractConsumptionKwh(text: string): number | undefined {
-  // 1. Try labeled patterns — these point to the billing-period figure
+  // 1. Try labeled patterns — highest confidence, directly name the billing-period total
   for (const pattern of CONSUMPTION_LABELED_PATTERNS) {
     const match = text.match(pattern);
     if (match?.[1]) {
@@ -145,13 +148,23 @@ function extractConsumptionKwh(text: string): number | undefined {
     }
   }
 
-  // 2. Fallback: collect all kWh values and pick the smallest plausible one.
-  // Annual / historical figures are always larger than the billing-period total,
-  // so the minimum reasonable value is the closest proxy for the actual period.
-  const matches = extractAllNumbers(text, /(\d[\d.,]*)\s*kWh/i);
-  const reasonable = matches.filter((v) => v >= 1);
-  if (reasonable.length === 0) return undefined;
-  return Math.min(...reasonable);
+  // 2. Fallback: exclude values explicitly labeled as annual/average figures, then take
+  // the maximum of remaining candidates. The billing-period total is always >= any
+  // sub-period breakdown value, and after removing annual/average it should be the top.
+  const excludedValues = new Set<number>();
+  const excludeRe = new RegExp(CONSUMPTION_EXCLUDE_RE.source, 'gi');
+  let excMatch: RegExpExecArray | null;
+  while ((excMatch = excludeRe.exec(text)) !== null) {
+    if (excMatch[1]) {
+      const v = parseEuropeanNumber(excMatch[1]);
+      if (!isNaN(v)) excludedValues.add(v);
+    }
+  }
+
+  const allKwh = extractAllNumbers(text, /(\d[\d.,]*)\s*kWh/i);
+  const candidates = allKwh.filter((v) => v >= 1 && !excludedValues.has(v));
+  if (candidates.length === 0) return undefined;
+  return Math.max(...candidates);
 }
 
 function extractConsumptionM3(text: string): number | undefined {
