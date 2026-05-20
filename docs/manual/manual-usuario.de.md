@@ -43,7 +43,7 @@ Ein geordneter Leitfaden durch EnergyScan – von der ersten Schätzung bis zu d
 
 ## 1. Was ist Anclora EnergyScan
 
-![Startseite im Dunkelmodus](screenshots/hero-dark.png)
+![Startseite im Dunkelmodus](screenshots/imagen-pag3-de.png)
 
 **Anclora EnergyScan** ist eine Plattform, um die Energieinformationen einer Immobilie zu ordnen, bevor Entscheidungen getroffen werden: sanieren, Angebote vergleichen, Kontakt mit Anbietern anfragen oder eine technische Besichtigung vorbereiten.
 
@@ -116,7 +116,7 @@ Für eine aussagekräftigere Schätzung halten Sie folgende Angaben bereit:
 
 ### 3.1 Konto erstellen oder anmelden
 
-![Anmeldebildschirm](screenshots/auth-dark.png)
+![Anmeldebildschirm](screenshots/imagen-pag6-de.png)
 
 Der Anmeldebildschirm ermöglicht den Zugang zu Ihrem privaten Bereich oder die Erstellung eines neuen Kontos. Über **Anmelden** können Sie sich einloggen mit:
 
@@ -141,7 +141,7 @@ In der oberen Leiste finden Sie die Einstellungsschaltfläche, zum Beispiel **DE
 | Währung | EUR, GBP oder andere konfigurierte Währungen |
 | Einheiten | Metrisch oder imperial |
 
-![Startseite im Hellmodus](screenshots/hero-light.png)
+![Startseite im Hellmodus](screenshots/imagen-pag7-de.png)
 
 > Neue Inhalte des verbundenen Produkts sind in ES/EN/DE verfügbar. Einige vom Nutzer gespeicherte Daten – wie Dateinamen oder ursprüngliche technische Werte – werden so angezeigt, wie sie eingegeben wurden.
 
@@ -151,7 +151,7 @@ In der oberen Leiste finden Sie die Einstellungsschaltfläche, zum Beispiel **DE
 
 ### 4.1 Startseite
 
-![Vollständige Startseite](screenshots/home-dark.png)
+![Vollständige Startseite](screenshots/imagen-pag8-de.png)
 
 Die Startseite fasst die wichtigsten Aktionen zusammen:
 
@@ -162,7 +162,7 @@ Die Startseite fasst die wichtigsten Aktionen zusammen:
 
 ### 4.2 Energiesparrechner
 
-![Energiesparrechner](screenshots/calculadora-dark.png)
+![Energiesparrechner](screenshots/imagen-pag9-de.png)
 
 Der Rechner ist öffentlich und schnell. Er eignet sich zur Schätzung allgemeiner Bereiche, bevor die vollständige Analyse durchgeführt wird.
 
@@ -182,7 +182,7 @@ Der Rechner ist öffentlich und schnell. Er eignet sich zur Schätzung allgemein
 
 ### 4.3 Vorbewertungs-Wizard
 
-![Vorbewertungs-Wizard](screenshots/wizard-dark.png)
+![Vorbewertungs-Wizard](screenshots/imagen-pag10-de.png)
 
 Der Wizard ist der Hauptprozess zur Erstellung einer neuen Analyse. Er besteht aus 5 geführten Schritten, die in wenigen Minuten abgeschlossen werden können.
 
@@ -198,13 +198,13 @@ Der Wizard ist der Hauptprozess zur Erstellung einer neuen Analyse. Er besteht a
 
 ### 4.3.1 Auswahl der Ziel-Energieklasse
 
-![Auswahl der Ziel-Energieklasse](screenshots/wizard-target-dark.png)
+![Auswahl der Ziel-Energieklasse](screenshots/imagen-pag11-de.png)
 
 Wenn Sie **Eine bestimmte Klasse erreichen** wählen, zeigt der Wizard einen A–G-Klassenselektor. Sie können angeben, welche Klasse Sie erreichen möchten, und die Analyse berücksichtigt, ob dies mit den eingegebenen Daten erreichbar ist. EnergyScan zeigt einen Hinweis, wenn das Ziel sehr ehrgeizig ist oder wenn Sie es mit Ihrer aktuellen Situation bereits erfüllen.
 
 ### 4.4 Kataster-Suche und Immobilienkarte
 
-![Immobiliendaten mit Kataster-Suche und Karte](screenshots/wizard-map-dark.png)
+![Immobiliendaten mit Kataster-Suche und Karte](screenshots/imagen-pag12-de.png)
 
 Im Schritt Immobiliendaten können Sie die **Kataster-Suche** verwenden, um die Immobilie über Katasterreferenz oder Adresse zu suchen. Die Karte aktualisiert sich automatisch und ermöglicht die Auswahl des genauen Standorts. Aus dem Kataster abgerufene Daten (Wohnfläche, Baujahr, Typ) werden vorab in das Formular eingetragen. Dokumente oder Bilder können in diesem Schritt ebenfalls hochgeladen werden.
 
@@ -264,7 +264,7 @@ Vom Ergebnis aus können Sie:
 
 ## 5. Mein EnergyScan-Bereich
 
-![Verbundener Dashboard auf dem Desktop](screenshots/dashboard-connected-dark.png)
+![Verbundener Dashboard auf dem Desktop](screenshots/imagen-pag15-de.png)
 
 Der Dashboard ist das Arbeitszentrum für angemeldete Nutzer. Zugang über `/dashboard` oder über die Anwendungslinks.
 
@@ -331,7 +331,7 @@ Auf Mobilgeräten priorisiert der Dashboard schnelles Lesen: Zuerst werden Ident
 
 ## 6. Premium-Bericht und Zahlungen
 
-![Preisseite](screenshots/pricing-dark.png)
+![Preisseite](screenshots/imagen-pag19-de.jpeg)
 
 Der **Premium-PDF-Bericht** ist ein Einmalzahlungsprodukt für eine bestimmte Analyse.
 
@@ -414,7 +414,7 @@ Die Analyse erscheint im Premium-PDF als Seite **KI-gestützte Bildanalyse der e
 
 ## 7. Zweitmeinung zu einem Sanierungsangebot
 
-![Zweitmeinung zu einem Sanierungsangebot](screenshots/budget-review-dark.png)
+![Zweitmeinung zu einem Sanierungsangebot](screenshots/imagen-pag23-de.jpeg)
 
 Die Zweitmeinung analysiert ein Sanierungsangebot, um Posten, Beträge und mögliche Hinweise zu erkennen.
 
@@ -466,7 +466,7 @@ Er enthält:
 
 ### 8.1 Fachseite
 
-![Fachseite](screenshots/profesional-dark.png)
+![Fachseite](screenshots/imagen-pag25-de.jpeg)
 
 Der Fachbereich ist für Energieausweis-Aussteller, Bautechniker, Energieberater und Immobilienagenturen gedacht, die Immobilien vor einer offiziellen Prüfung voreinschätzen möchten.
 
@@ -482,7 +482,7 @@ Geplante Funktionen:
 
 ### 8.2 Beta-Zugang beantragen
 
-![Formular für den Fachzugangsantrag](screenshots/profesional-solicitar-dark.png)
+![Formular für den Fachzugangsantrag](screenshots/imagen-pag26-de.jpeg)
 
 Schritte:
 
@@ -502,9 +502,11 @@ Wenn bereits ein Antrag für dieselbe E-Mail-Adresse vorliegt, erstellt EnergySc
 | Genehmigt | Sie können den Fach-Dashboard aufrufen |
 | Abgelehnt | Der Antrag wurde derzeit nicht genehmigt |
 
+Sobald Ihr Antrag genehmigt wird, erhalten Sie eine Bestätigungs-E-Mail. Um auf den Fach-Dashboard zuzugreifen, melden Sie sich bei EnergyScan an — oder erstellen Sie ein neues Konto — mit derselben E-Mail-Adresse, die Sie im Antragsformular angegeben haben.
+
 ### 8.4 Fach-Dashboard
 
-![Beta-Fach-Dashboard](screenshots/profesional-dashboard-dark.png)
+![Beta-Fach-Dashboard](screenshots/imagen-pag27-de.jpeg)
 
 Wenn der Zugang genehmigt ist, zeigt der Dashboard:
 
@@ -523,7 +525,7 @@ Wenn der Zugang genehmigt ist, zeigt der Dashboard:
 
 ### 9.1 Anbieter-Marktplatz
 
-![Anbieter-Marktplatz](screenshots/proveedores-dark.png)
+![Anbieter-Marktplatz](screenshots/imagen-pag28-de.jpeg)
 
 Der Marktplatz verbindet Anbieter mit Nutzern, die eine Vorbewertung abgeschlossen und Kontakt angefragt haben.
 
@@ -538,7 +540,7 @@ Typische Profile:
 
 ### 9.2 Anbieterregistrierung
 
-![Anbieterregistrierung](screenshots/provider-register-dark.png)
+![Anbieterregistrierung](screenshots/imagen-pag29-de.jpeg)
 
 Zur Registrierung:
 
@@ -555,9 +557,11 @@ Zur Registrierung:
 
 Der Anbieter kann je nach interner Prüfung Status haben wie **PENDING**, **VERIFIED**, **PREFERRED**, **SUSPENDED** oder ähnliche.
 
+Nach dem Absenden des Formulars prüft Anclora das Profil intern. Sobald der Status auf **VERIFIED** — oder einen höheren Status — wechselt, erhalten Sie eine Benachrichtigung an die angegebene E-Mail-Adresse. Um auf Ihr Anbieter-Dashboard zuzugreifen, erstellen Sie ein Konto oder melden Sie sich bei EnergyScan mit dieser E-Mail-Adresse an: die Verknüpfung erfolgt beim ersten Zugriff automatisch.
+
 ### 9.3 Anbieter-Dashboard
 
-![Anbieter-Dashboard](screenshots/provider-dashboard-dark.png)
+![Anbieter-Dashboard](screenshots/imagen-pag30-de.jpeg)
 
 Der Anbieter-Dashboard zeigt:
 
@@ -575,7 +579,7 @@ Wenn der Anbieter ausstehend ist, kann der Dashboard vorbereitet werden, die kom
 
 ### 9.4 Zugewiesene Leads
 
-![Anbieter-Leads](screenshots/provider-leads-dark.png)
+![Anbieter-Leads](screenshots/imagen-pag31-de.jpeg)
 
 Jeder Lead zeigt nicht-personenbezogene Informationen:
 
@@ -626,7 +630,7 @@ Für jeden Lead kann der Status aktualisiert werden:
 
 ### 9.7 Guthaben und Abrechnung
 
-![Anbieter-Guthaben](screenshots/provider-billing-dark.png)
+![Anbieter-Guthaben](screenshots/imagen-pag33-de.jpeg)
 
 Guthaben wird in Paketen über Stripe erworben.
 
@@ -645,7 +649,7 @@ Guthaben wird in Paketen über Stripe erworben.
 
 ### 10.1 Cookie-Banner
 
-![Cookie-Panel](screenshots/cookies-banner-dark.png)
+![Cookie-Panel](screenshots/imagen-pag34-de.png)
 
 Beim ersten Besuch erscheint ein Panel mit drei Optionen:
 
@@ -657,7 +661,7 @@ Beim ersten Besuch erscheint ein Panel mit drei Optionen:
 
 ### 10.2 Detaillierte Einstellungen
 
-![Cookie-Einstellungen](screenshots/cookies-settings-dark.png)
+![Cookie-Einstellungen](screenshots/imagen-pag35-de.png)
 
 | Kategorie | Zweck | Erforderlich |
 | --- | --- | --- |
@@ -750,7 +754,7 @@ Nein. Ein verifizierter oder bevorzugter Status kann auf eine interne Prüfung h
 
 ## 13. Rechtlicher Hinweis
 
-![Rechtlicher Hinweis](screenshots/legal-dark.png)
+![Rechtlicher Hinweis](screenshots/imagen-pag39-de.jpeg)
 
 Anclora EnergyScan stellt orientierende Schätzungen auf der Grundlage angegebener Daten, eingereichter Dokumente und interner Modelle bereit.
 

@@ -162,7 +162,7 @@ La página de inicio resume las acciones principales:
 
 ### 4.2 Calculadora de ahorro energético
 
-![Calculadora de ahorro energético](screenshots/calculadora-dark.png)
+![Calculadora de ahorro energético](screenshots/imagen-pag9-es.png)
 
 La calculadora es pública y rápida. Sirve para estimar rangos generales antes de hacer el diagnóstico completo.
 
@@ -264,7 +264,7 @@ Desde el resultado puedes:
 
 ## 5. Mi panel EnergyScan
 
-![Dashboard conectado en escritorio](screenshots/dashboard-connected-dark.png)
+![Dashboard conectado en escritorio](screenshots/imagen-pag15-es.png)
 
 El dashboard es el centro de trabajo para usuarios con sesión iniciada. Accede desde `/dashboard` o desde los enlaces de la aplicación.
 
@@ -502,9 +502,11 @@ Si ya existe una solicitud para el mismo email, EnergyScan no crea duplicados y 
 | Aprobado | Puedes entrar al panel profesional |
 | Rechazado | No se ha aprobado por ahora |
 
+Cuando tu solicitud sea aprobada, recibirás un email de confirmación. Para acceder al panel profesional, inicia sesión —o crea una cuenta nueva— en EnergyScan con el mismo email que usaste en el formulario de solicitud.
+
 ### 8.4 Panel profesional
 
-![Panel profesional beta](screenshots/profesional-dashboard-dark.png)
+![Panel profesional beta](screenshots/imagen-pag27-es.jpeg)
 
 Cuando el acceso está aprobado, el panel muestra:
 
@@ -555,9 +557,11 @@ Para registrarte:
 
 El proveedor puede estar en estados como **PENDING**, **VERIFIED**, **PREFERRED**, **SUSPENDED** o similares según revisión interna.
 
+Tras enviar el formulario, Anclora revisa el perfil internamente. Cuando el estado cambia a **VERIFIED** —o superior—, recibirás una notificación al email indicado. Para acceder al panel de proveedor, crea una cuenta o inicia sesión en EnergyScan con ese mismo email: la vinculación se realiza de forma automática en el primer acceso.
+
 ### 9.3 Panel de proveedor
 
-![Panel de proveedor](screenshots/provider-dashboard-dark.png)
+![Panel de proveedor](screenshots/imagen-pag30-es.jpeg)
 
 El panel de proveedor muestra:
 
@@ -575,7 +579,7 @@ Si el proveedor está pendiente, puede preparar el panel, pero la asignación co
 
 ### 9.4 Leads asignados
 
-![Leads de proveedor](screenshots/provider-leads-dark.png)
+![Leads de proveedor](screenshots/imagen-pag31-es.jpeg)
 
 Cada lead muestra información no personal:
 
@@ -626,7 +630,7 @@ En cada lead puedes actualizar el estado:
 
 ### 9.7 Créditos y billing
 
-![Créditos de proveedor](screenshots/provider-billing-dark.png)
+![Créditos de proveedor](screenshots/imagen-pag33-es.jpeg)
 
 Los créditos se compran en packs mediante Stripe.
 
