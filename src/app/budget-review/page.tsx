@@ -32,6 +32,12 @@ export default async function BudgetReviewPage() {
     ? 'Budget Review ist nicht im Premium-PDF für Wohngebäude enthalten. Es ist eine unabhängige Prüfung des Angebots. Für eine vollständige Energieanalyse nutzen Sie den Wizard.'
     : 'Budget Review no está incluido en el PDF Premium residencial. Es una revisión independiente del presupuesto. Para un diagnóstico completo de la vivienda, usa el wizard.';
 
+  const demoLabel = language === 'en'
+    ? 'See a sample report'
+    : language === 'de'
+    ? 'Beispielbericht ansehen'
+    : 'Ver informe de ejemplo';
+
   const legalLimitation = language === 'en'
     ? 'Budget Review does not replace a technical, contractual, legal or in-person review. It does not validate real site measurements.'
     : language === 'de'
@@ -59,6 +65,19 @@ export default async function BudgetReviewPage() {
           {/* Differentiation note */}
           <div className="mt-4 rounded-2xl border border-[#FFB020]/20 bg-[#FFB020]/5 p-4">
             <p className="text-xs text-[#FFB020] leading-relaxed">{notIncludedNote}</p>
+          </div>
+
+          {/* Demo CTA */}
+          <div className="mt-4">
+            <a
+              href="/demo-assets/budget-review-demo.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-xl border border-brand/30 bg-brand/5 px-4 py-2 text-sm text-brand hover:bg-brand/10 transition-colors"
+            >
+              <span>↗</span>
+              {demoLabel}
+            </a>
           </div>
         </div>
 
