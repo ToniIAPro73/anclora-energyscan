@@ -89,20 +89,29 @@ function parseEuropeanNumber(raw: string): number {
 
 // ─── Amount extraction ───────────────────────────────────────────────────────
 
-const AMOUNT_PATTERNS = [
+// Labeled patterns tried first (highest specificity)
+const AMOUNT_LABELED_PATTERNS = [
   /(?:total\s+a\s+pagar|importe\s+total|total\s+factura|total\s+de\s+la\s+factura|importe\s+de\s+la\s+factura|a\s+pagar)\s*[:\s]*(?:€\s*)?(\d[\d. ]*[,.]?\d{0,2})\s*€?/i,
-  /€\s*(\d[\d.]*,\d{2})\b/,
-  /(\d[\d.]*,\d{2})\s*€/,
+  // Bare "Total" on its own line followed by the amount (Endesa, Naturgy format)
+  /^Total\s+(\d[\d.]*,\d{2})\s*€?$/im,
+  /\bTotal\b\s{1,10}(\d[\d.]*,\d{2})\s*€/i,
 ];
 
 function extractAmount(text: string): number | undefined {
-  for (const pattern of AMOUNT_PATTERNS) {
+  // 1. Try labeled patterns
+  for (const pattern of AMOUNT_LABELED_PATTERNS) {
     const match = text.match(pattern);
     if (match?.[1]) {
       const value = parseEuropeanNumber(match[1].trim());
-      if (!isNaN(value) && value > 0) return value;
+      if (!isNaN(value) && value > 0 && value < 100_000) return value;
     }
   }
+
+  // 2. Fallback: collect all EUR amounts and return the largest (total >= any line item)
+  const allAmounts = extractAllNumbers(text, /(\d[\d.]*,\d{2})\s*€/);
+  const reasonable = allAmounts.filter((v) => v >= 1 && v < 100_000);
+  if (reasonable.length > 0) return Math.max(...reasonable);
+
   return undefined;
 }
 
@@ -119,9 +128,30 @@ function extractAllNumbers(text: string, pattern: RegExp): number[] {
   return matches;
 }
 
+// Patterns that explicitly label the billing-period consumption
+const CONSUMPTION_LABELED_PATTERNS = [
+  /(?:consumo\s+total|consumo\s+del\s+per[ií]odo|consumo\s+facturado|consumo\s+en\s+este\s+per[ií]odo|energia\s+consumida|energia\s+activa)\s*[:\s]+(\d[\d.,]*)\s*kWh/i,
+  // "Consumo Total    217,570 kWh" (Endesa format with many spaces)
+  /^Consumo\s+Total\s+(\d[\d.,]*)\s*kWh/im,
+];
+
 function extractConsumptionKwh(text: string): number | undefined {
+  // 1. Try labeled patterns — these point to the billing-period figure
+  for (const pattern of CONSUMPTION_LABELED_PATTERNS) {
+    const match = text.match(pattern);
+    if (match?.[1]) {
+      const value = parseEuropeanNumber(match[1].trim());
+      if (!isNaN(value) && value > 0) return value;
+    }
+  }
+
+  // 2. Fallback: collect all kWh values and pick the smallest plausible one.
+  // Annual / historical figures are always larger than the billing-period total,
+  // so the minimum reasonable value is the closest proxy for the actual period.
   const matches = extractAllNumbers(text, /(\d[\d.,]*)\s*kWh/i);
-  return matches.length > 0 ? Math.max(...matches) : undefined;
+  const reasonable = matches.filter((v) => v >= 1);
+  if (reasonable.length === 0) return undefined;
+  return Math.min(...reasonable);
 }
 
 function extractConsumptionM3(text: string): number | undefined {
