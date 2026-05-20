@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { normalizeLanguage, PREFERENCE_COOKIE_NAMES } from '@/lib/preferences';
 import { getProviderStatusLabel } from '@/lib/enum-labels';
 import { ProviderStatusChanger } from '@/components/admin/ProviderStatusChanger';
+import { ProviderLinkUser } from '@/components/admin/ProviderLinkUser';
 import { isAdmin } from '@/lib/is-admin';
 
 export const dynamic = 'force-dynamic';
@@ -29,6 +30,11 @@ const headings = {
     saving: '…',
     saved: '✓',
     saveError: 'Error',
+    linkUser: 'Vincular usuario',
+    linkingUser: '…',
+    linkedUser: 'Usuario vinculado',
+    noUserFound: 'Sin usuario',
+    linkError: 'Error al vincular',
   },
   en: {
     title: 'Provider Administration',
@@ -49,6 +55,11 @@ const headings = {
     saving: '…',
     saved: '✓',
     saveError: 'Error',
+    linkUser: 'Link user',
+    linkingUser: '…',
+    linkedUser: 'User linked',
+    noUserFound: 'No user found',
+    linkError: 'Link error',
   },
   de: {
     title: 'Anbieter-Administration',
@@ -69,6 +80,11 @@ const headings = {
     saving: '…',
     saved: '✓',
     saveError: 'Fehler',
+    linkUser: 'Benutzer verknüpfen',
+    linkingUser: '…',
+    linkedUser: 'Benutzer verknüpft',
+    noUserFound: 'Kein Benutzer',
+    linkError: 'Verknüpfungsfehler',
   },
 };
 
@@ -156,6 +172,12 @@ export default async function AdminProvidersPage() {
                           statusLabels={Object.fromEntries(['PENDING', 'VERIFIED', 'PREFERRED', 'SUSPENDED', 'EXCLUSIVE'].map((s) => [s, getProviderStatusLabel(s, language)]))}
                           labels={{ save: copy.save, saving: copy.saving, saved: copy.saved, saveError: copy.saveError }}
                         />
+                        {provider.accounts.length === 0 && (
+                          <ProviderLinkUser
+                            providerId={provider.id}
+                            labels={{ link: copy.linkUser, linking: copy.linkingUser, linked: copy.linkedUser, noUser: copy.noUserFound, error: copy.linkError }}
+                          />
+                        )}
                         <span className="text-xs text-muted">{provider.createdAt.toLocaleDateString(locale)}</span>
                       </div>
                       <h2 className="mt-2 font-heading text-xl font-bold text-premium">{provider.name}</h2>

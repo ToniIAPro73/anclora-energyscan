@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { auth } from '@/auth';
+import { lightAuth as auth } from '@/auth.config';
 import { createBudgetReviewFromText } from '@/lib/budget-review/service';
 import { trackEvent } from '@/lib/analytics';
 import { extractTextFromPdf } from '@/lib/ocr/pdf-extractor';

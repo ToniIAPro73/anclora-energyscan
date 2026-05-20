@@ -7,7 +7,7 @@ import { CadastralMatchSchema } from '@/lib/catastro/types';
 import { isAllowedPhotoAttachment, validatePhotoAttachments, MAX_ATTACHMENT_SIZE, formatFileSize } from '@/lib/attachments';
 import { deleteStoredAttachment, saveAssessmentAttachment } from '@/lib/blob-storage';
 import { createStatelessAssessmentId, createStatelessPayload } from '@/lib/stateless-assessment';
-import { auth } from '@/auth';
+import { lightAuth as auth } from '@/auth.config';
 import {
   normalizePropertyType,
   normalizeHeatingSystem,

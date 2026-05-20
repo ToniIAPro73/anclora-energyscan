@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { auth } from '@/auth';
+import { lightAuth as auth } from '@/auth.config';
 import { prisma } from '@/lib/prisma';
 import { ProviderLeadError, serializeProviderLeadContact, updateProviderLeadStatus } from '@/lib/provider-leads';
 
