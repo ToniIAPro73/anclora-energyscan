@@ -1,6 +1,5 @@
-import NextAuth from 'next-auth';
 import { NextResponse } from 'next/server';
-import { authConfig } from './auth.config';
+import { lightAuth } from './auth.config';
 
 function isAdmin(email?: string | null): boolean {
   const allowlist = (process.env.ADMIN_EMAILS || '')
@@ -10,9 +9,7 @@ function isAdmin(email?: string | null): boolean {
   return Boolean(email && allowlist.includes(email.toLowerCase()));
 }
 
-const { auth } = NextAuth(authConfig);
-
-export default auth((req) => {
+export default lightAuth((req) => {
   const email = req.auth?.user?.email;
   if (!isAdmin(email)) {
     return NextResponse.json({ error: 'forbidden' }, { status: 403 });
