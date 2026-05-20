@@ -26,7 +26,7 @@ export default function Navbar({
   userName,
   userImage,
   isAdmin = false,
-  providerHref = '/provider/register',
+  providerHref = '/provider/dashboard',
   professionalHref = '/profesional',
 }: NavbarProps) {
   const initials = userName ? userName.slice(0, 2).toUpperCase() : (userEmail ? userEmail.slice(0, 2).toUpperCase() : '?');
