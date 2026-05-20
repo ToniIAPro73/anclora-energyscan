@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    serverComponentsExternalPackages: ['@napi-rs/canvas'],
+    serverComponentsExternalPackages: ['@napi-rs/canvas', '@prisma/client', '@prisma/adapter-pg', 'pg'],
   },
   webpack: (config) => {
     config.resolve.alias['pg-native'] = false;
