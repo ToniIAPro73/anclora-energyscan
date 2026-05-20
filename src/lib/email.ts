@@ -2,7 +2,7 @@ import { createHash } from 'crypto';
 import { prisma } from '@/lib/prisma';
 
 export type EmailLanguage = 'es' | 'en' | 'de';
-export type EmailType = 'premium_purchase' | 'checkout_recovery' | 'provider_lead_notification' | 'consent_confirmation';
+export type EmailType = 'premium_purchase' | 'checkout_recovery' | 'provider_lead_notification' | 'consent_confirmation' | 'provider_verified' | 'professional_approved';
 
 export function hashEmail(email: string) {
   return createHash('sha256').update(email.trim().toLowerCase()).digest('hex');
@@ -265,5 +265,87 @@ export async function sendCheckoutRecoveryEmail(input: {
       copy.cta,
       premiumCopy[language].legal
     ),
+  });
+}
+
+const providerVerifiedCopy = {
+  es: {
+    subject: 'Tu empresa ha sido verificada en Anclora EnergyScan',
+    title: '¡Tu empresa está verificada!',
+    copy: 'El equipo de Anclora ha revisado y verificado tu perfil de proveedor. Ya puedes acceder a leads de clientes en tu área de servicio.',
+    cta: 'Acceder a mi panel',
+    legal: 'Si no reconoces esta solicitud, contacta con soporte.',
+  },
+  en: {
+    subject: 'Your company has been verified on Anclora EnergyScan',
+    title: 'Your company is verified!',
+    copy: 'The Anclora team has reviewed and verified your provider profile. You can now access client leads in your service area.',
+    cta: 'Access my dashboard',
+    legal: 'If you did not request this, please contact support.',
+  },
+  de: {
+    subject: 'Ihr Unternehmen wurde auf Anclora EnergyScan verifiziert',
+    title: 'Ihr Unternehmen ist verifiziert!',
+    copy: 'Das Anclora-Team hat Ihr Anbieterprofil geprüft und verifiziert. Sie können jetzt auf Kundenanfragen in Ihrem Servicebereich zugreifen.',
+    cta: 'Zum Dashboard',
+    legal: 'Wenn Sie diese Anfrage nicht gestellt haben, kontaktieren Sie bitte den Support.',
+  },
+} as const;
+
+export async function sendProviderVerifiedEmail(input: {
+  to?: string | null;
+  providerId: string;
+  language?: EmailLanguage;
+}) {
+  const language = input.language || 'es';
+  const copy = providerVerifiedCopy[language];
+  const appUrl = getAppUrl();
+  return sendTransactionalEmail({
+    type: 'provider_verified',
+    to: input.to,
+    subject: copy.subject,
+    html: layout(copy.title, copy.copy, `${appUrl}/provider/dashboard`, copy.cta, copy.legal),
+    metadata: { providerId: input.providerId },
+  });
+}
+
+const professionalApprovedCopy = {
+  es: {
+    subject: 'Tu acceso profesional ha sido aprobado en Anclora EnergyScan',
+    title: '¡Acceso profesional activado!',
+    copy: 'El equipo de Anclora ha aprobado tu solicitud de acceso profesional. Ya puedes gestionar expedientes de clientes y acceder a todas las funciones del área profesional.',
+    cta: 'Acceder a mi área profesional',
+    legal: 'Si no reconoces esta solicitud, contacta con soporte.',
+  },
+  en: {
+    subject: 'Your professional access has been approved on Anclora EnergyScan',
+    title: 'Professional access activated!',
+    copy: 'The Anclora team has approved your professional access request. You can now manage client cases and access all professional area features.',
+    cta: 'Access my professional area',
+    legal: 'If you did not request this, please contact support.',
+  },
+  de: {
+    subject: 'Ihr Berufszugang wurde auf Anclora EnergyScan genehmigt',
+    title: 'Berufszugang aktiviert!',
+    copy: 'Das Anclora-Team hat Ihren Antrag auf Berufszugang genehmigt. Sie können jetzt Kundenfälle verwalten und alle Funktionen des Berufsbereichs nutzen.',
+    cta: 'Zum Berufsbereich',
+    legal: 'Wenn Sie diese Anfrage nicht gestellt haben, kontaktieren Sie bitte den Support.',
+  },
+} as const;
+
+export async function sendProfessionalApprovedEmail(input: {
+  to?: string | null;
+  requestId: string;
+  language?: EmailLanguage;
+}) {
+  const language = input.language || 'es';
+  const copy = professionalApprovedCopy[language];
+  const appUrl = getAppUrl();
+  return sendTransactionalEmail({
+    type: 'professional_approved',
+    to: input.to,
+    subject: copy.subject,
+    html: layout(copy.title, copy.copy, `${appUrl}/profesional/dashboard`, copy.cta, copy.legal),
+    metadata: { requestId: input.requestId },
   });
 }
