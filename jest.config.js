@@ -11,4 +11,6 @@ module.exports = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
+  // Exclude locked agent worktrees from test discovery
+  testPathIgnorePatterns: ['/node_modules/', '/.claude/worktrees/'],
 };

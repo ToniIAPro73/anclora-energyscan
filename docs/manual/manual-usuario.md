@@ -53,9 +53,12 @@ La herramienta genera una **estimación orientativa** basada en los datos declar
 
 | Perfil | Qué permite hacer |
 | --- | --- |
-| Usuario residencial | Crear un prediagnóstico, consultar el historial, descargar PDF básico, desbloquear PDF Premium y analizar presupuestos |
+| Usuario residencial (sin registrarse) | Completar el wizard, obtener diagnóstico gratuito, desbloquear PDF Premium y revisar un presupuesto puntual mediante Budget Review. Sin historial persistente hasta crear cuenta |
+| Usuario residencial (con cuenta) | Todo lo anterior más dashboard, historial de análisis y presupuestos analizados |
 | Profesional | Gestionar expedientes de clientes desde una cuenta profesional. Ejemplo: una inmobiliaria que prepara informes orientativos para viviendas de su cartera |
 | Proveedor | Recibir oportunidades comerciales consentidas. Ejemplo: certificadora oficial, empresa de ventanas, solar, aislamiento, climatización o reforma |
+
+> **Nota importante:** El análisis de vivienda (wizard + PDF Premium) y el Budget Review son productos distintos. El wizard puede usar un presupuesto adjunto como contexto económico del informe, pero no lo revisa partida por partida. Budget Review analiza el presupuesto como documento independiente.
 
 Una misma organización puede usar más de un perfil. Por ejemplo, una empresa técnica puede usar el área profesional para preparar expedientes de clientes y, además, registrarse como proveedor para recibir solicitudes comerciales. EnergyScan muestra ambos perfiles como accesos independientes.
 
@@ -130,6 +133,8 @@ La pantalla de acceso permite entrar a tu espacio privado o crear una cuenta nue
 
 La cuenta permite guardar el historial, recuperar análisis anteriores, consultar presupuestos analizados y acceder a productos pagados desde el dashboard. La barra de navegación principal se mantiene en el resto de áreas de producto para que puedas volver a precios, wizard, proveedor o preferencias sin perder contexto.
 
+> **No necesitas cuenta para iniciar un análisis residencial o revisar un presupuesto puntual.** Puedes completar el wizard, desbloquear un PDF Premium y usar Budget Review sin registrarte. La cuenta es recomendable para guardar historial y recuperar los análisis anteriores.
+
 ### 3.2 Preferencias de idioma, tema, moneda y unidades
 
 En la barra superior encontrarás el botón de preferencias, por ejemplo **ES · EUR · m²**.
@@ -195,6 +200,8 @@ El wizard es el flujo principal para crear un análisis nuevo. Consta de 5 pasos
 | Envolvente | Ventanas, aislamiento de fachada y cubierta |
 | Horizonte y presupuesto | Plazo de actuación y rango económico |
 | Documentación | Fotos, CEE o presupuesto si quieres enriquecer el análisis |
+
+> **Si adjuntas un presupuesto en este paso:** EnergyScan lo utiliza para contextualizar los escenarios de mejora del informe energético. Esto no equivale a una Budget Review completa. El presupuesto adjunto se usa como contexto económico, no se revisa partida por partida. Si quieres una revisión detallada del presupuesto, utiliza la sección [Budget Review](#7-segunda-opinión-de-presupuesto).
 
 ### 4.3.1 Selección de clasificación energética objetivo
 
@@ -360,6 +367,21 @@ El **Informe Premium PDF** es un producto de pago único para un análisis concr
 | Ayudas y normativa ampliada | No | Sí |
 | Análisis visual IA de fotos | No | Hasta 3 fotos priorizadas por relevancia energética |
 | Imágenes catastrales en PDF | No | Parcela resaltada y mapa del entorno si hay datos |
+| Revisión detallada de presupuesto | No | No (disponible como Budget Review independiente) |
+
+> El PDF Premium puede tener en cuenta un presupuesto adjunto como contexto económico del informe. No incluye revisión detallada partida por partida. Para eso, usa [Budget Review](#7-segunda-opinión-de-presupuesto).
+
+### 6.7 Pack Reforma Inteligente
+
+El **Pack Reforma Inteligente** combina el PDF Premium residencial y el Budget Review en un único pago. Permite analizar la vivienda y revisar el presupuesto de reforma sin pagar por separado.
+
+| Plan | Incluye |
+| --- | --- |
+| PDF Premium | Diagnóstico completo, escenarios, costes, PDF descargable |
+| Budget Review | Revisión de partidas, totales, alertas, PDF descargable |
+| Pack Reforma Inteligente | PDF Premium + Budget Review |
+
+> El Pack Reforma Inteligente está disponible próximamente. Consulta la [página de precios](/pricing) para ver el estado actual.
 
 ### 6.3 PDF gratuito
 
@@ -416,7 +438,9 @@ El análisis aparece en el PDF Premium como una página de **Análisis visual de
 
 ![Segunda opinión de presupuesto](screenshots/budget-review-dark.png)
 
-La segunda opinión analiza un presupuesto de reforma para detectar partidas, importes y posibles alertas.
+**Budget Review es una segunda opinión sobre un presupuesto concreto de reforma. Puede usarlo un usuario residencial sin haber completado el wizard energético.** Es un producto independiente del PDF Premium residencial.
+
+> **Diferencia clave:** El PDF Premium analiza la vivienda en su conjunto. Budget Review analiza el presupuesto como documento económico/técnico independiente. Un análisis no incluye el otro.
 
 ### 7.1 Cuándo usarla
 
@@ -707,9 +731,25 @@ Revisa de forma orientativa hasta 3 fotografías aportadas en Premium. Puede se�
 
 Si eliges una letra objetivo, EnergyScan puede mostrar si parece alcanzable, si exige más presupuesto del declarado o si no parece técnicamente alcanzable con las reglas actuales. Es una estimación, no un presupuesto.
 
+**¿Necesito cuenta para usar EnergyScan como residencial?**
+
+No. Puedes completar el wizard, obtener el diagnóstico gratuito, desbloquear el PDF Premium y usar Budget Review sin crear cuenta. La cuenta es recomendable para guardar historial y recuperar análisis anteriores.
+
+**¿Qué diferencia hay entre PDF Premium y Budget Review?**
+
+El PDF Premium analiza la vivienda en su conjunto: letra estimada, escenarios de mejora, costes orientativos, normativa, ayudas y análisis visual IA. Budget Review analiza un presupuesto concreto de reforma partida por partida, detectando totales, posibles alertas de precio y omisiones habituales. Son productos independientes con pagos separados.
+
+**Si subo un presupuesto en el wizard, ¿ya tengo Budget Review?**
+
+No. El presupuesto adjunto en el wizard se usa como contexto económico del informe energético para contextualizar los escenarios de mejora. No se revisa partida por partida. Para una segunda opinión detallada del presupuesto, usa Budget Review.
+
+**¿Puedo comprar solo Budget Review?**
+
+Sí. Budget Review es un producto independiente accesible desde la sección [Segunda opinión de presupuesto](/budget-review). No necesitas haber completado el wizard ni tener PDF Premium.
+
 **¿El Budget Review está incluido en Premium?**
 
-No. Es un producto independiente para analizar presupuestos de reforma.
+No. Es un producto independiente para analizar presupuestos de reforma. El Pack Reforma Inteligente combina ambos en un único pago (próximamente).
 
 **¿Puedo recuperar mis análisis?**
 
@@ -738,9 +778,10 @@ No. Un estado verificado o preferente puede indicar revisión interna, pero no g
 | Término | Significado |
 | --- | --- |
 | Assessment | Análisis o prediagnóstico de una vivienda |
-| Budget Review | Segunda opinión de presupuesto |
+| Budget Review | Segunda opinión independiente sobre un presupuesto de reforma concreto. Producto separado del PDF Premium residencial |
+| PDF Premium residencial | Informe energético pagado con PDF completo, escenarios, costes orientativos, normativa, ayudas y análisis visual IA |
+| Pack Reforma Inteligente | Producto bundle que combina PDF Premium residencial y Budget Review en un único pago (próximamente) |
 | PDF gratuito | Resumen básico descargable de 2 páginas sin pago |
-| Premium | Informe pagado con PDF y contenido ampliado |
 | Análisis visual IA | Observaciones orientativas sobre fotos aportadas, disponibles en Premium |
 | Lead | Solicitud de contacto asignada a proveedor |
 | Crédito | Unidad que permite desbloquear un contacto |
@@ -776,6 +817,7 @@ Anclora EnergyScan proporciona estimaciones orientativas basadas en datos declar
 - Los presupuestos deben revisarse con técnicos o contratistas cualificados.
 - Las ayudas públicas deben comprobarse siempre en fuentes oficiales vigentes.
 - Los datos personales de leads deben tratarse conforme a RGPD y consentimiento.
+- **Budget Review no sustituye una revisión técnica, contractual, legal ni una medición real de obra.** El análisis es automático y orientativo. No valida mediciones, calidades, permisos ni responsabilidades contractuales.
 
 <div class="footer-brand">
 

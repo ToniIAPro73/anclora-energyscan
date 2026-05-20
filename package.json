@@ -16,7 +16,8 @@
     "manual:pdf:es": "node scripts/generate-manual-pdf.mjs --lang es",
     "manual:pdf:en": "node scripts/generate-manual-pdf.mjs --lang en",
     "manual:pdf:de": "node scripts/generate-manual-pdf.mjs --lang de",
-    "manual:pdf": "npm run manual:pdf:es && npm run manual:pdf:en && npm run manual:pdf:de"
+    "manual:pdf": "npm run manual:pdf:es && npm run manual:pdf:en && npm run manual:pdf:de",
+    "budget-review:demo": "node scripts/generate-budget-review-demo.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.97.0",

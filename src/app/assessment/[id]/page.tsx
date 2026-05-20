@@ -655,7 +655,7 @@ export default async function AssessmentResultsPage({ params }: { params: { id: 
             </div>
           )}
 
-          {!canViewPremium && <PaywallSection assessmentId={params.id} />}
+          {!canViewPremium && <PaywallSection assessmentId={params.id} hasBudgetAttached={rehabBudgets.length > 0} />}
 
           {/* EVIDENCE MATRIX */}
           <section className="surface border rounded-3xl p-6 lg:p-8 space-y-5">

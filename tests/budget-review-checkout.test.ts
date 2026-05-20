@@ -26,7 +26,8 @@ describe('POST /api/budget-review/checkout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     process.env.NEXT_PUBLIC_APP_URL = 'http://localhost:3000';
-    process.env.NEXT_PUBLIC_BUDGET_REVIEW_PRICE_EUR = '19.90';
+    // Default launch price is 14.90 EUR
+    process.env.NEXT_PUBLIC_BUDGET_REVIEW_PRICE_EUR = '14.90';
     delete process.env.STRIPE_PRICE_BUDGET_REVIEW;
   });
 
@@ -46,7 +47,8 @@ describe('POST /api/budget-review/checkout', () => {
     expect(response.status).toBe(200);
     expect(mockCreateSession).toHaveBeenCalledWith(expect.objectContaining({
       metadata: expect.objectContaining({
-        amountCents: '1990',
+        // 14.90 EUR = 1490 cents (launch price)
+        amountCents: '1490',
         budgetReviewId: 'br_123',
         currency: 'eur',
         productType: 'budget_review',

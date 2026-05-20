@@ -993,6 +993,12 @@ export default function AssessmentWizard() {
       <div>
         <p className="font-heading text-sm font-bold text-premium">{t.wizardBudgetImportTitle}</p>
         <p className="mt-1 text-xs text-muted">{t.wizardBudgetImportDescription}</p>
+        {/* Budget context notice — differentiates wizard upload from Budget Review */}
+        <p className="mt-2 text-[11px] text-[#FFB020] leading-relaxed rounded-xl border border-[#FFB020]/20 bg-[#FFB020]/5 px-3 py-2">
+          {t.wizardBudgetContextNotice ?? (
+            'El presupuesto adjunto se usará como contexto económico del informe. Para una revisión detallada partida por partida, utiliza Budget Review.'
+          )}
+        </p>
       </div>
       <input
         ref={budgetFileInputRef}
