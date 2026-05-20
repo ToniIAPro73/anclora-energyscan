@@ -1,5 +1,5 @@
-jest.mock('@/auth', () => ({
-  auth: jest.fn(),
+jest.mock('@/auth.config', () => ({
+  lightAuth: jest.fn(),
 }));
 
 jest.mock('@/lib/prisma', () => ({
@@ -23,7 +23,7 @@ jest.mock('@/lib/analytics', () => ({
 }));
 
 import { POST } from '@/app/api/provider/credits/checkout/route';
-import { auth } from '@/auth';
+import { lightAuth } from '@/auth.config';
 import { prisma } from '@/lib/prisma';
 
 describe('POST /api/provider/credits/checkout', () => {
@@ -36,7 +36,7 @@ describe('POST /api/provider/credits/checkout', () => {
   });
 
   it('creates provider lead pack checkout with unambiguous metadata', async () => {
-    (auth as jest.Mock).mockResolvedValue({ user: { id: 'user_123' } });
+    (lightAuth as jest.Mock).mockResolvedValue({ user: { id: 'user_123' } });
     (prisma.providerAccount.findUnique as jest.Mock).mockResolvedValue({ providerId: 'prov_123' });
     mockCreateSession.mockResolvedValue({ id: 'cs_provider_123', url: 'https://checkout.stripe.com/c/pay/cs_provider_123' });
 
