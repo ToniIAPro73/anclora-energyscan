@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect } from 'react';
+import Link from 'next/link';
 import { CheckCircle2, ShieldCheck } from 'lucide-react';
 import { CheckoutButton } from './CheckoutButton';
 import { PdfPreview } from './PdfPreview';
 import { usePreferences } from './AppPreferencesProvider';
 import { trackEvent } from '@/lib/analytics';
 
-export function PaywallSection({ assessmentId }: { assessmentId: string }) {
+export function PaywallSection({ assessmentId, hasBudgetAttached = false }: { assessmentId: string; hasBudgetAttached?: boolean }) {
   const { dictionary: t, language, currency, measurementSystem } = usePreferences();
   const isLocalAssessment = assessmentId.startsWith('local_');
   const demoPdfHref = `/api/assessment/demo/pdf?lang=${language}&currency=${currency}&units=${measurementSystem}`;
@@ -69,6 +70,25 @@ export function PaywallSection({ assessmentId }: { assessmentId: string }) {
               <p className="mt-1">{t.paywallLegalNotice}</p>
             </div>
           </div>
+
+          {/* Budget Review upsell: shown when user attached a budget in the wizard */}
+          {hasBudgetAttached && (
+            <div className="rounded-2xl border border-[#FFB020]/20 bg-[#FFB020]/5 p-4 text-xs leading-relaxed text-[#FFB020]">
+              <p className="font-semibold mb-1">
+                {language === 'en' ? 'Want to review this quote line by line?' : language === 'de' ? 'Möchten Sie dieses Angebot positionsweise prüfen?' : '¿Quieres revisar este presupuesto partida por partida?'}
+              </p>
+              <p className="mb-2">
+                {language === 'en'
+                  ? 'The Premium PDF uses the attached quote as context, but does not review it line by line. Add Budget Review for an independent analysis.'
+                  : language === 'de'
+                  ? 'Das Premium-PDF nutzt das beigefügte Angebot als Kontext, prüft es aber nicht positionsweise. Fügen Sie Budget Review für eine unabhängige Analyse hinzu.'
+                  : 'El PDF Premium usa el presupuesto adjunto como contexto, pero no lo revisa partida por partida. Añade Budget Review para un análisis independiente.'}
+              </p>
+              <Link href="/budget-review" className="inline-flex items-center gap-1 rounded-full border border-[#FFB020]/40 px-4 py-1.5 text-[11px] font-bold text-[#FFB020] hover:bg-[#FFB020]/10 transition">
+                {language === 'en' ? 'Add Budget Review' : language === 'de' ? 'Budget Review hinzufügen' : 'Añadir Budget Review'}
+              </Link>
+            </div>
+          )}
         </div>
 
         <PdfPreview />

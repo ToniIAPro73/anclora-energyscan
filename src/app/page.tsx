@@ -171,6 +171,98 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* USE CASES RESIDENCIALES */}
+        <section id="casos-de-uso" className="py-24 sm:py-32 relative">
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#262626] to-transparent"></div>
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <p className="text-xs text-[#00DC82] font-heading font-semibold tracking-wider uppercase mb-3">{
+                language === 'en' ? 'For residential users' : language === 'de' ? 'Für Wohnungsnutzer' : 'Para usuarios residenciales'
+              }</p>
+              <h2 className="font-heading font-bold text-3xl sm:text-4xl text-premium mb-4">{
+                language === 'en' ? 'What do you need to review today?' : language === 'de' ? 'Was möchten Sie heute prüfen?' : '¿Qué necesitas revisar hoy?'
+              }</h2>
+              <p className="text-muted max-w-2xl mx-auto text-sm">
+                {language === 'en'
+                  ? 'You can analyse your home or review a quote without creating an account.'
+                  : language === 'de'
+                  ? 'Sie können Ihre Immobilie analysieren oder ein Angebot prüfen, ohne ein Konto zu erstellen.'
+                  : 'Puedes analizar tu vivienda o revisar un presupuesto sin crear cuenta.'}
+              </p>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-6 mb-8">
+              {/* CASO 1: Analizar vivienda */}
+              <div className="surface-2 border border-[#00DC82]/20 rounded-2xl p-6 sm:p-8 flex flex-col">
+                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[#00DC82]/10 text-[#00DC82] self-start">
+                  <Home className="h-6 w-6" />
+                </div>
+                <h3 className="font-heading font-bold text-xl text-premium mb-2">{
+                  language === 'en' ? 'Analyse my home' : language === 'de' ? 'Meine Immobilie analysieren' : 'Analizar mi vivienda'
+                }</h3>
+                <p className="text-sm text-muted leading-relaxed mb-6 flex-1">{
+                  language === 'en'
+                    ? 'To understand your home\'s energy situation, prioritise renovations and download a Premium report.'
+                    : language === 'de'
+                    ? 'Um die energetische Situation Ihrer Immobilie zu verstehen, Sanierungen zu priorisieren und einen Premium-Bericht herunterzuladen.'
+                    : 'Para entender la situación energética de tu vivienda, priorizar reformas y descargar un informe Premium.'
+                }</p>
+                <div className="flex flex-col gap-3">
+                  <Link href="/wizard" className="inline-flex items-center justify-center gap-2 rounded-full bg-[#00DC82] px-6 py-3 text-sm font-heading font-bold text-[#0A0A0A] transition hover:brightness-110">
+                    {t.startFree} <ArrowRight className="h-4 w-4" />
+                  </Link>
+                  <a
+                    href={`/api/assessment/demo/pdf?lang=${language}&currency=${currency}&units=${measurementSystem}`}
+                    className="inline-flex items-center justify-center gap-2 rounded-full border border-[#00DC82]/30 px-6 py-3 text-sm font-heading font-semibold text-[#00DC82] hover:bg-[#00DC82]/10 transition"
+                  >
+                    {t.paywallDemoLink}
+                  </a>
+                </div>
+              </div>
+
+              {/* CASO 2: Revisar presupuesto */}
+              <div className="surface-2 border border-white/10 rounded-2xl p-6 sm:p-8 flex flex-col">
+                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[#FFB020]/10 text-[#FFB020] self-start">
+                  <FileText className="h-6 w-6" />
+                </div>
+                <h3 className="font-heading font-bold text-xl text-premium mb-2">{
+                  language === 'en' ? 'Review a renovation quote' : language === 'de' ? 'Ein Angebot prüfen' : 'Revisar un presupuesto'
+                }</h3>
+                <p className="text-sm text-muted leading-relaxed mb-6 flex-1">{
+                  language === 'en'
+                    ? 'To get a second opinion on a renovation quote before accepting it.'
+                    : language === 'de'
+                    ? 'Um eine zweite Meinung zu einem Sanierungsangebot zu erhalten, bevor Sie es annehmen.'
+                    : 'Para obtener una segunda opinión sobre un presupuesto de reforma antes de aceptarlo.'
+                }</p>
+                <div className="flex flex-col gap-3">
+                  <Link href="/budget-review" className="inline-flex items-center justify-center gap-2 rounded-full border border-[#FFB020]/40 px-6 py-3 text-sm font-heading font-bold text-[#FFB020] hover:bg-[#FFB020]/10 transition">
+                    {language === 'en' ? 'Review my quote' : language === 'de' ? 'Mein Angebot prüfen' : 'Revisar mi presupuesto'} <ArrowRight className="h-4 w-4" />
+                  </Link>
+                  <Link
+                    href="/budget-review?demo=1"
+                    className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 px-6 py-3 text-sm font-heading font-semibold text-muted hover:text-premium hover:border-white/20 transition"
+                  >
+                    {language === 'en' ? 'View Budget Review demo' : language === 'de' ? 'Budget-Review-Demo ansehen' : 'Ver Budget Review demo'}
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* NOTA DIFERENCIAL */}
+            <div className="rounded-2xl border border-[#FFB020]/20 bg-[#FFB020]/5 p-4 text-center">
+              <p className="text-xs text-[#FFB020] leading-relaxed max-w-3xl mx-auto">
+                <span className="font-semibold">{language === 'en' ? 'Note:' : language === 'de' ? 'Hinweis:' : 'Nota:'}</span>{' '}
+                {language === 'en'
+                  ? 'If you upload a quote during the wizard, we use it as context for the energy report. For a line-by-line review, use Budget Review.'
+                  : language === 'de'
+                  ? 'Wenn Sie während des Wizards ein Angebot hochladen, verwenden wir es als Kontext für den Energiebericht. Für eine positionsweise Prüfung nutzen Sie Budget Review.'
+                  : 'Si subes un presupuesto durante el wizard, lo usamos como contexto para el informe energético. Si quieres revisarlo partida por partida, usa Budget Review.'}
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* PARTNERS */}
         <section id="mejoras" className="py-24 sm:py-32 relative">
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#262626] to-transparent"></div>
