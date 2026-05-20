@@ -7,6 +7,13 @@ import type { NextAuthConfig } from 'next-auth';
 export const authConfig = {
   pages: { signIn: '/auth' },
   providers: [],
+  callbacks: {
+    session({ session, token }) {
+      if (session.user && token.sub) session.user.id = token.sub;
+      if (session.user && token.picture !== undefined) session.user.image = token.picture as string | null;
+      return session;
+    },
+  },
 } satisfies NextAuthConfig;
 
 // Shared lightweight auth — safe for middleware and server components.
