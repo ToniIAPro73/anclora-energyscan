@@ -2,11 +2,13 @@ import { NextResponse } from 'next/server';
 import { lightAuth as auth } from '@/auth.config';
 import { prisma } from '@/lib/prisma';
 import { isAdmin } from '@/lib/is-admin';
+import { sendProviderVerifiedEmail } from '@/lib/email';
 
 export const dynamic = 'force-dynamic';
 
 const ALLOWED_STATUSES = ['PENDING', 'VERIFIED', 'PREFERRED', 'SUSPENDED', 'EXCLUSIVE'] as const;
 type ProviderStatus = typeof ALLOWED_STATUSES[number];
+const VERIFICATION_STATUSES: ProviderStatus[] = ['VERIFIED', 'PREFERRED', 'EXCLUSIVE'];
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   const session = await auth().catch(() => null);
@@ -24,7 +26,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     );
   }
 
-  const provider = await prisma.provider.findUnique({ where: { id: params.id }, select: { id: true } });
+  const provider = await prisma.provider.findUnique({ where: { id: params.id }, select: { id: true, email: true, status: true } });
   if (!provider) return NextResponse.json({ error: 'not_found' }, { status: 404 });
 
   const updated = await prisma.provider.update({
@@ -32,6 +34,12 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     data: { status },
     select: { id: true, status: true },
   });
+
+  // Send email when first transitioning into a verified state
+  const wasNotVerified = !VERIFICATION_STATUSES.includes(provider.status as ProviderStatus);
+  if (wasNotVerified && VERIFICATION_STATUSES.includes(status as ProviderStatus) && provider.email) {
+    void sendProviderVerifiedEmail({ to: provider.email, providerId: provider.id });
+  }
 
   return NextResponse.json({ ok: true, provider: updated });
 }

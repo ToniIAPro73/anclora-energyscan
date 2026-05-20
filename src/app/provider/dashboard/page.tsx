@@ -13,10 +13,23 @@ export default async function ProviderDashboardPage() {
   const copy = getMonetizationCopy(language).provider;
   const providerLang = language;
   const session = await auth().catch(() => null);
-  const account = session?.user?.id ? await prisma.providerAccount.findUnique({
+  let account = session?.user?.id ? await prisma.providerAccount.findUnique({
     where: { userId: session.user.id },
     include: { provider: { include: { leads: true } } },
   }) : null;
+
+  // Auto-link: if user has no ProviderAccount but registered a Provider with their email, link them now
+  if (!account && session?.user?.id && session.user.email) {
+    const unclaimed = await prisma.provider.findFirst({
+      where: { email: session.user.email, accounts: { is: null } },
+    });
+    if (unclaimed) {
+      account = await prisma.providerAccount.create({
+        data: { userId: session.user.id, providerId: unclaimed.id },
+        include: { provider: { include: { leads: true } } },
+      });
+    }
+  }
   const leads = account?.provider.leads || [];
   const unlocked = leads.filter((lead) => lead.contactUnlockedAt).length;
   const pending = leads.filter((lead) => lead.status === 'PENDING').length;

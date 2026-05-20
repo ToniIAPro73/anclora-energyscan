@@ -17,7 +17,7 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
   });
   if (!provider) return NextResponse.json({ error: 'not_found' }, { status: 404 });
 
-  if (provider.accounts.length > 0) {
+  if (provider.accounts !== null) {
     return NextResponse.json({ ok: true, alreadyLinked: true });
   }
 

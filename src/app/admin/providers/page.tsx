@@ -172,7 +172,7 @@ export default async function AdminProvidersPage() {
                           statusLabels={Object.fromEntries(['PENDING', 'VERIFIED', 'PREFERRED', 'SUSPENDED', 'EXCLUSIVE'].map((s) => [s, getProviderStatusLabel(s, language)]))}
                           labels={{ save: copy.save, saving: copy.saving, saved: copy.saved, saveError: copy.saveError }}
                         />
-                        {provider.accounts.length === 0 && (
+                        {!provider.accounts && (
                           <ProviderLinkUser
                             providerId={provider.id}
                             labels={{ link: copy.linkUser, linking: copy.linkingUser, linked: copy.linkedUser, noUser: copy.noUserFound, error: copy.linkError }}
