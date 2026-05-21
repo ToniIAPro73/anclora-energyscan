@@ -44,26 +44,30 @@ const SOCIAL_LINKS = [
   },
 ];
 
-const iconBtn =
-  'group flex h-8 w-8 items-center justify-center rounded-full text-muted/70 transition-all duration-200 hover:text-[#00DC82] hover:bg-[#00DC82]/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00DC82]/50';
-
 export function SocialRail() {
   return (
     <aside
       className="fixed right-0 top-1/2 -translate-y-1/2 z-[5900] hidden lg:flex flex-col items-center"
       aria-label="Redes sociales"
     >
-      <div className="flex flex-col items-center gap-0 rounded-l-2xl border border-r-0 border-white/[0.08] bg-[#111]/85 backdrop-blur-md py-4 px-2 shadow-2xl shadow-black/30">
+      <div className="social-rail-panel flex flex-col items-center gap-0 rounded-l-2xl border border-r-0 backdrop-blur-md py-4 px-2">
         <span
-          className="text-[9px] font-heading font-bold uppercase tracking-[0.2em] text-muted/60 mb-3 select-none"
+          className="social-rail-label text-[9px] font-heading font-bold uppercase tracking-[0.2em] mb-3 select-none"
           style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
         >
           Síguenos
         </span>
-        <div className="w-px h-5 bg-gradient-to-b from-transparent via-[#00DC82]/30 to-transparent mb-3" />
+        <div className="social-rail-divider w-px h-5 mb-3" />
         <div className="flex flex-col items-center gap-2">
           {SOCIAL_LINKS.map(({ label, href, svg }) => (
-            <a key={label} href={href} target="_blank" rel="noopener noreferrer" aria-label={label} className={iconBtn}>
+            <a
+              key={label}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={label}
+              className="social-rail-icon-btn flex h-8 w-8 items-center justify-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/50"
+            >
               {svg}
             </a>
           ))}
@@ -75,8 +79,8 @@ export function SocialRail() {
 
 export function SocialRailMobile() {
   return (
-    <div className="flex lg:hidden items-center justify-center gap-3 py-4 border-t border-white/[0.06]">
-      <span className="text-[9px] font-heading font-bold uppercase tracking-widest text-muted/50 mr-1">
+    <div className="flex lg:hidden items-center justify-center gap-3 py-4 border-t border-[var(--border)]">
+      <span className="text-[9px] font-heading font-bold uppercase tracking-widest social-rail-label mr-1">
         Síguenos
       </span>
       {SOCIAL_LINKS.map(({ label, href, svg }) => (
@@ -86,7 +90,7 @@ export function SocialRailMobile() {
           target="_blank"
           rel="noopener noreferrer"
           aria-label={label}
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-muted/60 transition hover:text-[#00DC82] hover:border-[#00DC82]/40 hover:bg-[#00DC82]/8"
+          className="social-rail-mobile-btn flex h-9 w-9 items-center justify-center rounded-full border"
         >
           {svg}
         </a>

@@ -388,3 +388,57 @@ select option:checked {
 .light .surface-2 {
   box-shadow: 0 12px 32px rgba(23, 21, 18, 0.06);
 }
+
+/* Social Rail — theme-aware */
+.social-rail-panel {
+  background: color-mix(in srgb, var(--elevated) 90%, transparent);
+  border-color: var(--border);
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.18);
+}
+
+.social-rail-label {
+  color: color-mix(in srgb, var(--muted) 65%, transparent);
+}
+
+.social-rail-divider {
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.social-rail-icon-btn {
+  color: color-mix(in srgb, var(--muted) 75%, transparent);
+  transition: color 200ms ease, background 200ms ease;
+}
+
+.social-rail-icon-btn:hover {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.social-rail-mobile-btn {
+  color: color-mix(in srgb, var(--muted) 70%, transparent);
+  border-color: var(--border);
+  background: color-mix(in srgb, var(--fg) 4%, transparent);
+  transition: color 200ms ease, border-color 200ms ease, background 200ms ease;
+}
+
+.social-rail-mobile-btn:hover {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+/* Scroll Arrows — theme-aware */
+.scroll-arrow-btn {
+  background: color-mix(in srgb, var(--elevated) 88%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent);
+  color: var(--accent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: border-color 200ms ease, background 200ms ease, transform 200ms ease;
+}
+
+.scroll-arrow-btn:hover {
+  border-color: color-mix(in srgb, var(--accent) 70%, transparent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  transform: scale(1.1);
+}
