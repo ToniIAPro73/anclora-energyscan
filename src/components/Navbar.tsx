@@ -43,12 +43,12 @@ export default function Navbar({
         { href: professionalHref, label: t.navProfessional, Icon: UserRound },
       ]
     : [
-        { href: '/#casos-de-uso', label: t.navResidential, Icon: Home },
-        { href: '/#como-funciona', label: t.navHow },
         { href: '/calculadora-ahorro', label: t.navCalculator },
-        { href: '/budget-review', label: t.navBudgetReview },
-        { href: '/proveedores', label: t.navProviders },
-        { href: '/profesional', label: t.navProfessional },
+        { href: '/wizard', label: t.navReports, Icon: FileText },
+        { href: '/budget-review', label: t.navBudgetReview, Icon: ReceiptText },
+        { href: '/#casos-de-uso', label: t.navResidential, Icon: Home },
+        { href: '/profesional', label: t.navProfessional, Icon: UserRound },
+        { href: '/proveedores', label: t.navProviders, Icon: BriefcaseBusiness },
       ];
 
   return (
@@ -101,6 +101,8 @@ export default function Navbar({
             </>
           ) : (
             <>
+              <Link href="/#como-funciona" className="inline-flex min-h-9 items-center whitespace-nowrap rounded-full px-3 font-semibold transition hover:bg-white/5 hover:text-premium">{t.navHow}</Link>
+              <Link href="/#mejoras" className="inline-flex min-h-9 items-center whitespace-nowrap rounded-full px-3 font-semibold transition hover:bg-white/5 hover:text-premium">{t.navImprovements}</Link>
               <Link href="/#normativa" className="inline-flex min-h-9 items-center whitespace-nowrap rounded-full px-3 font-semibold transition hover:bg-white/5 hover:text-premium">{t.navRegulation}</Link>
               <Link href="/pricing" className="inline-flex min-h-9 items-center whitespace-nowrap rounded-full px-3 font-semibold transition hover:bg-white/5 hover:text-premium">{t.navPricing}</Link>
             </>
