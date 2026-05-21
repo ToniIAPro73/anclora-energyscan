@@ -27,6 +27,25 @@ export const savingsCalculatorSchema = z.object({
 
 export type SavingsCalculatorInput = z.infer<typeof savingsCalculatorSchema>;
 
+export type PaybackCategory =
+  | 'fast'
+  | 'reasonable'
+  | 'long'
+  | 'very_long'
+  | 'not_economic';
+
+export type SavingsViability =
+  | 'mostly_economic'
+  | 'mixed'
+  | 'comfort_regulatory'
+  | 'strategic_not_financial';
+
+export type CalculatorWarning =
+  | 'very_long_payback'
+  | 'low_spend_deep_retrofit'
+  | 'basic_input_quality'
+  | 'heat_pump_already_installed';
+
 const savingsRateByMeasure: Record<SavingsCalculatorInput['measure'], [number, number]> = {
   windows: [0.06, 0.14],
   insulation: [0.12, 0.28],
@@ -42,6 +61,14 @@ const costByMeasurePerM2: Record<SavingsCalculatorInput['measure'], [number, num
   pv: [75, 180],
   deep_retrofit: [300, 700],
 };
+
+export function getSavingsRateRangeForMeasure(measure: SavingsCalculatorInput['measure']) {
+  return savingsRateByMeasure[measure];
+}
+
+export function getCostRangePerM2ForMeasure(measure: SavingsCalculatorInput['measure']) {
+  return costByMeasurePerM2[measure];
+}
 
 function constructionYearMultiplier(year: number | undefined): number {
   if (year === undefined) return 1.0;
@@ -109,13 +136,81 @@ export function calculateSavingsRange(input: SavingsCalculatorInput) {
   const savingsNarrowingPct =
     basicSpan > 0 ? Math.round(((basicSpan - enhancedSpan) / basicSpan) * 100) : 0;
 
+  const paybackMidpoint =
+    minPaybackYears !== null && maxPaybackYears !== null
+      ? (minPaybackYears + maxPaybackYears) / 2
+      : null;
+  const paybackCategory = categorizePayback(paybackMidpoint);
+  const viability = getViability(paybackCategory);
+
+  const warnings: CalculatorWarning[] = [];
+  if (paybackCategory === 'very_long' || paybackCategory === 'not_economic') {
+    warnings.push('very_long_payback');
+  }
+  if (parsed.monthlySpend < 80 && parsed.measure === 'deep_retrofit') {
+    warnings.push('low_spend_deep_retrofit');
+  }
+  if (inputQuality === 'basic') {
+    warnings.push('basic_input_quality');
+  }
+  if (parsed.measure === 'heat_pump' && parsed.heatingSystem === 'heat_pump') {
+    warnings.push('heat_pump_already_installed');
+  }
+
   return {
     input: parsed,
+    annualSpend,
+    estimatedSavingsRateRange: [minRate, maxRate] as const,
     annualSavingsRange: [minAnnualSavings, maxAnnualSavings] as const,
     costRange: [minCost, maxCost] as const,
     paybackYearsRange: [minPaybackYears, maxPaybackYears] as const,
+    paybackCategory,
+    viability,
+    interpretationKey: `calculator.interpretation.${paybackCategory}`,
+    primaryTakeawayKey: `calculator.takeaway.${viability}`,
+    warnings,
+    assumptions: [
+      'monthly_spend',
+      'measure',
+      'area',
+      'savings_rate',
+      'cost_rate',
+      'input_quality',
+    ],
+    assumptionValues: {
+      monthlySpend: parsed.monthlySpend,
+      annualSpend,
+      measure: parsed.measure,
+      area: parsed.area,
+      currentLetter: parsed.currentLetter,
+      savingsRateRange: [minRate, maxRate] as const,
+      costRateRange: [minCostM2, maxCostM2] as const,
+    },
     disclaimer: 'Rango orientativo no garantizado. Requiere validacion tecnica y datos completos de la vivienda.',
     inputQuality,
     savingsNarrowingPct,
   };
+}
+
+function categorizePayback(paybackYears: number | null): PaybackCategory {
+  if (paybackYears === null || !Number.isFinite(paybackYears)) return 'not_economic';
+  if (paybackYears <= 7) return 'fast';
+  if (paybackYears <= 15) return 'reasonable';
+  if (paybackYears <= 30) return 'long';
+  if (paybackYears <= 60) return 'very_long';
+  return 'not_economic';
+}
+
+function getViability(category: PaybackCategory): SavingsViability {
+  switch (category) {
+    case 'fast':
+    case 'reasonable':
+      return 'mostly_economic';
+    case 'long':
+      return 'mixed';
+    case 'very_long':
+      return 'comfort_regulatory';
+    case 'not_economic':
+      return 'strategic_not_financial';
+  }
 }

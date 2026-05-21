@@ -19,6 +19,10 @@ export function convertCurrencyFromEur(valueEur: number, currency: AppCurrency, 
   return currency === "GBP" ? valueEur * rate : valueEur;
 }
 
+export function convertCurrencyToEur(value: number, currency: AppCurrency, rate = getConfiguredEurGbpRate()): number {
+  return currency === "GBP" ? value / rate : value;
+}
+
 export function formatCurrency(
   valueEur: number,
   currency: AppCurrency,

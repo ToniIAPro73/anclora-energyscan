@@ -164,21 +164,23 @@ Die Startseite fasst die wichtigsten Aktionen zusammen:
 
 ![Energiesparrechner](screenshots/imagen-pag9-de.png)
 
-Der Rechner ist öffentlich und schnell. Er eignet sich zur Schätzung allgemeiner Bereiche, bevor die vollständige Analyse durchgeführt wird.
+Der öffentliche Rechner schaetzt einen orientierenden Wirtschaftlichkeitsbereich fuer eine konkrete Massnahme. Er nutzt den monatlichen Rechnungsbetrag als Basis fuer jaehrliche Einsparung, ungefaehre Investition und einfache Amortisation. Er ersetzt weder die vollstaendige Voreinschaetzung noch ein professionelles Angebot.
 
 **Schritte:**
 
 1. Immobilientyp auswählen.
 2. Wohnfläche eingeben.
-3. Ungefähre monatliche Energiekosten eingeben.
-4. Gewünschte Maßnahmen auswählen.
+3. Durchschnittlichen monatlichen Betrag der Energierechnungen eingeben. Keine kWh oder Anschlussleistung eingeben.
+4. Konkrete Verbesserung auswaehlen, die simuliert werden soll.
 5. **Orientierenden Bereich berechnen** klicken.
 
 | Ergebnis | Wie zu lesen |
 | --- | --- |
-| Jährliche Einsparung | Möglicher Einsparungsbereich – nicht garantiert |
-| Orientierende Kosten | Ungefähre Investition für die gewählten Maßnahmen |
-| Amortisationszeit | Ungefähre Rückzahlungsdauer in Jahren |
+| Geschaetzte jaehrliche Einsparung | Moeglicher Bereich im Vergleich zu den angegebenen Energiekosten |
+| Orientierende Investition | Ungefaehre Kosten fuer die ausgewaehlte Massnahme |
+| Einfache wirtschaftliche Amortisation | Ungefaehre Jahre, um die Investition nur durch Energieeinsparung zurueckzugewinnen |
+
+Eine lange Amortisation bedeutet nicht, dass die Massnahme nutzlos ist: Sie kann wegen Komfort, Wartung, Vorschriften, Verkauf/Vermietung oder Immobilienwert sinnvoll sein.
 
 ### 4.3 Vorbewertungs-Wizard
 
