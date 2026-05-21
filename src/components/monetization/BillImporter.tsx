@@ -72,12 +72,6 @@ function getBillingDays(entry: BillEntry): number | undefined {
   return entry.billingDays ?? entry.extracted.billingDays;
 }
 
-function computeMonthlyAmount(entry: BillEntry): number | undefined {
-  const amount = getAmountEur(entry);
-  if (amount === undefined) return undefined;
-  const days = getBillingDays(entry) ?? 30;
-  return amount / (days / 30.44);
-}
 
 function toSerializable(bills: BillEntry[]): SerializableBill[] {
   return bills
