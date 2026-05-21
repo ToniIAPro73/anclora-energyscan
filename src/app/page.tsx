@@ -2,7 +2,7 @@
 
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { ArrowRight, CheckCircle2, Home, Gauge, Zap, FileText } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Home, Gauge, Zap, FileText, Calculator } from 'lucide-react';
 import Link from 'next/link';
 import { usePreferences } from '@/components/AppPreferencesProvider';
 import { getLegalDisclaimer } from '@/lib/i18n';
@@ -63,20 +63,28 @@ export default function LandingPage() {
                 <p className="text-muted text-base sm:text-lg leading-relaxed mb-6 max-w-xl">
                   {t.heroCopy}
                 </p>
-                <div className="flex flex-wrap gap-3 mb-4">
+                {/* Product offerings strip */}
+                <div className="flex flex-wrap gap-2 mb-5">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#00DC82]/10 text-[#00DC82] border border-[#00DC82]/20">
+                    <FileText className="w-3 h-3" />
+                    {language === 'en' ? 'Premium PDF Report' : language === 'de' ? 'Premium PDF-Bericht' : 'Informe PDF Premium'}
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#FFB020]/10 text-[#FFB020] border border-[#FFB020]/20">
+                    <FileText className="w-3 h-3" />
+                    Budget Review
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/5 text-muted border border-white/10 border-dashed">
+                    {language === 'en' ? 'Full Pack · Soon' : language === 'de' ? 'Komplettpaket · Bald' : 'Pack completo · Próx.'}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-3 mb-6">
                   <Link href="/wizard" className="px-6 py-3 rounded-full bg-[#00DC82] text-[#0A0A0A] font-heading font-bold text-sm hover:brightness-110 transition pulse-glow">
                     {t.startFree}
                   </Link>
                   <Link href="/pricing" className="px-6 py-3 rounded-full border border-[#00DC82]/40 text-[#00DC82] font-heading font-bold text-sm hover:bg-[#00DC82]/10 transition">
                     {t.pricingPremiumCta}
                   </Link>
-                </div>
-                <div className="flex items-center gap-4 mb-6">
-                  <a href={`/api/assessment/demo/pdf?lang=${language}&currency=${currency}&units=${measurementSystem}`} className="text-xs text-muted font-heading font-semibold hover:text-[#00DC82] transition underline underline-offset-2">
-                    {t.paywallDemoLink}
-                  </a>
-                  <span className="text-[#262626]">·</span>
-                  <Link href="#como-funciona" className="text-xs text-muted font-heading font-semibold hover:text-premium transition">
+                  <Link href="#como-funciona" className="px-6 py-3 rounded-full border border-white/10 text-muted font-heading font-semibold text-sm hover:text-premium hover:border-white/20 transition">
                     {t.howItWorks}
                   </Link>
                 </div>
@@ -191,7 +199,7 @@ export default function LandingPage() {
               </p>
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-6 mb-8">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               {/* CASO 1: Analizar vivienda */}
               <div className="surface-2 border border-[#00DC82]/20 rounded-2xl p-6 sm:p-8 flex flex-col">
                 <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[#00DC82]/10 text-[#00DC82] self-start">
@@ -244,6 +252,28 @@ export default function LandingPage() {
                     className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 px-6 py-3 text-sm font-heading font-semibold text-muted hover:text-premium hover:border-white/20 transition"
                   >
                     {language === 'en' ? 'View Budget Review demo' : language === 'de' ? 'Budget-Review-Demo ansehen' : 'Ver Budget Review demo'}
+                  </Link>
+                </div>
+              </div>
+
+              {/* CASO 3: Calculadora de ahorro */}
+              <div className="surface-2 border border-[#60A5FA]/20 rounded-2xl p-6 sm:p-8 flex flex-col">
+                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[#60A5FA]/10 text-[#60A5FA] self-start">
+                  <Calculator className="h-6 w-6" />
+                </div>
+                <h3 className="font-heading font-bold text-xl text-premium mb-2">{
+                  language === 'en' ? 'Savings calculator' : language === 'de' ? 'Einsparpotenzial berechnen' : 'Calcular ahorro potencial'
+                }</h3>
+                <p className="text-sm text-muted leading-relaxed mb-6 flex-1">{
+                  language === 'en'
+                    ? 'Simulate a specific improvement measure and compare estimated investment, annual savings and payback period.'
+                    : language === 'de'
+                    ? 'Simulieren Sie eine konkrete Verbesserungsmaßnahme und vergleichen Sie Investition, Jahresersparnis und Amortisationszeit.'
+                    : 'Simula una medida concreta y compara inversión estimada, ahorro anual y plazo de retorno orientativos.'
+                }</p>
+                <div className="flex flex-col gap-3">
+                  <Link href="/calculadora-ahorro" className="inline-flex items-center justify-center gap-2 rounded-full border border-[#60A5FA]/40 px-6 py-3 text-sm font-heading font-bold text-[#60A5FA] hover:bg-[#60A5FA]/10 transition">
+                    {language === 'en' ? 'Open calculator' : language === 'de' ? 'Rechner öffnen' : 'Abrir calculadora'} <ArrowRight className="h-4 w-4" />
                   </Link>
                 </div>
               </div>
