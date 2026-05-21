@@ -67,16 +67,126 @@ const recoveryCopy = {
   },
 } as const;
 
-function layout(title: string, body: string, ctaHref?: string, ctaLabel?: string, legal?: string) {
-  return [
-    `<div style="font-family:Arial,sans-serif;line-height:1.5;color:#111;max-width:640px;margin:0 auto;padding:24px">`,
-    `<h1 style="font-size:24px;margin:0 0 16px">${title}</h1>`,
-    `<p>${body}</p>`,
-    ctaHref && ctaLabel ? `<p><a href="${ctaHref}" style="display:inline-block;background:#00DC82;color:#07140f;padding:12px 18px;border-radius:999px;font-weight:bold;text-decoration:none">${ctaLabel}</a></p>` : '',
-    legal ? `<p style="font-size:12px;color:#555;border-top:1px solid #eee;padding-top:16px">${legal}</p>` : '',
-    `<p style="font-size:12px;color:#555">Soporte: ${getSupportEmail()}</p>`,
-    `</div>`,
-  ].join('');
+function layout(
+  title: string,
+  body: string,
+  ctaHref?: string,
+  ctaLabel?: string,
+  legal?: string,
+  variant: 'success' | 'info' | 'rejected' = 'success',
+) {
+  const appUrl = getAppUrl();
+  const logoUrl = `${appUrl}/brand/logo-anclora-energy-scan.png`;
+  const support = getSupportEmail();
+
+  const accent = variant === 'rejected' ? '#FFB020' : '#00DC82';
+  const accentDim = variant === 'rejected' ? 'rgba(255,176,32,0.12)' : 'rgba(0,220,130,0.12)';
+  const accentBorder = variant === 'rejected' ? 'rgba(255,176,32,0.25)' : 'rgba(0,220,130,0.25)';
+  const accentGradient = variant === 'rejected'
+    ? 'linear-gradient(90deg,#FFB020,#e09800)'
+    : 'linear-gradient(90deg,#00DC82,#00b86e)';
+  const ctaBg = variant === 'rejected' ? '#FFB020' : '#00DC82';
+  const ctaColor = '#07140f';
+  const icon = variant === 'rejected' ? '&#x2715;' : variant === 'info' ? '&#x2139;' : '&#x2713;';
+
+  return `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>${title}</title>
+</head>
+<body style="margin:0;padding:0;background-color:#0A0A0A;-webkit-font-smoothing:antialiased">
+<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#0A0A0A">
+<tr><td align="center" style="padding:48px 16px 64px">
+
+  <table width="600" cellpadding="0" cellspacing="0" role="presentation" style="max-width:600px;width:100%">
+
+    <!-- HEADER -->
+    <tr>
+      <td style="background:linear-gradient(135deg,#0D1A12 0%,#0A1410 100%);padding:28px 40px;border-radius:20px 20px 0 0;border:1px solid #1a2e1f;border-bottom:none">
+        <table cellpadding="0" cellspacing="0" role="presentation">
+          <tr>
+            <td style="vertical-align:middle">
+              <img src="${logoUrl}" alt="Anclora EnergyScan" width="36" height="36"
+                style="border-radius:10px;display:block">
+            </td>
+            <td style="padding-left:12px;vertical-align:middle">
+              <span style="font-family:Arial,sans-serif;font-size:17px;font-weight:700;color:#F0EDE8;letter-spacing:-0.3px">Anclora EnergyScan</span>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <!-- ACCENT BAR -->
+    <tr>
+      <td style="background:${accentGradient};height:3px;padding:0;border-left:1px solid #1a1a1a;border-right:1px solid #1a1a1a"></td>
+    </tr>
+
+    <!-- BODY CARD -->
+    <tr>
+      <td style="background:#111111;padding:52px 40px 44px;border:1px solid #1a1a1a;border-top:none;border-bottom:none">
+
+        <!-- ICON -->
+        <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+          <tr>
+            <td align="center" style="padding-bottom:32px">
+              <div style="display:inline-block;width:64px;height:64px;border-radius:50%;background:${accentDim};border:1.5px solid ${accentBorder};text-align:center;line-height:64px;font-size:26px;font-weight:700;color:${accent}">${icon}</div>
+            </td>
+          </tr>
+
+          <!-- TITLE -->
+          <tr>
+            <td align="center" style="padding-bottom:20px">
+              <h1 style="font-family:Arial,sans-serif;font-size:26px;font-weight:700;color:#F0EDE8;margin:0;letter-spacing:-0.5px;line-height:1.25">${title}</h1>
+            </td>
+          </tr>
+
+          <!-- BODY TEXT -->
+          <tr>
+            <td align="center" style="padding-bottom:36px">
+              <p style="font-family:Arial,sans-serif;font-size:15px;line-height:1.75;color:#8A8A8A;margin:0;max-width:460px">${body}</p>
+            </td>
+          </tr>
+
+          ${ctaHref && ctaLabel ? `
+          <!-- CTA BUTTON -->
+          <tr>
+            <td align="center" style="padding-bottom:8px">
+              <a href="${ctaHref}"
+                style="display:inline-block;background:${ctaBg};color:${ctaColor};padding:14px 36px;border-radius:999px;font-family:Arial,sans-serif;font-size:15px;font-weight:700;text-decoration:none;letter-spacing:0.1px">${ctaLabel}</a>
+            </td>
+          </tr>` : ''}
+
+        </table>
+      </td>
+    </tr>
+
+    <!-- DIVIDER LINE -->
+    <tr>
+      <td style="background:#1a1a1a;height:1px;padding:0;border-left:1px solid #1a1a1a;border-right:1px solid #1a1a1a"></td>
+    </tr>
+
+    <!-- FOOTER -->
+    <tr>
+      <td style="background:#0D0D0D;padding:28px 40px;border-radius:0 0 20px 20px;border:1px solid #1a1a1a;border-top:none">
+        ${legal ? `<p style="font-family:Arial,sans-serif;font-size:12px;color:#555555;margin:0 0 10px;text-align:center;line-height:1.6">${legal}</p>` : ''}
+        <p style="font-family:Arial,sans-serif;font-size:12px;color:#444444;margin:0 0 6px;text-align:center">
+          ¿Preguntas? <a href="mailto:${support}" style="color:${accent};text-decoration:none">${support}</a>
+        </p>
+        <p style="font-family:Arial,sans-serif;font-size:11px;color:#333333;margin:0;text-align:center">
+          © 2026 Anclora Group · Anclora EnergyScan
+        </p>
+      </td>
+    </tr>
+
+  </table>
+</td></tr>
+</table>
+</body>
+</html>`;
 }
 
 async function createEmailLog(input: {
@@ -215,7 +325,7 @@ export async function sendProviderLeadNotificationEmail(input: {
     type: 'provider_lead_notification',
     to: input.to,
     subject: copy.subject,
-    html: layout(copy.title, copy.copy, `${appUrl}/provider/leads`, copy.cta, copy.legal),
+    html: layout(copy.title, copy.copy, `${appUrl}/provider/leads`, copy.cta, copy.legal, 'info'),
     metadata: { leadId: input.leadId, providerId: input.providerId },
   });
 }
@@ -240,7 +350,8 @@ export async function sendConsentConfirmationEmail(input: {
       copy.consentEmailCopy,
       withdrawUrl,
       copy.consentEmailWithdrawCta,
-      copy.consentEmailLegal
+      copy.consentEmailLegal,
+      'info'
     ),
   });
 }
@@ -263,7 +374,8 @@ export async function sendCheckoutRecoveryEmail(input: {
       `${copy.copy}${discount ? `<br><strong>${copy.discount} Codigo: ${discount}</strong>` : ''}`,
       `${getAppUrl()}/assessment/${input.assessmentId}`,
       copy.cta,
-      premiumCopy[language].legal
+      premiumCopy[language].legal,
+      'info'
     ),
   });
 }
@@ -386,7 +498,7 @@ export async function sendProfessionalRejectedEmail(input: {
     type: 'professional_rejected',
     to: input.to,
     subject: copy.subject,
-    html: layout(copy.title, copy.copy, `${appUrl}/`, copy.cta, copy.legal),
+    html: layout(copy.title, copy.copy, `${appUrl}/`, copy.cta, copy.legal, 'rejected'),
     metadata: { requestId: input.requestId },
   });
 }
