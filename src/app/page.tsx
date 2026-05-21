@@ -2,14 +2,14 @@
 
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { ArrowRight, CheckCircle2, Home, Gauge, Zap, FileText, Calculator } from 'lucide-react';
+import { ArrowRight, Home, Gauge, Zap, FileText, Calculator } from 'lucide-react';
 import Link from 'next/link';
 import { usePreferences } from '@/components/AppPreferencesProvider';
 import { getLegalDisclaimer } from '@/lib/i18n';
 import { HeroEnergyScale } from '@/components/HeroEnergyScale';
 
 export default function LandingPage() {
-  const { dictionary: t, language, currency, measurementSystem, formatCurrency } = usePreferences();
+  const { dictionary: t, language, currency, measurementSystem } = usePreferences();
   const timeline = {
     es: [
       { year: 'Hoy', title: 'R.D. 390/2021', desc: 'CEE obligatorio para venta/alquiler.', status: 'Vigente', color: 'bg-[#00DC82]' },
@@ -26,20 +26,6 @@ export default function LandingPage() {
       { year: '2030', title: '16% Reduktion', desc: 'Ziel zur Senkung der Primärenergie.', status: 'EU-Ziel', color: 'bg-[#FFB020]' },
       { year: '2033', title: 'Klasse E', desc: 'Wohngebäudeziel in regulatorischer Entwicklung.', status: 'Regulierung', color: 'bg-[#EF4444]' },
     ],
-  }[language];
-  const pricingItems = {
-    es: {
-      free: ['Wizard energético completo', 'Letra orientativa y confianza', 'Penalizaciones y fortalezas', 'Contexto normativo básico'],
-      premium: ['Informe PDF Premium', 'Escenarios de mejora', 'Costes orientativos', 'Categorías de proveedores sugeridas'],
-    },
-    en: {
-      free: ['Complete energy wizard', 'Indicative rating and confidence', 'Penalties and strengths', 'Basic regulatory context'],
-      premium: ['Premium PDF report', 'Improvement scenarios', 'Indicative costs', 'Suggested provider categories'],
-    },
-    de: {
-      free: ['Vollständiger Energie-Wizard', 'Orientierende Klasse und Sicherheit', 'Abzüge und Stärken', 'Grundlegender regulatorischer Kontext'],
-      premium: ['Premium-PDF-Bericht', 'Verbesserungsszenarien', 'Orientierungskosten', 'Vorgeschlagene Anbieterkategorien'],
-    },
   }[language];
 
   return (
@@ -330,59 +316,73 @@ export default function LandingPage() {
             <div className="text-center mb-12">
               <p className="text-xs text-[#00DC82] font-heading font-semibold tracking-wider uppercase mb-3">{t.navPricing}</p>
               <h2 className="font-heading font-bold text-3xl sm:text-4xl text-premium mb-4">{t.pricingTitle}</h2>
-              <p className="text-muted max-w-2xl mx-auto">
-                {t.pricingCopy}
-              </p>
+              <p className="text-muted max-w-2xl mx-auto">{t.pricingCopy}</p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6">
-              {[
-                {
-                  name: t.freePlan,
-                  price: formatCurrency(0, { maximumFractionDigits: 0 }),
-                  badge: t.freePlanBadge,
-                  cta: t.startFree,
-                  href: '/wizard',
-                  items: pricingItems.free,
-                },
-                {
-                  name: t.premiumPlan,
-                  price: t.priceDemo,
-                  badge: t.premiumPlanBadge,
-                  cta: t.pricingPremiumCta,
-                  href: '/wizard',
-                  items: pricingItems.premium,
-                },
-              ].map((plan) => (
-                <div key={plan.name} className="surface-2 border rounded-2xl p-6 sm:p-8">
-                  <div className="flex items-start justify-between gap-4 mb-6">
-                    <div>
-                      <h3 className="font-heading text-2xl font-bold text-premium">{plan.name}</h3>
-                      <p className="mt-2 text-sm text-muted">{plan.badge}</p>
-                    </div>
-                    <p className="font-heading text-3xl font-bold text-[#00DC82]">{plan.price}</p>
-                  </div>
-                  <ul className="space-y-3 mb-8">
-                    {plan.items.map((item) => (
-                      <li key={item} className="flex items-start gap-2 text-sm text-muted">
-                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#00DC82]" />
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                  <Link href={plan.href} className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#00DC82] px-6 py-3 text-sm font-heading font-bold text-[#0A0A0A] transition hover:brightness-110">
-                    {plan.cta} <ArrowRight className="h-4 w-4" />
-                  </Link>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              {/* Gratis */}
+              <div className="surface-2 border rounded-2xl p-5 flex flex-col">
+                <p className="text-xs text-muted font-heading font-semibold uppercase tracking-wider mb-3">
+                  {language === 'en' ? 'Free' : language === 'de' ? 'Kostenlos' : 'Gratis'}
+                </p>
+                <p className="font-heading font-bold text-3xl text-premium mb-1">0 €</p>
+                <p className="text-xs text-muted mb-4 flex-1">
+                  {language === 'en' ? 'Diagnostic + indicative rating' : language === 'de' ? 'Diagnose + Orientierende Klasse' : 'Diagnóstico + letra orientativa'}
+                </p>
+                <Link href="/wizard" className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/15 px-4 py-2.5 text-xs font-heading font-bold text-muted hover:text-premium hover:border-white/25 transition">
+                  {t.startFree} <ArrowRight className="h-3 w-3" />
+                </Link>
+              </div>
+
+              {/* PDF Premium */}
+              <div className="surface-2 border border-[#00DC82]/20 rounded-2xl p-5 flex flex-col">
+                <p className="text-xs text-[#00DC82] font-heading font-semibold uppercase tracking-wider mb-3">
+                  {language === 'en' ? 'PDF Report' : language === 'de' ? 'PDF-Bericht' : 'Informe PDF'}
+                </p>
+                <p className="font-heading font-bold text-3xl text-[#00DC82] mb-1">9,90 €</p>
+                <p className="text-xs text-muted mb-4 flex-1">
+                  {language === 'en' ? 'Scenarios, costs & downloadable PDF' : language === 'de' ? 'Szenarien, Kosten & PDF-Download' : 'Escenarios, costes y PDF descargable'}
+                </p>
+                <Link href="/wizard" className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#00DC82] px-4 py-2.5 text-xs font-heading font-bold text-[#0A0A0A] hover:brightness-110 transition">
+                  {language === 'en' ? 'Get report' : language === 'de' ? 'Bericht kaufen' : 'Obtener informe'} <ArrowRight className="h-3 w-3" />
+                </Link>
+              </div>
+
+              {/* Budget Review */}
+              <div className="surface-2 border border-[#FFB020]/20 rounded-2xl p-5 flex flex-col">
+                <p className="text-xs text-[#FFB020] font-heading font-semibold uppercase tracking-wider mb-3">Budget Review</p>
+                <p className="font-heading font-bold text-3xl text-[#FFB020] mb-1">19,90 €</p>
+                <p className="text-xs text-muted mb-4 flex-1">
+                  {language === 'en' ? 'Second opinion on renovation quotes' : language === 'de' ? 'Zweitmeinung zu Sanierungsangeboten' : 'Segunda opinión sobre presupuestos'}
+                </p>
+                <Link href="/budget-review" className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#FFB020] px-4 py-2.5 text-xs font-heading font-bold text-[#0A0A0A] hover:brightness-110 transition">
+                  {language === 'en' ? 'Review quote' : language === 'de' ? 'Angebot prüfen' : 'Revisar presupuesto'} <ArrowRight className="h-3 w-3" />
+                </Link>
+              </div>
+
+              {/* Pack Reforma Inteligente */}
+              <div className="surface-2 border border-white/10 border-dashed rounded-2xl p-5 flex flex-col opacity-80">
+                <p className="text-xs text-muted font-heading font-semibold uppercase tracking-wider mb-3">
+                  {language === 'en' ? 'Smart Reform Pack' : language === 'de' ? 'Reform-Paket' : 'Pack Reforma Inteligente'}
+                </p>
+                <p className="font-heading font-bold text-xl text-muted mb-1">
+                  {language === 'en' ? 'Coming soon' : language === 'de' ? 'Bald verfügbar' : 'Próximamente'}
+                </p>
+                <p className="text-xs text-muted mb-4 flex-1">
+                  {language === 'en' ? 'PDF Premium + Budget Review in one payment' : language === 'de' ? 'PDF + Budget Review in einer Zahlung' : 'PDF Premium + Budget Review en un pago'}
+                </p>
+                <div className="inline-flex w-full items-center justify-center rounded-full border border-white/10 px-4 py-2.5 text-xs font-heading font-semibold text-muted cursor-default">
+                  {language === 'en' ? 'Soon' : language === 'de' ? 'Bald' : 'Próximamente'}
                 </div>
-              ))}
+              </div>
             </div>
 
-            <p className="text-[11px] text-muted leading-relaxed max-w-3xl mx-auto text-center mt-8">
+            <p className="text-[11px] text-muted leading-relaxed max-w-3xl mx-auto text-center mb-6">
               {getLegalDisclaimer(language)}
             </p>
-            <div className="mt-6 text-center">
-              <Link href="/pricing" className="text-sm font-heading font-semibold text-[#00DC82] hover:brightness-125">
-                {t.navPricing}
+            <div className="text-center">
+              <Link href="/pricing" className="inline-flex items-center gap-2 text-sm font-heading font-semibold text-[#00DC82] hover:brightness-125 transition">
+                {language === 'en' ? 'See full plan details' : language === 'de' ? 'Alle Plandetails ansehen' : 'Ver detalle completo de planes'} <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
           </div>
