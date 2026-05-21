@@ -3,6 +3,7 @@ import { z } from 'zod';
 export const HEATING_SYSTEMS = [
   'gas_boiler',
   'electric_resistance',
+  'splits',
   'heat_pump',
   'oil_boiler',
   'pellets',
@@ -60,6 +61,8 @@ function heatingSystemMultiplierForMeasure(
     case 'electric_resistance': return 1.50;
     case 'gas_boiler':
     case 'oil_boiler': return 1.20;
+    // Splits are air-to-air heat pumps: some savings vs replacing with aerotermia, but less than a boiler swap
+    case 'splits': return 0.55;
     case 'heat_pump': return 0.20;
     default: return 1.00;
   }

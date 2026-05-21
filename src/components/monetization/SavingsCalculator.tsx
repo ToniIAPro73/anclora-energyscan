@@ -71,6 +71,7 @@ export function SavingsCalculator() {
   const heatingSystemLabels: Record<HeatingSystem, string> = {
     gas_boiler: copy.heatingGasBoiler,
     electric_resistance: copy.heatingElectricResistance,
+    splits: copy.heatingSplits,
     heat_pump: copy.heatingHeatPump,
     oil_boiler: copy.heatingOilBoiler,
     pellets: copy.heatingPellets,
@@ -195,6 +196,8 @@ export function SavingsCalculator() {
               onChange={(e) => setZipCode(e.target.value)}
               className="rounded-xl border border-white/10 bg-black/20 p-3"
             />
+            <div className="flex flex-col gap-1">
+              <label className="px-1 text-xs text-muted">{copy.heatingSystemLabel}</label>
             <select
               value={heatingSystem}
               onChange={(e) => setHeatingSystem(e.target.value as HeatingSystem | '')}
@@ -207,6 +210,7 @@ export function SavingsCalculator() {
                 </option>
               ))}
             </select>
+            </div>
 
             {/* Bill importer toggle */}
             <div className="md:col-span-2">
