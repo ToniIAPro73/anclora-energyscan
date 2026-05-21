@@ -2,7 +2,7 @@ import { createHash } from 'crypto';
 import { prisma } from '@/lib/prisma';
 
 export type EmailLanguage = 'es' | 'en' | 'de';
-export type EmailType = 'premium_purchase' | 'checkout_recovery' | 'provider_lead_notification' | 'consent_confirmation' | 'provider_verified' | 'professional_approved';
+export type EmailType = 'premium_purchase' | 'checkout_recovery' | 'provider_lead_notification' | 'consent_confirmation' | 'provider_verified' | 'professional_approved' | 'professional_rejected';
 
 export function hashEmail(email: string) {
   return createHash('sha256').update(email.trim().toLowerCase()).digest('hex');
@@ -272,22 +272,22 @@ const providerVerifiedCopy = {
   es: {
     subject: 'Tu empresa ha sido verificada en Anclora EnergyScan',
     title: '¡Tu empresa está verificada!',
-    copy: 'El equipo de Anclora ha revisado y verificado tu perfil de proveedor. Ya puedes acceder a leads de clientes en tu área de servicio.',
-    cta: 'Acceder a mi panel',
+    copy: 'El equipo de Anclora ha revisado y verificado tu perfil de proveedor. Para acceder a tu panel, regístrate o inicia sesión en Anclora EnergyScan usando el mismo correo electrónico con el que enviaste el registro. Tu perfil quedará activado automáticamente.',
+    cta: 'Registrarme en EnergyScan',
     legal: 'Si no reconoces esta solicitud, contacta con soporte.',
   },
   en: {
     subject: 'Your company has been verified on Anclora EnergyScan',
     title: 'Your company is verified!',
-    copy: 'The Anclora team has reviewed and verified your provider profile. You can now access client leads in your service area.',
-    cta: 'Access my dashboard',
+    copy: 'The Anclora team has reviewed and verified your provider profile. To access your dashboard, sign up or log in to Anclora EnergyScan using the same email address you submitted in your registration. Your profile will be activated automatically.',
+    cta: 'Sign up on EnergyScan',
     legal: 'If you did not request this, please contact support.',
   },
   de: {
     subject: 'Ihr Unternehmen wurde auf Anclora EnergyScan verifiziert',
     title: 'Ihr Unternehmen ist verifiziert!',
-    copy: 'Das Anclora-Team hat Ihr Anbieterprofil geprüft und verifiziert. Sie können jetzt auf Kundenanfragen in Ihrem Servicebereich zugreifen.',
-    cta: 'Zum Dashboard',
+    copy: 'Das Anclora-Team hat Ihr Anbieterprofil geprüft und verifiziert. Um auf Ihr Dashboard zuzugreifen, registrieren oder melden Sie sich bei Anclora EnergyScan mit derselben E-Mail-Adresse an, die Sie bei der Registrierung angegeben haben. Ihr Profil wird automatisch aktiviert.',
+    cta: 'Bei EnergyScan registrieren',
     legal: 'Wenn Sie diese Anfrage nicht gestellt haben, kontaktieren Sie bitte den Support.',
   },
 } as const;
@@ -304,7 +304,7 @@ export async function sendProviderVerifiedEmail(input: {
     type: 'provider_verified',
     to: input.to,
     subject: copy.subject,
-    html: layout(copy.title, copy.copy, `${appUrl}/provider/dashboard`, copy.cta, copy.legal),
+    html: layout(copy.title, copy.copy, `${appUrl}/auth`, copy.cta, copy.legal),
     metadata: { providerId: input.providerId },
   });
 }
@@ -312,23 +312,23 @@ export async function sendProviderVerifiedEmail(input: {
 const professionalApprovedCopy = {
   es: {
     subject: 'Tu acceso profesional ha sido aprobado en Anclora EnergyScan',
-    title: '¡Acceso profesional activado!',
-    copy: 'El equipo de Anclora ha aprobado tu solicitud de acceso profesional. Ya puedes gestionar expedientes de clientes y acceder a todas las funciones del área profesional.',
-    cta: 'Acceder a mi área profesional',
+    title: '¡Acceso profesional aprobado!',
+    copy: 'El equipo de Anclora ha aprobado tu solicitud de acceso profesional. Para activar tu área profesional, regístrate o inicia sesión en Anclora EnergyScan usando el mismo correo electrónico con el que enviaste la solicitud. Tu perfil quedará activado automáticamente en cuanto accedas.',
+    cta: 'Registrarme en EnergyScan',
     legal: 'Si no reconoces esta solicitud, contacta con soporte.',
   },
   en: {
     subject: 'Your professional access has been approved on Anclora EnergyScan',
-    title: 'Professional access activated!',
-    copy: 'The Anclora team has approved your professional access request. You can now manage client cases and access all professional area features.',
-    cta: 'Access my professional area',
+    title: 'Professional access approved!',
+    copy: 'The Anclora team has approved your professional access request. To activate your professional area, sign up or log in to Anclora EnergyScan using the same email address you submitted in your request. Your profile will be activated automatically once you log in.',
+    cta: 'Sign up on EnergyScan',
     legal: 'If you did not request this, please contact support.',
   },
   de: {
     subject: 'Ihr Berufszugang wurde auf Anclora EnergyScan genehmigt',
-    title: 'Berufszugang aktiviert!',
-    copy: 'Das Anclora-Team hat Ihren Antrag auf Berufszugang genehmigt. Sie können jetzt Kundenfälle verwalten und alle Funktionen des Berufsbereichs nutzen.',
-    cta: 'Zum Berufsbereich',
+    title: 'Berufszugang genehmigt!',
+    copy: 'Das Anclora-Team hat Ihren Antrag auf Berufszugang genehmigt. Um Ihren Berufsbereich zu aktivieren, registrieren oder melden Sie sich bei Anclora EnergyScan mit derselben E-Mail-Adresse an, die Sie in Ihrem Antrag angegeben haben. Ihr Profil wird automatisch aktiviert, sobald Sie sich einloggen.',
+    cta: 'Bei EnergyScan registrieren',
     legal: 'Wenn Sie diese Anfrage nicht gestellt haben, kontaktieren Sie bitte den Support.',
   },
 } as const;
@@ -345,7 +345,48 @@ export async function sendProfessionalApprovedEmail(input: {
     type: 'professional_approved',
     to: input.to,
     subject: copy.subject,
-    html: layout(copy.title, copy.copy, `${appUrl}/profesional/dashboard`, copy.cta, copy.legal),
+    html: layout(copy.title, copy.copy, `${appUrl}/auth`, copy.cta, copy.legal),
+    metadata: { requestId: input.requestId },
+  });
+}
+
+const professionalRejectedCopy = {
+  es: {
+    subject: 'Actualización sobre tu solicitud profesional en Anclora EnergyScan',
+    title: 'Solicitud profesional revisada',
+    copy: 'Hemos revisado tu solicitud de acceso profesional y en este momento no ha podido ser aprobada. Puedes seguir usando EnergyScan como usuario residencial con todas sus funciones gratuitas. Si crees que hay un error o quieres aportar más contexto sobre tu caso de uso, contacta con nosotros en soporte.',
+    cta: 'Ir a EnergyScan',
+    legal: 'Si no reconoces esta solicitud, ignora este email.',
+  },
+  en: {
+    subject: 'Update on your professional request on Anclora EnergyScan',
+    title: 'Professional request reviewed',
+    copy: 'We have reviewed your professional access request and it has not been approved at this time. You can continue using EnergyScan as a residential user with all its free features. If you believe there has been an error or would like to provide more context about your use case, please contact our support team.',
+    cta: 'Go to EnergyScan',
+    legal: 'If you did not make this request, please ignore this email.',
+  },
+  de: {
+    subject: 'Aktualisierung zu Ihrem Fachantrag bei Anclora EnergyScan',
+    title: 'Fachantrag geprüft',
+    copy: 'Wir haben Ihren Antrag auf Berufszugang geprüft und er konnte derzeit nicht genehmigt werden. Sie können EnergyScan weiterhin als Wohnnutzer mit allen kostenlosen Funktionen verwenden. Wenn Sie der Meinung sind, dass ein Fehler vorliegt, oder weitere Informationen zu Ihrem Anwendungsfall bereitstellen möchten, wenden Sie sich bitte an unser Support-Team.',
+    cta: 'Zu EnergyScan',
+    legal: 'Wenn Sie diese Anfrage nicht gestellt haben, ignorieren Sie bitte diese E-Mail.',
+  },
+} as const;
+
+export async function sendProfessionalRejectedEmail(input: {
+  to?: string | null;
+  requestId: string;
+  language?: EmailLanguage;
+}) {
+  const language = input.language || 'es';
+  const copy = professionalRejectedCopy[language];
+  const appUrl = getAppUrl();
+  return sendTransactionalEmail({
+    type: 'professional_rejected',
+    to: input.to,
+    subject: copy.subject,
+    html: layout(copy.title, copy.copy, `${appUrl}/`, copy.cta, copy.legal),
     metadata: { requestId: input.requestId },
   });
 }

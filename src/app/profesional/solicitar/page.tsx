@@ -1,8 +1,6 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
-import Link from 'next/link';
-import { Info, LogIn } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { usePreferences } from '@/components/AppPreferencesProvider';
 import { useSession } from 'next-auth/react';
@@ -50,24 +48,6 @@ export default function ProfessionalRequestPage() {
       <main className="mx-auto max-w-3xl px-4 pb-16 pt-28">
         <h1 className="font-heading text-4xl font-bold text-premium">{copy.requestTitle}</h1>
         <p className="mt-3 text-sm text-muted">{copy.requestIntro}</p>
-
-        {/* Login context for unauthenticated users */}
-        {!session?.user && (
-          <div className="mt-6 flex items-start gap-3 rounded-3xl border border-[#00DC82]/20 bg-[#00DC82]/5 p-5">
-            <Info className="mt-0.5 h-5 w-5 shrink-0 text-[#00DC82]" />
-            <div>
-              <p className="font-heading text-sm font-bold text-premium">{copy.loginContextTitle as string}</p>
-              <p className="mt-1 text-sm text-muted">{copy.loginContextText as string}</p>
-              <Link
-                href="/auth?callbackUrl=/profesional/solicitar"
-                className="mt-3 inline-flex items-center gap-2 rounded-full bg-[#00DC82] px-4 py-2 text-xs font-bold text-[#07140f]"
-              >
-                <LogIn className="h-3.5 w-3.5" />
-                {copy.loginContextCta as string}
-              </Link>
-            </div>
-          </div>
-        )}
 
         <form onSubmit={submit} className="mt-8 grid gap-4">
           <input
