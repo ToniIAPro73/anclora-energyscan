@@ -9,8 +9,8 @@
 <div class="cover-subtitle">Practical guide for residential users,<br>beta professional users and providers</div>
 
 <div class="cover-meta">
-  <div class="cover-version">Version 1.2</div>
-  <div class="cover-date">19 May 2026</div>
+  <div class="cover-version">Version 1.3</div>
+  <div class="cover-date">21 May 2026</div>
 </div>
 
 <div class="cover-disclaimer">EnergyScan provides an indicative energy pre-assessment. It does not issue official Energy Performance Certificates and does not replace a review by a qualified professional.</div>
@@ -156,9 +156,11 @@ In the top bar you will find the preferences button, for example **EN · EUR · 
 The home page summarises the main actions:
 
 1. **Start assessment**: opens the pre-assessment wizard.
-2. **View pricing**: shows the free, Premium and professional plans.
-3. **Product**: expands access to the calculator, renovation quotes, providers and professional area.
+2. **Product**: expands access to the calculator, reports, renovation quotes, residential users, professional and providers.
+3. **How it works · Regulation · Improvements · Pricing**: direct links to the landing sections (in that order).
 4. **Preferences**: changes language, theme, currency and units.
+5. **Social rail**: social media icons fixed on the right side (hidden on mobile, visible at the bottom of the page).
+6. **Discover**: button in the hero that smoothly scrolls to the first content section.
 
 ### 4.2 Energy savings calculator
 
@@ -489,7 +491,7 @@ Planned features:
 Steps:
 
 1. Go to **Professional**.
-2. Click **Request beta professional access**.
+2. Click **Register as professional**.
 3. Provide name, email, company, profile and use case.
 4. Submit the request.
 
@@ -782,6 +784,6 @@ Anclora EnergyScan provides indicative estimates based on declared data, submitt
 <div class="footer-brand">
 
 *Anclora EnergyScan · Anclora Group*  
-*User Manual v1.2 — 19 May 2026*
+*User Manual v1.3 — 21 May 2026*
 
 </div>
