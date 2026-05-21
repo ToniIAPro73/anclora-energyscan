@@ -1,6 +1,15 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
-import { ArrowUpRight, BriefcaseBusiness, FileText, LockKeyhole } from 'lucide-react';
+import {
+  ArrowUpRight,
+  BriefcaseBusiness,
+  FileText,
+  LockKeyhole,
+  CircleDollarSign,
+  CheckCircle2,
+  Info,
+  Users,
+} from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { CheckoutButton } from '@/components/CheckoutButton';
 import { PdfDownloadLink } from '@/components/PdfDownloadLink';
@@ -11,6 +20,7 @@ import { normalizeLanguage, PREFERENCE_COOKIE_NAMES } from '@/lib/preferences';
 import { canAccessPremiumContent } from '@/lib/premium-access';
 import { IncludeInMarketplaceButton } from '@/components/professional/IncludeInMarketplaceButton';
 import { WhiteLabelAddonCard } from '@/components/professional/WhiteLabelAddonCard';
+import { getPropertyTypeLabel } from '@/lib/enum-labels';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,21 +41,20 @@ export default async function ProfessionalDashboardPage() {
   if (!session?.user?.id || !session.user.email) {
     return (
       <div className="min-h-screen app-shell">
-        {session?.user ? (
-        <Navbar
-          mode="app"
-          userEmail={session.user.email}
-          userName={session.user.name}
-          userImage={session.user.image}
-        />
-      ) : (
         <Navbar />
-      )}
         <main className="mx-auto max-w-3xl px-4 pb-16 pt-28">
           <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-            <h1 className="font-heading text-3xl font-bold text-premium">{copy.dashboardTitle}</h1>
+            <LockKeyhole className="h-8 w-8 text-[#00DC82]" />
+            <h1 className="mt-4 font-heading text-3xl font-bold text-premium">{copy.dashboardTitle}</h1>
             <p className="mt-3 text-muted">{copy.loginRequired}</p>
-            <Link href="/auth" className="mt-6 inline-flex rounded-full bg-[#00DC82] px-6 py-3 font-heading font-bold text-[#07140f]">{copy.loginCta}</Link>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <Link href="/auth" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#00DC82] px-6 py-3 font-heading font-bold text-[#07140f]">
+                {copy.loginCta}<ArrowUpRight className="h-4 w-4" />
+              </Link>
+              <Link href="/profesional/solicitar" className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/10 px-6 py-3 font-heading font-bold text-premium">
+                {copy.cta}
+              </Link>
+            </div>
           </div>
         </main>
       </div>
@@ -58,50 +67,127 @@ export default async function ProfessionalDashboardPage() {
   });
 
   const accessStatus = request?.status || 'NONE';
-  const cases = accessStatus === 'APPROVED'
+  const isApproved = accessStatus === 'APPROVED';
+
+  const cases = isApproved
     ? await prisma.assessment.findMany({ where: { userId: session.user.id }, orderBy: { createdAt: 'desc' }, take: 100 })
     : [];
 
+  const budgetReviews = isApproved
+    ? await prisma.budgetReview.count({ where: { userId: session.user.id } })
+    : 0;
+
+  const pdfUnlocked = isApproved
+    ? cases.filter((c) => canAccessPremiumContent({ paidAt: c.paidAt, isDemo: c.isDemo }).isPaid).length
+    : 0;
+
   return (
     <div className="min-h-screen app-shell">
-      {session?.user ? (
-        <Navbar
-          mode="app"
-          userEmail={session.user.email}
-          userName={session.user.name}
-          userImage={session.user.image}
-        />
-      ) : (
-        <Navbar />
-      )}
+      <Navbar
+        mode="app"
+        userEmail={session.user.email}
+        userName={session.user.name}
+        userImage={session.user.image}
+      />
       <main className="mx-auto max-w-6xl px-4 pb-16 pt-28">
+
+        {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-xs font-bold uppercase text-[#00DC82]">{copy.accessStatus}</p>
             <h1 className="mt-2 font-heading text-4xl font-bold text-premium">{copy.dashboardTitle}</h1>
+            <p className="mt-2 max-w-xl text-sm text-muted">{copy.intro}</p>
           </div>
-          <span className="inline-flex w-fit rounded-full border border-white/10 px-4 py-2 text-sm font-bold text-premium">
-            {copy.statusLabel[accessStatus as keyof typeof copy.statusLabel] || accessStatus}
-          </span>
+          <div className="flex flex-wrap gap-2">
+            <span className="inline-flex w-fit rounded-full border border-white/10 px-4 py-2 text-sm font-bold text-premium">
+              {copy.statusLabel[accessStatus as keyof typeof copy.statusLabel] || accessStatus}
+            </span>
+            {isApproved && (
+              <>
+                <span className="inline-flex w-fit rounded-full bg-[#00DC82]/15 px-3 py-2 text-xs font-bold text-[#00DC82]">{copy.accessApproved as string}</span>
+                <span className="inline-flex w-fit rounded-full border border-white/10 px-3 py-2 text-xs font-bold text-muted">{copy.noCeeOfficial as string}</span>
+              </>
+            )}
+          </div>
         </div>
 
-        {accessStatus !== 'APPROVED' ? (
+        {/* Gated states */}
+        {!isApproved && (
           <section className="mt-8 rounded-3xl border border-white/10 bg-white/5 p-6">
             <LockKeyhole className="h-7 w-7 text-[#00DC82]" />
             <h2 className="mt-4 font-heading text-2xl font-bold text-premium">{copy.gatedTitle}</h2>
             <p className="mt-2 text-muted">
-              {accessStatus === 'NONE' ? copy.noRequestCopy : accessStatus === 'REJECTED' ? copy.rejectedCopy : copy.pendingCopy}
+              {accessStatus === 'NONE'
+                ? copy.noRequestCopy
+                : accessStatus === 'REJECTED'
+                ? copy.rejectedCopy
+                : copy.pendingCopy}
             </p>
-            <Link href="/profesional/solicitar" className="mt-5 inline-flex rounded-full bg-[#00DC82] px-6 py-3 font-heading font-bold text-[#07140f]">{copy.cta}</Link>
+            {accessStatus === 'PENDING' && (
+              <p className="mt-3 text-sm text-muted">{copy.pendingCopyExtended as string}</p>
+            )}
+            {accessStatus === 'REJECTED' && (
+              <p className="mt-3 text-sm text-muted">{copy.rejectedCopyExtended as string}</p>
+            )}
+            <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+              {accessStatus !== 'PENDING' && (
+                <Link href="/profesional/solicitar" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#00DC82] px-6 py-3 font-heading font-bold text-[#07140f]">
+                  {copy.cta}<ArrowUpRight className="h-4 w-4" />
+                </Link>
+              )}
+              <Link href="/dashboard" className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/10 px-6 py-3 font-heading font-bold text-premium">
+                {copy.residentialDashboard}
+              </Link>
+            </div>
           </section>
-        ) : (
+        )}
+
+        {/* Approved dashboard */}
+        {isApproved && (
           <>
-            <div className="mt-8 grid gap-3 sm:grid-cols-3">
-              <Link href="/wizard" className="inline-flex min-h-14 items-center justify-between rounded-2xl bg-[#00DC82] px-5 py-3 font-heading font-bold text-[#07140f]">{copy.newClientAssessment}<ArrowUpRight className="h-4 w-4" /></Link>
-              <Link href="/dashboard" className="inline-flex min-h-14 items-center justify-between rounded-2xl border border-white/10 px-5 py-3 font-heading font-bold text-premium">{copy.residentialDashboard}<ArrowUpRight className="h-4 w-4" /></Link>
-              <Link href="/profesional/solicitar" className="inline-flex min-h-14 items-center justify-between rounded-2xl border border-white/10 px-5 py-3 font-heading font-bold text-premium">{copy.requestPlan}<ArrowUpRight className="h-4 w-4" /></Link>
+            {/* KPIs */}
+            <div className="mt-8 grid gap-3 sm:grid-cols-4">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <p className="text-xs font-bold uppercase text-muted">{copy.casesTitle}</p>
+                <p className="mt-2 font-heading text-3xl font-bold text-premium">{cases.length}</p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <p className="text-xs font-bold uppercase text-muted">{copy.premiumAvailable}</p>
+                <p className="mt-2 font-heading text-3xl font-bold text-premium">{pdfUnlocked}</p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <p className="text-xs font-bold uppercase text-muted">Budget Reviews</p>
+                <p className="mt-2 font-heading text-3xl font-bold text-premium">{budgetReviews}</p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <p className="text-xs font-bold uppercase text-muted">{copy.betaBadge as string}</p>
+                <p className="mt-2 font-heading text-sm font-bold text-[#00DC82]">{copy.accessApproved as string}</p>
+              </div>
             </div>
 
+            {/* Quick actions */}
+            <div className="mt-6 grid gap-3 sm:grid-cols-3">
+              <Link
+                href="/wizard"
+                className="inline-flex min-h-14 items-center justify-between rounded-2xl bg-[#00DC82] px-5 py-3 font-heading font-bold text-[#07140f]"
+              >
+                {copy.newClientAssessment}<ArrowUpRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href="/budget-review"
+                className="inline-flex min-h-14 items-center justify-between rounded-2xl border border-[#00DC82]/40 px-5 py-3 font-heading font-bold text-premium"
+              >
+                {copy.reviewClientBudget as string}<ArrowUpRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href="/dashboard"
+                className="inline-flex min-h-14 items-center justify-between rounded-2xl border border-white/10 px-5 py-3 font-heading font-bold text-premium"
+              >
+                {copy.residentialDashboard}<ArrowUpRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            {/* Cases */}
             <section className="mt-10">
               <h2 className="font-heading text-2xl font-bold text-premium">{copy.casesTitle}</h2>
               <div className="mt-4 grid gap-3">
@@ -113,12 +199,13 @@ export default async function ProfessionalDashboardPage() {
                   </div>
                 ) : cases.map((item) => {
                   const premiumAccess = canAccessPremiumContent({ paidAt: item.paidAt, isDemo: item.isDemo });
+                  const propertyLabel = item.propertyType ? getPropertyTypeLabel(item.propertyType, language) : copy.caseFallback;
                   return (
                     <article key={item.id} className="rounded-3xl border border-white/10 bg-white/5 p-5">
                       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                         <div>
                           <p className="text-xs font-bold uppercase text-muted">{item.createdAt.toLocaleDateString(locale)}</p>
-                          <h3 className="mt-2 font-heading text-xl font-bold text-premium">{copy.caseFallback} · {item.zipcode}</h3>
+                          <h3 className="mt-2 font-heading text-xl font-bold text-premium">{propertyLabel} · {item.zipcode}</h3>
                           <p className="mt-1 text-sm text-muted">{copy.estimatedLetter}: {item.estimatedLetter} · {copy.confidence}: {localizeConfidence(item.confidence, language)}</p>
                           <p className="mt-1 text-sm text-muted">{premiumAccess.isPaid ? copy.premiumAvailable : copy.premiumPending}</p>
                         </div>
@@ -137,49 +224,101 @@ export default async function ProfessionalDashboardPage() {
                 })}
               </div>
             </section>
+
+            {/* How to use */}
+            <section className="mt-10 rounded-3xl border border-white/10 bg-white/5 p-6">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-[#00DC82]" />
+                <h2 className="font-heading text-xl font-bold text-premium">{copy.howToUseTitle as string}</h2>
+              </div>
+              <ol className="mt-4 space-y-2">
+                {(copy.howToUse as string[]).map((step, i) => (
+                  <li key={i} className="flex items-start gap-3 text-sm text-muted">
+                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#00DC82]/20 text-xs font-bold text-[#00DC82]">{i + 1}</span>
+                    {step}
+                  </li>
+                ))}
+              </ol>
+            </section>
+
+            {/* Budget Review professional */}
+            <section className="mt-6 rounded-3xl border border-[#00DC82]/20 bg-[#00DC82]/5 p-6">
+              <div className="flex items-center gap-2">
+                <CircleDollarSign className="h-5 w-5 text-[#00DC82]" />
+                <h2 className="font-heading text-xl font-bold text-premium">{copy.budgetReviewTitle as string}</h2>
+              </div>
+              <p className="mt-3 text-sm text-muted">{copy.budgetReviewDescription as string}</p>
+              <p className="mt-2 text-xs text-muted">{copy.budgetReviewDisclaimer as string}</p>
+              <Link
+                href="/budget-review"
+                className="mt-5 inline-flex min-h-10 items-center gap-2 rounded-full bg-[#00DC82] px-5 py-2 text-sm font-bold text-[#07140f]"
+              >
+                {copy.reviewClientBudget as string}<ArrowUpRight className="h-3.5 w-3.5" />
+              </Link>
+            </section>
+
+            {/* Plans */}
+            <section className="mt-10 rounded-3xl border border-white/10 bg-white/5 p-6">
+              <h2 className="font-heading text-2xl font-bold text-premium">{copy.plansTitle}</h2>
+              <div className="mt-4 grid gap-4 md:grid-cols-3">
+                {copy.plans.map((plan) => (
+                  <div
+                    key={plan.name}
+                    className={`rounded-2xl p-5 ${plan.highlight ? 'border-2 border-[#00DC82]/60 bg-[#00DC82]/5' : 'border border-white/10 bg-black/10'}`}
+                  >
+                    {plan.highlight && (
+                      <span className="mb-3 inline-block rounded-full bg-[#00DC82]/20 px-2 py-0.5 text-[10px] font-bold uppercase text-[#00DC82]">Pro</span>
+                    )}
+                    <p className="font-heading text-lg font-bold text-premium">{plan.name}</p>
+                    <p className="mt-1 font-heading text-xl font-bold text-[#00DC82]">{plan.price}</p>
+                    <ul className="mt-3 space-y-1.5">
+                      {plan.features.map((f) => (
+                        <li key={f} className="flex items-start gap-2 text-xs text-muted">
+                          <span className="mt-0.5 text-[#00DC82]">✓</span>
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-4 text-xs text-muted">{copy.plansSoon} · <a href="/profesional/solicitar" className="text-[#00DC82] underline">{copy.planRequestLabel}</a></p>
+              <p className="mt-2 text-xs text-muted">{copy.planLegal}</p>
+              <WhiteLabelAddonCard />
+            </section>
+
+            {/* Upcoming features */}
+            <section className="mt-6 rounded-3xl border border-white/10 bg-white/5 p-6">
+              <h2 className="font-heading text-xl font-bold text-premium">{copy.betaNextTitle}</h2>
+              <div className="mt-4 grid gap-3 md:grid-cols-4">
+                {copy.betaNext.map((item) => (
+                  <div key={item} className="rounded-2xl border border-white/10 bg-black/10 p-4 text-sm text-muted">
+                    <FileText className="mb-3 h-4 w-4 text-[#00DC82]" />
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Provider CTA */}
+            <div className="mt-6 flex items-start gap-3 rounded-3xl border border-white/10 bg-white/5 p-5">
+              <Users className="mt-0.5 h-5 w-5 shrink-0 text-[#00DC82]" />
+              <div>
+                <p className="font-heading text-sm font-bold text-premium">{copy.providerCtaTitle as string}</p>
+                <p className="mt-1 text-xs text-muted">{copy.providerCtaText as string}</p>
+                <Link href="/proveedores" className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-[#00DC82] underline">
+                  {copy.providerCtaLink as string} <ArrowUpRight className="h-3 w-3" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Legal notice */}
+            <div className="mt-6 flex items-start gap-3 rounded-3xl border border-white/10 bg-white/5 p-5">
+              <Info className="mt-0.5 h-5 w-5 shrink-0 text-muted" />
+              <p className="text-xs text-muted">{copy.notIncluded as string}</p>
+            </div>
           </>
         )}
-
-        <section className="mt-10 rounded-3xl border border-white/10 bg-white/5 p-6">
-          <h2 className="font-heading text-2xl font-bold text-premium">{copy.plansTitle}</h2>
-          <div className="mt-4 grid gap-4 md:grid-cols-3">
-            {copy.plans.map((plan) => (
-              <div
-                key={plan.name}
-                className={`rounded-2xl p-5 ${plan.highlight ? 'border-2 border-[#00DC82]/60 bg-[#00DC82]/5' : 'border border-white/10 bg-black/10'}`}
-              >
-                {plan.highlight && (
-                  <span className="mb-3 inline-block rounded-full bg-[#00DC82]/20 px-2 py-0.5 text-[10px] font-bold uppercase text-[#00DC82]">Pro</span>
-                )}
-                <p className="font-heading text-lg font-bold text-premium">{plan.name}</p>
-                <p className="mt-1 font-heading text-xl font-bold text-[#00DC82]">{plan.price}</p>
-                <ul className="mt-3 space-y-1.5">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-xs text-muted">
-                      <span className="mt-0.5 text-[#00DC82]">✓</span>
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-          <p className="mt-4 text-xs text-muted">{copy.plansSoon} · <a href="/profesional/solicitar" className="text-[#00DC82] underline">{copy.planRequestLabel}</a></p>
-          <p className="mt-2 text-xs text-muted">{copy.planLegal}</p>
-          {accessStatus === 'APPROVED' && <WhiteLabelAddonCard />}
-        </section>
-
-        <section className="mt-6 rounded-3xl border border-white/10 bg-white/5 p-6">
-          <h2 className="font-heading text-xl font-bold text-premium">{copy.betaNextTitle}</h2>
-          <div className="mt-4 grid gap-3 md:grid-cols-4">
-            {copy.betaNext.map((item) => (
-              <div key={item} className="rounded-2xl border border-white/10 bg-black/10 p-4 text-sm text-muted">
-                <FileText className="mb-3 h-4 w-4 text-[#00DC82]" />
-                {item}
-              </div>
-            ))}
-          </div>
-        </section>
       </main>
     </div>
   );

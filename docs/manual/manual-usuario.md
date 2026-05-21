@@ -55,7 +55,7 @@ La herramienta genera una **estimación orientativa** basada en los datos declar
 | --- | --- |
 | Usuario residencial (sin registrarse) | Completar el wizard, obtener diagnóstico gratuito, desbloquear PDF Premium y revisar un presupuesto puntual mediante Budget Review. Sin historial persistente hasta crear cuenta |
 | Usuario residencial (con cuenta) | Todo lo anterior más dashboard, historial de análisis y presupuestos analizados |
-| Profesional | Gestionar expedientes de clientes desde una cuenta profesional. Ejemplo: una inmobiliaria que prepara informes orientativos para viviendas de su cartera |
+| Profesional | Gestionar prediagnósticos orientativos de viviendas de terceros: técnicos, asesores energéticos, arquitectos técnicos, inmobiliarias o equipos patrimoniales. No emite CEE oficial ni sustituye software reconocido o visita técnica |
 | Proveedor | Recibir oportunidades comerciales consentidas. Ejemplo: certificadora oficial, empresa de ventanas, solar, aislamiento, climatización o reforma |
 
 > **Nota importante:** El análisis de vivienda (wizard + PDF Premium) y el Budget Review son productos distintos. El wizard puede usar un presupuesto adjunto como contexto económico del informe, pero no lo revisa partida por partida. Budget Review analiza el presupuesto como documento independiente.
@@ -490,60 +490,106 @@ Incluye:
 
 ## 8. Área profesional beta
 
-### 8.1 Página profesional
+### 8.1 Para quién es el área profesional
 
-![Página profesional](screenshots/profesional-dark.png)
+El área profesional está pensada para usuarios que trabajan con viviendas de terceros: certificadores, técnicos energéticos, arquitectos técnicos, asesores de reforma, inmobiliarias o equipos de gestión patrimonial que preparan prediagnósticos orientativos antes de una visita técnica, una captación o una propuesta comercial.
 
-El área profesional está pensada para certificadores, arquitectos técnicos, asesores energéticos e inmobiliarias que quieren preevaluar viviendas antes de una revisión oficial.
+**Profesional no es lo mismo que proveedor.** El perfil profesional sirve para preparar casos e informes. El perfil proveedor sirve para recibir oportunidades comerciales consentidas y gestionar leads. Una misma organización puede solicitar ambos accesos de forma independiente.
 
-Funciones previstas:
+| Perfil | Para quién | Qué puede hacer |
+| --- | --- | --- |
+| Profesional | Técnico, asesor, inmobiliaria | Gestionar expedientes, informes orientativos, Budget Review de cliente |
+| Proveedor | Instalador, empresa de obras o servicios | Recibir leads, gestionar créditos, desbloquear contacto con consentimiento |
 
-| Función | Estado |
-| --- | --- |
-| Multi-expediente | Disponible en MVP con análisis asociados al usuario |
-| Historial | Disponible desde el panel |
-| PDF con marca | Próximamente |
-| Gestión avanzada de clientes | Próximamente |
-| Cuotas mensuales | Próximamente |
+### 8.2 Qué incluye el MVP profesional
 
-### 8.2 Solicitar acceso beta
+**Disponible ahora:**
+
+- Solicitar acceso profesional beta y gestionar expedientes una vez aprobado.
+- Crear análisis orientativos para viviendas de clientes.
+- Consultar expedientes y resultados desde el panel profesional.
+- Descargar informes Premium cuando estén desbloqueados.
+- Usar Budget Review para revisar presupuestos de clientes como segunda opinión orientativa.
+- Registrar el interés de un cliente en el marketplace de proveedores con su consentimiento.
+
+**Próximamente:**
+
+- Alias de cliente / referencia interna.
+- PDF con marca profesional.
+- Planes por volumen.
+- Exportación de casos.
+- White-label.
+
+**Fuera de alcance / no prometido:**
+
+- Emisión de CEE oficial.
+- Firma técnica del informe.
+- Sustitución de software reconocido.
+- CRM completo o facturación avanzada.
+
+### 8.3 Solicitar acceso beta
 
 ![Formulario de solicitud profesional](screenshots/profesional-solicitar-dark.png)
 
-Pasos:
+Para solicitar acceso:
 
-1. Entra en **Profesional**.
+1. Entra en **Profesional** desde la navegación.
 2. Pulsa **Solicitar acceso profesional beta**.
-3. Indica nombre, email, empresa, perfil y caso de uso.
-4. Envía la solicitud.
+3. Completa nombre, email, empresa, tipo de perfil profesional y caso de uso principal.
+4. Acepta el uso orientativo de la herramienta.
+5. Envía la solicitud.
 
 Si ya existe una solicitud para el mismo email, EnergyScan no crea duplicados y mostrará el estado existente.
 
-### 8.3 Estados de acceso
+> Para vincular el acceso profesional a tu cuenta necesitas iniciar sesión o crear una cuenta antes de enviar la solicitud.
+
+### 8.4 Estados de acceso
 
 | Estado | Qué significa |
 | --- | --- |
 | Sin solicitud | Todavía no has pedido acceso beta |
-| Pendiente | La solicitud está en revisión |
+| Pendiente | La solicitud está en revisión. Puedes seguir usando análisis residencial y Budget Review mientras tanto |
 | Aprobado | Puedes entrar al panel profesional |
-| Rechazado | No se ha aprobado por ahora |
+| Rechazado | No se ha aprobado por ahora. Puedes seguir usando las funciones residenciales |
 
-Cuando tu solicitud sea aprobada, recibirás un email de confirmación. Para acceder al panel profesional, inicia sesión —o crea una cuenta nueva— en EnergyScan con el mismo email que usaste en el formulario de solicitud.
+### 8.5 Panel profesional
 
-### 8.4 Panel profesional
-
-![Panel profesional beta](screenshots/imagen-pag27-es.jpeg)
+![Panel profesional beta](screenshots/profesional-dashboard-dark.png)
 
 Cuando el acceso está aprobado, el panel muestra:
 
-- Estado de acceso.
-- Acciones rápidas: nuevo análisis de cliente, panel residencial, solicitar plan Pro.
-- Expedientes asociados al usuario.
-- Estado Premium de cada expediente.
-- Acceso al resultado o PDF si está disponible.
-- Bloque de funciones beta próximas.
+- KPIs: expedientes, PDFs desbloqueados, Budget Reviews.
+- Acciones rápidas: nuevo análisis de cliente, revisar presupuesto, panel residencial.
+- Expedientes asociados al usuario con acceso a resultado, PDF y desbloqueo Premium.
+- Guía paso a paso de cómo usar el área profesional con clientes.
+- Budget Review profesional como segunda opinión orientativa.
+- Bloque de funciones beta próximas y planes informativos.
 
-> En el MVP, los expedientes se corresponden con análisis guardados por el usuario profesional. La gestión avanzada de cliente/alias y branding queda preparada para fases posteriores.
+> En el MVP, los expedientes se corresponden con análisis guardados por el usuario profesional. La gestión avanzada de cliente/alias, marca profesional en PDF y planes por volumen quedan preparados para fases posteriores.
+
+### 8.6 Budget Review profesional
+
+Budget Review puede usarse como segunda opinión orientativa sobre presupuestos de reforma de clientes. Permite detectar partidas, importes, posibles omisiones y preguntas que conviene aclarar antes de aceptar una propuesta.
+
+**Importante:** No sustituye la revisión legal, la medición técnica real ni la dirección facultativa.
+
+### 8.7 Planes profesionales
+
+Los planes profesionales están en fase beta. El acceso funciona bajo solicitud mientras se validan volúmenes y casos de uso. Los precios mostrados son orientativos y pueden cambiar. No se realizan cargos automáticos si no hay una suscripción activa en Stripe.
+
+### 8.8 Preguntas frecuentes sobre el área profesional
+
+**¿El área profesional emite certificados oficiales?**
+No. EnergyScan Profesional genera prediagnósticos orientativos. El CEE oficial debe emitirlo un técnico habilitado mediante herramientas y procedimientos reconocidos.
+
+**¿Un profesional es lo mismo que un proveedor?**
+No. El profesional usa EnergyScan para preparar casos e informes orientativos. El proveedor recibe solicitudes comerciales consentidas y gestiona leads.
+
+**¿Puedo ser profesional y proveedor a la vez?**
+Sí. Una misma organización puede solicitar ambos accesos si necesita preparar expedientes y también recibir oportunidades comerciales.
+
+**¿Puedo usar Budget Review en el área profesional?**
+Sí, como segunda opinión orientativa sobre presupuestos de clientes. No sustituye una revisión técnica, legal o contractual.
 
 ---
 
