@@ -18,7 +18,10 @@ export interface BillImporterCopy {
   billErrorOcr: string;
   billMissingFields: string;
   billCalculateAvg: string;
-  billAvgResult: (eur: number) => string;
+  billAvgResult: (eur: number, supply: string) => string;
+  billSupplyElec: string;
+  billSupplyGas: string;
+  billSupplyBoth: string;
   billApplied: string;
   billImportDesc: string;
 }
@@ -69,12 +72,6 @@ function getBillingDays(entry: BillEntry): number | undefined {
   return entry.billingDays ?? entry.extracted.billingDays;
 }
 
-function computeMonthlyAmount(entry: BillEntry): number | undefined {
-  const amount = getAmountEur(entry);
-  if (amount === undefined) return undefined;
-  const days = getBillingDays(entry) ?? 30;
-  return amount / (days / 30.44);
-}
 
 function toSerializable(bills: BillEntry[]): SerializableBill[] {
   return bills
@@ -91,6 +88,7 @@ function toSerializable(bills: BillEntry[]): SerializableBill[] {
 export function BillImporter({ onMonthlySpendChange, onBillsChange, copy }: BillImporterProps) {
   const [bills, setBills] = useState<BillEntry[]>([]);
   const [avgResult, setAvgResult] = useState<number | null>(null);
+  const [avgSupplyLabel, setAvgSupplyLabel] = useState<string>('');
   const electricityInputRef = useRef<HTMLInputElement>(null);
   const gasInputRef = useRef<HTMLInputElement>(null);
 
@@ -179,13 +177,18 @@ export function BillImporter({ onMonthlySpendChange, onBillsChange, copy }: Bill
     const billsWithAmount = bills.filter((b) => getAmountEur(b) !== undefined);
     if (billsWithAmount.length === 0) return;
 
-    const total = billsWithAmount.reduce((sum, b) => {
-      const monthly = computeMonthlyAmount(b);
-      return sum + (monthly ?? 0);
-    }, 0);
+    // Weighted average: total EUR across all bills / total days, scaled to 30.44 days/month
+    const totalAmount = billsWithAmount.reduce((sum, b) => sum + (getAmountEur(b) ?? 0), 0);
+    const totalDays = billsWithAmount.reduce((sum, b) => sum + (getBillingDays(b) ?? 30), 0);
+    const monthly = totalAmount / (totalDays / 30.44);
 
-    setAvgResult(total);
-    onMonthlySpendChange(total);
+    const hasElec = billsWithAmount.some((b) => b.supplyType === 'electricity');
+    const hasGas = billsWithAmount.some((b) => b.supplyType === 'gas');
+    const supplyLabel = hasElec && hasGas ? copy.billSupplyBoth : hasElec ? copy.billSupplyElec : copy.billSupplyGas;
+
+    setAvgResult(monthly);
+    setAvgSupplyLabel(supplyLabel);
+    onMonthlySpendChange(monthly);
   }
 
   const hasEnoughForCalc = bills.some((b) => getAmountEur(b) !== undefined);
@@ -331,7 +334,7 @@ export function BillImporter({ onMonthlySpendChange, onBillsChange, copy }: Bill
         </button>
         {avgResult !== null && (
           <p className="text-sm font-semibold text-[#00DC82]">
-            {copy.billAvgResult(avgResult)}
+            {copy.billAvgResult(Math.round(avgResult), avgSupplyLabel)}
           </p>
         )}
       </div>
