@@ -11,6 +11,8 @@ import { BillImporter, type SerializableBill } from '@/components/monetization/B
 import { convertCurrencyFromEur, convertCurrencyToEur } from '@/lib/formatters';
 
 type HeatingSystem = (typeof HEATING_SYSTEMS)[number];
+type CalculatorResult = ReturnType<typeof calculateSavingsRange>;
+type DecisionPotentialLevel = CalculatorResult['decisionPotential']['level'];
 
 const QUALITY_COLORS: Record<'basic' | 'enhanced' | 'full', string> = {
   basic: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
@@ -18,11 +20,18 @@ const QUALITY_COLORS: Record<'basic' | 'enhanced' | 'full', string> = {
   full: 'bg-[#00DC82]/20 text-[#00DC82] border-[#00DC82]/30',
 };
 
+const DECISION_COLORS: Record<DecisionPotentialLevel, string> = {
+  favorable: 'border-[#00DC82]/40 bg-[#00DC82]/15 text-[#00DC82]',
+  review: 'border-blue-400/40 bg-blue-500/15 text-blue-200',
+  full_analysis: 'border-yellow-500/30 bg-yellow-500/12 text-yellow-100',
+  not_enough_data: 'border-white/15 bg-white/10 text-muted',
+};
+
 export function SavingsCalculator() {
   const { language, currency, formatCurrency, formatArea, formatNumber } = usePreferences();
   const copy = getMonetizationCopy(language).calculator;
 
-  const [result, setResult] = useState<ReturnType<typeof calculateSavingsRange> | null>(null);
+  const [result, setResult] = useState<CalculatorResult | null>(null);
   const [error, setError] = useState('');
   const [monthlySpendHelpOpen, setMonthlySpendHelpOpen] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
@@ -109,23 +118,39 @@ export function SavingsCalculator() {
     return `${range[0].toLocaleString(language === 'en' ? 'en-GB' : language === 'de' ? 'de-DE' : 'es-ES')} - ${range[1].toLocaleString(language === 'en' ? 'en-GB' : language === 'de' ? 'de-DE' : 'es-ES')} ${copy.years}`;
   }
 
-  function paybackFooter(category: ReturnType<typeof calculateSavingsRange>['paybackCategory']) {
-    switch (category) {
-      case 'fast': return copy.paybackFast;
-      case 'reasonable': return copy.paybackReasonable;
-      case 'long': return copy.paybackLong;
-      case 'very_long': return copy.paybackVeryLong;
-      case 'not_economic': return copy.paybackNotEconomic;
+  function decisionLabel(level: DecisionPotentialLevel) {
+    switch (level) {
+      case 'favorable': return copy.decisionPotentialFavorable;
+      case 'review': return copy.decisionPotentialReview;
+      case 'full_analysis': return copy.decisionPotentialFullAnalysis;
+      case 'not_enough_data': return copy.decisionPotentialNotEnoughData;
     }
   }
 
-  function quickRead(category: ReturnType<typeof calculateSavingsRange>['paybackCategory']) {
-    switch (category) {
-      case 'fast': return copy.quickReadFast;
-      case 'reasonable': return copy.quickReadReasonable;
-      case 'long': return copy.quickReadLong;
-      case 'very_long': return copy.quickReadVeryLong;
-      case 'not_economic': return copy.quickReadNotEconomic;
+  function decisionDescription(level: DecisionPotentialLevel) {
+    switch (level) {
+      case 'favorable': return copy.decisionPotentialFavorableDescription;
+      case 'review': return copy.decisionPotentialReviewDescription;
+      case 'full_analysis': return copy.decisionPotentialFullAnalysisDescription;
+      case 'not_enough_data': return copy.decisionPotentialNotEnoughDataDescription;
+    }
+  }
+
+  function decisionNotice(level: DecisionPotentialLevel) {
+    switch (level) {
+      case 'favorable': return copy.decisionNoticeFavorable;
+      case 'review': return copy.decisionNoticeReview;
+      case 'full_analysis': return copy.decisionNoticeFullAnalysis;
+      case 'not_enough_data': return copy.decisionNoticeNotEnoughData;
+    }
+  }
+
+  function quickRead(level: DecisionPotentialLevel) {
+    switch (level) {
+      case 'favorable': return copy.quickReadFavorable;
+      case 'review': return copy.quickReadReview;
+      case 'full_analysis': return copy.quickReadFullAnalysis;
+      case 'not_enough_data': return copy.quickReadNotEnoughData;
     }
   }
 
@@ -360,16 +385,22 @@ export function SavingsCalculator() {
               <p className="mt-3 text-xs text-muted">{copy.estimatedCostFooter}</p>
             </div>
             <div className="rounded-2xl bg-white/5 p-4">
-              <p className="font-heading text-sm font-bold">{copy.payback}</p>
-              <p className="mt-1 text-xs text-muted">{copy.paybackSubtitle}</p>
-              <p className="mt-3 font-heading text-xl font-bold">{formatPaybackRange(result.paybackYearsRange)}</p>
-              <p className="mt-3 text-xs text-muted">{paybackFooter(result.paybackCategory)}</p>
+              <p className="font-heading text-sm font-bold">{copy.decisionPotentialTitle}</p>
+              <p className={`mt-3 inline-flex rounded-full border px-3 py-1 text-sm font-bold ${DECISION_COLORS[result.decisionPotential.level]}`}>
+                {decisionLabel(result.decisionPotential.level)}
+              </p>
+              <p className="mt-3 text-xs text-muted">{decisionDescription(result.decisionPotential.level)}</p>
             </div>
           </div>
 
-          {result.warnings.length > 0 && (
+          <div className={`flex gap-2 rounded-2xl border p-3 text-sm ${DECISION_COLORS[result.decisionPotential.level]}`}>
+            <Info className="mt-0.5 h-4 w-4 shrink-0" />
+            <p>{decisionNotice(result.decisionPotential.level)}</p>
+          </div>
+
+          {result.warnings.some((warning) => warning !== 'very_long_payback') && (
             <div className="space-y-2">
-              {result.warnings.map((warning) => (
+              {result.warnings.filter((warning) => warning !== 'very_long_payback').map((warning) => (
                 <div key={warning} className="flex gap-2 rounded-2xl border border-yellow-500/30 bg-yellow-500/10 p-3 text-sm text-yellow-100">
                   <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
                   <p>{copy.warnings[warning]}</p>
@@ -380,8 +411,22 @@ export function SavingsCalculator() {
 
           <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
             <p className="font-heading text-lg font-bold text-premium">{copy.quickReadTitle}</p>
-            <p className="mt-2 text-sm text-muted">{quickRead(result.paybackCategory)}</p>
+            <p className="mt-2 text-sm text-muted">{quickRead(result.decisionPotential.level)}</p>
+            <p className="mt-3 text-sm text-muted">{copy.quickReadPremiumBridge}</p>
+            <Link
+              href="/wizard?source=calculator"
+              onClick={() => trackEvent('seo_cta_clicked', { source: 'calculator_quick_read_premium_bridge' })}
+              className="mt-4 inline-flex min-h-10 items-center justify-center rounded-full border border-[#00DC82]/40 px-5 py-2 text-sm font-bold text-[#00DC82] hover:bg-[#00DC82]/10"
+            >
+              {copy.quickReadCta}
+            </Link>
           </div>
+
+          <details className="rounded-2xl border border-white/10 bg-black/10 p-5">
+            <summary className="cursor-pointer font-heading text-base font-bold text-premium">{copy.technicalPaybackToggle}</summary>
+            <p className="mt-3 text-sm text-muted">{copy.technicalPaybackValue(formatPaybackRange(result.paybackYearsRange))}</p>
+            <p className="mt-2 text-xs text-muted">{copy.technicalPaybackNote}</p>
+          </details>
 
           <details className="rounded-2xl border border-white/10 bg-black/10 p-5">
             <summary className="cursor-pointer font-heading text-base font-bold text-premium">{copy.assumptionsTitle}</summary>
