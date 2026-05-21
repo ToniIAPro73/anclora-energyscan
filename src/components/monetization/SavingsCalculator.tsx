@@ -87,16 +87,25 @@ export function SavingsCalculator() {
           <option value="terraced">{copy.propertyTerraced}</option>
         </select>
         <input name="area" type="number" min="20" max="600" placeholder={copy.areaPlaceholder} className="rounded-xl border border-white/10 bg-black/20 p-3" />
-        <select name="currentLetter" className="rounded-xl border border-white/10 bg-black/20 p-3">
-          {['A', 'B', 'C', 'D', 'E', 'F', 'G'].map((letter) => <option key={letter}>{letter}</option>)}
-        </select>
-        <select name="measure" className="rounded-xl border border-white/10 bg-black/20 p-3">
-          <option value="windows">{copy.measureWindows}</option>
-          <option value="insulation">{copy.measureInsulation}</option>
-          <option value="heat_pump">{copy.measureHeatPump}</option>
-          <option value="pv">{copy.measurePv}</option>
-          <option value="deep_retrofit">{copy.measureDeepRetrofit}</option>
-        </select>
+        <div className="flex flex-col gap-1">
+          <label className="px-1 text-xs text-muted">{copy.currentLetterLabel}</label>
+          <select name="currentLetter" defaultValue="E" className="rounded-xl border border-white/10 bg-black/20 p-3">
+            <option value="E">{copy.letterUnknown}</option>
+            {['A', 'B', 'C', 'D', 'E', 'F', 'G'].map((letter) => (
+              <option key={letter} value={letter}>{letter}</option>
+            ))}
+          </select>
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="px-1 text-xs text-muted">{copy.measureLabel}</label>
+          <select name="measure" className="rounded-xl border border-white/10 bg-black/20 p-3">
+            <option value="windows">{copy.measureWindows}</option>
+            <option value="insulation">{copy.measureInsulation}</option>
+            <option value="heat_pump">{copy.measureHeatPump}</option>
+            <option value="pv">{copy.measurePv}</option>
+            <option value="deep_retrofit">{copy.measureDeepRetrofit}</option>
+          </select>
+        </div>
 
         <div className="relative md:col-span-2">
           <input
