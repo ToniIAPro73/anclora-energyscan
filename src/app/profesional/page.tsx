@@ -71,12 +71,6 @@ export default async function ProfessionalPage() {
           >
             {primaryLabel}<ArrowUpRight className="h-4 w-4" />
           </Link>
-          <Link
-            href="/dashboard"
-            className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/10 px-6 py-3 font-heading font-bold text-premium"
-          >
-            {copy.residentialDashboard}
-          </Link>
         </div>
 
         {/* Access status */}
