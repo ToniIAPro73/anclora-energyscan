@@ -2,7 +2,7 @@
 
 import type React from 'react';
 import { Coins, Languages, Monitor, Moon, Ruler, Settings2, Sun } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   AppCurrency,
   AppLanguage,
@@ -49,6 +49,14 @@ export function PreferenceToggles({ compact = false, variant = 'inline' }: { com
     setMeasurementSystem,
   } = usePreferences();
   const [open, setOpen] = useState(false);
+  const popoverRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    function handleOutside(e: MouseEvent) {
+      if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener('mousedown', handleOutside);
+    return () => document.removeEventListener('mousedown', handleOutside);
+  }, []);
 
   const groups = (
     <div className={`flex max-w-full ${compact ? 'flex-wrap items-center justify-center gap-1.5' : 'flex-wrap items-center gap-3'}`}>
@@ -120,7 +128,7 @@ export function PreferenceToggles({ compact = false, variant = 'inline' }: { com
 
   if (variant === 'popover') {
     return (
-      <div className="relative">
+      <div className="relative" ref={popoverRef}>
         <button
           type="button"
           onClick={() => setOpen((value) => !value)}

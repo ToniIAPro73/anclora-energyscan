@@ -2,9 +2,9 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { BriefcaseBusiness, ChevronDown, FileText, Home, LayoutDashboard, LogOut, ReceiptText, Settings, Shield, UserRound } from 'lucide-react';
+import { BriefcaseBusiness, Calculator, ChevronDown, FileText, Home, LayoutDashboard, LogOut, ReceiptText, Settings, Shield, UserRound } from 'lucide-react';
 import { signOut as clientSignOut } from 'next-auth/react';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { PreferenceToggles } from './PreferenceToggles';
 import { usePreferences } from './AppPreferencesProvider';
 
@@ -33,6 +33,16 @@ export default function Navbar({
   const { dictionary: t } = usePreferences();
   const [productOpen, setProductOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
+  const productRef = useRef<HTMLDivElement>(null);
+  const accountRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    function handleOutside(e: MouseEvent) {
+      if (productRef.current && !productRef.current.contains(e.target as Node)) setProductOpen(false);
+      if (accountRef.current && !accountRef.current.contains(e.target as Node)) setAccountOpen(false);
+    }
+    document.addEventListener('mousedown', handleOutside);
+    return () => document.removeEventListener('mousedown', handleOutside);
+  }, []);
   const isAppMode = mode === 'app';
   const productLinks = isAppMode
     ? [
@@ -43,7 +53,7 @@ export default function Navbar({
         { href: professionalHref, label: t.navProfessional, Icon: UserRound },
       ]
     : [
-        { href: '/calculadora-ahorro', label: t.navCalculator },
+        { href: '/calculadora-ahorro', label: t.navCalculator, Icon: Calculator },
         { href: '/wizard', label: t.navReports, Icon: FileText },
         { href: '/budget-review', label: t.navBudgetReview, Icon: ReceiptText },
         { href: '/#casos-de-uso', label: t.navResidential, Icon: Home },
@@ -66,7 +76,7 @@ export default function Navbar({
           <span className="hidden whitespace-nowrap min-[430px]:inline">Anclora EnergyScan</span>
         </Link>
         <div className="premium-nav-pill hidden items-center gap-1 rounded-full p-1 text-sm text-muted xl:flex">
-          <div className="relative">
+          <div className="relative" ref={productRef}>
             <button
               type="button"
               onClick={() => setProductOpen((value) => !value)}
@@ -102,9 +112,9 @@ export default function Navbar({
           ) : (
             <>
               <Link href="/#como-funciona" className="inline-flex min-h-9 items-center whitespace-nowrap rounded-full px-3 font-semibold transition hover:bg-white/5 hover:text-premium">{t.navHow}</Link>
-              <Link href="/#mejoras" className="inline-flex min-h-9 items-center whitespace-nowrap rounded-full px-3 font-semibold transition hover:bg-white/5 hover:text-premium">{t.navImprovements}</Link>
               <Link href="/#normativa" className="inline-flex min-h-9 items-center whitespace-nowrap rounded-full px-3 font-semibold transition hover:bg-white/5 hover:text-premium">{t.navRegulation}</Link>
-              <Link href="/pricing" className="inline-flex min-h-9 items-center whitespace-nowrap rounded-full px-3 font-semibold transition hover:bg-white/5 hover:text-premium">{t.navPricing}</Link>
+              <Link href="/#mejoras" className="inline-flex min-h-9 items-center whitespace-nowrap rounded-full px-3 font-semibold transition hover:bg-white/5 hover:text-premium">{t.navImprovements}</Link>
+              <Link href="/#precios" className="inline-flex min-h-9 items-center whitespace-nowrap rounded-full px-3 font-semibold transition hover:bg-white/5 hover:text-premium">{t.navPricing}</Link>
             </>
           )}
         </div>
@@ -190,7 +200,7 @@ export default function Navbar({
       <div className="flex items-center justify-between border-t border-white/5 px-3 py-2 md:hidden">
         <PreferenceToggles compact variant="popover" />
         {isAppMode && (
-          <div className="relative">
+          <div className="relative" ref={accountRef}>
             <button
               type="button"
               onClick={() => setAccountOpen((v) => !v)}

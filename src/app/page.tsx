@@ -7,6 +7,8 @@ import Link from 'next/link';
 import { usePreferences } from '@/components/AppPreferencesProvider';
 import { getLegalDisclaimer } from '@/lib/i18n';
 import { HeroEnergyScale } from '@/components/HeroEnergyScale';
+import { ScrollArrows } from '@/components/ScrollArrows';
+import { SocialRail, SocialRailMobile } from '@/components/SocialRail';
 
 export default function LandingPage() {
   const { dictionary: t, language, currency, measurementSystem } = usePreferences();
@@ -129,6 +131,23 @@ export default function LandingPage() {
                   <p className="text-[10px] text-muted mt-1 uppercase tracking-wider font-semibold">{s.label}</p>
                 </div>
               ))}
+            </div>
+
+            {/* HERO SCROLL INDICATOR */}
+            <div className="flex flex-col items-center gap-1 mt-10 pb-2">
+              <button
+                type="button"
+                onClick={() => document.getElementById('como-funciona')?.scrollIntoView({ behavior: 'smooth' })}
+                className="group flex flex-col items-center gap-2 animate-bounce focus:outline-none"
+                aria-label={language === 'en' ? 'Scroll down' : language === 'de' ? 'Nach unten scrollen' : 'Desplazarse hacia abajo'}
+              >
+                <span className="text-[10px] font-heading font-semibold text-muted uppercase tracking-widest group-hover:text-[#00DC82] transition">
+                  {language === 'en' ? 'Discover' : language === 'de' ? 'Entdecken' : 'Descubrir'}
+                </span>
+                <div className="w-6 h-10 rounded-full border-2 border-[#00DC82]/40 flex items-start justify-center p-1.5 group-hover:border-[#00DC82]/70 transition">
+                  <div className="w-1.5 h-3 rounded-full bg-[#00DC82]/60 animate-pulse group-hover:bg-[#00DC82] transition" />
+                </div>
+              </button>
             </div>
           </div>
         </section>
@@ -342,6 +361,73 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* PRECIOS */}
+        <section id="precios" className="py-24 sm:py-32 relative">
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#262626] to-transparent"></div>
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <p className="text-xs text-[#00DC82] font-heading font-semibold tracking-wider uppercase mb-3">{t.navPricing}</p>
+              <h2 className="font-heading font-bold text-3xl sm:text-4xl text-premium mb-4">{t.pricingTitle}</h2>
+              <p className="text-muted max-w-2xl mx-auto">{t.pricingCopy}</p>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              <div className="surface-2 border rounded-2xl p-5 flex flex-col">
+                <p className="text-xs text-muted font-heading font-semibold uppercase tracking-wider mb-3">
+                  {language === 'en' ? 'Free' : language === 'de' ? 'Kostenlos' : 'Gratis'}
+                </p>
+                <p className="font-heading font-bold text-3xl text-premium mb-1">0 €</p>
+                <p className="text-xs text-muted mb-4 flex-1">
+                  {language === 'en' ? 'Diagnostic + indicative rating' : language === 'de' ? 'Diagnose + orientierende Klasse' : 'Diagnóstico + letra orientativa'}
+                </p>
+                <Link href="/wizard" className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/15 px-4 py-2.5 text-xs font-heading font-bold text-muted hover:text-premium hover:border-white/25 transition">
+                  {t.startFree} <ArrowRight className="h-3 w-3" />
+                </Link>
+              </div>
+              <div className="surface-2 border border-[#00DC82]/20 rounded-2xl p-5 flex flex-col">
+                <p className="text-xs text-[#00DC82] font-heading font-semibold uppercase tracking-wider mb-3">
+                  {language === 'en' ? 'PDF Report' : language === 'de' ? 'PDF-Bericht' : 'Informe PDF'}
+                </p>
+                <p className="font-heading font-bold text-3xl text-[#00DC82] mb-1">9,90 €</p>
+                <p className="text-xs text-muted mb-4 flex-1">
+                  {language === 'en' ? 'Scenarios, costs & downloadable PDF' : language === 'de' ? 'Szenarien, Kosten & PDF-Download' : 'Escenarios, costes y PDF descargable'}
+                </p>
+                <Link href="/wizard" className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#00DC82] px-4 py-2.5 text-xs font-heading font-bold text-[#0A0A0A] hover:brightness-110 transition">
+                  {language === 'en' ? 'Get report' : language === 'de' ? 'Bericht kaufen' : 'Obtener informe'} <ArrowRight className="h-3 w-3" />
+                </Link>
+              </div>
+              <div className="surface-2 border border-[#FFB020]/20 rounded-2xl p-5 flex flex-col">
+                <p className="text-xs text-[#FFB020] font-heading font-semibold uppercase tracking-wider mb-3">Budget Review</p>
+                <p className="font-heading font-bold text-3xl text-[#FFB020] mb-1">19,90 €</p>
+                <p className="text-xs text-muted mb-4 flex-1">
+                  {language === 'en' ? 'Second opinion on renovation quotes' : language === 'de' ? 'Zweitmeinung zu Sanierungsangeboten' : 'Segunda opinión sobre presupuestos'}
+                </p>
+                <Link href="/budget-review" className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#FFB020] px-4 py-2.5 text-xs font-heading font-bold text-[#0A0A0A] hover:brightness-110 transition">
+                  {language === 'en' ? 'Review quote' : language === 'de' ? 'Angebot prüfen' : 'Revisar presupuesto'} <ArrowRight className="h-3 w-3" />
+                </Link>
+              </div>
+              <div className="surface-2 border border-white/10 border-dashed rounded-2xl p-5 flex flex-col opacity-75">
+                <p className="text-xs text-muted font-heading font-semibold uppercase tracking-wider mb-3">
+                  {language === 'en' ? 'Smart Reform Pack' : language === 'de' ? 'Reform-Paket' : 'Pack Reforma'}
+                </p>
+                <p className="font-heading font-bold text-xl text-muted mb-1">
+                  {language === 'en' ? 'Coming soon' : language === 'de' ? 'Bald' : 'Próximamente'}
+                </p>
+                <p className="text-xs text-muted mb-4 flex-1">
+                  {language === 'en' ? 'PDF + Budget Review in one payment' : language === 'de' ? 'PDF + Budget Review in einer Zahlung' : 'PDF Premium + Budget Review en un pago'}
+                </p>
+                <div className="inline-flex w-full items-center justify-center rounded-full border border-white/10 px-4 py-2.5 text-xs font-heading font-semibold text-muted cursor-default">
+                  {language === 'en' ? 'Soon' : language === 'de' ? 'Bald' : 'Próximamente'}
+                </div>
+              </div>
+            </div>
+            <div className="text-center">
+              <Link href="/pricing" className="inline-flex items-center gap-2 text-sm font-heading font-semibold text-[#00DC82] hover:brightness-125 transition">
+                {language === 'en' ? 'See full plan details' : language === 'de' ? 'Alle Details' : 'Ver detalle completo de planes'} <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          </div>
+        </section>
+
         {/* CTA FINAL */}
         <section className="py-24 sm:py-32 relative overflow-hidden text-center">
           <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -361,7 +447,13 @@ export default function LandingPage() {
         </section>
       </main>
 
+      {/* Mobile social rail above footer */}
+      <SocialRailMobile />
       <Footer />
+
+      {/* Fixed overlays */}
+      <SocialRail />
+      <ScrollArrows />
     </div>
   );
 }
