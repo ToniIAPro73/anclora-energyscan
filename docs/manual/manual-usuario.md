@@ -169,21 +169,23 @@ La página de inicio resume las acciones principales:
 
 ![Calculadora de ahorro energético](screenshots/imagen-pag9-es.png)
 
-La calculadora es pública y rápida. Sirve para estimar rangos generales antes de hacer el diagnóstico completo.
+La calculadora pública sirve para estimar un rango económico orientativo de una medida concreta. Usa el importe mensual de facturas como base para estimar ahorro anual, inversión aproximada y retorno simple. No sustituye el prediagnóstico completo ni un presupuesto profesional.
 
 **Pasos:**
 
 1. Selecciona el tipo de vivienda.
 2. Introduce superficie.
-3. Indica gasto energético mensual aproximado.
-4. Marca las medidas que te interesan.
+3. Indica el importe medio mensual de tus facturas de energía. No introduzcas kWh ni potencia contratada.
+4. Selecciona la mejora concreta que quieres simular.
 5. Pulsa **Calcular rango orientativo**.
 
 | Resultado | Cómo leerlo |
 | --- | --- |
-| Ahorro anual | Rango de ahorro posible, no garantizado |
-| Coste orientativo | Inversión aproximada por las medidas elegidas |
-| Payback | Años aproximados de retorno |
+| Ahorro anual estimado | Rango posible frente al gasto energético declarado |
+| Inversión orientativa | Coste aproximado de aplicar la medida seleccionada |
+| Retorno económico simple | Años aproximados para recuperar la inversión solo mediante ahorro energético |
+
+Un retorno largo no significa que la medida sea inútil: puede tener sentido por confort, mantenimiento, normativa, venta/alquiler o valor del inmueble.
 
 ### 4.3 Wizard de prediagnóstico
 

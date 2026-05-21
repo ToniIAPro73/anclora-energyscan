@@ -164,21 +164,23 @@ The home page summarises the main actions:
 
 ![Energy savings calculator](screenshots/imagen-pag9-en.png)
 
-The calculator is public and quick. It is useful for estimating general ranges before carrying out the full assessment.
+The public calculator estimates an indicative economic range for one specific measure. It uses the monthly bill amount as the basis for estimating annual savings, approximate investment and simple payback. It does not replace the full pre-assessment or a professional quote.
 
 **Steps:**
 
 1. Select the property type.
 2. Enter the floor area.
-3. Enter the approximate monthly energy cost.
-4. Select the measures you are interested in.
+3. Enter the average monthly amount of your energy bills. Do not enter kWh or contracted power.
+4. Select the specific improvement you want to simulate.
 5. Click **Calculate indicative range**.
 
 | Result | How to read it |
 | --- | --- |
-| Annual savings | Possible savings range — not guaranteed |
-| Indicative cost | Approximate investment for the selected measures |
-| Payback | Approximate return period in years |
+| Estimated annual savings | Possible range compared with the declared energy spend |
+| Indicative investment | Approximate cost of applying the selected measure |
+| Simple economic payback | Approximate years to recover the investment through energy savings only |
+
+A long payback does not mean the measure is useless: it may make sense for comfort, maintenance, regulation, sale/rental preparation or property value.
 
 ### 4.3 Pre-assessment wizard
 

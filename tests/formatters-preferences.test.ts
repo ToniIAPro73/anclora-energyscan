@@ -1,4 +1,4 @@
-import { convertArea, convertCurrencyFromEur, formatArea, formatCurrency } from '../src/lib/formatters';
+import { convertArea, convertCurrencyFromEur, convertCurrencyToEur, formatArea, formatCurrency } from '../src/lib/formatters';
 import { formatCostQuantity, formatUnitPrice } from '../src/lib/costs/format';
 
 describe('preference formatters', () => {
@@ -21,6 +21,7 @@ describe('preference formatters', () => {
     expect(formatArea(185, 'imperial', 'en')).toContain('sq ft');
     expect(Math.round(convertArea(185, 'imperial'))).toBe(1991);
     expect(convertCurrencyFromEur(100, 'GBP', 0.86)).toBe(86);
+    expect(convertCurrencyToEur(86, 'GBP', 0.86)).toBe(100);
     expect(formatCostQuantity(185, 'm2', { language: 'en', measurementSystem: 'imperial' })).toContain('sq ft');
     expect(formatUnitPrice(100, 'm2', { language: 'en', currency: 'GBP', measurementSystem: 'imperial' })).toContain('/sq ft');
   });
