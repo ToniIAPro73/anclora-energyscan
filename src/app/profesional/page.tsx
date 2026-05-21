@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import {
-  ArrowUpRight,
   BriefcaseBusiness,
   FileText,
   History,
@@ -31,11 +30,7 @@ export default async function ProfessionalPage() {
   const isApproved = request?.status === 'APPROVED';
   const isLoggedIn = !!session?.user;
 
-  const primaryHref = isApproved
-    ? '/profesional/dashboard'
-    : isLoggedIn
-    ? '/profesional/solicitar'
-    : '/auth?callbackUrl=/profesional/solicitar';
+  const primaryHref = isApproved ? '/profesional/dashboard' : '/profesional/solicitar';
 
   const primaryLabel = isApproved ? copy.dashboardCta : copy.cta;
 
@@ -69,7 +64,7 @@ export default async function ProfessionalPage() {
             href={primaryHref}
             className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#00DC82] px-6 py-3 font-heading font-bold text-[#07140f]"
           >
-            {primaryLabel}<ArrowUpRight className="h-4 w-4" />
+            {primaryLabel}
           </Link>
         </div>
 
@@ -158,7 +153,7 @@ export default async function ProfessionalPage() {
               href={primaryHref}
               className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full bg-[#00DC82] px-5 py-2 text-sm font-bold text-[#07140f]"
             >
-              {primaryLabel}<ArrowUpRight className="h-3.5 w-3.5" />
+              {primaryLabel}
             </Link>
             <Link
               href="/proveedores"
