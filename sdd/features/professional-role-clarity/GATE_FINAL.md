@@ -21,18 +21,18 @@
 | 10 | i18n ES/EN/DE updated | ✅ |
 | 11 | Tests passing | ✅ (39 professional tests) |
 | 12 | TypeScript clean | ✅ (tsc --noEmit: 0 errors) |
-| 13 | QA documentation created | ✅ |
-| 14 | SDD spec created | ✅ |
-| 15 | Commit and PR ready | Pending |
+| 13 | QA visual/manual documented | ✅ (Playwright 1.60, 12 screenshots) |
+| 14 | SDD spec and QA report created | ✅ |
+| 15 | Build successful | ✅ (npm run build: 0 errors) |
+| 16 | Full test suite passing | ✅ (417 tests) |
+| 17 | PR open | ✅ PR #75 |
 
 ---
 
 ## Pending
 
-- Manual EN/DE update (deferred — ES is canonical).
-- Manual PDF regeneration (deferred — requires environment).
-- Build check (deferred — requires running environment).
-- Visual/manual QA (deferred — requires running app).
+- Manual EN/DE update (deferred — ES is canonical, i18n keys are complete in EN/DE).
+- Manual PDF regeneration (deferred — requires headless Puppeteer in environment).
 
 ---
 

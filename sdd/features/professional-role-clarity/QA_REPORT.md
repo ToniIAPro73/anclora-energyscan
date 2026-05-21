@@ -118,15 +118,36 @@ The professional role existed in the codebase but lacked:
 
 ```
 npx tsc --noEmit            → 0 errors
-npm test -- professional    → 39 tests PASS
-npm test -- monetization-packaging residential-product-contract → 33 tests PASS
+npm run lint                → no warnings or errors
+npm test -- professional    → 39 tests PASS (23 new + 16 existing)
+npm test (full suite)       → 417 tests PASS
+npm run build               → successful, 0 errors
 ```
 
-Build: pending (requires running environment).
+## 9. Visual / manual QA — Playwright (2026-05-21)
+
+Playwright 1.60.0. Next.js dev server port 3099.
+
+| Caso | Check | Result |
+|---|---|---|
+| A anon ES | `/profesional` carga bloques "Para quién es", "Qué puedes hacer ahora", "Qué no incluye", beta notice, proveedor diferencia | ✅ |
+| A anon ES | CTA primario anón → `/auth?callbackUrl=/profesional/solicitar` | ✅ |
+| A anon ES | Mobile 390px — sin scroll horizontal | ✅ |
+| B solicitar ES | Login context notice, dropdown profileType (8 opts), useCase, volume, terms checkbox | ✅ |
+| B solicitar ES | Submit sin terms → error "Debes aceptar el uso orientativo" | ✅ |
+| B solicitar ES | Submit sin email → HTML5 nativo bloquea | ✅ |
+| C dashboard | Sin sesión: lock icon + "Inicia sesión" + CTAs Entrar + Solicitar | ✅ |
+| G EN landing | "Who it is for", "Energy certifiers...", "What you can do now", no Spanish/German mix | ✅ |
+| G EN solicitar | Dropdown EN, login notice EN, terms label EN, error terms EN | ✅ |
+| G DE landing | "Für wen ist es gedacht", "Energiezertifizierer", beta notice DE, no Spanish/English mix | ✅ |
+| G DE solicitar | Dropdown DE, login notice DE | ✅ |
+| H mobile dark | Páginas profesional/solicitar/dashboard cargadas en 390px dark mode | ✅ |
+
+**Nota arquitectura i18n — cliente:** `/profesional/solicitar` es `'use client'` y lee el idioma de `localStorage` (via `AppPreferencesProvider`). Los server components leen de la cookie. Ambos se sincronizan cuando el usuario cambia idioma en settings. Para usuarios reales el comportamiento es coherente. Es la arquitectura existente del sistema de preferencias, no una regresión.
 
 ---
 
-## 9. Remaining limitations
+## 10. Remaining limitations
 
 - Manual EN/DE not updated (marked as pending; ES is canonical).
 - Manual PDF not regenerated (requires `npm run manual:pdf:es` with Puppeteer in environment).
@@ -136,7 +157,7 @@ Build: pending (requires running environment).
 
 ---
 
-## 10. Legal and commercial risks
+## 11. Legal and commercial risks
 
 - No official EPC claims introduced. Copy consistently says "orientativo / indicativo / orientierend".
 - Plans shown as beta — no payment initiated without explicit Stripe billing implementation.
