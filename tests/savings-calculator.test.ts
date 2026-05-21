@@ -1,4 +1,4 @@
-import { calculateSavingsRange, savingsCalculatorSchema } from '@/lib/calculator/savings';
+import { calculateSavingsRange, getDecisionPotential, savingsCalculatorSchema } from '@/lib/calculator/savings';
 
 describe('savings calculator value clarity', () => {
   it('returns indicative ranges and a non-guaranteed disclaimer', () => {
@@ -145,5 +145,63 @@ describe('savings calculator value clarity', () => {
       'cost_rate',
     ]));
     expect(result.assumptionValues.annualSpend).toBe(1800);
+  });
+
+  it('maps short maximum payback to favorable decision potential', () => {
+    const result = calculateSavingsRange({
+      propertyType: 'flat',
+      area: 20,
+      currentLetter: 'E',
+      measure: 'windows',
+      monthlySpend: 500,
+    });
+
+    expect(result.paybackYearsRange[1]).toBeLessThanOrEqual(15);
+    expect(result.decisionPotential.level).toBe('favorable');
+  });
+
+  it('maps mixed payback range to review decision potential', () => {
+    const result = calculateSavingsRange({
+      propertyType: 'flat',
+      area: 40,
+      currentLetter: 'E',
+      measure: 'windows',
+      monthlySpend: 180,
+    });
+
+    expect(result.paybackYearsRange[0]).toBeLessThanOrEqual(30);
+    expect(result.paybackYearsRange[1]).toBeGreaterThan(15);
+    expect(result.decisionPotential.level).toBe('review');
+  });
+
+  it('maps high minimum payback to full analysis decision potential', () => {
+    const result = calculateSavingsRange({
+      propertyType: 'flat',
+      area: 45,
+      currentLetter: 'E',
+      measure: 'deep_retrofit',
+      monthlySpend: 66,
+    });
+
+    expect(result.paybackYearsRange[0]).toBeGreaterThan(30);
+    expect(result.decisionPotential.level).toBe('full_analysis');
+  });
+
+  it('maps missing payback data to not enough data', () => {
+    expect(getDecisionPotential([null, null]).level).toBe('not_enough_data');
+    expect(getDecisionPotential([4, 12], false).level).toBe('not_enough_data');
+  });
+
+  it('keeps simple payback available as internal technical data', () => {
+    const result = calculateSavingsRange({
+      propertyType: 'house',
+      area: 120,
+      currentLetter: 'E',
+      measure: 'pv',
+      monthlySpend: 220,
+    });
+
+    expect(result.paybackYearsRange[0]).toEqual(expect.any(Number));
+    expect(result.paybackYearsRange[1]).toEqual(expect.any(Number));
   });
 });

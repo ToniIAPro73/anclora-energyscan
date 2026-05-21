@@ -40,6 +40,19 @@ export type SavingsViability =
   | 'comfort_regulatory'
   | 'strategic_not_financial';
 
+export type DecisionPotentialLevel =
+  | 'favorable'
+  | 'review'
+  | 'full_analysis'
+  | 'not_enough_data';
+
+export type DecisionPotential = {
+  level: DecisionPotentialLevel;
+  labelKey: string;
+  descriptionKey: string;
+  technicalNoteKey?: string;
+};
+
 export type CalculatorWarning =
   | 'very_long_payback'
   | 'low_spend_deep_retrofit'
@@ -142,6 +155,7 @@ export function calculateSavingsRange(input: SavingsCalculatorInput) {
       : null;
   const paybackCategory = categorizePayback(paybackMidpoint);
   const viability = getViability(paybackCategory);
+  const decisionPotential = getDecisionPotential([minPaybackYears, maxPaybackYears]);
 
   const warnings: CalculatorWarning[] = [];
   if (paybackCategory === 'very_long' || paybackCategory === 'not_economic') {
@@ -166,6 +180,7 @@ export function calculateSavingsRange(input: SavingsCalculatorInput) {
     paybackYearsRange: [minPaybackYears, maxPaybackYears] as const,
     paybackCategory,
     viability,
+    decisionPotential,
     interpretationKey: `calculator.interpretation.${paybackCategory}`,
     primaryTakeawayKey: `calculator.takeaway.${viability}`,
     warnings,
@@ -189,6 +204,41 @@ export function calculateSavingsRange(input: SavingsCalculatorInput) {
     disclaimer: 'Rango orientativo no garantizado. Requiere validacion tecnica y datos completos de la vivienda.',
     inputQuality,
     savingsNarrowingPct,
+  };
+}
+
+export function getDecisionPotential(
+  paybackYearsRange: readonly [number | null, number | null],
+  hasEnoughData = true,
+): DecisionPotential {
+  const [minPaybackYears, maxPaybackYears] = paybackYearsRange;
+  const hasUsablePayback =
+    minPaybackYears !== null &&
+    maxPaybackYears !== null &&
+    Number.isFinite(minPaybackYears) &&
+    Number.isFinite(maxPaybackYears);
+
+  if (!hasEnoughData || !hasUsablePayback) {
+    return createDecisionPotential('not_enough_data');
+  }
+
+  if (maxPaybackYears <= 15) {
+    return createDecisionPotential('favorable');
+  }
+
+  if (minPaybackYears <= 30) {
+    return createDecisionPotential('review');
+  }
+
+  return createDecisionPotential('full_analysis');
+}
+
+function createDecisionPotential(level: DecisionPotentialLevel): DecisionPotential {
+  return {
+    level,
+    labelKey: `calculator.decisionPotential.level.${level}`,
+    descriptionKey: `calculator.decisionPotential.description.${level}`,
+    technicalNoteKey: 'calculator.decisionPotential.technicalNote',
   };
 }
 
