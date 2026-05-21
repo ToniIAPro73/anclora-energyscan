@@ -2,7 +2,7 @@
 
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { ArrowRight, CheckCircle2, Home, Gauge, Zap, FileText, Calculator } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Home, Gauge, Zap, FileText, Calculator, Package } from 'lucide-react';
 import Link from 'next/link';
 import { usePreferences } from '@/components/AppPreferencesProvider';
 import { getLegalDisclaimer } from '@/lib/i18n';
@@ -63,30 +63,63 @@ export default function LandingPage() {
                 <p className="text-muted text-base sm:text-lg leading-relaxed mb-6 max-w-xl">
                   {t.heroCopy}
                 </p>
-                {/* Product offerings strip */}
-                <div className="flex flex-wrap gap-2 mb-5">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#00DC82]/10 text-[#00DC82] border border-[#00DC82]/20">
-                    <FileText className="w-3 h-3" />
-                    {language === 'en' ? 'Premium PDF Report' : language === 'de' ? 'Premium PDF-Bericht' : 'Informe PDF Premium'}
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#FFB020]/10 text-[#FFB020] border border-[#FFB020]/20">
-                    <FileText className="w-3 h-3" />
-                    Budget Review
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/5 text-muted border border-white/10 border-dashed">
-                    {language === 'en' ? 'Full Pack · Soon' : language === 'de' ? 'Komplettpaket · Bald' : 'Pack completo · Próx.'}
-                  </span>
-                </div>
+                {/* Primary CTAs */}
                 <div className="flex flex-wrap gap-3 mb-6">
                   <Link href="/wizard" className="px-6 py-3 rounded-full bg-[#00DC82] text-[#0A0A0A] font-heading font-bold text-sm hover:brightness-110 transition pulse-glow">
                     {t.startFree}
                   </Link>
-                  <Link href="/pricing" className="px-6 py-3 rounded-full border border-[#00DC82]/40 text-[#00DC82] font-heading font-bold text-sm hover:bg-[#00DC82]/10 transition">
-                    {t.pricingPremiumCta}
-                  </Link>
-                  <Link href="#como-funciona" className="px-6 py-3 rounded-full border border-white/10 text-muted font-heading font-semibold text-sm hover:text-premium hover:border-white/20 transition">
+                  <Link href="#como-funciona" className="px-6 py-3 rounded-full border border-white/15 text-muted font-heading font-semibold text-sm hover:text-premium hover:border-white/25 transition">
                     {t.howItWorks}
                   </Link>
+                </div>
+
+                {/* Premium products block */}
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 mb-6">
+                  <p className="text-[10px] font-heading font-semibold text-muted uppercase tracking-wider mb-3">
+                    {language === 'en' ? 'Premium reports' : language === 'de' ? 'Premium-Berichte' : 'Informes Premium'}
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    {/* PDF Premium */}
+                    <Link href="/wizard" className="group flex items-start gap-3 rounded-xl border border-[#00DC82]/20 bg-[#00DC82]/5 p-3 hover:bg-[#00DC82]/10 hover:border-[#00DC82]/40 transition">
+                      <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#00DC82]/15">
+                        <FileText className="h-4 w-4 text-[#00DC82]" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-heading font-bold text-premium leading-tight">
+                          {language === 'en' ? 'PDF Report' : language === 'de' ? 'PDF-Bericht' : 'Informe PDF'}
+                        </p>
+                        <p className="text-[11px] text-[#00DC82] font-semibold">9,90 €</p>
+                      </div>
+                      <ArrowRight className="ml-auto h-3.5 w-3.5 text-[#00DC82]/50 group-hover:text-[#00DC82] transition shrink-0 mt-1" />
+                    </Link>
+
+                    {/* Budget Review */}
+                    <Link href="/budget-review" className="group flex items-start gap-3 rounded-xl border border-[#FFB020]/20 bg-[#FFB020]/5 p-3 hover:bg-[#FFB020]/10 hover:border-[#FFB020]/40 transition">
+                      <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#FFB020]/15">
+                        <Calculator className="h-4 w-4 text-[#FFB020]" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-heading font-bold text-premium leading-tight">Budget Review</p>
+                        <p className="text-[11px] text-[#FFB020] font-semibold">14,90 €</p>
+                      </div>
+                      <ArrowRight className="ml-auto h-3.5 w-3.5 text-[#FFB020]/50 group-hover:text-[#FFB020] transition shrink-0 mt-1" />
+                    </Link>
+
+                    {/* Pack completo — próximamente */}
+                    <div className="flex items-start gap-3 rounded-xl border border-white/10 border-dashed bg-white/[0.02] p-3 opacity-70">
+                      <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/5">
+                        <Package className="h-4 w-4 text-muted" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-heading font-bold text-muted leading-tight">
+                          {language === 'en' ? 'Full Pack' : language === 'de' ? 'Komplettpaket' : 'Pack completo'}
+                        </p>
+                        <p className="text-[11px] text-muted font-semibold">
+                          {language === 'en' ? 'Coming soon' : language === 'de' ? 'Bald verfügbar' : 'Próximamente'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <p className="text-[10px] text-muted leading-relaxed max-w-md">
                   {getLegalDisclaimer(language)}

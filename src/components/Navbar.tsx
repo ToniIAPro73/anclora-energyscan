@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { BriefcaseBusiness, ChevronDown, FileText, LayoutDashboard, LogOut, ReceiptText, Settings, Shield, UserRound } from 'lucide-react';
+import { BriefcaseBusiness, ChevronDown, FileText, Home, LayoutDashboard, LogOut, ReceiptText, Settings, Shield, UserRound } from 'lucide-react';
 import { signOut as clientSignOut } from 'next-auth/react';
 import { useState } from 'react';
 import { PreferenceToggles } from './PreferenceToggles';
@@ -43,6 +43,7 @@ export default function Navbar({
         { href: professionalHref, label: t.navProfessional, Icon: UserRound },
       ]
     : [
+        { href: '/#casos-de-uso', label: t.navResidential, Icon: Home },
         { href: '/#como-funciona', label: t.navHow },
         { href: '/calculadora-ahorro', label: t.navCalculator },
         { href: '/budget-review', label: t.navBudgetReview },
