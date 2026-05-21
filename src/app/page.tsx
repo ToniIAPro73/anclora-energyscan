@@ -2,7 +2,7 @@
 
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { ArrowRight, Home, Gauge, Zap, FileText, Calculator } from 'lucide-react';
+import { ArrowRight, Home, Gauge, Zap, FileText, Calculator, Package } from 'lucide-react';
 import Link from 'next/link';
 import { usePreferences } from '@/components/AppPreferencesProvider';
 import { getLegalDisclaimer } from '@/lib/i18n';
