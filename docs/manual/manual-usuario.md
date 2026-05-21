@@ -9,8 +9,8 @@
 <div class="cover-subtitle">Guía práctica para usuarios residenciales,<br>profesionales beta y proveedores</div>
 
 <div class="cover-meta">
-  <div class="cover-version">Versión 1.2</div>
-  <div class="cover-date">19 mayo 2026</div>
+  <div class="cover-version">Versión 1.3</div>
+  <div class="cover-date">21 mayo 2026</div>
 </div>
 
 <div class="cover-disclaimer">EnergyScan ofrece un prediagnóstico energético orientativo. No emite Certificados de Eficiencia Energética oficiales ni sustituye la revisión de un técnico cualificado.</div>
@@ -161,9 +161,11 @@ En la barra superior encontrarás el botón de preferencias, por ejemplo **ES ·
 La página de inicio resume las acciones principales:
 
 1. **Iniciar análisis**: abre el wizard de prediagnóstico.
-2. **Ver precios**: muestra el plan gratuito, Premium y profesional.
-3. **Producto**: despliega accesos a calculadora, presupuestos, proveedores y profesional.
+2. **Producto**: despliega accesos a calculadora, informes, presupuestos, usuarios residenciales, profesional y proveedores.
+3. **Cómo funciona · Normativa · Mejoras · Precios**: accesos directos a las secciones de la landing (en ese orden).
 4. **Preferencias**: cambia idioma, tema, moneda y unidades.
+5. **Rail social**: iconos de redes sociales fijos en el lateral derecho (ocultos en móvil, visibles en la parte inferior de la página).
+6. **Descubrir**: botón en el hero que desplaza suavemente hasta la primera sección de contenido.
 
 ### 4.2 Calculadora de ahorro energético
 
@@ -534,7 +536,7 @@ El área profesional está pensada para usuarios que trabajan con viviendas de t
 Para solicitar acceso:
 
 1. Entra en **Profesional** desde la navegación.
-2. Pulsa **Solicitar acceso profesional beta**.
+2. Pulsa **Registrar profesional**.
 3. Completa nombre, email, empresa, tipo de perfil profesional y caso de uso principal.
 4. Acepta el uso orientativo de la herramienta.
 5. Envía la solicitud.
@@ -870,6 +872,6 @@ Anclora EnergyScan proporciona estimaciones orientativas basadas en datos declar
 <div class="footer-brand">
 
 *Anclora EnergyScan · Anclora Group*  
-*Manual de usuario v1.2 — 19 mayo 2026*
+*Manual de usuario v1.3 — 21 mayo 2026*
 
 </div>

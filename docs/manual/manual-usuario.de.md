@@ -9,8 +9,8 @@
 <div class="cover-subtitle">Praktischer Leitfaden für private Nutzer,<br>Beta-Fachnutzer und Anbieter</div>
 
 <div class="cover-meta">
-  <div class="cover-version">Version 1.2</div>
-  <div class="cover-date">19. Mai 2026</div>
+  <div class="cover-version">Version 1.3</div>
+  <div class="cover-date">21. Mai 2026</div>
 </div>
 
 <div class="cover-disclaimer">EnergyScan bietet eine orientierende energetische Vorbewertung. Es stellt keine offiziellen Energieausweise aus und ersetzt nicht die Prüfung durch eine qualifizierte Fachkraft.</div>
@@ -156,9 +156,11 @@ In der oberen Leiste finden Sie die Einstellungsschaltfläche, zum Beispiel **DE
 Die Startseite fasst die wichtigsten Aktionen zusammen:
 
 1. **Analyse starten**: öffnet den Vorbewertungs-Wizard.
-2. **Preise ansehen**: zeigt den kostenlosen, Premium- und Fachplan.
-3. **Produkt**: blendet Zugänge zu Rechner, Sanierungsangeboten, Anbietern und Fachbereich ein.
+2. **Produkt**: blendet Zugänge zu Rechner, Berichten, Sanierungsangeboten, Wohnnutzern, Fachbereich und Anbietern ein.
+3. **Ablauf · Regulierung · Verbesserungen · Preise**: Direktlinks zu den Landing-Abschnitten (in dieser Reihenfolge).
 4. **Einstellungen**: ändert Sprache, Design, Währung und Einheiten.
+5. **Social-Rail**: Social-Media-Icons fest auf der rechten Seite (auf Mobilgeräten ausgeblendet, unten auf der Seite sichtbar).
+6. **Entdecken**: Schaltfläche im Hero, die sanft zum ersten Inhaltsabschnitt scrollt.
 
 ### 4.2 Energiesparrechner
 
@@ -489,7 +491,7 @@ Geplante Funktionen:
 Schritte:
 
 1. **Fachbereich** aufrufen.
-2. **Beta-Fachzugang beantragen** klicken.
+2. **Als Fachmann registrieren** klicken.
 3. Name, E-Mail, Unternehmen, Profil und Anwendungsfall angeben.
 4. Antrag absenden.
 
@@ -782,6 +784,6 @@ Anclora EnergyScan stellt orientierende Schätzungen auf der Grundlage angegeben
 <div class="footer-brand">
 
 *Anclora EnergyScan · Anclora Group*  
-*Benutzerhandbuch v1.2 — 19. Mai 2026*
+*Benutzerhandbuch v1.3 — 21. Mai 2026*
 
 </div>
