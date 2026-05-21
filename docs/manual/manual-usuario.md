@@ -597,22 +597,50 @@ Sí, como segunda opinión orientativa sobre presupuestos de clientes. No sustit
 
 ## 9. Área de proveedores
 
-### 9.1 Marketplace de proveedores
+### 9.1 Qué es el perfil proveedor
 
-![Marketplace de proveedores](screenshots/proveedores-dark.png)
+El perfil proveedor está pensado para **empresas, autónomos o equipos técnicos/comerciales** que prestan servicios relacionados con mejora energética de viviendas y quieren recibir oportunidades comerciales consentidas.
 
-El marketplace conecta proveedores con usuarios que han completado un prediagnóstico y han solicitado contacto.
+**Proveedor no es lo mismo que profesional.** El proveedor recibe oportunidades comerciales y gestiona leads. El profesional prepara casos e informes para clientes. Una misma organización puede solicitar ambos accesos si necesita ambas funciones.
 
-Perfiles típicos:
+Perfiles típicos de proveedor:
 
-- Instaladores de climatización.
-- Empresas de ventanas.
-- Empresas de aislamiento.
-- Fotovoltaica.
-- Certificadores y técnicos.
-- Constructoras de rehabilitación.
+- Instaladores de climatización y aerotermia.
+- Empresas de ventanas y cerramientos.
+- Especialistas en aislamiento y envolvente.
+- Fotovoltaica y autoconsumo.
+- Certificadores y técnicos energéticos.
+- Empresas de rehabilitación energética integral.
 
-### 9.2 Registro de proveedor
+### 9.2 Qué permite hacer el perfil proveedor
+
+**Disponible ahora:**
+
+- Registro de proveedor y revisión por Anclora.
+- Panel proveedor protegido con KPIs y estado.
+- Visualización de oportunidades compatibles.
+- Sistema de créditos para desbloquear leads.
+- Pack de créditos vía Stripe.
+- Gestión básica del estado del lead.
+- Protección de datos de contacto hasta desbloqueo.
+- Consentimiento del usuario antes de handoff.
+
+**Próximamente:**
+
+- Matching avanzado por scoring y disponibilidad.
+- Perfil público completo de proveedor.
+- Notificaciones automáticas de nuevos leads.
+- Segmentación más granular por zona y categoría.
+- Facturación avanzada e historial detallado.
+
+**Fuera de alcance (no prometido):**
+
+- Garantía de volumen mínimo de leads.
+- Garantía de cierre comercial.
+- Exclusividad territorial.
+- Leads sin consentimiento.
+
+### 9.3 Registro de proveedor
 
 ![Registro de proveedor](screenshots/provider-register-dark.png)
 
@@ -620,20 +648,33 @@ Para registrarte:
 
 1. Entra en **Proveedores**.
 2. Pulsa **Registrar proveedor**.
-3. Completa empresa, email, teléfono, web, categorías y zonas.
-4. Envía el formulario.
+3. Completa empresa, email, teléfono, web, categorías de servicio y zona de cobertura.
+4. Selecciona las categorías que corresponden a tus servicios.
+5. Acepta el uso de datos de leads para la finalidad consentida.
+6. Envía el formulario.
 
-| Campo | Consejo |
+| Campo | Descripción |
 | --- | --- |
-| Categorías | Usa códigos claros: HVAC, SOLAR, WINDOWS, INSULATION, CEE |
-| Zonas | Indica zonas comerciales reales: Palma, Mallorca, Baleares |
-| Email | Usa un correo operativo para notificaciones |
+| Nombre comercial | Nombre de tu empresa o actividad |
+| Email | Correo operativo para notificaciones |
+| Teléfono | Opcional, para contacto interno |
+| Web | URL de tu empresa si existe |
+| Categorías | Selecciona los tipos de servicio que ofreces |
+| Zona de cobertura | Provincias, zonas o municipios donde trabajas |
 
-El proveedor puede estar en estados como **PENDING**, **VERIFIED**, **PREFERRED**, **SUSPENDED** o similares según revisión interna.
+Tras enviar el formulario, Anclora revisa el perfil internamente. Cuando el estado cambia a **Verificado** —o superior—, recibirás una notificación al email indicado. Para acceder al panel de proveedor, crea una cuenta o inicia sesión en EnergyScan con ese mismo email: la vinculación se realiza automáticamente.
 
-Tras enviar el formulario, Anclora revisa el perfil internamente. Cuando el estado cambia a **VERIFIED** —o superior—, recibirás una notificación al email indicado. Para acceder al panel de proveedor, crea una cuenta o inicia sesión en EnergyScan con ese mismo email: la vinculación se realiza de forma automática en el primer acceso.
+### 9.4 Estados del proveedor
 
-### 9.3 Panel de proveedor
+| Estado | Qué significa |
+| --- | --- |
+| Pendiente de revisión | Tu solicitud ha sido recibida y está siendo revisada |
+| Verificado | Acceso operativo al panel, leads y créditos |
+| Preferente | Nivel de confianza elevado |
+| Exclusivo | Acceso exclusivo en determinadas condiciones |
+| Suspendido | Acceso temporal limitado; contacta con soporte |
+
+### 9.5 Panel de proveedor
 
 ![Panel de proveedor](screenshots/imagen-pag30-es.jpeg)
 
@@ -642,54 +683,66 @@ El panel de proveedor muestra:
 | Elemento | Qué indica |
 | --- | --- |
 | Nombre del proveedor | Empresa asociada a la cuenta |
-| Estado | Revisión o nivel comercial |
+| Estado | Nivel de acceso actual |
 | Créditos | Saldo para desbloquear contactos |
-| Leads totales | Solicitudes asignadas |
+| Leads totales | Solicitudes asignadas a tu proveedor |
 | Desbloqueados | Contactos ya accesibles |
 | Pendientes | Leads sin gestionar |
 | Ganados/perdidos | Seguimiento comercial |
 
-Si el proveedor está pendiente, puede preparar el panel, pero la asignación comercial puede estar limitada.
+Si el proveedor está pendiente, puede ver el panel pero no acceder a leads ni desbloquear contactos. Si está suspendido, el acceso operativo queda limitado hasta que se resuelva el estado.
 
-### 9.4 Leads asignados
+### 9.6 Leads asignados
 
 ![Leads de proveedor](screenshots/imagen-pag31-es.jpeg)
 
-Cada lead muestra información no personal:
+Cada lead muestra información no personal antes del desbloqueo:
 
 - Servicio solicitado.
-- Zona.
-- Urgencia.
-- Fecha.
-- Estado comercial.
+- Zona aproximada.
+- Urgencia o interés declarado.
+- Fecha de solicitud.
 - Tipo de inmueble si hay análisis asociado.
 - Código postal o zona.
-- Letra estimada.
+- Letra energética estimada.
 - Presupuesto orientativo si existe.
+- Estado de consentimiento.
 
-### 9.5 Contacto bloqueado y desbloqueo
+**Lo que no se muestra antes de desbloquear:** nombre, email, teléfono ni dirección exacta.
 
-Por privacidad, los datos personales están bloqueados al principio:
+### 9.7 Contacto bloqueado y desbloqueo
+
+Por privacidad, los datos de contacto están protegidos hasta que el proveedor decide desbloquearlos:
 
 | Antes de desbloquear | Después de desbloquear |
 | --- | --- |
 | No se muestra nombre | Se muestra nombre si existe |
 | No se muestra email | Se muestra email |
 | No se muestra teléfono | Se muestra teléfono |
-| No consume crédito | Ya se ha registrado consumo |
+| No consume crédito | Se registra 1 crédito consumido |
 
 Para desbloquear:
 
 1. Revisa el contexto técnico del lead.
-2. Comprueba que tienes créditos.
-3. Pulsa **Desbloquear contacto**.
-4. Se consume 1 crédito.
-5. El contacto queda visible.
-6. El consumo queda registrado en el ledger.
+2. Comprueba que tienes créditos disponibles.
+3. Pulsa **Desbloquear contacto** (se indica que se usará 1 crédito).
+4. Se consume 1 crédito y el contacto queda visible.
+5. El consumo queda registrado.
 
-Si ya habías desbloqueado ese lead, volver a abrirlo no consume otro crédito.
+> **Importante:** Si ya habías desbloqueado ese lead, volver a abrirlo no consume otro crédito.
+> **Aviso de finalidad:** Usa los datos de contacto únicamente para responder a la solicitud del usuario relacionada con EnergyScan. No los reutilices para otras finalidades.
 
-### 9.6 Cambiar estado comercial
+### 9.8 Consentimiento y retirada
+
+El usuario ha solicitado contacto de forma expresa. EnergyScan registra ese consentimiento antes de asignar el lead a proveedores.
+
+Si el usuario retira el consentimiento:
+
+- El lead muestra estado **Retirado**.
+- No se puede desbloquear.
+- Si ya estaba desbloqueado, no debes usar los datos para nuevas comunicaciones.
+
+### 9.9 Cambiar estado comercial
 
 En cada lead puedes actualizar el estado:
 
@@ -702,7 +755,7 @@ En cada lead puedes actualizar el estado:
 | Perdido | No se cerró |
 | Cancelado | Solicitud descartada |
 
-### 9.7 Créditos y billing
+### 9.10 Créditos y billing
 
 ![Créditos de proveedor](screenshots/imagen-pag33-es.jpeg)
 
@@ -713,7 +766,21 @@ Los créditos se compran en packs mediante Stripe.
 | Saldo actual | Créditos disponibles |
 | Pack de leads | Compra prepago para desbloquear contactos |
 | Verificando pago | Estado temporal hasta que Stripe confirma |
-| Ledger | Registro interno de compras y consumos |
+
+**Pack de lanzamiento: 10 créditos por 300 €.**
+
+Qué incluye el pack:
+
+- Acceso a datos de contacto tras desbloqueo.
+- Trazabilidad básica del estado del lead.
+- Uso limitado a la finalidad de la solicitud.
+
+Qué no incluye:
+
+- Garantía de cierre comercial.
+- Exclusividad territorial.
+- Leads ilimitados.
+- Datos sin consentimiento.
 
 > Los datos personales de leads solo pueden usarse para la solicitud consentida. EnergyScan no garantiza cierres comerciales ni resultados de obra.
 
