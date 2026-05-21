@@ -246,15 +246,17 @@ export function buildEvidenceMatrix(input: EvidenceMatrixInput): EvidenceItem[] 
     requiresReview: !yearFromCatastro && assessment.year < 1950,
   });
 
-  // Used area (declared)
+  // Used area — upgrade to catastro/high when consistent with cadastral surface (diff ≤ 20 m²)
+  const cadastralSurface = cadastralRecord?.surfaceBuiltM2 ?? null;
+  const areaMatchesCatastro = hasCatastro && cadastralSurface != null && Math.abs(assessment.area - cadastralSurface) <= 20;
   items.push({
     key: 'usedAreaM2',
     labelKey: 'usedAreaM2',
     value: assessment.area,
-    source: 'user_declared',
-    confidence: 'medium',
+    source: areaMatchesCatastro ? 'catastro' : 'user_declared',
+    confidence: areaMatchesCatastro ? 'high' : 'medium',
     usedInScore: true,
-    requiresReview: hasCatastro && Boolean(cadastralRecord?.surfaceBuiltM2) && Math.abs(assessment.area - (cadastralRecord!.surfaceBuiltM2 ?? assessment.area)) > 20,
+    requiresReview: hasCatastro && cadastralSurface != null && Math.abs(assessment.area - cadastralSurface) > 20,
   });
 
   // Cadastral built area
