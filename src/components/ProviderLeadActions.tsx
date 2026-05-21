@@ -82,26 +82,32 @@ export function ProviderLeadActions({
             {contact.userEmail && <a href={`mailto:${contact.userEmail}`} className="break-all text-[#00DC82]">{contact.userEmail}</a>}
             {contact.userPhone && <a href={`tel:${contact.userPhone}`} className="text-[#00DC82]">{contact.userPhone}</a>}
           </div>
+          <p className="mt-3 text-xs text-muted">{copy.contactUseNotice as string}</p>
         </div>
       ) : (
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="flex items-center gap-2 text-sm text-muted">
-            <LockKeyhole className="h-4 w-4" /> {copy.contactLocked}
-          </p>
-          {credits > 0 ? (
-            <button
-              type="button"
-              onClick={unlock}
-              disabled={loading === 'unlock'}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#00DC82] px-5 py-2 font-heading text-sm font-bold text-[#07140f] disabled:opacity-70"
-            >
-              {loading === 'unlock' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4" />}
-              {copy.unlockContact}
-            </button>
-          ) : (
-            <a href="/provider/billing" className="inline-flex min-h-11 items-center justify-center rounded-full border border-[#00DC82]/30 px-5 py-2 font-heading text-sm font-bold text-[#00DC82]">
-              {copy.buyCreditsCta}
-            </a>
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="flex items-center gap-2 text-sm text-muted">
+              <LockKeyhole className="h-4 w-4" /> {copy.contactLocked}
+            </p>
+            {credits > 0 ? (
+              <button
+                type="button"
+                onClick={unlock}
+                disabled={loading === 'unlock'}
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#00DC82] px-5 py-2 font-heading text-sm font-bold text-[#07140f] disabled:opacity-70"
+              >
+                {loading === 'unlock' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4" />}
+                {copy.unlockContact}
+              </button>
+            ) : (
+              <a href="/provider/billing" className="inline-flex min-h-11 items-center justify-center rounded-full border border-[#00DC82]/30 px-5 py-2 font-heading text-sm font-bold text-[#00DC82]">
+                {copy.buyCreditsCta}
+              </a>
+            )}
+          </div>
+          {credits > 0 && (
+            <p className="text-xs text-muted">{copy.unlockHint as string}</p>
           )}
         </div>
       )}
