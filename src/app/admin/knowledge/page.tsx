@@ -13,7 +13,7 @@ const headings = {
     title: 'Base de conocimiento',
     subtitle: 'Entradas utilizadas por el analizador de presupuestos y el asistente IA',
     newEntry: 'Nueva entrada',
-    back: 'Volver a métricas',
+    back: 'Panel admin',
     filterAll: 'Todas las categorías',
     filterAllRegions: 'Todas las regiones',
     filterNational: 'Nacional',
@@ -67,7 +67,7 @@ const headings = {
     title: 'Knowledge Base',
     subtitle: 'Entries used by the budget analyzer and AI assistant',
     newEntry: 'New entry',
-    back: 'Back to metrics',
+    back: 'Admin panel',
     filterAll: 'All categories',
     filterAllRegions: 'All regions',
     filterNational: 'National',
@@ -121,7 +121,7 @@ const headings = {
     title: 'Wissensdatenbank',
     subtitle: 'Eintraege fuer den Budgetanalysator und den KI-Assistenten',
     newEntry: 'Neuer Eintrag',
-    back: 'Zurueck zu Metriken',
+    back: 'Admin-Panel',
     filterAll: 'Alle Kategorien',
     filterAllRegions: 'Alle Regionen',
     filterNational: 'National',
@@ -295,7 +295,7 @@ export default function KnowledgePage() {
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <Link href="/admin/metrics" className="text-xs text-[#00DC82] hover:underline">← {t.back}</Link>
+            <Link href="/admin" className="text-xs text-[#00DC82] hover:underline">← {t.back}</Link>
             <h1 className="mt-2 font-heading text-3xl font-bold text-premium flex items-center gap-2">
               <BookOpen className="h-7 w-7 text-[#00DC82]" />
               {t.title}

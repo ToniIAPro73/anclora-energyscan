@@ -8,9 +8,9 @@ import { normalizeLanguage, PREFERENCE_COOKIE_NAMES } from '@/lib/preferences';
 export const dynamic = 'force-dynamic';
 
 const copy = {
-  es: { title: 'Leads', intro: 'Solicitudes comerciales generadas desde EnergyScan.', service: 'Servicio', user: 'Contacto', zone: 'Zona', status: 'Estado', date: 'Fecha', empty: 'No hay leads registrados.', back: 'Volver al resumen', roleLabel: 'Administrador' },
-  en: { title: 'Leads', intro: 'Commercial requests generated from EnergyScan.', service: 'Service', user: 'Contact', zone: 'Zone', status: 'Status', date: 'Date', empty: 'No leads registered.', back: 'Back to overview', roleLabel: 'Administrator' },
-  de: { title: 'Leads', intro: 'Kommerzielle Anfragen aus EnergyScan.', service: 'Leistung', user: 'Kontakt', zone: 'Region', status: 'Status', date: 'Datum', empty: 'Keine Leads vorhanden.', back: 'Zur Übersicht', roleLabel: 'Administrator' },
+  es: { title: 'Leads', intro: 'Solicitudes comerciales generadas desde EnergyScan.', service: 'Servicio', user: 'Contacto', zone: 'Zona', status: 'Estado', date: 'Fecha', empty: 'No hay leads registrados.', back: 'Panel admin', roleLabel: 'Administrador' },
+  en: { title: 'Leads', intro: 'Commercial requests generated from EnergyScan.', service: 'Service', user: 'Contact', zone: 'Zone', status: 'Status', date: 'Date', empty: 'No leads registered.', back: 'Admin panel', roleLabel: 'Administrator' },
+  de: { title: 'Leads', intro: 'Kommerzielle Anfragen aus EnergyScan.', service: 'Leistung', user: 'Kontakt', zone: 'Region', status: 'Status', date: 'Datum', empty: 'Keine Leads vorhanden.', back: 'Admin-Panel', roleLabel: 'Administrator' },
 };
 
 export default async function AdminLeadsPage() {
