@@ -168,6 +168,8 @@ await shot('/profesional', 'imagen-pag25-de.jpeg', { lang: 'de', theme: 'dark' }
 
 await shot('/pricing',      'pricing-dark.png',            { lang: 'es', theme: 'dark' });
 await shot('/proveedores',  'proveedores-dark.png',         { lang: 'es', theme: 'dark' });
+await shot('/proveedores',  'proveedores-en-dark.png',      { lang: 'en', theme: 'dark' });
+await shot('/proveedores',  'proveedores-de-dark.png',      { lang: 'de', theme: 'dark' });
 await shot('/dashboard',    'dashboard-connected-dark.png', { lang: 'es', theme: 'dark' });
 await shot('/dashboard',    'dashboard-connected-mobile.png', { lang: 'es', theme: 'dark', mobile: true });
 
