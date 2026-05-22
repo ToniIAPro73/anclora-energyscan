@@ -312,6 +312,7 @@ const es = {
     notGuaranteedText: 'No garantizamos volumen mínimo de leads, cierre comercial, exclusividad territorial ni que cada oportunidad termine en contratación. EnergyScan facilita conexiones trazables y consentidas.',
     professionalDiffTitle: 'Proveedor no es lo mismo que profesional',
     professionalDiffText: 'El proveedor recibe oportunidades comerciales consentidas y gestiona leads con créditos. El profesional prepara casos e informes para clientes. Una misma organización puede solicitar ambos accesos si necesita ambas funciones.',
+    professionalCtaLink: 'Área de Profesionales',
     availableNowTitle: 'Disponible ahora',
     availableNow: [
       'Registro de proveedor y revisión por Anclora.',
@@ -939,6 +940,7 @@ const en: typeof es = {
     notGuaranteedText: 'We do not guarantee a minimum lead volume, commercial wins, territorial exclusivity or that every opportunity leads to a contract. EnergyScan facilitates traceable, consented connections.',
     professionalDiffTitle: 'Provider is not the same as professional',
     professionalDiffText: 'The provider receives consented commercial opportunities and manages leads with credits. The professional prepares cases and reports for clients. The same organisation can apply for both if it needs both functions.',
+    professionalCtaLink: 'Professional area',
     availableNowTitle: 'Available now',
     availableNow: [
       'Provider registration and Anclora review.',
@@ -1565,6 +1567,7 @@ const de: typeof es = {
     notGuaranteedText: 'Wir garantieren kein Mindestvolumen an Leads, keinen Abschluss, keine territoriale Exklusivitaet und nicht, dass jede Anfrage zu einem Vertrag fuehrt. EnergyScan erleichtert nachvollziehbare, eingewilligte Verbindungen.',
     professionalDiffTitle: 'Anbieter ist nicht dasselbe wie Fachmann',
     professionalDiffText: 'Der Anbieter empfaengt eingewilligte Geschaeftschancen und verwaltet Leads mit Credits. Der Fachmann bereitet Faelle und Berichte fuer Kunden vor. Dieselbe Organisation kann beide Zugaenge beantragen.',
+    professionalCtaLink: 'Fachbereich',
     availableNowTitle: 'Jetzt verfuegbar',
     availableNow: [
       'Anbieterregistrierung und Pruefung durch Anclora.',

@@ -235,7 +235,7 @@ export default async function ProvidersLandingPage() {
               href="/profesional"
               className="inline-flex min-h-10 items-center justify-center rounded-full border border-white/10 px-5 py-2 text-sm font-bold text-premium"
             >
-              {getMonetizationCopy(language).professional.providerCtaLink}
+              {copy.professionalCtaLink as string}
             </Link>
           </div>
         </section>
