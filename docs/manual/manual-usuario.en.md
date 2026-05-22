@@ -735,6 +735,18 @@ No. Only when a consented request exists and the provider unlocks the contact.
 
 No. A verified or preferred status may indicate internal review, but does not guarantee works, pricing, savings or any outcome.
 
+**What changes in the top bar after signing in?**
+
+Without a session, the bar shows public navigation, preferences, **Login** and **Free assessment**. With an active session, it shows the workspace for the corresponding profile. If the user is an administrator, the primary navigation switches to the admin console and does not mix residential, professional or provider options as the main navigation.
+
+**Where does an administrator land?**
+
+The administrator lands on `/admin`. From there they can review requests, professionals, providers, leads, KPIs, analytics and documentation. Admin routes are protected by session and role.
+
+**What do I see on Providers without a session?**
+
+The public `/proveedores` page shows the **Register provider** CTA from the top of the page. The provider dashboard button only appears when the account has real provider access.
+
 ---
 
 ## 12. Quick glossary

@@ -6,6 +6,7 @@ import { PrismaAdapter } from '@auth/prisma-adapter';
 import { prisma } from '@/lib/prisma';
 import { verifyPassword } from '@/lib/password';
 import { getOAuthEnv } from '@/lib/auth-env';
+import { isAdmin } from '@/lib/is-admin';
 
 const oauth = getOAuthEnv();
 
@@ -58,6 +59,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async jwt({ token, user, trigger }) {
       if (user?.id) token.sub = user.id;
+      if (token.email) token.isAdmin = isAdmin(String(token.email));
       if (trigger === 'update' && token.sub) {
         const fresh = await prisma.user.findUnique({
           where: { id: token.sub },
@@ -73,6 +75,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     session({ session, token }) {
       if (session.user && token.sub) session.user.id = token.sub;
       if (session.user && token.picture !== undefined) session.user.image = token.picture as string | null;
+      if (session.user) session.user.isAdmin = Boolean(token.isAdmin || isAdmin(session.user.email));
       return session;
     },
   },

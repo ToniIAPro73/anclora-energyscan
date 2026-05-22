@@ -22,6 +22,12 @@ export default async function ProvidersLandingPage() {
   const session = await auth().catch(() => null);
 
   const userIsAdmin = isAdmin(session?.user?.email);
+  const anonymousProviderText = (value: string) => {
+    if (session?.user) return value;
+    if (language === 'en') return value.replace(/Provider dashboard/g, 'Provider workspace').replace(/provider dashboard/g, 'provider workspace');
+    if (language === 'de') return value.replace(/Anbieter-Dashboard/g, 'Anbieterbereich').replace(/Anbieterbereich/g, 'Anbieterbereich');
+    return value.replace(/Panel proveedor/g, 'Área de gestión').replace(/panel proveedor/g, 'área de gestión');
+  };
 
   const account = session?.user?.id && !userIsAdmin
     ? await prisma.providerAccount.findUnique({
@@ -36,7 +42,7 @@ export default async function ProvidersLandingPage() {
     account?.provider.status === 'EXCLUSIVE';
 
   const primaryHref = isApproved ? '/provider/dashboard' : '/provider/register';
-  const primaryLabel = isApproved ? copy.viewLeads : copy.registerCta;
+  const primaryLabel = isApproved ? copy.dashboardTitle : copy.registerCta;
 
   const CATEGORY_ICONS = ['🪟', '🏠', '🌡️', '☀️', '📋', '🔧'];
 
@@ -71,7 +77,7 @@ export default async function ProvidersLandingPage() {
         <p className="mt-4 max-w-3xl text-muted">{copy.landingIntro}</p>
         <p className="mt-3 text-xs text-muted">{copy.providerLegal}</p>
 
-        {/* CTAs — hidden for admin (not a provider) */}
+        {/* CTAs */}
         {!userIsAdmin && (
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link
@@ -80,12 +86,18 @@ export default async function ProvidersLandingPage() {
             >
               {primaryLabel}
             </Link>
-            {session?.user && (
+            <Link
+              href="#como-funciona-proveedores"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-white/10 px-6 py-3 font-heading font-bold text-premium"
+            >
+              {copy.howItWorksTitle}
+            </Link>
+            {isApproved && (
               <Link
-                href="/provider/dashboard"
+                href="/provider/leads"
                 className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-white/10 px-6 py-3 font-heading font-bold text-premium"
               >
-                {copy.dashboardTitle}
+                {copy.viewLeads}
               </Link>
             )}
           </div>
@@ -108,15 +120,15 @@ export default async function ProvidersLandingPage() {
             {(copy.forWhomCards as string[]).map((card, i) => (
               <div key={card} className="rounded-3xl border border-white/10 bg-white/5 p-5">
                 <span className="text-2xl">{CATEGORY_ICONS[i]}</span>
-                <p className="mt-4 font-heading font-bold text-premium">{card}</p>
-                <p className="mt-2 text-sm text-muted">{(copy.forWhomCardCopy as string[])[i]}</p>
+                <p className="mt-4 font-heading font-bold text-premium">{anonymousProviderText(card)}</p>
+                <p className="mt-2 text-sm text-muted">{anonymousProviderText((copy.forWhomCardCopy as string[])[i])}</p>
               </div>
             ))}
           </div>
         </section>
 
         {/* HOW IT WORKS */}
-        <section className="mt-12">
+        <section id="como-funciona-proveedores" className="mt-12 scroll-mt-24">
           <h2 className="font-heading text-2xl font-bold text-premium">{copy.howItWorksTitle}</h2>
           <ol className="mt-6 space-y-3">
             {(copy.howItWorksSteps as string[]).map((step, i) => (
@@ -124,7 +136,7 @@ export default async function ProvidersLandingPage() {
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#00DC82]/15 font-heading text-sm font-bold text-[#00DC82]">
                   {i + 1}
                 </span>
-                <span className="pt-0.5 text-sm leading-relaxed text-muted">{step}</span>
+                <span className="pt-0.5 text-sm leading-relaxed text-muted">{anonymousProviderText(step)}</span>
               </li>
             ))}
           </ol>
@@ -138,10 +150,10 @@ export default async function ProvidersLandingPage() {
               <h2 className="font-heading text-lg font-bold text-premium">{copy.availableNowTitle}</h2>
             </div>
             <ul className="mt-4 space-y-2">
-              {(copy.availableNow as string[]).map((item) => (
-                <li key={item} className="flex items-start gap-2 text-sm text-muted">
+              {(copy.availableNow as string[]).map((item, index) => (
+                <li key={index} className="flex items-start gap-2 text-sm text-muted">
                   <span className="mt-0.5 shrink-0 text-[#00DC82]">✓</span>
-                  {item}
+                  {anonymousProviderText(item)}
                 </li>
               ))}
             </ul>
@@ -155,7 +167,7 @@ export default async function ProvidersLandingPage() {
               {(copy.comingSoon as string[]).map((item) => (
                 <li key={item} className="flex items-start gap-2 text-sm text-muted">
                   <span className="mt-0.5 shrink-0 text-muted">→</span>
-                  {item}
+                  {anonymousProviderText(item)}
                 </li>
               ))}
             </ul>

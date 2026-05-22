@@ -888,6 +888,18 @@ No. Solo cuando exista una solicitud consentida y el proveedor desbloquee el con
 
 No. Un estado verificado o preferente puede indicar revisión interna, pero no garantiza obra, precio, ahorro ni resultado.
 
+**¿Qué cambia en la barra superior al iniciar sesión?**
+
+Sin sesión, la barra muestra navegación pública, preferencias, **Entrar** y **Análisis gratuito**. Con sesión activa muestra el espacio correspondiente a tu perfil. Si el usuario es administrador, la navegación principal pasa a la consola admin y no mezcla opciones residenciales, profesionales o de proveedor como navegación principal.
+
+**¿Dónde entra un administrador?**
+
+El administrador accede a `/admin`. Desde ahí puede revisar solicitudes, profesionales, proveedores, leads, KPIs, analytics y documentación. Las rutas admin están protegidas por sesión y rol.
+
+**¿Qué veo en Proveedores sin sesión?**
+
+La página pública `/proveedores` muestra el CTA **Registrar proveedor** desde el inicio. El botón de panel proveedor solo aparece cuando la cuenta tiene acceso de proveedor real.
+
 ---
 
 ## 12. Glosario rápido

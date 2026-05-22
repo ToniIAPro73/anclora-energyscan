@@ -30,7 +30,7 @@ export default async function DashboardPage() {
   const language = normalizeLanguage(cookies().get(PREFERENCE_COOKIE_NAMES.language)?.value);
   const copy = getMonetizationCopy(language).dashboard;
   const session = await auth().catch(() => null);
-  if (session?.user?.id && isAdmin(session.user.email)) redirect('/admin/metrics');
+  if (session?.user?.id && isAdmin(session.user.email)) redirect('/admin');
   if (!session?.user?.id) {
     return (
       <div className="min-h-screen app-shell">

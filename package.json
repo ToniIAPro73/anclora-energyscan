@@ -17,7 +17,8 @@
     "manual:pdf:en": "node scripts/generate-manual-pdf.mjs --lang en",
     "manual:pdf:de": "node scripts/generate-manual-pdf.mjs --lang de",
     "manual:pdf": "npm run manual:pdf:es && npm run manual:pdf:en && npm run manual:pdf:de",
-    "budget-review:demo": "node scripts/generate-budget-review-demo.mjs"
+    "budget-review:demo": "node scripts/generate-budget-review-demo.mjs",
+    "seed:admin-demo": "ts-node --compiler-options '{\"module\":\"commonjs\"}' scripts/reset-admin-demo-data.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.97.0",

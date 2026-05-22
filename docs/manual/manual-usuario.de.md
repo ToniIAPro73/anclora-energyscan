@@ -735,6 +735,18 @@ Nein. Nur wenn eine zugestimmte Anfrage vorliegt und der Anbieter den Kontakt fr
 
 Nein. Ein verifizierter oder bevorzugter Status kann auf eine interne Prüfung hinweisen, garantiert jedoch keine Baumaßnahmen, Preise, Einsparungen oder Ergebnisse.
 
+**Was ändert sich in der oberen Leiste nach der Anmeldung?**
+
+Ohne Sitzung zeigt die Leiste öffentliche Navigation, Einstellungen, **Anmelden** und **Kostenlose Analyse**. Mit aktiver Sitzung zeigt sie den Bereich des entsprechenden Profils. Ist der Nutzer Administrator, wechselt die Hauptnavigation zur Admin-Konsole und mischt keine Wohn-, Fach- oder Anbieteroptionen als primäre Navigation.
+
+**Wo landet ein Administrator?**
+
+Der Administrator landet auf `/admin`. Dort kann er Anfragen, Fachleute, Anbieter, Leads, KPIs, Analytics und Dokumentation prüfen. Admin-Routen sind durch Sitzung und Rolle geschützt.
+
+**Was sehe ich bei Anbieter ohne Sitzung?**
+
+Die öffentliche Seite `/proveedores` zeigt den CTA **Anbieter registrieren** direkt am Anfang. Der Button zum Anbieter-Dashboard erscheint nur, wenn das Konto echten Anbieterzugang hat.
+
 ---
 
 ## 12. Kurzglossar
