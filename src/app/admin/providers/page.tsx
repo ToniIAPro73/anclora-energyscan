@@ -13,6 +13,7 @@ export const dynamic = 'force-dynamic';
 const headings = {
   es: {
     title: 'Administración de Proveedores',
+    roleLabel: 'Administrador',
     forbidden: 'Acceso no autorizado',
     forbiddenCopy: 'Solo los administradores pueden acceder a esta sección.',
     name: 'Nombre',
@@ -24,6 +25,8 @@ const headings = {
     leads: 'Leads',
     registered: 'Alta',
     back: 'Volver a métricas',
+    navOverview: 'Resumen',
+    navProfessionals: 'Profesionales',
     noProviders: 'No hay proveedores registrados.',
     navKnowledge: 'Base de conocimiento',
     save: 'Guardar',
@@ -38,6 +41,7 @@ const headings = {
   },
   en: {
     title: 'Provider Administration',
+    roleLabel: 'Administrator',
     forbidden: 'Unauthorized access',
     forbiddenCopy: 'Only administrators can access this section.',
     name: 'Name',
@@ -49,6 +53,8 @@ const headings = {
     leads: 'Leads',
     registered: 'Registered',
     back: 'Back to metrics',
+    navOverview: 'Overview',
+    navProfessionals: 'Professionals',
     noProviders: 'No providers registered.',
     navKnowledge: 'Knowledge base',
     save: 'Save',
@@ -63,6 +69,7 @@ const headings = {
   },
   de: {
     title: 'Anbieter-Administration',
+    roleLabel: 'Administrator',
     forbidden: 'Kein Zugriff',
     forbiddenCopy: 'Nur Administratoren können auf diesen Bereich zugreifen.',
     name: 'Name',
@@ -74,6 +81,8 @@ const headings = {
     leads: 'Leads',
     registered: 'Registriert',
     back: 'Zurück zu Metriken',
+    navOverview: 'Übersicht',
+    navProfessionals: 'Fachleute',
     noProviders: 'Keine Anbieter registriert.',
     navKnowledge: 'Wissensdatenbank',
     save: 'Speichern',
@@ -130,12 +139,12 @@ export default async function AdminProvidersPage() {
       <main className="mx-auto max-w-7xl px-4 pb-16 pt-28">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-heading font-semibold uppercase tracking-wider text-[#00DC82]">Admin</p>
+            <p className="text-xs font-heading font-semibold uppercase tracking-wider text-[#00DC82]">{copy.roleLabel}</p>
             <h1 className="mt-2 font-heading text-4xl font-bold text-premium">{copy.title}</h1>
           </div>
           <div className="flex gap-2">
-            <a href="/admin/metrics" className="rounded-full border border-white/10 px-4 py-2 text-sm font-heading font-semibold text-premium hover:border-[#00DC82]/40">{copy.back}</a>
-            <a href="/admin/professional" className="rounded-full border border-white/10 px-4 py-2 text-sm font-heading font-semibold text-premium hover:border-[#00DC82]/40">Profesional</a>
+            <a href="/admin" className="rounded-full border border-white/10 px-4 py-2 text-sm font-heading font-semibold text-premium hover:border-[#00DC82]/40">{copy.navOverview}</a>
+            <a href="/admin/professional" className="rounded-full border border-white/10 px-4 py-2 text-sm font-heading font-semibold text-premium hover:border-[#00DC82]/40">{copy.navProfessionals}</a>
             <a href="/admin/knowledge" className="rounded-full border border-white/10 px-4 py-2 text-sm font-heading font-semibold text-premium hover:border-[#00DC82]/40">{copy.navKnowledge}</a>
           </div>
         </div>

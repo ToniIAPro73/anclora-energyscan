@@ -17,12 +17,14 @@ const statusColors: Record<string, string> = {
 const copy = {
   es: {
     title: 'Solicitudes de Acceso Profesional',
+    roleLabel: 'Administrador',
     forbidden: 'Acceso no autorizado',
     forbiddenCopy: 'Solo los administradores pueden acceder a esta sección.',
     noRequests: 'No hay solicitudes registradas.',
     back: 'Volver a métricas',
     navProviders: 'Proveedores',
     navKnowledge: 'Base de conocimiento',
+    navOverview: 'Resumen',
     name: 'Nombre',
     email: 'Email',
     company: 'Empresa',
@@ -39,12 +41,14 @@ const copy = {
   },
   en: {
     title: 'Professional Access Requests',
+    roleLabel: 'Administrator',
     forbidden: 'Unauthorized access',
     forbiddenCopy: 'Only administrators can access this section.',
     noRequests: 'No requests registered.',
     back: 'Back to metrics',
     navProviders: 'Providers',
     navKnowledge: 'Knowledge base',
+    navOverview: 'Overview',
     name: 'Name',
     email: 'Email',
     company: 'Company',
@@ -61,12 +65,14 @@ const copy = {
   },
   de: {
     title: 'Anfragen für professionellen Zugang',
+    roleLabel: 'Administrator',
     forbidden: 'Kein Zugriff',
     forbiddenCopy: 'Nur Administratoren können auf diesen Bereich zugreifen.',
     noRequests: 'Keine Anfragen registriert.',
     back: 'Zurück zu Metriken',
     navProviders: 'Anbieter',
     navKnowledge: 'Wissensdatenbank',
+    navOverview: 'Übersicht',
     name: 'Name',
     email: 'E-Mail',
     company: 'Unternehmen',
@@ -118,11 +124,11 @@ export default async function AdminProfessionalPage() {
       <main className="mx-auto max-w-7xl px-4 pb-16 pt-28">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-heading font-semibold uppercase tracking-wider text-[#00DC82]">Admin</p>
+            <p className="text-xs font-heading font-semibold uppercase tracking-wider text-[#00DC82]">{t.roleLabel}</p>
             <h1 className="mt-2 font-heading text-4xl font-bold text-premium">{t.title}</h1>
           </div>
           <div className="flex gap-2">
-            <a href="/admin/metrics" className="rounded-full border border-white/10 px-4 py-2 text-sm font-heading font-semibold text-premium hover:border-[#00DC82]/40">{t.back}</a>
+            <a href="/admin" className="rounded-full border border-white/10 px-4 py-2 text-sm font-heading font-semibold text-premium hover:border-[#00DC82]/40">{t.navOverview}</a>
             <a href="/admin/providers" className="rounded-full border border-white/10 px-4 py-2 text-sm font-heading font-semibold text-premium hover:border-[#00DC82]/40">{t.navProviders}</a>
             <a href="/admin/knowledge" className="rounded-full border border-white/10 px-4 py-2 text-sm font-heading font-semibold text-premium hover:border-[#00DC82]/40">{t.navKnowledge}</a>
           </div>

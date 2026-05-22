@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Plus, Pencil, EyeOff, RotateCcw, BookOpen } from 'lucide-react';
 import { KnowledgeEntryForm, type KnowledgeEntry as Entry } from '@/components/admin/KnowledgeEntryForm';
 import { KNOWLEDGE_CATEGORIES, SPAIN_REGIONS } from '@/lib/knowledge/constants';
+import { usePreferences } from '@/components/AppPreferencesProvider';
 
 // --- i18n inline (same pattern as other admin pages) ---
 const headings = {
@@ -188,14 +189,9 @@ function getRegionLabel(code: string | null, lang: 'es' | 'en' | 'de', national:
 }
 
 export default function KnowledgePage() {
-  // Detect browser language for admin UI
-  const lang: 'es' | 'en' | 'de' = (() => {
-    if (typeof navigator === 'undefined') return 'es';
-    const l = navigator.language.slice(0, 2);
-    return l === 'en' ? 'en' : l === 'de' ? 'de' : 'es';
-  })();
-
+  const { language: lang } = usePreferences();
   const t = headings[lang] || headings.es;
+  const locale = lang === 'en' ? 'en-GB' : lang === 'de' ? 'de-DE' : 'es-ES';
 
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -337,7 +333,7 @@ export default function KnowledgePage() {
             <option value="">{t.filterAllRegions}</option>
             <option value="national">{t.filterNational}</option>
             {SPAIN_REGIONS.map((r) => (
-              <option key={r.code} value={r.code}>{r.es}</option>
+              <option key={r.code} value={r.code}>{getRegionLabel(r.code, lang, t.national)}</option>
             ))}
           </select>
 
@@ -395,7 +391,7 @@ export default function KnowledgePage() {
                     )}
                   </td>
                   <td className="px-4 py-3 text-xs text-muted whitespace-nowrap">
-                    {entry.updatedAt ? new Date(entry.updatedAt).toLocaleDateString('es-ES') : '—'}
+                    {entry.updatedAt ? new Date(entry.updatedAt).toLocaleDateString(locale) : '—'}
                   </td>
                   <td className="px-4 py-3">
                     <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${entry.active ? 'bg-[#00DC82]/20 text-[#00DC82]' : 'bg-white/10 text-muted'}`}>

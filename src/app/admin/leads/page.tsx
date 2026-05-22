@@ -8,9 +8,9 @@ import { normalizeLanguage, PREFERENCE_COOKIE_NAMES } from '@/lib/preferences';
 export const dynamic = 'force-dynamic';
 
 const copy = {
-  es: { title: 'Leads', intro: 'Solicitudes comerciales generadas desde EnergyScan.', service: 'Servicio', user: 'Contacto', zone: 'Zona', status: 'Estado', date: 'Fecha', empty: 'No hay leads registrados.', back: 'Volver al resumen' },
-  en: { title: 'Leads', intro: 'Commercial requests generated from EnergyScan.', service: 'Service', user: 'Contact', zone: 'Zone', status: 'Status', date: 'Date', empty: 'No leads registered.', back: 'Back to overview' },
-  de: { title: 'Leads', intro: 'Kommerzielle Anfragen aus EnergyScan.', service: 'Service', user: 'Kontakt', zone: 'Region', status: 'Status', date: 'Datum', empty: 'Keine Leads vorhanden.', back: 'Zur Übersicht' },
+  es: { title: 'Leads', intro: 'Solicitudes comerciales generadas desde EnergyScan.', service: 'Servicio', user: 'Contacto', zone: 'Zona', status: 'Estado', date: 'Fecha', empty: 'No hay leads registrados.', back: 'Volver al resumen', roleLabel: 'Administrador' },
+  en: { title: 'Leads', intro: 'Commercial requests generated from EnergyScan.', service: 'Service', user: 'Contact', zone: 'Zone', status: 'Status', date: 'Date', empty: 'No leads registered.', back: 'Back to overview', roleLabel: 'Administrator' },
+  de: { title: 'Leads', intro: 'Kommerzielle Anfragen aus EnergyScan.', service: 'Leistung', user: 'Kontakt', zone: 'Region', status: 'Status', date: 'Datum', empty: 'Keine Leads vorhanden.', back: 'Zur Übersicht', roleLabel: 'Administrator' },
 };
 
 export default async function AdminLeadsPage() {
@@ -26,7 +26,7 @@ export default async function AdminLeadsPage() {
       <main className="mx-auto max-w-7xl px-4 pb-16 pt-28">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-xs font-heading font-semibold uppercase tracking-wider text-[#00DC82]">Admin</p>
+            <p className="text-xs font-heading font-semibold uppercase tracking-wider text-[#00DC82]">{t.roleLabel}</p>
             <h1 className="mt-2 font-heading text-4xl font-bold text-premium">{t.title}</h1>
             <p className="mt-2 text-sm text-muted">{t.intro}</p>
           </div>
