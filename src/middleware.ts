@@ -6,6 +6,13 @@ export default lightAuth((req) => {
   const { pathname } = req.nextUrl;
   const email = req.auth?.user?.email;
 
+  if (pathname === '/') {
+    if (email && isAdmin(email)) {
+      return NextResponse.redirect(new URL('/admin', req.nextUrl));
+    }
+    return NextResponse.next();
+  }
+
   if (pathname.startsWith('/admin')) {
     if (!email) {
       const signInUrl = new URL('/auth', req.nextUrl);
@@ -41,5 +48,5 @@ export default lightAuth((req) => {
 });
 
 export const config = {
-  matcher: ['/admin/:path*', '/dashboard', '/provider/dashboard', '/provider/leads', '/provider/billing', '/profesional/dashboard'],
+  matcher: ['/', '/admin/:path*', '/dashboard', '/provider/dashboard', '/provider/leads', '/provider/billing', '/profesional/dashboard'],
 };
