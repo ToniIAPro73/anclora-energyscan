@@ -110,15 +110,6 @@ const copy = {
   },
 };
 
-function parseList(value?: string | null) {
-  if (!value) return '';
-  try {
-    const parsed = JSON.parse(value);
-    return Array.isArray(parsed) ? parsed.join(', ') : String(parsed);
-  } catch {
-    return value;
-  }
-}
 
 function money(cents: number, locale: string) {
   return new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' }).format(cents / 100);
