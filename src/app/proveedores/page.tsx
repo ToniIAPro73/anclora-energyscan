@@ -14,13 +14,16 @@ import { getMonetizationCopy } from '@/lib/monetization/i18n';
 import { normalizeLanguage, PREFERENCE_COOKIE_NAMES } from '@/lib/preferences';
 import { lightAuth as auth } from '@/auth.config';
 import { prisma } from '@/lib/prisma';
+import { isAdmin } from '@/lib/is-admin';
 
 export default async function ProvidersLandingPage() {
   const language = normalizeLanguage(cookies().get(PREFERENCE_COOKIE_NAMES.language)?.value);
   const copy = getMonetizationCopy(language).provider;
   const session = await auth().catch(() => null);
 
-  const account = session?.user?.id
+  const userIsAdmin = isAdmin(session?.user?.email);
+
+  const account = session?.user?.id && !userIsAdmin
     ? await prisma.providerAccount.findUnique({
         where: { userId: session.user.id },
         include: { provider: true },
@@ -44,7 +47,8 @@ export default async function ProvidersLandingPage() {
           mode="app"
           userEmail={session.user.email}
           userName={session.user.name}
-          userImage={session.user.image}
+          userImage={session.user.image as string | null}
+          isAdmin={userIsAdmin}
         />
       ) : (
         <Navbar />
@@ -67,24 +71,28 @@ export default async function ProvidersLandingPage() {
         <p className="mt-4 max-w-3xl text-muted">{copy.landingIntro}</p>
         <p className="mt-3 text-xs text-muted">{copy.providerLegal}</p>
 
-        {/* CTAs */}
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <Link
-            href={primaryHref}
-            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#00DC82] px-6 py-3 font-heading font-bold text-[#07140f]"
-          >
-            {primaryLabel}
-          </Link>
-          <Link
-            href="/provider/dashboard"
-            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-white/10 px-6 py-3 font-heading font-bold text-premium"
-          >
-            {copy.dashboardTitle}
-          </Link>
-        </div>
+        {/* CTAs — hidden for admin (not a provider) */}
+        {!userIsAdmin && (
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Link
+              href={primaryHref}
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#00DC82] px-6 py-3 font-heading font-bold text-[#07140f]"
+            >
+              {primaryLabel}
+            </Link>
+            {session?.user && (
+              <Link
+                href="/provider/dashboard"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-white/10 px-6 py-3 font-heading font-bold text-premium"
+              >
+                {copy.dashboardTitle}
+              </Link>
+            )}
+          </div>
+        )}
 
         {/* Access status */}
-        {account && (
+        {!userIsAdmin && account && (
           <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm">
             <span className="text-xs font-bold uppercase text-[#00DC82]">{copy.status}:</span>
             <span className="font-bold text-premium">
@@ -203,12 +211,14 @@ export default async function ProvidersLandingPage() {
           </div>
           <p className="mt-3 text-sm text-muted">{copy.professionalDiffText}</p>
           <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-            <Link
-              href={primaryHref}
-              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full bg-[#00DC82] px-5 py-2 text-sm font-bold text-[#07140f]"
-            >
-              {primaryLabel}
-            </Link>
+            {!userIsAdmin && (
+              <Link
+                href={primaryHref}
+                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full bg-[#00DC82] px-5 py-2 text-sm font-bold text-[#07140f]"
+              >
+                {primaryLabel}
+              </Link>
+            )}
             <Link
               href="/profesional"
               className="inline-flex min-h-10 items-center justify-center rounded-full border border-white/10 px-5 py-2 text-sm font-bold text-premium"
