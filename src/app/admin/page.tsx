@@ -1,12 +1,15 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
-import { Activity, BarChart3, BriefcaseBusiness, ClipboardList, FileText, ShieldCheck, UserRound, Users } from 'lucide-react';
+import { Activity, BarChart3, BriefcaseBusiness, FileText, ShieldCheck, UserRound, Users } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { lightAuth as auth } from '@/auth.config';
 import { prisma } from '@/lib/prisma';
 import { normalizeLanguage, PREFERENCE_COOKIE_NAMES } from '@/lib/preferences';
 
 export const dynamic = 'force-dynamic';
+
+const REVIEW_TRAY_LIMIT = 5;
+const ACTIVITY_LIMIT = 8;
 
 const copy = {
   es: {
@@ -15,33 +18,31 @@ const copy = {
     subtitle: 'Supervisa solicitudes, actividad comercial, proveedores, profesionales y métricas operativas de EnergyScan.',
     role: 'Administrador',
     updated: 'Última actualización',
-    pendingRequests: 'Solicitudes pendientes',
     pendingProfessionals: 'Profesionales pendientes',
     pendingProviders: 'Proveedores pendientes',
     leads: 'Leads generados',
     assessments: 'Análisis realizados',
     revenue: 'Ingresos estimados',
     reviewTray: 'Solicitudes pendientes de revisión',
+    pendingProfessionalsLabel: 'Profesionales',
+    pendingProvidersLabel: 'Proveedores',
+    viewAllProfessionals: 'Ver todos',
+    viewAllProviders: 'Ver todos',
+    emptyProfessionals: 'Sin profesionales pendientes.',
+    emptyProviders: 'Sin proveedores pendientes.',
     recentActivity: 'Actividad reciente',
+    viewAllActivity: 'Ver leads',
     monetization: 'Resumen comercial',
     documentation: 'Documentación',
     documentationCopy: 'Área preparada para gestionar documentación interna, fuentes normativas, catálogos de costes y materiales de soporte para EnergyScan.',
-    type: 'Tipo',
-    name: 'Nombre',
     professional: 'Profesional',
     provider: 'Proveedor',
-    company: 'Empresa',
-    category: 'Categoría',
-    zone: 'Zona',
-    date: 'Fecha',
-    status: 'Estado',
-    review: 'Revisar',
-    empty: 'No hay elementos pendientes.',
     premiumReports: 'Informes premium desbloqueados',
     budgetReviews: 'Budget reviews',
     payments: 'Pagos completados',
     providerCredits: 'Créditos proveedor',
     viewDocs: 'Ver documentación',
+    moreItems: 'y %n más →',
   },
   en: {
     eyebrow: 'Admin console',
@@ -49,33 +50,31 @@ const copy = {
     subtitle: 'Monitor requests, commercial activity, providers, professionals and operational metrics for EnergyScan.',
     role: 'Administrator',
     updated: 'Last updated',
-    pendingRequests: 'Pending requests',
     pendingProfessionals: 'Pending professionals',
     pendingProviders: 'Pending providers',
     leads: 'Generated leads',
     assessments: 'Assessments completed',
     revenue: 'Estimated revenue',
     reviewTray: 'Requests pending review',
+    pendingProfessionalsLabel: 'Professionals',
+    pendingProvidersLabel: 'Providers',
+    viewAllProfessionals: 'View all',
+    viewAllProviders: 'View all',
+    emptyProfessionals: 'No pending professionals.',
+    emptyProviders: 'No pending providers.',
     recentActivity: 'Recent activity',
+    viewAllActivity: 'View leads',
     monetization: 'Commercial summary',
     documentation: 'Documentation',
     documentationCopy: 'Area prepared to manage internal documentation, regulatory sources, cost catalogs and support material for EnergyScan.',
-    type: 'Type',
-    name: 'Name',
     professional: 'Professional',
     provider: 'Provider',
-    company: 'Company',
-    category: 'Category',
-    zone: 'Zone',
-    date: 'Date',
-    status: 'Status',
-    review: 'Review',
-    empty: 'No pending items.',
     premiumReports: 'Premium reports unlocked',
     budgetReviews: 'Budget reviews',
     payments: 'Completed payments',
     providerCredits: 'Provider credits',
     viewDocs: 'View documentation',
+    moreItems: 'and %n more →',
   },
   de: {
     eyebrow: 'Administrationskonsole',
@@ -83,33 +82,31 @@ const copy = {
     subtitle: 'Überwache Anfragen, kommerzielle Aktivität, Anbieter, Fachleute und operative Kennzahlen von EnergyScan.',
     role: 'Administrator',
     updated: 'Letzte Aktualisierung',
-    pendingRequests: 'Ausstehende Anfragen',
     pendingProfessionals: 'Ausstehende Fachleute',
     pendingProviders: 'Ausstehende Anbieter',
     leads: 'Generierte Leads',
     assessments: 'Durchgeführte Analysen',
     revenue: 'Geschätzter Umsatz',
     reviewTray: 'Anfragen zur Prüfung',
+    pendingProfessionalsLabel: 'Fachleute',
+    pendingProvidersLabel: 'Anbieter',
+    viewAllProfessionals: 'Alle anzeigen',
+    viewAllProviders: 'Alle anzeigen',
+    emptyProfessionals: 'Keine ausstehenden Fachleute.',
+    emptyProviders: 'Keine ausstehenden Anbieter.',
     recentActivity: 'Letzte Aktivität',
+    viewAllActivity: 'Leads anzeigen',
     monetization: 'Kommerzielle Übersicht',
     documentation: 'Dokumentation',
     documentationCopy: 'Bereich zur Verwaltung interner Dokumentation, regulatorischer Quellen, Kostenkataloge und Supportmaterialien für EnergyScan.',
-    type: 'Typ',
-    name: 'Name',
     professional: 'Fachperson',
     provider: 'Anbieter',
-    company: 'Unternehmen',
-    category: 'Kategorie',
-    zone: 'Region',
-    date: 'Datum',
-    status: 'Status',
-    review: 'Prüfen',
-    empty: 'Keine ausstehenden Einträge.',
     premiumReports: 'Freigeschaltete Premium-Berichte',
     budgetReviews: 'Budget Reviews',
     payments: 'Abgeschlossene Zahlungen',
     providerCredits: 'Anbieter-Credits',
     viewDocs: 'Dokumentation öffnen',
+    moreItems: 'und %n weitere →',
   },
 };
 
@@ -134,8 +131,10 @@ export default async function AdminDashboardPage() {
   const locale = language === 'en' ? 'en-GB' : language === 'de' ? 'de-DE' : 'es-ES';
 
   const [
-    professionalRequests,
-    providers,
+    pendingProfessionals,
+    pendingProviders,
+    allProfessionalsCount,
+    allProvidersCount,
     leadCount,
     assessmentCount,
     premiumReports,
@@ -145,9 +144,14 @@ export default async function AdminDashboardPage() {
     budgetRevenue,
     recentLeads,
     recentAssessments,
+    recentProfessionals,
+    recentProviders,
+    creditsAggregate,
   ] = await Promise.all([
-    prisma.professionalAccessRequest.findMany({ orderBy: { createdAt: 'desc' }, take: 20 }),
-    prisma.provider.findMany({ orderBy: { createdAt: 'desc' }, take: 20 }),
+    prisma.professionalAccessRequest.findMany({ where: { status: 'PENDING' }, orderBy: { createdAt: 'desc' } }),
+    prisma.provider.findMany({ where: { status: 'PENDING' }, orderBy: { createdAt: 'desc' } }),
+    prisma.professionalAccessRequest.count({ where: { status: 'PENDING' } }),
+    prisma.provider.count({ where: { status: 'PENDING' } }),
     prisma.lead.count(),
     prisma.assessment.count(),
     prisma.assessment.count({ where: { paidAt: { not: null } } }),
@@ -155,46 +159,24 @@ export default async function AdminDashboardPage() {
     prisma.budgetReview.count({ where: { paidAt: { not: null } } }),
     prisma.assessment.aggregate({ _sum: { paidAmountCents: true }, where: { paidAt: { not: null } } }),
     prisma.budgetReview.aggregate({ _sum: { paidAmountCents: true }, where: { paidAt: { not: null } } }),
-    prisma.lead.findMany({ orderBy: { createdAt: 'desc' }, take: 4 }),
-    prisma.assessment.findMany({ orderBy: { createdAt: 'desc' }, take: 4 }),
+    prisma.lead.findMany({ orderBy: { createdAt: 'desc' }, take: ACTIVITY_LIMIT }),
+    prisma.assessment.findMany({ orderBy: { createdAt: 'desc' }, take: ACTIVITY_LIMIT }),
+    prisma.professionalAccessRequest.findMany({ orderBy: { createdAt: 'desc' }, take: ACTIVITY_LIMIT }),
+    prisma.provider.findMany({ orderBy: { createdAt: 'desc' }, take: ACTIVITY_LIMIT }),
+    prisma.provider.aggregate({ _sum: { leadCreditsBalance: true } }),
   ]);
 
-  const pendingProfessionals = professionalRequests.filter((item) => item.status === 'PENDING');
-  const pendingProviders = providers.filter((item) => item.status === 'PENDING');
   const revenueCents = (assessmentRevenue._sum.paidAmountCents || 0) + (budgetRevenue._sum.paidAmountCents || 0);
-  const pendingRows = [
-    ...pendingProfessionals.map((item) => ({
-      id: item.id,
-      href: '/admin/professionals',
-      type: t.professional,
-      name: item.name || item.email,
-      email: item.email,
-      company: item.company || '',
-      category: item.role || '',
-      zone: '',
-      status: item.status,
-      createdAt: item.createdAt,
-    })),
-    ...pendingProviders.map((item) => ({
-      id: item.id,
-      href: '/admin/providers',
-      type: t.provider,
-      name: item.name,
-      email: item.email || '',
-      company: item.legalName || '',
-      category: parseList(item.categories),
-      zone: parseList(item.zones),
-      status: item.status,
-      createdAt: item.createdAt,
-    })),
-  ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+  const pendingProfessionalsSlice = pendingProfessionals.slice(0, REVIEW_TRAY_LIMIT);
+  const pendingProvidersSlice = pendingProviders.slice(0, REVIEW_TRAY_LIMIT);
 
   const activity = [
-    ...professionalRequests.slice(0, 4).map((item) => ({ id: `pro-${item.id}`, label: `${t.professional}: ${item.name || item.email}`, date: item.createdAt })),
-    ...providers.slice(0, 4).map((item) => ({ id: `provider-${item.id}`, label: `${t.provider}: ${item.name}`, date: item.createdAt })),
+    ...recentProfessionals.map((item) => ({ id: `pro-${item.id}`, label: `${t.professional}: ${item.name || item.email}`, date: item.createdAt })),
+    ...recentProviders.map((item) => ({ id: `provider-${item.id}`, label: `${t.provider}: ${item.name}`, date: item.createdAt })),
     ...recentLeads.map((item) => ({ id: `lead-${item.id}`, label: `${t.leads}: ${item.requestedService || item.userEmail || item.zone || item.id}`, date: item.createdAt })),
     ...recentAssessments.map((item) => ({ id: `assessment-${item.id}`, label: `${t.assessments}: ${item.zipcode} · ${item.estimatedLetter}`, date: item.createdAt })),
-  ].sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 8);
+  ].sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, ACTIVITY_LIMIT);
 
   return (
     <div className="min-h-screen app-shell">
@@ -214,71 +196,105 @@ export default async function AdminDashboardPage() {
           </div>
         </section>
 
-        <section className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+        <section className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           {[
-            { label: t.pendingRequests, value: pendingRows.length, Icon: ClipboardList },
-            { label: t.pendingProfessionals, value: pendingProfessionals.length, Icon: UserRound },
-            { label: t.pendingProviders, value: pendingProviders.length, Icon: BriefcaseBusiness },
-            { label: t.leads, value: leadCount, Icon: Users },
-            { label: t.assessments, value: assessmentCount, Icon: BarChart3 },
-            { label: t.revenue, value: money(revenueCents, locale), Icon: ShieldCheck },
-          ].map(({ label, value, Icon }) => (
-            <article key={label} className="rounded-2xl border border-white/10 bg-white/5 p-5">
+            { label: t.pendingProfessionals, value: allProfessionalsCount, Icon: UserRound, href: '/admin/professional' },
+            { label: t.pendingProviders, value: allProvidersCount, Icon: BriefcaseBusiness, href: '/admin/providers' },
+            { label: t.leads, value: leadCount, Icon: Users, href: '/admin/leads' },
+            { label: t.assessments, value: assessmentCount, Icon: BarChart3, href: '/admin/kpis' },
+            { label: t.revenue, value: money(revenueCents, locale), Icon: ShieldCheck, href: '/admin/kpis' },
+          ].map(({ label, value, Icon, href }) => (
+            <Link key={label} href={href} className="group rounded-2xl border border-white/10 bg-white/5 p-5 transition hover:border-[#00DC82]/30">
               <Icon className="h-5 w-5 text-[#00DC82]" />
               <p className="mt-4 font-heading text-3xl font-bold text-premium">{value}</p>
               <p className="mt-1 text-xs font-bold uppercase text-muted">{label}</p>
-            </article>
+            </Link>
           ))}
         </section>
 
         <section className="mt-8 rounded-3xl border border-white/10 bg-white/5 p-5">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="font-heading text-2xl font-bold text-premium">{t.reviewTray}</h2>
-            <Link href="/admin/requests" className="text-sm font-bold text-[#00DC82]">{t.review}</Link>
-          </div>
-          <div className="mt-5 overflow-x-auto">
-            {pendingRows.length === 0 ? (
-              <p className="text-sm text-muted">{t.empty}</p>
-            ) : (
-              <table className="w-full min-w-[760px] text-left text-sm">
-                <thead className="text-xs uppercase text-muted">
-                  <tr>
-                    <th className="py-3 pr-4">{t.type}</th>
-                    <th className="py-3 pr-4">{t.name}</th>
-                    <th className="py-3 pr-4">Email</th>
-                    <th className="py-3 pr-4">{t.company}</th>
-                    <th className="py-3 pr-4">{t.category}</th>
-                    <th className="py-3 pr-4">{t.zone}</th>
-                    <th className="py-3 pr-4">{t.date}</th>
-                    <th className="py-3 pr-4">{t.status}</th>
-                    <th className="py-3 pr-4"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/10">
-                  {pendingRows.map((row) => (
-                    <tr key={`${row.type}-${row.id}`} className="text-muted">
-                      <td className="py-3 pr-4 font-bold text-[#00DC82]">{row.type}</td>
-                      <td className="py-3 pr-4 font-semibold text-premium">{row.name}</td>
-                      <td className="py-3 pr-4">{row.email}</td>
-                      <td className="py-3 pr-4">{row.company || '-'}</td>
-                      <td className="py-3 pr-4">{row.category || '-'}</td>
-                      <td className="py-3 pr-4">{row.zone || '-'}</td>
-                      <td className="py-3 pr-4">{row.createdAt.toLocaleDateString(locale)}</td>
-                      <td className="py-3 pr-4">{row.status}</td>
-                      <td className="py-3 pr-4"><Link href={row.href} className="font-bold text-[#00DC82]">{t.review}</Link></td>
-                    </tr>
+          <h2 className="font-heading text-2xl font-bold text-premium">{t.reviewTray}</h2>
+          <div className="mt-5 grid gap-5 lg:grid-cols-2">
+            {/* Profesionales pendientes */}
+            <div>
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <UserRound className="h-4 w-4 text-[#00DC82]" />
+                  <span className="text-sm font-bold text-premium">{t.pendingProfessionalsLabel}</span>
+                  <span className="rounded-full bg-[#00DC82]/15 px-2 py-0.5 text-xs font-bold text-[#00DC82]">{allProfessionalsCount}</span>
+                </div>
+                {allProfessionalsCount > 0 && (
+                  <Link href="/admin/professional" className="text-xs font-bold text-[#00DC82]">{t.viewAllProfessionals} →</Link>
+                )}
+              </div>
+              {pendingProfessionals.length === 0 ? (
+                <p className="rounded-2xl border border-white/10 bg-black/10 p-4 text-sm text-muted">{t.emptyProfessionals}</p>
+              ) : (
+                <div className="space-y-2">
+                  {pendingProfessionalsSlice.map((item) => (
+                    <Link key={item.id} href="/admin/professional" className="flex items-start justify-between gap-2 rounded-2xl border border-white/10 bg-black/10 p-4 transition hover:border-[#00DC82]/30">
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold text-premium">{item.name || item.email}</p>
+                        <p className="truncate text-xs text-muted">{item.email}</p>
+                        {item.company && <p className="text-xs text-muted">{item.company}</p>}
+                      </div>
+                      <span className="shrink-0 text-xs text-muted">{item.createdAt.toLocaleDateString(locale)}</span>
+                    </Link>
                   ))}
-                </tbody>
-              </table>
-            )}
+                  {allProfessionalsCount > REVIEW_TRAY_LIMIT && (
+                    <Link href="/admin/professional" className="block rounded-2xl border border-white/5 bg-black/5 px-4 py-3 text-center text-xs font-bold text-[#00DC82]">
+                      {t.moreItems.replace('%n', String(allProfessionalsCount - REVIEW_TRAY_LIMIT))}
+                    </Link>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Proveedores pendientes */}
+            <div>
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <BriefcaseBusiness className="h-4 w-4 text-[#00DC82]" />
+                  <span className="text-sm font-bold text-premium">{t.pendingProvidersLabel}</span>
+                  <span className="rounded-full bg-[#00DC82]/15 px-2 py-0.5 text-xs font-bold text-[#00DC82]">{allProvidersCount}</span>
+                </div>
+                {allProvidersCount > 0 && (
+                  <Link href="/admin/providers" className="text-xs font-bold text-[#00DC82]">{t.viewAllProviders} →</Link>
+                )}
+              </div>
+              {pendingProviders.length === 0 ? (
+                <p className="rounded-2xl border border-white/10 bg-black/10 p-4 text-sm text-muted">{t.emptyProviders}</p>
+              ) : (
+                <div className="space-y-2">
+                  {pendingProvidersSlice.map((item) => (
+                    <Link key={item.id} href="/admin/providers" className="flex items-start justify-between gap-2 rounded-2xl border border-white/10 bg-black/10 p-4 transition hover:border-[#00DC82]/30">
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold text-premium">{item.name}</p>
+                        {item.email && <p className="truncate text-xs text-muted">{item.email}</p>}
+                        {item.legalName && <p className="text-xs text-muted">{item.legalName}</p>}
+                      </div>
+                      <span className="shrink-0 text-xs text-muted">{item.createdAt.toLocaleDateString(locale)}</span>
+                    </Link>
+                  ))}
+                  {allProvidersCount > REVIEW_TRAY_LIMIT && (
+                    <Link href="/admin/providers" className="block rounded-2xl border border-white/5 bg-black/5 px-4 py-3 text-center text-xs font-bold text-[#00DC82]">
+                      {t.moreItems.replace('%n', String(allProvidersCount - REVIEW_TRAY_LIMIT))}
+                    </Link>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </section>
 
         <section className="mt-8 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-            <div className="flex items-center gap-2">
-              <Activity className="h-5 w-5 text-[#00DC82]" />
-              <h2 className="font-heading text-2xl font-bold text-premium">{t.recentActivity}</h2>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Activity className="h-5 w-5 text-[#00DC82]" />
+                <h2 className="font-heading text-2xl font-bold text-premium">{t.recentActivity}</h2>
+              </div>
+              <Link href="/admin/leads" className="text-xs font-bold text-[#00DC82]">{t.viewAllActivity} →</Link>
             </div>
             <div className="mt-5 space-y-3">
               {activity.map((item) => (
@@ -298,7 +314,7 @@ export default async function AdminDashboardPage() {
                   [t.premiumReports, premiumReports],
                   [t.budgetReviews, budgetReviews],
                   [t.payments, premiumReports + paidBudgetReviews],
-                  [t.providerCredits, providers.reduce((sum, provider) => sum + provider.leadCreditsBalance, 0)],
+                  [t.providerCredits, creditsAggregate._sum.leadCreditsBalance ?? 0],
                 ].map(([label, value]) => (
                   <div key={label} className="rounded-2xl border border-white/10 bg-black/10 p-4">
                     <p className="text-xs font-bold uppercase text-muted">{label}</p>

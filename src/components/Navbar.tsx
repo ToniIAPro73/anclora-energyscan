@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { BarChart3, BookOpen, BriefcaseBusiness, Calculator, ChevronDown, ClipboardList, FileText, Home, LayoutDashboard, LogOut, ReceiptText, Settings, UserRound } from 'lucide-react';
+import { BarChart3, BookOpen, BriefcaseBusiness, Calculator, ChevronDown, FileText, Home, LayoutDashboard, LogOut, ReceiptText, Settings, UserRound } from 'lucide-react';
 import { signOut as clientSignOut, useSession } from 'next-auth/react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
@@ -72,7 +72,6 @@ export default function Navbar({
 
   const adminLinks = [
     { href: '/admin', label: t.navAdminOverview, Icon: LayoutDashboard },
-    { href: '/admin/requests', label: t.navAdminRequests, Icon: ClipboardList },
     { href: '/admin/professionals', label: t.navAdminProfessionals, Icon: UserRound },
     { href: '/admin/providers', label: t.navAdminProviders, Icon: BriefcaseBusiness },
     { href: '/admin/leads', label: t.navAdminLeads, Icon: ReceiptText },
