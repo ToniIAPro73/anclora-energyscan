@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { createPasswordResetToken, hashPassword, hashToken } from '@/lib/password';
 import { signIn, signOut as authSignOut } from '@/auth';
+import { isAdmin } from '@/lib/is-admin';
 
 type AuthActionState = {
   ok?: boolean;
@@ -37,7 +38,7 @@ export async function signInWithEmail(_: AuthActionState, formData: FormData): P
     await signIn('credentials', {
       email,
       password,
-      redirectTo: '/dashboard',
+      redirectTo: isAdmin(email) ? '/admin/metrics' : '/dashboard',
     });
   } catch (error) {
     if ((error as Error & { digest?: string }).digest?.startsWith('NEXT_REDIRECT')) throw error;

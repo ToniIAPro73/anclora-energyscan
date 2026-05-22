@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { ArrowUpRight, BarChart3, BriefcaseBusiness, FileText, LockKeyhole, ReceiptText, ShieldCheck } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { CheckoutButton } from '@/components/CheckoutButton';
@@ -29,6 +30,7 @@ export default async function DashboardPage() {
   const language = normalizeLanguage(cookies().get(PREFERENCE_COOKIE_NAMES.language)?.value);
   const copy = getMonetizationCopy(language).dashboard;
   const session = await auth().catch(() => null);
+  if (session?.user?.id && isAdmin(session.user.email)) redirect('/admin/metrics');
   if (!session?.user?.id) {
     return (
       <div className="min-h-screen app-shell">

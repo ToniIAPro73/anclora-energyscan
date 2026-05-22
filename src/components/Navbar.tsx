@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { BriefcaseBusiness, Calculator, ChevronDown, FileText, Home, LayoutDashboard, LogOut, ReceiptText, Settings, Shield, UserRound } from 'lucide-react';
+import { BarChart3, BookOpen, BriefcaseBusiness, Calculator, ChevronDown, ClipboardList, FileText, Home, LayoutDashboard, LogOut, ReceiptText, Settings, UserRound } from 'lucide-react';
 import { signOut as clientSignOut } from 'next-auth/react';
 import { useState, useRef, useEffect } from 'react';
 import { PreferenceToggles } from './PreferenceToggles';
@@ -44,7 +44,17 @@ export default function Navbar({
     return () => document.removeEventListener('mousedown', handleOutside);
   }, []);
   const isAppMode = mode === 'app';
-  const productLinks = isAppMode
+  const adminLinks = [
+    { href: '/admin/professional', label: t.navAdminRequests, Icon: ClipboardList },
+    { href: '/admin/professional', label: t.navAdminProfessionals, Icon: UserRound },
+    { href: '/admin/providers', label: t.navAdminProviders, Icon: BriefcaseBusiness },
+    { href: '/admin/metrics', label: t.navAdminKpis, Icon: BarChart3 },
+    { href: '/admin/metrics', label: t.navAdminAnalytics, Icon: BarChart3 },
+    { href: '/admin/knowledge', label: t.navAdminDocs, Icon: BookOpen },
+  ];
+  const productLinks = isAdmin && isAppMode
+    ? adminLinks
+    : isAppMode
     ? [
         { href: '/dashboard', label: t.navDashboard, Icon: LayoutDashboard },
         { href: '/wizard', label: t.navAssessment, Icon: FileText },
@@ -103,7 +113,14 @@ export default function Navbar({
               </div>
             )}
           </div>
-          {isAppMode ? (
+          {isAppMode && isAdmin ? (
+            <>
+              <Link href="/admin/professional" className="inline-flex min-h-9 items-center whitespace-nowrap rounded-full px-3 font-semibold transition hover:bg-white/5 hover:text-premium">{t.navAdminRequests}</Link>
+              <Link href="/admin/providers" className="inline-flex min-h-9 items-center whitespace-nowrap rounded-full px-3 font-semibold transition hover:bg-white/5 hover:text-premium">{t.navAdminProviders}</Link>
+              <Link href="/admin/metrics" className="inline-flex min-h-9 items-center whitespace-nowrap rounded-full px-3 font-semibold transition hover:bg-white/5 hover:text-premium">{t.navAdminKpis}</Link>
+              <Link href="/admin/knowledge" className="inline-flex min-h-9 items-center whitespace-nowrap rounded-full px-3 font-semibold transition hover:bg-white/5 hover:text-premium">{t.navAdminDocs}</Link>
+            </>
+          ) : isAppMode ? (
             <>
               <Link href="/dashboard" className="inline-flex min-h-9 items-center whitespace-nowrap rounded-full px-3 font-semibold transition hover:bg-white/5 hover:text-premium">{t.navDashboard}</Link>
               <Link href="/budget-review" className="inline-flex min-h-9 items-center whitespace-nowrap rounded-full px-3 font-semibold transition hover:bg-white/5 hover:text-premium">{t.navBudgetReview}</Link>
@@ -136,13 +153,20 @@ export default function Navbar({
                     ? <Image src={userImage} alt="" width={28} height={28} className="h-full w-full object-cover" />
                     : <span className="text-[10px] font-black text-[#00DC82]">{initials}</span>}
                 </span>
-                <span className="truncate">{userName || userEmail || t.navAccount}</span>
+                <span className="flex min-w-0 items-center gap-2">
+                  <span className="truncate">{userName || userEmail || t.navAccount}</span>
+                  {isAdmin && (
+                    <span className="shrink-0 rounded-full bg-[#00DC82]/15 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-[#00DC82]">
+                      {t.navAdminRole}
+                    </span>
+                  )}
+                </span>
                 <ChevronDown className={`h-4 w-4 shrink-0 text-muted transition ${accountOpen ? 'rotate-180' : ''}`} />
               </button>
               {accountOpen && (
                 <div className="surface absolute right-0 top-[calc(100%+0.85rem)] z-[8600] w-72 overflow-hidden rounded-3xl border shadow-2xl shadow-black/40">
                   <div className="border-b border-white/10 p-5">
-                    <p className="text-xs font-heading font-bold uppercase tracking-wider text-[#00DC82]">EnergyScan</p>
+                    <p className="text-xs font-heading font-bold uppercase tracking-wider text-[#00DC82]">{isAdmin ? t.navAdminRole : 'EnergyScan'}</p>
                     <p className="mt-1 truncate font-heading text-lg font-bold text-premium">{userName || t.navAccount}</p>
                     {userEmail && <p className="truncate text-sm font-semibold text-muted">{userEmail}</p>}
                   </div>
@@ -163,16 +187,6 @@ export default function Navbar({
                       <Settings className="h-4 w-4 text-[#00DC82]" />
                       {t.navSettings}
                     </Link>
-                    {isAdmin && (
-                      <Link
-                        href="/admin/metrics"
-                        onClick={() => setAccountOpen(false)}
-                        className="flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-heading font-semibold text-muted transition hover:bg-white/5 hover:text-premium"
-                      >
-                        <Shield className="h-4 w-4 text-[#00DC82]" />
-                        Admin
-                      </Link>
-                    )}
                   </div>
                   <div className="border-t border-white/10 p-2">
                     <button
@@ -213,13 +227,20 @@ export default function Navbar({
                   ? <Image src={userImage} alt="" width={24} height={24} className="h-full w-full object-cover" />
                   : <span className="text-[9px] font-black text-[#00DC82]">{initials}</span>}
               </span>
-              <span className="max-w-[8rem] truncate text-xs">{userName || userEmail || t.navAccount}</span>
+              <span className="flex min-w-0 items-center gap-1.5">
+                <span className="max-w-[8rem] truncate text-xs">{userName || userEmail || t.navAccount}</span>
+                {isAdmin && (
+                  <span className="shrink-0 rounded-full bg-[#00DC82]/15 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide text-[#00DC82]">
+                    {t.navAdminRole}
+                  </span>
+                )}
+              </span>
               <ChevronDown className={`h-3.5 w-3.5 shrink-0 text-muted transition ${accountOpen ? 'rotate-180' : ''}`} />
             </button>
             {accountOpen && (
               <div className="surface absolute bottom-[calc(100%+0.5rem)] right-0 z-[8600] w-64 overflow-hidden rounded-3xl border shadow-2xl shadow-black/40">
                 <div className="border-b border-white/10 p-4">
-                  <p className="text-xs font-heading font-bold uppercase tracking-wider text-[#00DC82]">EnergyScan</p>
+                  <p className="text-xs font-heading font-bold uppercase tracking-wider text-[#00DC82]">{isAdmin ? t.navAdminRole : 'EnergyScan'}</p>
                   <p className="mt-1 truncate font-heading text-base font-bold text-premium">{userName || t.navAccount}</p>
                   {userEmail && <p className="truncate text-xs font-semibold text-muted">{userEmail}</p>}
                 </div>
@@ -240,16 +261,6 @@ export default function Navbar({
                     <Settings className="h-4 w-4 text-[#00DC82]" />
                     {t.navSettings}
                   </Link>
-                  {isAdmin && (
-                    <Link
-                      href="/admin/metrics"
-                      onClick={() => setAccountOpen(false)}
-                      className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-heading font-semibold text-muted transition hover:bg-white/5 hover:text-premium"
-                    >
-                      <Shield className="h-4 w-4 text-[#00DC82]" />
-                      Admin
-                    </Link>
-                  )}
                 </div>
                 <div className="border-t border-white/10 p-2">
                   <button
