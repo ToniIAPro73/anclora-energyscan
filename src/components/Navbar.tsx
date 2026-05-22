@@ -144,7 +144,7 @@ export default function Navbar({
           {isAppMode && effectiveIsAdmin ? (
             <>
               <Link href="/admin" className="inline-flex min-h-9 items-center whitespace-nowrap rounded-full px-3 font-semibold transition hover:bg-white/5 hover:text-premium">{t.navAdminOverview}</Link>
-              <Link href="/admin/requests" className="inline-flex min-h-9 items-center whitespace-nowrap rounded-full px-3 font-semibold transition hover:bg-white/5 hover:text-premium">{t.navAdminRequests}</Link>
+              <Link href="/admin/professionals" className="inline-flex min-h-9 items-center whitespace-nowrap rounded-full px-3 font-semibold transition hover:bg-white/5 hover:text-premium">{t.navAdminProfessionals}</Link>
               <Link href="/admin/providers" className="inline-flex min-h-9 items-center whitespace-nowrap rounded-full px-3 font-semibold transition hover:bg-white/5 hover:text-premium">{t.navAdminProviders}</Link>
               <Link href="/admin/leads" className="inline-flex min-h-9 items-center whitespace-nowrap rounded-full px-3 font-semibold transition hover:bg-white/5 hover:text-premium">{t.navAdminLeads}</Link>
               <Link href="/admin/kpis" className="inline-flex min-h-9 items-center whitespace-nowrap rounded-full px-3 font-semibold transition hover:bg-white/5 hover:text-premium">{t.navAdminKpis}</Link>
