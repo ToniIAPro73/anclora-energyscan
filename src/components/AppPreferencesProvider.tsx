@@ -19,6 +19,7 @@ import {
 } from '@/lib/preferences';
 import { convertArea, convertCurrencyFromEur, formatArea, formatCurrency, formatNumber } from '@/lib/formatters';
 import { dictionaries, Dictionary } from '@/lib/i18n';
+import { resolveInitialLocale } from '@/lib/anclora-language-toggle';
 
 type PreferencesContextValue = AppPreferences & {
   preferences: AppPreferences;
@@ -62,7 +63,12 @@ function applyTheme(theme: AppTheme) {
 }
 
 function readStoredPreferences(): AppPreferences {
-  const language = normalizeLanguage(localStorage.getItem(PREFERENCE_COOKIE_NAMES.language));
+  const searchParams = new URLSearchParams(window.location.search);
+  const language = resolveInitialLocale({
+    urlLocale: searchParams.get('lang') || searchParams.get('locale'),
+    persistedLocale: localStorage.getItem(PREFERENCE_COOKIE_NAMES.language),
+    browserLocales: navigator.languages?.length ? navigator.languages : [navigator.language],
+  });
   const languagePreset = getPreferencesForLanguage(language);
   return normalizePreferences({
     theme: localStorage.getItem(PREFERENCE_COOKIE_NAMES.theme),

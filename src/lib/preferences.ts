@@ -1,6 +1,8 @@
+import { ACTIVE_APP_LOCALES, DEFAULT_APP_LOCALE, normalizeActiveLocale, type ActiveAncloraLocale } from './anclora-language-toggle';
+
 export type AppTheme = "dark" | "light" | "system";
 export type ThemeMode = AppTheme;
-export type AppLanguage = "es" | "en" | "de";
+export type AppLanguage = ActiveAncloraLocale;
 export type AppCurrency = "EUR" | "GBP";
 export type MeasurementSystem = "metric" | "imperial";
 
@@ -13,13 +15,13 @@ export type AppPreferences = {
 
 export const DEFAULT_PREFERENCES: AppPreferences = {
   theme: "dark",
-  language: "es",
+  language: DEFAULT_APP_LOCALE,
   currency: "EUR",
   measurementSystem: "metric",
 };
 
 export const themeModes: AppTheme[] = ["dark", "light", "system"];
-export const languages: AppLanguage[] = ["es", "en", "de"];
+export const languages: AppLanguage[] = [...ACTIVE_APP_LOCALES];
 export const currencies: AppCurrency[] = ["EUR", "GBP"];
 export const measurementSystems: MeasurementSystem[] = ["metric", "imperial"];
 
@@ -40,7 +42,7 @@ export function normalizeTheme(value: unknown): AppTheme {
 }
 
 export function normalizeLanguage(value: unknown): AppLanguage {
-  return value === "en" || value === "de" ? value : DEFAULT_PREFERENCES.language;
+  return normalizeActiveLocale(value);
 }
 
 export function normalizeCurrency(value: unknown): AppCurrency {
