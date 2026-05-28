@@ -120,6 +120,8 @@ export const dictionaryIT = {
   sendLink: "Invia il link",
   sending: "Invio in corso...",
   backToAccess: "Torna all'accesso",
+  showPassword: "Mostra password",
+  hidePassword: "Nascondi password",
   settingsTitle: "Impostazioni",
   settingsBack: "Indietro",
   settingsReset: "Ripristina predefiniti",

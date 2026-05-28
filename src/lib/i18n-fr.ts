@@ -120,6 +120,8 @@ export const dictionaryFR = {
   sendLink: "Envoyer le lien",
   sending: "Envoi en cours...",
   backToAccess: "Retour à l'accès",
+  showPassword: "Afficher le mot de passe",
+  hidePassword: "Masquer le mot de passe",
   settingsTitle: "Paramètres",
   settingsBack: "Retour",
   settingsReset: "Réinitialiser",

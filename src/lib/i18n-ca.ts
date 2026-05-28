@@ -120,6 +120,8 @@ export const dictionaryCA = {
   sendLink: "Enviar enllaç",
   sending: "Enviant...",
   backToAccess: "Tornar a l'accés",
+  showPassword: "Mostra la contrasenya",
+  hidePassword: "Amaga la contrasenya",
   settingsTitle: "Configuració",
   settingsBack: "Tornar",
   settingsReset: "Restablir per defecte",

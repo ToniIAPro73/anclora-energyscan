@@ -3,8 +3,9 @@
 import { useFormState, useFormStatus } from 'react-dom';
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
-import { GitBranch, Mail } from 'lucide-react';
+import { Eye, EyeOff, GitBranch, Mail } from 'lucide-react';
 import { requestPasswordReset, signInWithEmail, signInWithProvider, signUpWithEmail } from './actions';
 import { usePreferences } from '@/components/AppPreferencesProvider';
 
@@ -15,6 +16,7 @@ type AuthFormProps = {
 
 export function AuthForm({ googleEnabled, githubEnabled }: AuthFormProps) {
   const [mode, setMode] = useState<'signin' | 'signup' | 'forgot'>('signin');
+  const [showPassword, setShowPassword] = useState(false);
   const [providerStatus, setProviderStatus] = useState({ googleEnabled, githubEnabled });
   const { dictionary: t } = usePreferences();
   const [signInState, signInAction] = useFormState(signInWithEmail, {});
@@ -42,6 +44,19 @@ export function AuthForm({ googleEnabled, githubEnabled }: AuthFormProps) {
 
   return (
     <div className="surface border rounded-3xl p-6 shadow-2xl sm:p-8">
+      {/* Logo + divisor + app name — visible on mobile, hidden on lg (shown in intro column) */}
+      <div className="mb-5 flex flex-col items-center lg:hidden">
+        <Image
+          src="/brand/logo-anclora-energy-scan.png"
+          alt="Anclora EnergyScan"
+          width={56}
+          height={56}
+          className="rounded-xl"
+          priority
+        />
+        <div className="my-3 h-px w-14 bg-gradient-to-r from-transparent via-[#00DC82]/60 to-transparent" />
+        <span className="font-heading text-base font-bold text-premium">Anclora EnergyScan</span>
+      </div>
       <div className="mb-6 grid grid-cols-2 rounded-2xl border border-white/10 bg-white/5 p-1">
         <button
           type="button"
@@ -86,7 +101,24 @@ export function AuthForm({ googleEnabled, githubEnabled }: AuthFormProps) {
             <input name="name" type="text" required placeholder={t.authFieldName} className="w-full rounded-xl border border-[#262626] bg-[#131313] p-3 text-sm outline-none focus:border-[#00DC82]" />
           )}
           <input name="email" type="email" required placeholder={t.authFieldEmail} className="w-full rounded-xl border border-[#262626] bg-[#131313] p-3 text-sm outline-none focus:border-[#00DC82]" />
-          <input name="password" type="password" required minLength={8} placeholder={t.authFieldPassword} className="w-full rounded-xl border border-[#262626] bg-[#131313] p-3 text-sm outline-none focus:border-[#00DC82]" />
+          <div className="relative">
+            <input
+              name="password"
+              type={showPassword ? 'text' : 'password'}
+              required
+              minLength={8}
+              placeholder={t.authFieldPassword}
+              className="w-full rounded-xl border border-[#262626] bg-[#131313] p-3 pr-10 text-sm outline-none focus:border-[#00DC82]"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? t.hidePassword : t.showPassword}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#666] hover:text-[#00DC82]"
+            >
+              {showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
+            </button>
+          </div>
 
           <SubmitButton label={mode === 'signin' ? t.signIn : t.signUp} pendingLabel={t.processing} />
 
