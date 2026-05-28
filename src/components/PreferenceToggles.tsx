@@ -1,7 +1,7 @@
 'use client';
 
 import type React from 'react';
-import { Check, ChevronDown, Globe, Monitor, Moon, Sun, X } from 'lucide-react';
+import { ChevronDown, Globe, Monitor, Moon, Sun, X } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import {
   AppCurrency,
@@ -113,7 +113,6 @@ function GlobalPreferencesTrigger({
   const [open, setOpen] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
   const selected = ANCLORA_LOCALE_META[language];
-  const pendingLabel = language === 'en' ? 'Localization pending' : language === 'de' ? 'Lokalisierung ausstehend' : 'Localización pendiente';
   const summary = `${selected.nativeName} · ${currency} · ${measurementLabels[measurementSystem]}`;
 
   useEffect(() => {
@@ -158,37 +157,26 @@ function GlobalPreferencesTrigger({
             </button>
           </div>
           <p className="mb-2 px-1 text-xs font-bold uppercase tracking-[0.18em] text-muted">Language</p>
-          <div className="grid gap-1.5">
+          <select
+            value={language}
+            onChange={(event) => setLanguage(event.target.value as ActiveAncloraLocale)}
+            className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2 text-sm font-bold text-premium"
+            aria-label="Language"
+          >
             {PREMIUM_LOCALES.map((locale) => {
               const meta = ANCLORA_LOCALE_META[locale];
               const active = meta.status === 'active';
-              const current = locale === language;
               return (
-                <button
+                <option
                   key={locale}
-                  type="button"
                   disabled={!active}
-                  onClick={() => {
-                    if (!active) return;
-                    setLanguage(locale as ActiveAncloraLocale);
-                    setOpen(false);
-                  }}
-                  className={`flex items-center justify-between gap-3 rounded-2xl border px-3 py-2 text-left text-sm transition ${
-                    current
-                      ? 'border-[#00DC82]/50 bg-[#00DC82]/10 text-premium'
-                      : 'border-white/10 bg-white/[0.03] text-muted hover:border-white/20 hover:text-premium'
-                  } ${!active ? 'cursor-not-allowed opacity-55' : ''}`}
-                  aria-pressed={current}
+                  value={locale}
                 >
-                  <span>
-                    <span className="block font-bold">{meta.nativeName}</span>
-                    <span className="text-xs">{meta.englishName}</span>
-                  </span>
-                  <span className="text-xs font-black">{current ? <Check className="h-4 w-4" /> : active ? meta.short : pendingLabel}</span>
-                </button>
+                  {meta.nativeName} - {meta.englishName}{active ? '' : ' - Localization pending'}
+                </option>
               );
             })}
-          </div>
+          </select>
 
           <p className="mb-2 mt-4 px-1 text-xs font-bold uppercase tracking-[0.18em] text-muted">Currency</p>
           <select
