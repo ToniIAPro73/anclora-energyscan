@@ -30,6 +30,8 @@ describe('preference normalization', () => {
     expect(normalizeLanguage('en')).toBe('en');
     expect(normalizeLanguage('de')).toBe('de');
     expect(normalizeLanguage('es')).toBe('es');
+    expect(normalizeLanguage('en-US')).toBe('en');
+    expect(normalizeLanguage('de-CH')).toBe('de');
     expect(normalizeLanguage('fr')).toBe('es');
   });
 

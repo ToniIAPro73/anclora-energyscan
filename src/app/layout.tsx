@@ -37,7 +37,9 @@ export default async function RootLayout({
               (function () {
                 try {
                   var theme = localStorage.getItem('enerscan-theme') || 'dark';
-                  var language = localStorage.getItem('enerscan-language') || 'es';
+                  var params = new URLSearchParams(window.location.search);
+                  var rawLanguage = params.get('lang') || params.get('locale') || localStorage.getItem('enerscan-language') || ((navigator.languages && navigator.languages[0]) || navigator.language || 'es');
+                  var language = String(rawLanguage).toLowerCase().split(/[-_]/)[0];
                   var currency = localStorage.getItem('enerscan-currency');
                   var units = localStorage.getItem('enerscan-measurement-system');
                   if (language !== 'en' && language !== 'de') language = 'es';
