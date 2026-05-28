@@ -120,6 +120,8 @@ export const dictionaryPT = {
   sendLink: "Enviar ligação",
   sending: "A enviar...",
   backToAccess: "Voltar ao acesso",
+  showPassword: "Mostrar palavra-passe",
+  hidePassword: "Ocultar palavra-passe",
   settingsTitle: "Definições",
   settingsBack: "Voltar",
   settingsReset: "Repor predefinições",
