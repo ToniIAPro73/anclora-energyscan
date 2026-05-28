@@ -20,6 +20,7 @@ import {
 import { convertArea, convertCurrencyFromEur, formatArea, formatCurrency, formatNumber } from '@/lib/formatters';
 import { dictionaries, Dictionary } from '@/lib/i18n';
 import { resolveInitialLocale } from '@/lib/anclora-language-toggle';
+import { toLegacyLocale } from '@/lib/anclora-language-toggle';
 
 type PreferencesContextValue = AppPreferences & {
   preferences: AppPreferences;
@@ -29,7 +30,7 @@ type PreferencesContextValue = AppPreferences & {
   measurementSystem: MeasurementSystem;
   dictionary: Dictionary;
   setTheme: (theme: AppTheme) => void;
-  setLanguage: (language: AppLanguage) => void;
+  setLanguage: (language: import("@/lib/anclora-language-toggle").ActiveAncloraLocale) => void;
   setCurrency: (currency: AppCurrency) => void;
   setMeasurementSystem: (measurementSystem: MeasurementSystem) => void;
   setPreferences: (preferences: Partial<AppPreferences>) => void;
@@ -69,7 +70,7 @@ function readStoredPreferences(): AppPreferences {
     persistedLocale: localStorage.getItem(PREFERENCE_COOKIE_NAMES.language),
     browserLocales: navigator.languages?.length ? navigator.languages : [navigator.language],
   });
-  const languagePreset = getPreferencesForLanguage(language);
+  const languagePreset = getPreferencesForLanguage((language === "es" || language === "en" || language === "de" ? language : (language === "ca" ? "es" : "en")) as import("@/lib/preferences").AppLanguage);
   return normalizePreferences({
     theme: localStorage.getItem(PREFERENCE_COOKIE_NAMES.theme),
     language,
@@ -118,11 +119,12 @@ export function AppPreferencesProvider({ children }: { children: React.ReactNode
     return {
       ...preferences,
       preferences,
-      dictionary: dictionaries[preferences.language],
+      dictionary: dictionaries[toLegacyLocale(preferences.language)],
       setTheme(nextTheme) {
         updatePreferences({ theme: normalizeTheme(nextTheme) });
       },
-      setLanguage(nextLanguage) {
+      setLanguage(nextLang: import("@/lib/anclora-language-toggle").ActiveAncloraLocale) {
+        const nextLanguage = (nextLang === "es" || nextLang === "en" || nextLang === "de" ? nextLang : (nextLang === "ca" ? "es" : "en")) as AppLanguage; // eslint-disable-line
         const language = normalizeLanguage(nextLanguage);
         updatePreferences({ language, ...getPreferencesForLanguage(language) });
         router.refresh();

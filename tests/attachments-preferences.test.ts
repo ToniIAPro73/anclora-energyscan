@@ -32,7 +32,8 @@ describe('preference normalization', () => {
     expect(normalizeLanguage('es')).toBe('es');
     expect(normalizeLanguage('en-US')).toBe('en');
     expect(normalizeLanguage('de-CH')).toBe('de');
-    expect(normalizeLanguage('fr')).toBe('es');
+    // fr/it/pt are active Premium locales; normalizeLanguage maps them to 'en' for dictionary access
+    expect(normalizeLanguage('fr')).toBe('en');
   });
 
   it('applies language presets for currency and measurement', () => {

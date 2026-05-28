@@ -1,8 +1,8 @@
-import { ACTIVE_APP_LOCALES, DEFAULT_APP_LOCALE, normalizeActiveLocale, type ActiveAncloraLocale } from './anclora-language-toggle';
+import { DEFAULT_APP_LOCALE, normalizeActiveLocale } from './anclora-language-toggle';
 
 export type AppTheme = "dark" | "light" | "system";
 export type ThemeMode = AppTheme;
-export type AppLanguage = ActiveAncloraLocale;
+export type AppLanguage = "es" | "en" | "de";
 export type AppCurrency = "EUR" | "USD" | "GBP" | "CHF" | "SEK" | "DKK" | "NOK";
 export type MeasurementSystem = "metric" | "imperial";
 
@@ -15,13 +15,13 @@ export type AppPreferences = {
 
 export const DEFAULT_PREFERENCES: AppPreferences = {
   theme: "dark",
-  language: DEFAULT_APP_LOCALE,
+  language: DEFAULT_APP_LOCALE as AppLanguage,
   currency: "EUR",
   measurementSystem: "metric",
 };
 
 export const themeModes: AppTheme[] = ["dark", "light", "system"];
-export const languages: AppLanguage[] = [...ACTIVE_APP_LOCALES];
+export const languages: AppLanguage[] = ["es", "en", "de"];
 export const currencies: AppCurrency[] = ["EUR", "USD", "GBP", "CHF", "SEK", "DKK", "NOK"];
 export const measurementSystems: MeasurementSystem[] = ["metric", "imperial"];
 
@@ -34,6 +34,7 @@ export const PREFERENCE_COOKIE_NAMES = {
 
 export function getPreferencesForLanguage(language: AppLanguage): Pick<AppPreferences, "currency" | "measurementSystem"> {
   if (language === "en") return { currency: "GBP", measurementSystem: "imperial" };
+  // ca, fr, it, pt: EUR + metric
   return { currency: "EUR", measurementSystem: "metric" };
 }
 
@@ -42,7 +43,10 @@ export function normalizeTheme(value: unknown): AppTheme {
 }
 
 export function normalizeLanguage(value: unknown): AppLanguage {
-  return normalizeActiveLocale(value);
+  const locale = normalizeActiveLocale(value);
+  if (locale === "es" || locale === "en" || locale === "de") return locale;
+  if (locale === "ca") return "es";
+  return "en"; // fr, it, pt → en for dictionary access
 }
 
 export function normalizeCurrency(value: unknown): AppCurrency {

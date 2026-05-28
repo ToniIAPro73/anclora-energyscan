@@ -18,7 +18,8 @@
     "manual:pdf:de": "node scripts/generate-manual-pdf.mjs --lang de",
     "manual:pdf": "npm run manual:pdf:es && npm run manual:pdf:en && npm run manual:pdf:de",
     "budget-review:demo": "node scripts/generate-budget-review-demo.mjs",
-    "seed:admin-demo": "ts-node --compiler-options '{\"module\":\"commonjs\"}' scripts/reset-admin-demo-data.ts"
+    "seed:admin-demo": "ts-node --compiler-options '{\"module\":\"commonjs\"}' scripts/reset-admin-demo-data.ts",
+    "anclora:locale-copy-check": "node scripts/check-locale-copy-quality.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.97.0",
