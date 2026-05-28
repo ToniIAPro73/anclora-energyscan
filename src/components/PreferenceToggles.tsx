@@ -1,7 +1,7 @@
 'use client';
 
 import type React from 'react';
-import { Check, ChevronDown, Globe, Monitor, Moon, Sun, X } from 'lucide-react';
+import { ChevronDown, Globe, Monitor, Moon, Sun, X } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import {
   AppCurrency,
@@ -28,6 +28,93 @@ const currencyLabels: Record<AppCurrency, { label: string; symbol: string }> = {
   SEK: { label: 'Swedish krona', symbol: 'SEK kr' },
   DKK: { label: 'Danish krone', symbol: 'DKK kr' },
   NOK: { label: 'Norwegian krone', symbol: 'NOK kr' },
+};
+
+const preferenceCopy: Record<ActiveAncloraLocale, {
+  trigger: string;
+  dialog: string;
+  eyebrow: string;
+  close: string;
+  language: string;
+  currency: string;
+  units: string;
+  pending: string;
+  save: string;
+  currencies: Record<AppCurrency, string>;
+  unitsMap: Record<MeasurementSystem, string>;
+}> = {
+  es: {
+    trigger: 'Preferencias globales',
+    dialog: 'Ajustes de preferencias globales',
+    eyebrow: 'Ajustes',
+    close: 'Cerrar preferencias',
+    language: 'Idioma',
+    currency: 'Moneda',
+    units: 'Unidades de medida',
+    pending: 'Localización pendiente',
+    save: 'Guardar y cerrar',
+    currencies: {
+      EUR: 'Euro',
+      USD: 'Dólar estadounidense',
+      GBP: 'Libra esterlina',
+      CHF: 'Franco suizo',
+      SEK: 'Corona sueca',
+      DKK: 'Corona danesa',
+      NOK: 'Corona noruega',
+    },
+    unitsMap: {
+      metric: 'Metro cuadrado - m² / Hectárea - ha',
+      imperial: 'Pie cuadrado - ft² / Acre - ac',
+    },
+  },
+  en: {
+    trigger: 'Global preferences',
+    dialog: 'Global preferences settings',
+    eyebrow: 'Settings',
+    close: 'Close preferences',
+    language: 'Language',
+    currency: 'Currency',
+    units: 'Measure units',
+    pending: 'Localization pending',
+    save: 'Save and close',
+    currencies: {
+      EUR: 'Euro',
+      USD: 'US dollar',
+      GBP: 'Pound sterling',
+      CHF: 'Swiss franc',
+      SEK: 'Swedish krona',
+      DKK: 'Danish krone',
+      NOK: 'Norwegian krone',
+    },
+    unitsMap: {
+      metric: 'Square meter - m² / Hectare - ha',
+      imperial: 'Square foot - ft² / Acre - ac',
+    },
+  },
+  de: {
+    trigger: 'Globale Einstellungen',
+    dialog: 'Globale Präferenzeinstellungen',
+    eyebrow: 'Einstellungen',
+    close: 'Einstellungen schließen',
+    language: 'Sprache',
+    currency: 'Währung',
+    units: 'Maßeinheiten',
+    pending: 'Lokalisierung ausstehend',
+    save: 'Speichern und schließen',
+    currencies: {
+      EUR: 'Euro',
+      USD: 'US-Dollar',
+      GBP: 'Pfund Sterling',
+      CHF: 'Schweizer Franken',
+      SEK: 'Schwedische Krone',
+      DKK: 'Dänische Krone',
+      NOK: 'Norwegische Krone',
+    },
+    unitsMap: {
+      metric: 'Quadratmeter - m² / Hektar - ha',
+      imperial: 'Quadratfuß - ft² / Acre - ac',
+    },
+  },
 };
 
 const measurementLabels: Record<MeasurementSystem, string> = {
@@ -113,8 +200,8 @@ function GlobalPreferencesTrigger({
   const [open, setOpen] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
   const selected = ANCLORA_LOCALE_META[language];
-  const pendingLabel = language === 'en' ? 'Localization pending' : language === 'de' ? 'Lokalisierung ausstehend' : 'Localización pendiente';
   const summary = `${selected.nativeName} · ${currency} · ${measurementLabels[measurementSystem]}`;
+  const copy = preferenceCopy[language];
 
   useEffect(() => {
     function handleOutside(e: MouseEvent) {
@@ -139,7 +226,7 @@ function GlobalPreferencesTrigger({
         className="premium-toggle min-h-[40px] max-w-full px-3 text-xs font-bold"
         aria-expanded={open}
         aria-haspopup="dialog"
-        aria-label="Global preferences"
+        aria-label={copy.trigger}
       >
         <Globe className="h-3.5 w-3.5 text-[#00DC82]" aria-hidden="true" />
         <span className="truncate">{compact ? `${selected.nativeName} · ${currency} · ${measurementLabels[measurementSystem]}` : summary}</span>
@@ -149,77 +236,66 @@ function GlobalPreferencesTrigger({
         <div
           className="surface absolute right-0 top-[calc(100%+0.6rem)] z-[8700] w-[min(22rem,calc(100vw-2rem))] rounded-3xl border p-3 shadow-2xl shadow-black/40 backdrop-blur-xl"
           role="dialog"
-          aria-label="Global preferences settings"
+          aria-label={copy.dialog}
         >
           <div className="mb-2 flex items-center justify-between gap-3 px-1">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted">Ajustes</p>
-            <button type="button" onClick={() => setOpen(false)} className="rounded-full p-1 text-premium" aria-label="Close preferences">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted">{copy.eyebrow}</p>
+            <button type="button" onClick={() => setOpen(false)} className="rounded-full p-1 text-premium" aria-label={copy.close}>
               <X className="h-4 w-4" />
             </button>
           </div>
-          <p className="mb-2 px-1 text-xs font-bold uppercase tracking-[0.18em] text-muted">Language</p>
-          <div className="grid gap-1.5">
+          <p className="mb-2 px-1 text-xs font-bold uppercase tracking-[0.18em] text-muted">{copy.language}</p>
+          <select
+            value={language}
+            onChange={(event) => setLanguage(event.target.value as ActiveAncloraLocale)}
+            className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2 text-sm font-bold text-premium"
+            aria-label={copy.language}
+          >
             {PREMIUM_LOCALES.map((locale) => {
               const meta = ANCLORA_LOCALE_META[locale];
               const active = meta.status === 'active';
-              const current = locale === language;
               return (
-                <button
+                <option
                   key={locale}
-                  type="button"
                   disabled={!active}
-                  onClick={() => {
-                    if (!active) return;
-                    setLanguage(locale as ActiveAncloraLocale);
-                    setOpen(false);
-                  }}
-                  className={`flex items-center justify-between gap-3 rounded-2xl border px-3 py-2 text-left text-sm transition ${
-                    current
-                      ? 'border-[#00DC82]/50 bg-[#00DC82]/10 text-premium'
-                      : 'border-white/10 bg-white/[0.03] text-muted hover:border-white/20 hover:text-premium'
-                  } ${!active ? 'cursor-not-allowed opacity-55' : ''}`}
-                  aria-pressed={current}
+                  value={locale}
                 >
-                  <span>
-                    <span className="block font-bold">{meta.nativeName}</span>
-                    <span className="text-xs">{meta.englishName}</span>
-                  </span>
-                  <span className="text-xs font-black">{current ? <Check className="h-4 w-4" /> : active ? meta.short : pendingLabel}</span>
-                </button>
+                  {meta.nativeName} - {meta.englishName}{active ? '' : ` - ${copy.pending}`}
+                </option>
               );
             })}
-          </div>
+          </select>
 
-          <p className="mb-2 mt-4 px-1 text-xs font-bold uppercase tracking-[0.18em] text-muted">Currency</p>
+          <p className="mb-2 mt-4 px-1 text-xs font-bold uppercase tracking-[0.18em] text-muted">{copy.currency}</p>
           <select
             value={currency}
             onChange={(event) => setCurrency(event.target.value as AppCurrency)}
             className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2 text-sm font-bold text-premium"
-            aria-label="Currency"
+            aria-label={copy.currency}
           >
             {currencies.map((item) => (
               <option key={item} value={item}>
-                {currencyLabels[item].label} - {item} {currencyLabels[item].symbol}
+                {copy.currencies[item]} - {item} {currencyLabels[item].symbol}
               </option>
             ))}
           </select>
 
-          <p className="mb-2 mt-4 px-1 text-xs font-bold uppercase tracking-[0.18em] text-muted">Measure Units</p>
+          <p className="mb-2 mt-4 px-1 text-xs font-bold uppercase tracking-[0.18em] text-muted">{copy.units}</p>
           <select
             value={measurementSystem}
             onChange={(event) => setMeasurementSystem(event.target.value as MeasurementSystem)}
             className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2 text-sm font-bold text-premium"
-            aria-label="Measure units"
+            aria-label={copy.units}
           >
             {measurementSystems.map((item) => (
               <option key={item} value={item}>
-                {item === 'metric' ? 'Square Meter - m² / Hectare - Ha' : 'Square Foot - sqft / Acre - ac'}
+                {copy.unitsMap[item]}
               </option>
             ))}
           </select>
 
           <button type="button" className="mt-4 w-full rounded-2xl bg-[#00DC82] px-4 py-2 text-sm font-black text-[#06130f]" onClick={() => setOpen(false)}>
-            Save and close
+            {copy.save}
           </button>
         </div>
       )}
