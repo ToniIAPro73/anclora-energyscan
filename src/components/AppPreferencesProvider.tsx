@@ -11,26 +11,31 @@ import {
   getPreferencesForLanguage,
   MeasurementSystem,
   normalizeCurrency,
-  normalizeLanguage,
+  normalizeSelectedLocale,
   normalizeMeasurementSystem,
   normalizePreferences,
   normalizeTheme,
   PREFERENCE_COOKIE_NAMES,
+  toDictLanguage,
 } from '@/lib/preferences';
 import { convertArea, convertCurrencyFromEur, formatArea, formatCurrency, formatNumber } from '@/lib/formatters';
 import { dictionaries, Dictionary } from '@/lib/i18n';
-import { resolveInitialLocale } from '@/lib/anclora-language-toggle';
-import { toLegacyLocale } from '@/lib/anclora-language-toggle';
+import { ActiveAncloraLocale, DEFAULT_APP_LOCALE, resolveInitialLocale } from '@/lib/anclora-language-toggle';
 
 type PreferencesContextValue = AppPreferences & {
   preferences: AppPreferences;
   theme: AppTheme;
+  /** Narrowed to es/en/de for dictionary access. Use selectedLanguage for selector display. */
   language: AppLanguage;
+  /** The locale the user actually selected (all 7 Premium locales). */
+  selectedLanguage: ActiveAncloraLocale;
+  /** Narrowed to es/en/de for inline dictionary access. */
+  dictionaryLanguage: AppLanguage;
   currency: AppCurrency;
   measurementSystem: MeasurementSystem;
   dictionary: Dictionary;
   setTheme: (theme: AppTheme) => void;
-  setLanguage: (language: import("@/lib/anclora-language-toggle").ActiveAncloraLocale) => void;
+  setLanguage: (language: ActiveAncloraLocale) => void;
   setCurrency: (currency: AppCurrency) => void;
   setMeasurementSystem: (measurementSystem: MeasurementSystem) => void;
   setPreferences: (preferences: Partial<AppPreferences>) => void;
@@ -70,7 +75,7 @@ function readStoredPreferences(): AppPreferences {
     persistedLocale: localStorage.getItem(PREFERENCE_COOKIE_NAMES.language),
     browserLocales: navigator.languages?.length ? navigator.languages : [navigator.language],
   });
-  const languagePreset = getPreferencesForLanguage((language === "es" || language === "en" || language === "de" ? language : (language === "ca" ? "es" : "en")) as import("@/lib/preferences").AppLanguage);
+  const languagePreset = getPreferencesForLanguage(language);
   return normalizePreferences({
     theme: localStorage.getItem(PREFERENCE_COOKIE_NAMES.theme),
     language,
@@ -81,11 +86,15 @@ function readStoredPreferences(): AppPreferences {
 
 export function AppPreferencesProvider({ children }: { children: React.ReactNode }) {
   const [preferences, setPreferencesState] = useState<AppPreferences>(DEFAULT_PREFERENCES);
+  const [selectedLocale, setSelectedLocale] = useState<ActiveAncloraLocale>(DEFAULT_APP_LOCALE);
   const router = useRouter();
 
   useEffect(() => {
     const stored = readStoredPreferences();
     setPreferencesState(stored);
+    // Restore the full selected locale (may be ca/fr/it/pt) from storage
+    const rawLocale = localStorage.getItem(PREFERENCE_COOKIE_NAMES.language);
+    setSelectedLocale(normalizeSelectedLocale(rawLocale));
     document.documentElement.lang = stored.language;
     applyTheme(stored.theme);
   }, []);
@@ -119,14 +128,21 @@ export function AppPreferencesProvider({ children }: { children: React.ReactNode
     return {
       ...preferences,
       preferences,
-      dictionary: dictionaries[toLegacyLocale(preferences.language)],
+      selectedLanguage: selectedLocale,
+      dictionaryLanguage: preferences.language,
+      dictionary: dictionaries[preferences.language],
       setTheme(nextTheme) {
         updatePreferences({ theme: normalizeTheme(nextTheme) });
       },
-      setLanguage(nextLang: import("@/lib/anclora-language-toggle").ActiveAncloraLocale) {
-        const nextLanguage = (nextLang === "es" || nextLang === "en" || nextLang === "de" ? nextLang : (nextLang === "ca" ? "es" : "en")) as AppLanguage; // eslint-disable-line
-        const language = normalizeLanguage(nextLanguage);
-        updatePreferences({ language, ...getPreferencesForLanguage(language) });
+      setLanguage(nextLang: ActiveAncloraLocale) {
+        // Store the full locale (ca, fr, it, pt) for the selector
+        setSelectedLocale(nextLang);
+        localStorage.setItem(PREFERENCE_COOKIE_NAMES.language, nextLang);
+        persistCookie(PREFERENCE_COOKIE_NAMES.language, nextLang);
+        // Use the dict language (es/en/de) for dictionary and formatters
+        const dictLang = toDictLanguage(nextLang);
+        const presets = getPreferencesForLanguage(nextLang);
+        updatePreferences({ language: dictLang, ...presets });
         router.refresh();
       },
       setCurrency(nextCurrency) {
@@ -157,7 +173,7 @@ export function AppPreferencesProvider({ children }: { children: React.ReactNode
         return convertCurrencyFromEur(valueEur, preferences.currency);
       },
     };
-  }, [preferences, router]);
+  }, [preferences, selectedLocale, router]);
 
   return <PreferencesContext.Provider value={value}>{children}</PreferencesContext.Provider>;
 }

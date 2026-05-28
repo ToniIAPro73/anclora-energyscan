@@ -1,7 +1,8 @@
-import { DEFAULT_APP_LOCALE, normalizeActiveLocale } from './anclora-language-toggle';
+import { ActiveAncloraLocale, normalizeActiveLocale } from './anclora-language-toggle';
 
 export type AppTheme = "dark" | "light" | "system";
 export type ThemeMode = AppTheme;
+/** 3-locale type for dictionary access. The user's full selection is stored separately. */
 export type AppLanguage = "es" | "en" | "de";
 export type AppCurrency = "EUR" | "USD" | "GBP" | "CHF" | "SEK" | "DKK" | "NOK";
 export type MeasurementSystem = "metric" | "imperial";
@@ -15,13 +16,13 @@ export type AppPreferences = {
 
 export const DEFAULT_PREFERENCES: AppPreferences = {
   theme: "dark",
-  language: DEFAULT_APP_LOCALE as AppLanguage,
+  language: "es",
   currency: "EUR",
   measurementSystem: "metric",
 };
 
 export const themeModes: AppTheme[] = ["dark", "light", "system"];
-export const languages: AppLanguage[] = ["es", "en", "de"];
+export const languages: ActiveAncloraLocale[] = ["es", "ca", "en", "de", "fr", "it", "pt"];
 export const currencies: AppCurrency[] = ["EUR", "USD", "GBP", "CHF", "SEK", "DKK", "NOK"];
 export const measurementSystems: MeasurementSystem[] = ["metric", "imperial"];
 
@@ -32,9 +33,15 @@ export const PREFERENCE_COOKIE_NAMES = {
   measurementSystem: "enerscan-measurement-system",
 } as const;
 
-export function getPreferencesForLanguage(language: AppLanguage): Pick<AppPreferences, "currency" | "measurementSystem"> {
+/** Maps a full Premium locale to AppLanguage for dictionary access. */
+export function toDictLanguage(lang: ActiveAncloraLocale): AppLanguage {
+  if (lang === "es" || lang === "en" || lang === "de") return lang;
+  if (lang === "ca") return "es";
+  return "en"; // fr, it, pt → en
+}
+
+export function getPreferencesForLanguage(language: ActiveAncloraLocale): Pick<AppPreferences, "currency" | "measurementSystem"> {
   if (language === "en") return { currency: "GBP", measurementSystem: "imperial" };
-  // ca, fr, it, pt: EUR + metric
   return { currency: "EUR", measurementSystem: "metric" };
 }
 
@@ -42,11 +49,15 @@ export function normalizeTheme(value: unknown): AppTheme {
   return value === "light" || value === "system" ? value : DEFAULT_PREFERENCES.theme;
 }
 
+/** Returns the AppLanguage (es/en/de) for dictionary access. */
 export function normalizeLanguage(value: unknown): AppLanguage {
   const locale = normalizeActiveLocale(value);
-  if (locale === "es" || locale === "en" || locale === "de") return locale;
-  if (locale === "ca") return "es";
-  return "en"; // fr, it, pt → en for dictionary access
+  return toDictLanguage(locale);
+}
+
+/** Returns the full ActiveAncloraLocale including ca/fr/it/pt. */
+export function normalizeSelectedLocale(value: unknown): ActiveAncloraLocale {
+  return normalizeActiveLocale(value);
 }
 
 export function normalizeCurrency(value: unknown): AppCurrency {
