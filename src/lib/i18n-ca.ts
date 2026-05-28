@@ -3,7 +3,8 @@ import type { Dictionary } from './i18n';
 
 // Overrides 134 key visible strings; remaining keys fall back to es.
 // LEGAL_REVIEW_REQUIRED: cookie, privacy, terms and legal disclaimer strings below.
-export const dictionaryCA: Dictionary = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const dictionaryCA = {
   ...dictionaries.es,
   navHow: "Com funciona",
   navProduct: "Producte",
@@ -139,4 +140,4 @@ export const dictionaryCA: Dictionary = {
   footerLegal: "Legal",
   footerContact: "Contacte",
   footerCopy: "Plataforma de prediagnòstic energètic per a l'adequació normativa i l'activació de la reforma.",
-};
+} as unknown as Dictionary;

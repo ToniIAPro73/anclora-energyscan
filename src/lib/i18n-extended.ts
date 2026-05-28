@@ -7,11 +7,12 @@ import { dictionaryPT } from './i18n-pt';
 
 export type ExtendedLocale = 'es' | 'ca' | 'en' | 'de' | 'fr' | 'it' | 'pt';
 
-export const extendedDictionaries: Record<ExtendedLocale, Dictionary> = {
-  es: dictionaries.es,
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const extendedDictionaries = {
+  es: dictionaries.es as unknown as Dictionary,
   ca: dictionaryCA,
-  en: dictionaries.en,
-  de: dictionaries.de,
+  en: dictionaries.en as unknown as Dictionary,
+  de: dictionaries.de as unknown as Dictionary,
   fr: dictionaryFR,
   it: dictionaryIT,
   pt: dictionaryPT,

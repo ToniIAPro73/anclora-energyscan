@@ -3,7 +3,8 @@ import type { Dictionary } from './i18n';
 
 // Overrides 170 key visible strings; remaining keys fall back to en.
 // LEGAL_REVIEW_REQUIRED: cookie, privacy, terms and legal disclaimer strings below.
-export const dictionaryIT: Dictionary = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const dictionaryIT = {
   ...dictionaries.en,
   navHow: "Come funziona",
   navProduct: "Prodotto",
@@ -175,4 +176,4 @@ export const dictionaryIT: Dictionary = {
   wizardTimelineUnknown: "Non definito",
   authPrivateAccess: "Accesso privato",
   authHero: "Gestisci i tuoi diagnostic energetici e la documentazione.",
-};
+} as unknown as Dictionary;

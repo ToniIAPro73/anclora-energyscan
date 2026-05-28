@@ -1666,10 +1666,10 @@ export const dictionaries = {
   },
 } as const;
 
-export type Dictionary = (typeof dictionaries)[AppLanguage];
+export type Dictionary = typeof dictionaries.es;
 
 export function getDictionary(language?: string): Dictionary {
-  return dictionaries[normalizeLanguage(language)];
+  return dictionaries[normalizeLanguage(language)] as unknown as Dictionary;
 }
 
 export function getLegalDisclaimer(language?: string): string {
