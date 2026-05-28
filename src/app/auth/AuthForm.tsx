@@ -3,7 +3,6 @@
 import { useFormState, useFormStatus } from 'react-dom';
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Eye, EyeOff, GitBranch, Mail } from 'lucide-react';
 import { requestPasswordReset, signInWithEmail, signInWithProvider, signUpWithEmail } from './actions';
@@ -43,20 +42,7 @@ export function AuthForm({ googleEnabled, githubEnabled }: AuthFormProps) {
   }, []);
 
   return (
-    <div className="surface border rounded-3xl p-6 shadow-2xl sm:p-8">
-      {/* Logo + divisor + app name — visible on mobile, hidden on lg (shown in intro column) */}
-      <div className="mb-5 flex flex-col items-center lg:hidden">
-        <Image
-          src="/brand/logo-anclora-energy-scan.png"
-          alt="Anclora EnergyScan"
-          width={56}
-          height={56}
-          className="rounded-xl"
-          priority
-        />
-        <div className="my-3 h-px w-14 bg-gradient-to-r from-transparent via-[#00DC82]/60 to-transparent" />
-        <span className="font-heading text-base font-bold text-premium">Anclora EnergyScan</span>
-      </div>
+    <div className="px-6 pb-6 sm:px-8 sm:pb-8">
       <div className="mb-6 grid grid-cols-2 rounded-2xl border border-white/10 bg-white/5 p-1">
         <button
           type="button"
