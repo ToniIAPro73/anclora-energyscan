@@ -32,7 +32,7 @@ describe('preference normalization', () => {
     expect(normalizeLanguage('es')).toBe('es');
     expect(normalizeLanguage('en-US')).toBe('en');
     expect(normalizeLanguage('de-CH')).toBe('de');
-    // fr/it/pt are active Premium locales; normalizeLanguage maps them to 'en' for dictionary access
+    // normalizeLanguage maps to AppLanguage (dict locale): fr/it/pt → en, ca → es
     expect(normalizeLanguage('fr')).toBe('en');
   });
 

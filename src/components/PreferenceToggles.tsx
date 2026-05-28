@@ -221,7 +221,7 @@ const measurementLabels: Record<MeasurementSystem, string> = {
 export function PreferenceToggles({ compact = false, variant = 'inline' }: { compact?: boolean; variant?: 'inline' | 'popover' }) {
   const {
     theme,
-    language,
+    selectedLanguage: language,
     currency,
     measurementSystem,
     setTheme,
