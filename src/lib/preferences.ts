@@ -3,7 +3,7 @@ import { ACTIVE_APP_LOCALES, DEFAULT_APP_LOCALE, normalizeActiveLocale, type Act
 export type AppTheme = "dark" | "light" | "system";
 export type ThemeMode = AppTheme;
 export type AppLanguage = ActiveAncloraLocale;
-export type AppCurrency = "EUR" | "GBP";
+export type AppCurrency = "EUR" | "USD" | "GBP" | "CHF" | "SEK" | "DKK" | "NOK";
 export type MeasurementSystem = "metric" | "imperial";
 
 export type AppPreferences = {
@@ -22,7 +22,7 @@ export const DEFAULT_PREFERENCES: AppPreferences = {
 
 export const themeModes: AppTheme[] = ["dark", "light", "system"];
 export const languages: AppLanguage[] = [...ACTIVE_APP_LOCALES];
-export const currencies: AppCurrency[] = ["EUR", "GBP"];
+export const currencies: AppCurrency[] = ["EUR", "USD", "GBP", "CHF", "SEK", "DKK", "NOK"];
 export const measurementSystems: MeasurementSystem[] = ["metric", "imperial"];
 
 export const PREFERENCE_COOKIE_NAMES = {
@@ -46,7 +46,7 @@ export function normalizeLanguage(value: unknown): AppLanguage {
 }
 
 export function normalizeCurrency(value: unknown): AppCurrency {
-  return value === "GBP" ? "GBP" : DEFAULT_PREFERENCES.currency;
+  return typeof value === "string" && (currencies as string[]).includes(value) ? value as AppCurrency : DEFAULT_PREFERENCES.currency;
 }
 
 export function normalizeMeasurementSystem(value: unknown): MeasurementSystem {

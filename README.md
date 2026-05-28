@@ -283,3 +283,13 @@ EnergyScan no sustituye a Anclora Private Estates como plataforma principal del 
 - [ ] Panel Admin de Proveedores completo
 - [ ] Integración Nexus — sincronización de leads
 - [ ] Data Lab — señales energéticas territoriales
+## Global Preferences Toggle
+
+Esta app sigue el contrato global de preferencias de Anclora Group.
+
+Incluye:
+- idioma
+- moneda, porque muestra precios/importes
+- unidades, porque muestra superficies/medidas
+
+El Theme Toggle se gestiona por separado y solo aparece en grupos Premium, Internal y Portfolio.
