@@ -19,7 +19,8 @@ import {
   toDictLanguage,
 } from '@/lib/preferences';
 import { convertArea, convertCurrencyFromEur, formatArea, formatCurrency, formatNumber } from '@/lib/formatters';
-import { dictionaries, Dictionary } from '@/lib/i18n';
+import { Dictionary } from '@/lib/i18n';
+import { extendedDictionaries } from '@/lib/i18n-extended';
 import { ActiveAncloraLocale, DEFAULT_APP_LOCALE, resolveInitialLocale } from '@/lib/anclora-language-toggle';
 
 type PreferencesContextValue = AppPreferences & {
@@ -130,7 +131,7 @@ export function AppPreferencesProvider({ children }: { children: React.ReactNode
       preferences,
       selectedLanguage: selectedLocale,
       dictionaryLanguage: preferences.language,
-      dictionary: dictionaries[preferences.language],
+      dictionary: extendedDictionaries[selectedLocale] ?? extendedDictionaries.en,
       setTheme(nextTheme) {
         updatePreferences({ theme: normalizeTheme(nextTheme) });
       },
