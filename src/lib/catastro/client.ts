@@ -140,13 +140,19 @@ async function searchNominatimStreets(params: {
     console.log(`[Nominatim] Found ${results.length} results for "${query}" in ${municipality}`);
 
     return results
-      .filter((result) => result.address?.road || result.address?.street)
+      .filter((result) => {
+        // Keep results that have street/road OR a proper name
+        const hasStreetInfo = result.address?.road || result.address?.street;
+        const hasName = result.name && result.name.length > 2;
+        return hasStreetInfo || hasName;
+      })
       .map((result, index) => ({
         id: `nominatim-${index}`,
+        // Prefer structured address fields, fall back to name
         name: result.address?.road || result.address?.street || result.name || query,
         type: 'CL',
         municipality,
-        province: result.address?.state || 'ILLES BALEARS',
+        province: result.address?.state || result.address?.province || 'ILLES BALEARS',
         provinceCode: '7',
         municipalityCode: '40',
         streetCode: `nominatim-${index}`,
