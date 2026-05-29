@@ -47,14 +47,14 @@ export function AuthForm({ googleEnabled, githubEnabled }: AuthFormProps) {
         <button
           type="button"
           onClick={() => setMode('signin')}
-          className={`h-11 rounded-xl text-sm font-bold transition ${mode === 'signin' ? 'bg-[#00DC82] text-[#0A0A0A]' : 'text-muted hover:text-premium'}`}
+          className={`h-10 rounded-xl text-sm font-bold transition ${mode === 'signin' ? 'bg-[#00DC82] text-[#0A0A0A]' : 'text-muted hover:text-premium'}`}
         >
           {t.signIn}
         </button>
         <button
           type="button"
           onClick={() => setMode('signup')}
-          className={`h-11 rounded-xl text-sm font-bold transition ${mode === 'signup' ? 'bg-[#00DC82] text-[#0A0A0A]' : 'text-muted hover:text-premium'}`}
+          className={`h-10 rounded-xl text-sm font-bold transition ${mode === 'signup' ? 'bg-[#00DC82] text-[#0A0A0A]' : 'text-muted hover:text-premium'}`}
         >
           {t.signUp}
         </button>
@@ -66,7 +66,7 @@ export function AuthForm({ googleEnabled, githubEnabled }: AuthFormProps) {
             <h1 className="font-heading text-2xl font-bold text-premium">{t.recoverPassword}</h1>
             <p className="mt-2 text-sm text-muted">{t.recoverCopy}</p>
           </div>
-          <input name="email" type="email" required placeholder={t.authEmailPlaceholder} className="w-full rounded-xl border border-[#262626] bg-[#131313] p-3 text-sm outline-none focus:border-[#00DC82]" />
+          <input name="email" type="email" required placeholder={t.authEmailPlaceholder} className="h-10 w-full rounded-xl border border-[#262626] bg-[#131313] p-3 text-sm outline-none focus:border-[#00DC82]" />
           <SubmitButton label={t.sendLink} pendingLabel={t.sending} />
           {resetState.ok && <p className="text-sm text-[#00DC82]">{t.authResetOk}</p>}
           {resetState.resetUrl && (
@@ -84,7 +84,7 @@ export function AuthForm({ googleEnabled, githubEnabled }: AuthFormProps) {
           </div>
 
           {mode === 'signup' && (
-            <input name="name" type="text" required placeholder={t.authFieldName} className="w-full rounded-xl border border-[#262626] bg-[#131313] p-3 text-sm outline-none focus:border-[#00DC82]" />
+            <input name="name" type="text" required placeholder={t.authFieldName} className="h-10 w-full rounded-xl border border-[#262626] bg-[#131313] p-3 text-sm outline-none focus:border-[#00DC82]" />
           )}
           <input name="email" type="email" required placeholder={t.authFieldEmail} className="w-full rounded-xl border border-[#262626] bg-[#131313] p-3 text-sm outline-none focus:border-[#00DC82]" />
           <div className="relative">
@@ -94,7 +94,7 @@ export function AuthForm({ googleEnabled, githubEnabled }: AuthFormProps) {
               required
               minLength={8}
               placeholder={t.authFieldPassword}
-              className="w-full rounded-xl border border-[#262626] bg-[#131313] p-3 pr-10 text-sm outline-none focus:border-[#00DC82]"
+              className="h-10 w-full rounded-xl border border-[#262626] bg-[#131313] p-3 pr-10 text-sm outline-none focus:border-[#00DC82]"
             />
             <button
               type="button"
@@ -145,7 +145,7 @@ export function AuthForm({ googleEnabled, githubEnabled }: AuthFormProps) {
 function SubmitButton({ label, pendingLabel }: { label: string; pendingLabel: string }) {
   const { pending } = useFormStatus();
   return (
-    <button disabled={pending} className="h-12 w-full rounded-full bg-[#00DC82] font-heading font-bold text-[#0A0A0A] disabled:cursor-not-allowed disabled:opacity-50">
+    <button disabled={pending} className="h-10 w-full rounded-full bg-[#00DC82] font-heading font-bold text-[#0A0A0A] disabled:cursor-not-allowed disabled:opacity-50">
       {pending ? pendingLabel : label}
     </button>
   );
@@ -155,7 +155,7 @@ function SocialButton({ provider, label, icon, enabled }: { provider: string; la
   return (
     <form action={signInWithProvider}>
       <input type="hidden" name="provider" value={provider} />
-      <button disabled={!enabled} className="flex h-12 w-full items-center justify-center gap-2 rounded-full border border-white/10 text-sm font-bold text-premium hover:border-[#00DC82]/40 disabled:cursor-not-allowed disabled:opacity-50">
+      <button disabled={!enabled} className="flex h-9 w-full items-center justify-center gap-2 rounded-full border border-white/10 text-sm font-bold text-premium hover:border-[#00DC82]/40 disabled:cursor-not-allowed disabled:opacity-50">
         {icon}
         {label}
       </button>
