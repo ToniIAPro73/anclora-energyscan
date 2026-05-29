@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { renderToStream } from '@react-pdf/renderer';
 import { BudgetReviewReport } from '@/lib/pdf/BudgetReviewReport';
-import { normalizeLanguage } from '@/lib/preferences';
+import { normalizeLanguage, normalizeSelectedLocale, toPdfLanguage } from '@/lib/preferences';
 import { getMonetizationCopy } from '@/lib/monetization/i18n';
 import type { BudgetLineItem } from '@/lib/ingestion/types';
 import type { KbPriceRef } from '@/lib/budget-review/advanced-analysis';
@@ -19,10 +19,12 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   }
 
   const cookieHeader = req.headers.get('cookie') || '';
-  const cookieLang = cookieHeader.match(/enerscan-language=(es|en|de)/)?.[1];
+  const cookieLang = cookieHeader.match(/enerscan-language=(es|ca|en|de|fr|it|pt)/)?.[1];
   const url = new URL(req.url);
-  const language = normalizeLanguage(url.searchParams.get('lang') || cookieLang);
-  const locale = language === 'en' ? 'en-GB' : language === 'de' ? 'de-DE' : 'es-ES';
+  const pdfLanguage = toPdfLanguage(normalizeSelectedLocale(url.searchParams.get('lang') || cookieLang));
+  const language = normalizeLanguage(pdfLanguage);
+  const localeMap: Record<string, string> = { es: 'es-ES', ca: 'es-ES', en: 'en-GB', de: 'de-DE', fr: 'fr-FR', it: 'it-IT', pt: 'pt-PT' };
+  const locale = localeMap[pdfLanguage] ?? 'es-ES';
 
   const lineItems = Array.isArray(review.lineItemsJson) ? review.lineItemsJson as BudgetLineItem[] : [];
   const summaryJson = review.summaryJson as { totalAmount?: number; confidence?: number } | null;
@@ -36,7 +38,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     currency: review.currency || 'EUR',
     extractionConfidence: review.extractionConfidence ?? undefined,
     lineItems,
-    language,
+    language: pdfLanguage,
     kbPriceRefs: findingsJson?.kbPriceRefs,
   };
 
