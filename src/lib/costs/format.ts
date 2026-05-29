@@ -1,11 +1,11 @@
-import type { AppCurrency, AppLanguage, MeasurementSystem } from '../preferences';
+import type { AppCurrency, AppLanguage, MeasurementSystem, PdfLanguage } from '../preferences';
 import { formatCostRange, formatCurrency, formatNumber, SQFT_PER_M2 } from '../formatters';
 
 export function formatEuroRange(
   min: number,
   max: number,
   mid?: number,
-  options: { currency?: AppCurrency; language?: AppLanguage } = {}
+  options: { currency?: AppCurrency; language?: AppLanguage | PdfLanguage } = {}
 ) {
   return formatCostRange(min, max, options.currency || 'EUR', options.language || 'es', mid);
 }
@@ -13,7 +13,7 @@ export function formatEuroRange(
 export function formatUnitPrice(
   value: number,
   unit: string,
-  options: { currency?: AppCurrency; language?: AppLanguage; measurementSystem?: MeasurementSystem } = {}
+  options: { currency?: AppCurrency; language?: AppLanguage | PdfLanguage; measurementSystem?: MeasurementSystem } = {}
 ) {
   const language = options.language || 'es';
   const measurementSystem = options.measurementSystem || 'metric';
@@ -26,7 +26,7 @@ export function formatUnitPrice(
 export function formatCostQuantity(
   quantity: number,
   unit: string,
-  options: { language?: AppLanguage; measurementSystem?: MeasurementSystem } = {}
+  options: { language?: AppLanguage | PdfLanguage; measurementSystem?: MeasurementSystem } = {}
 ) {
   const language = options.language || 'es';
   const measurementSystem = options.measurementSystem || 'metric';

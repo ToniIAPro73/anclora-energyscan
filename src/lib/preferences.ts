@@ -4,6 +4,8 @@ export type AppTheme = "dark" | "light" | "system";
 export type ThemeMode = AppTheme;
 /** 3-locale type for dictionary access. The user's full selection is stored separately. */
 export type AppLanguage = "es" | "en" | "de";
+/** 7-locale type used by the PDF and document layer — covers all active app locales. */
+export type PdfLanguage = "es" | "ca" | "en" | "de" | "fr" | "it" | "pt";
 export type AppCurrency = "EUR" | "USD" | "GBP" | "CHF" | "SEK" | "DKK" | "NOK";
 export type MeasurementSystem = "metric" | "imperial";
 
@@ -38,6 +40,12 @@ export function toDictLanguage(lang: ActiveAncloraLocale): AppLanguage {
   if (lang === "es" || lang === "en" || lang === "de") return lang;
   if (lang === "ca") return "es";
   return "en"; // fr, it, pt → en
+}
+
+/** Maps any locale to PdfLanguage (all 7 supported). */
+export function toPdfLanguage(lang: unknown): PdfLanguage {
+  const valid: PdfLanguage[] = ["es", "ca", "en", "de", "fr", "it", "pt"];
+  return valid.includes(lang as PdfLanguage) ? (lang as PdfLanguage) : "es";
 }
 
 export function getPreferencesForLanguage(language: ActiveAncloraLocale): Pick<AppPreferences, "currency" | "measurementSystem"> {

@@ -8,7 +8,7 @@ import { getRelevantSubsidies } from '@/lib/subsidies';
 import { renderToStream } from '@react-pdf/renderer';
 import { EnerScanReport } from '@/lib/pdf/EnerScanReport';
 import { AssessmentAttachment, PremiumReportData, PropertyDataV2, ScoreResultV2, EnergyLetter, PropertyType, HeatingSystem, CoolingSystem, WaterHeatingSystem, WindowType, RenewableSystem, InsulationLevel, BudgetRange, AssessmentObjective, ConfidenceLevel, PropertyOrientation, RoofType, VentilationType, TimelineHorizon } from '@/lib/domain/energy-assessment';
-import { getPreferencesForLanguage, normalizeCurrency, normalizeLanguage, normalizeMeasurementSystem } from '@/lib/preferences';
+import { getPreferencesForLanguage, normalizeCurrency, normalizeLanguage, normalizeMeasurementSystem, normalizeSelectedLocale, toPdfLanguage } from '@/lib/preferences';
 import { createReportDataFromPayload, getPublicAssessmentRef, parseStatelessAssessmentId } from '@/lib/stateless-assessment';
 import { isBlobAttachmentPath, readAttachmentBytes } from '@/lib/blob-storage';
 import React from 'react';
@@ -147,11 +147,19 @@ function buildReportFilename(reportData: PremiumReportData, reportRef: string) {
     const timestamp = formatDownloadTimestamp();
     if (reportData.language === 'en') return `energyscan-report-demo-en-${demoRef}-${timestamp}.pdf`;
     if (reportData.language === 'de') return `energyscan-bericht-demo-de-${demoRef}-${timestamp}.pdf`;
+    if (reportData.language === 'ca') return `energyscan-informe-demo-ca-${demoRef}-${timestamp}.pdf`;
+    if (reportData.language === 'fr') return `energyscan-rapport-demo-fr-${demoRef}-${timestamp}.pdf`;
+    if (reportData.language === 'it') return `energyscan-rapporto-demo-it-${demoRef}-${timestamp}.pdf`;
+    if (reportData.language === 'pt') return `energyscan-relatorio-demo-pt-${demoRef}-${timestamp}.pdf`;
     return `energyscan-informe-demo-es-${demoRef}-${timestamp}.pdf`;
   }
 
   if (reportData.language === 'en') return `energyscan-report-${reportRef}.pdf`;
   if (reportData.language === 'de') return `energyscan-bericht-${reportRef}.pdf`;
+  if (reportData.language === 'ca') return `energyscan-informe-ca-${reportRef}.pdf`;
+  if (reportData.language === 'fr') return `energyscan-rapport-fr-${reportRef}.pdf`;
+  if (reportData.language === 'it') return `energyscan-rapporto-it-${reportRef}.pdf`;
+  if (reportData.language === 'pt') return `energyscan-relatorio-pt-${reportRef}.pdf`;
   return `energyscan-informe-${reportRef}.pdf`;
 }
 
@@ -177,11 +185,12 @@ export async function buildAssessmentPdfResponse(
 ) {
   try {
     const cookieHeader = req.headers.get('cookie') || '';
-    const cookieLanguage = cookieHeader.match(/enerscan-language=(es|en|de)/)?.[1];
+    const cookieLanguage = cookieHeader.match(/enerscan-language=(es|ca|en|de|fr|it|pt)/)?.[1];
     const cookieCurrency = cookieHeader.match(/enerscan-currency=(EUR|GBP)/)?.[1];
     const cookieUnits = cookieHeader.match(/enerscan-measurement-system=(metric|imperial)/)?.[1];
     const url = new URL(req.url);
-    const language = normalizeLanguage(url.searchParams.get('lang') || cookieLanguage);
+    const pdfLanguage = toPdfLanguage(normalizeSelectedLocale(url.searchParams.get('lang') || cookieLanguage));
+    const language = normalizeLanguage(pdfLanguage);
     const languageDefaults = getPreferencesForLanguage(language);
     const currency = normalizeCurrency(url.searchParams.get('currency') || cookieCurrency || languageDefaults.currency);
     const measurementSystem = normalizeMeasurementSystem(url.searchParams.get('units') || cookieUnits || languageDefaults.measurementSystem);
@@ -298,7 +307,7 @@ export async function buildAssessmentPdfResponse(
 
       reportData = {
         id: assessment.id,
-        date: new Date(assessment.createdAt).toLocaleDateString(language === 'es' ? 'es-ES' : language === 'de' ? 'de-DE' : 'en-US'),
+        date: new Date(assessment.createdAt).toLocaleDateString(pdfLanguage === 'es' || pdfLanguage === 'ca' ? 'es-ES' : pdfLanguage === 'de' ? 'de-DE' : pdfLanguage === 'fr' ? 'fr-FR' : pdfLanguage === 'it' ? 'it-IT' : pdfLanguage === 'pt' ? 'pt-PT' : 'en-GB'),
         propertyData,
         scoreResult,
         scenarios,
@@ -358,7 +367,7 @@ export async function buildAssessmentPdfResponse(
           source: assessment.cadastralRecord.sourceSystem,
           confidence: assessment.cadastralRecord.confidence || 1,
         } : undefined,
-        language,
+        language: pdfLanguage,
         currency,
         measurementSystem,
         isDemo: assessment.isDemo,
@@ -433,7 +442,7 @@ export async function buildAssessmentPdfResponse(
 
             const curated = curateVisionFindingsForReport({
               assessmentId: reportData.id,
-              locale: (reportData.language ?? 'es') as 'es' | 'en' | 'de',
+              locale: reportData.language ?? 'es',
               entitlementLevel: visionEntitlement.level,
               imageAnalyses: analysisInputs,
             });
