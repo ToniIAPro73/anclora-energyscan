@@ -190,8 +190,14 @@ const streetCache = new Map<string, CatastroStreetSuggestion[]>();
 
 function normalizeStreetQuery(query: string) {
   return query
+    // Remove Catalan/Spanish prefixes (Carrer, Calle, Carrer de, Calle de, etc.)
+    .replace(/^(carrer\s+(de|d[''`]?)?|calle\s+(de|d[''`]?)?|avenida\s+(de|d[''`]?)?|avinguda\s+(de|d[''`]?)?)/i, '')
+    // Remove accents and diacritics (\u00e9 \u2192 e, \u00f1 \u2192 n, etc.)
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
+    // Remove apostrophes and special characters (d'Enric \u2192 dEnric \u2192 d Enric after space normalization)
+    .replace(/[''`]/g, ' ')
+    // Trim and normalize whitespace
     .trim()
     .replace(/\s+/g, ' ')
     .toUpperCase();
