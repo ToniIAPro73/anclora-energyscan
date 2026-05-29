@@ -1,4 +1,4 @@
-import { AppLanguage, normalizeLanguage } from "./preferences";
+import { AppLanguage, normalizeLanguage, normalizeSelectedLocale } from "./preferences";
 
 export const legalDisclaimer = {
   es: "Anclora EnergyScan es un prediagnóstico orientativo. No sustituye al Certificado de Eficiencia Energética oficial ni a la inspección de un técnico competente. Ahorros, costes y clasificaciones son estimaciones.",
@@ -1687,6 +1687,9 @@ export const dictionaries = {
 export type Dictionary = typeof dictionaries.es;
 
 export function getDictionary(language?: string): Dictionary {
+  const locale = normalizeSelectedLocale(language);
+  const dict = (dictionaries as Record<string, unknown>)[locale];
+  if (dict) return dict as unknown as Dictionary;
   return dictionaries[normalizeLanguage(language)] as unknown as Dictionary;
 }
 

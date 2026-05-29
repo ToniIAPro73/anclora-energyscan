@@ -151,6 +151,91 @@ export const demoAttachments: DemoAttachment[] = [
   },
 ];
 
+const demoCaptionsByLocale: Record<string, Record<string, string>> = {
+  ca: {
+    'demo-cee': 'Certificat energètic demo aportat per l\'usuari',
+    'demo-exterior-01-fachada': 'Façana principal',
+    'demo-exterior-02-lateral': 'Vista exterior lateral',
+    'demo-interior-07-distribuidor': 'Distribuïdor de planta superior',
+    'demo-interior-06-bano-suite': 'Bany principal / bany en suite',
+    'demo-interior-05-dormitorio': 'Dormitori principal',
+    'demo-interior-04-acceso-escalera': 'Accés i escala interior',
+    'demo-interior-02-cocina': 'Cuina',
+    'demo-interior-01-salon': 'Saló principal',
+    'demo-exterior-03-piscina': 'Vista exterior posterior amb piscina',
+  },
+  en: {
+    'demo-cee': 'Demo energy certificate provided by user',
+    'demo-exterior-01-fachada': 'Main facade',
+    'demo-exterior-02-lateral': 'Lateral exterior view',
+    'demo-interior-07-distribuidor': 'Upper floor hallway',
+    'demo-interior-06-bano-suite': 'Master bathroom / en-suite',
+    'demo-interior-05-dormitorio': 'Master bedroom',
+    'demo-interior-04-acceso-escalera': 'Interior access and staircase',
+    'demo-interior-02-cocina': 'Kitchen',
+    'demo-interior-01-salon': 'Main living room',
+    'demo-exterior-03-piscina': 'Rear exterior view with pool',
+  },
+  de: {
+    'demo-cee': 'Demo-Energieausweis vom Nutzer bereitgestellt',
+    'demo-exterior-01-fachada': 'Hauptfassade',
+    'demo-exterior-02-lateral': 'Seitliche Außenansicht',
+    'demo-interior-07-distribuidor': 'Flur im Obergeschoss',
+    'demo-interior-06-bano-suite': 'Hauptbad / En-Suite-Bad',
+    'demo-interior-05-dormitorio': 'Hauptschlafzimmer',
+    'demo-interior-04-acceso-escalera': 'Eingang und Innentreppe',
+    'demo-interior-02-cocina': 'Küche',
+    'demo-interior-01-salon': 'Hauptwohnraum',
+    'demo-exterior-03-piscina': 'Rückwärtige Außenansicht mit Pool',
+  },
+  fr: {
+    'demo-cee': 'Certificat énergétique démo fourni par l\'utilisateur',
+    'demo-exterior-01-fachada': 'Façade principale',
+    'demo-exterior-02-lateral': 'Vue extérieure latérale',
+    'demo-interior-07-distribuidor': 'Couloir de l\'étage supérieur',
+    'demo-interior-06-bano-suite': 'Salle de bain principale / en suite',
+    'demo-interior-05-dormitorio': 'Chambre principale',
+    'demo-interior-04-acceso-escalera': 'Accès et escalier intérieur',
+    'demo-interior-02-cocina': 'Cuisine',
+    'demo-interior-01-salon': 'Salon principal',
+    'demo-exterior-03-piscina': 'Vue extérieure arrière avec piscine',
+  },
+  it: {
+    'demo-cee': 'Attestato di prestazione energetica demo fornito dall\'utente',
+    'demo-exterior-01-fachada': 'Facciata principale',
+    'demo-exterior-02-lateral': 'Vista esterna laterale',
+    'demo-interior-07-distribuidor': 'Corridoio piano superiore',
+    'demo-interior-06-bano-suite': 'Bagno principale / en suite',
+    'demo-interior-05-dormitorio': 'Camera da letto principale',
+    'demo-interior-04-acceso-escalera': 'Accesso e scala interna',
+    'demo-interior-02-cocina': 'Cucina',
+    'demo-interior-01-salon': 'Soggiorno principale',
+    'demo-exterior-03-piscina': 'Vista esterna posteriore con piscina',
+  },
+  pt: {
+    'demo-cee': 'Certificado de desempenho energético demo fornecido pelo utilizador',
+    'demo-exterior-01-fachada': 'Fachada principal',
+    'demo-exterior-02-lateral': 'Vista exterior lateral',
+    'demo-interior-07-distribuidor': 'Hall do piso superior',
+    'demo-interior-06-bano-suite': 'Casa de banho principal / en suite',
+    'demo-interior-05-dormitorio': 'Quarto principal',
+    'demo-interior-04-acceso-escalera': 'Acesso e escada interior',
+    'demo-interior-02-cocina': 'Cozinha',
+    'demo-interior-01-salon': 'Sala de estar principal',
+    'demo-exterior-03-piscina': 'Vista exterior traseira com piscina',
+  },
+};
+
+export function getLocalizedDemoAttachments(locale?: string): DemoAttachment[] {
+  const lang = locale && demoCaptionsByLocale[locale] ? locale : null;
+  if (!lang) return demoAttachments;
+  const captions = demoCaptionsByLocale[lang];
+  return demoAttachments.map((a) => ({
+    ...a,
+    caption: captions[a.id] ?? a.caption,
+  }));
+}
+
 export function getDemoAttachmentById(id: string): DemoAttachment | undefined {
   return demoAttachments.find((attachment) => attachment.id === id);
 }
@@ -165,10 +250,10 @@ export function getDemoAssetPathByFileName(fileName: string): string {
   return path.join(process.cwd(), "public", DEMO_ASSET_BASE, fileName);
 }
 
-export function getDemoAssessmentPayload() {
+export function getDemoAssessmentPayload(locale?: string) {
   return {
     propertyData: demoProperty,
-    attachments: demoAttachments,
+    attachments: locale ? getLocalizedDemoAttachments(locale) : demoAttachments,
     isDemo: true,
     publicRef: demoPublicRef,
   };
