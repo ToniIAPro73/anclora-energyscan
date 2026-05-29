@@ -120,8 +120,13 @@ async function searchNominatimStreets(params: {
     const searchQuery = `${query}, ${municipality}, Spain`;
 
     const response = await fetch(
-      `${NOMINATIM_URL}?q=${encodeURIComponent(searchQuery)}&format=json&type=street&limit=10`,
-      { signal: AbortSignal.timeout(5000) }
+      `${NOMINATIM_URL}?q=${encodeURIComponent(searchQuery)}&format=json&type=street&limit=10&email=noreply@anclora.app`,
+      {
+        signal: AbortSignal.timeout(5000),
+        headers: {
+          'User-Agent': 'AncloraEnergyScan/1.0 (+https://anclora.app)',
+        },
+      }
     );
 
     if (!response.ok) {
@@ -207,6 +212,8 @@ export async function getStreets(params: {
     TipoVia: '',
     NombreVia: normalizedQuery,
   });
+
+  console.log(`[Catastro] URL: ${url}`);
   let streets: CatastroStreetSuggestion[] = [];
 
   try {
