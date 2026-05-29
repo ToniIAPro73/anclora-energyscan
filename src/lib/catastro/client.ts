@@ -6,6 +6,7 @@ import { getFallbackStreets } from '@/lib/location/open-address';
 const CALLEJERO_REST_URL = 'https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero/COVCCallejero.svc/rest';
 const CALLEJERO_CODIGOS_REST_URL = 'https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero/COVCCallejeroCodigos.svc/rest';
 const COORDENADAS_REST_URL = 'https://ovc.catastro.meh.es/ovcservweb/OVCSWLocalizacionRC/OVCCoordenadas.asmx';
+const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
 const CATASTRO_FETCH_TIMEOUT_MS = 10_000;
 const CATASTRO_FETCH_ATTEMPTS = 3;
 
@@ -110,6 +111,53 @@ function getCatastroFallbackReason(error: unknown) {
   return error instanceof Error ? error.message : String(error);
 }
 
+async function searchNominatimStreets(params: {
+  municipality: string;
+  query: string;
+}): Promise<CatastroStreetSuggestion[]> {
+  try {
+    const { municipality, query } = params;
+    const searchQuery = `${query}, ${municipality}, Spain`;
+
+    const response = await fetch(
+      `${NOMINATIM_URL}?q=${encodeURIComponent(searchQuery)}&format=json&type=street&limit=10&email=noreply@anclora.app`,
+      {
+        signal: AbortSignal.timeout(5000),
+        headers: {
+          'User-Agent': 'AncloraEnergyScan/1.0 (+https://anclora.app)',
+        },
+      }
+    );
+
+    if (!response.ok) {
+      console.warn(`[Nominatim] Failed with status ${response.status}`);
+      return [];
+    }
+
+    const results = await response.json();
+    if (!Array.isArray(results)) return [];
+
+    console.log(`[Nominatim] Found ${results.length} results for "${query}" in ${municipality}`);
+
+    return results
+      .filter((result) => result.address?.road || result.address?.street)
+      .map((result, index) => ({
+        id: `nominatim-${index}`,
+        name: result.address?.road || result.address?.street || result.name || query,
+        type: 'CL',
+        municipality,
+        province: result.address?.state || 'ILLES BALEARS',
+        provinceCode: '7',
+        municipalityCode: '40',
+        streetCode: `nominatim-${index}`,
+      }))
+      .slice(0, 5);
+  } catch (error) {
+    console.warn('[Nominatim] Search failed:', error instanceof Error ? error.message : String(error));
+    return [];
+  }
+}
+
 export type CatastroStreetSuggestion = {
   id: string;
   name: string;
@@ -164,13 +212,22 @@ export async function getStreets(params: {
     TipoVia: '',
     NombreVia: normalizedQuery,
   });
+
+  console.log(`[Catastro] URL: ${url}`);
   let streets: CatastroStreetSuggestion[] = [];
+
   try {
     const xml = await fetchCatastroXml(url, 'Failed to fetch streets');
-    
+
     // Extract street data using a more specific regex since they are inside <calle>
     const streetBlocks = xml.match(/<calle>[\s\S]*?<\/calle>/gi) || [];
-    
+
+    console.log(`[Catastro] Searching for "${normalizedQuery}" in ${municipality}, ${province}:`, {
+      urlCalled: url,
+      xmlLength: xml.length,
+      streetBlocksFound: streetBlocks.length,
+    });
+
     streets = streetBlocks.map(block => ({
       id: extractTagValue(block, 'cv'),
       name: extractTagValue(block, 'nv'),
@@ -181,14 +238,39 @@ export async function getStreets(params: {
       municipalityCode: extractTagValue(block, 'cm'),
       streetCode: extractTagValue(block, 'cv'),
     }));
-  } catch (error) {
-    console.warn('Using fallback streets after Catastro street lookup failed:', getCatastroFallbackReason(error));
-    streets = getFallbackStreets({ province, municipality, query: normalizedQuery });
-    if (streets.length === 0) throw error;
-  }
 
-  if (streets.length === 0) {
+    console.log(`[Catastro] Extracted ${streets.length} streets`);
+
+    // If Catastro returns no results, try curated fallback
+    if (streets.length === 0) {
+      console.log(`[Fallback] Catastro returned 0, trying curated list for: ${normalizedQuery}`);
+      streets = getFallbackStreets({ province, municipality, query: normalizedQuery });
+      console.log(`[Fallback] Curated list: ${streets.length} found`);
+
+      // If curated fallback also empty, try Nominatim
+      if (streets.length === 0) {
+        console.log(`[Nominatim] Trying OpenStreetMap for: ${normalizedQuery}`);
+        streets = await searchNominatimStreets({ municipality, query: normalizedQuery });
+        console.log(`[Nominatim] Found ${streets.length} streets`);
+      }
+    }
+  } catch (error) {
+    console.warn('[Catastro] API failed:', getCatastroFallbackReason(error));
+
+    // Try curated fallback
     streets = getFallbackStreets({ province, municipality, query: normalizedQuery });
+    console.log(`[Fallback] After error, curated: ${streets.length} found`);
+
+    // If curated fallback empty, try Nominatim
+    if (streets.length === 0) {
+      console.log(`[Nominatim] Trying after API error for: ${normalizedQuery}`);
+      streets = await searchNominatimStreets({ municipality, query: normalizedQuery });
+      console.log(`[Nominatim] Found ${streets.length} streets`);
+    }
+
+    if (streets.length === 0) {
+      console.warn('[Search] All methods failed:', { province, municipality, query: normalizedQuery });
+    }
   }
 
   streetCache.set(cacheKey, streets);

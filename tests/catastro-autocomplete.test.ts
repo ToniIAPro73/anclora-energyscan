@@ -57,17 +57,20 @@ describe('Catastro Street Autocomplete', () => {
     expect(requestedUrl).toContain('NombreVia=MIQUEL');
   });
 
-  it('should handle fetch errors', async () => {
+  it('should handle fetch errors gracefully by returning empty array', async () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: false,
       status: 500
     });
 
-    await expect(getStreets({
+    const result = await getStreets({
       province: 'TEST',
       municipality: 'TEST',
       query: 'TEST'
-    })).rejects.toThrow('Failed to fetch streets');
+    });
+
+    // Should return empty array instead of throwing when all methods fail
+    expect(result).toEqual([]);
   });
 
   it('should return fallback street suggestions when Catastro rejects a known street lookup', async () => {
