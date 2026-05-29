@@ -139,12 +139,11 @@ export function CadastreSearch({ onConfirm, onLocationChange, onMatchSelect, onA
       return;
     }
 
-    const prefix = normalizedQuery.slice(0, 3);
-    const cacheKey = `${selectedProvince}|${selectedMunicipality}|${prefix}`;
+    const cacheKey = `${selectedProvince}|${selectedMunicipality}|${normalizedQuery}`;
     const cachedSuggestions = streetSuggestionCache[cacheKey];
 
     if (cachedSuggestions) {
-      setStreetSuggestions(cachedSuggestions.filter((street) => normalizeStreetText(street.name).includes(normalizedQuery)));
+      setStreetSuggestions(cachedSuggestions);
       setStreetError(null);
       setShowSuggestions(true);
       return;
@@ -154,11 +153,11 @@ export function CadastreSearch({ onConfirm, onLocationChange, onMatchSelect, onA
       setStreetLoading(true);
       setStreetError(null);
       try {
-        const res = await fetch(`/api/catastro/streets?province=${encodeURIComponent(selectedProvince)}&municipality=${encodeURIComponent(selectedMunicipality)}&query=${encodeURIComponent(prefix)}`);
+        const res = await fetch(`/api/catastro/streets?province=${encodeURIComponent(selectedProvince)}&municipality=${encodeURIComponent(selectedMunicipality)}&query=${encodeURIComponent(normalizedQuery)}`);
         if (res.ok) {
           const data: CatastroStreetSuggestion[] = await res.json();
           setStreetSuggestionCache((current) => ({ ...current, [cacheKey]: data }));
-          setStreetSuggestions(data.filter((street) => normalizeStreetText(street.name).includes(normalizedQuery)));
+          setStreetSuggestions(data);
           setShowSuggestions(true);
         } else {
           const data = await res.json().catch(() => null);
