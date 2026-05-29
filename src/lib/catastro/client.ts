@@ -1,12 +1,10 @@
 import type { CadastralMatch, Province, Municipality } from './types';
 import { extractTagsValues, parseCadastralList, extractTagValue, parseCoordinateList } from './normalize';
 import { getFallbackMunicipalities, getFallbackProvinces } from '@/lib/location/spanish-admin';
-import { getFallbackStreets } from '@/lib/location/open-address';
 
 const CALLEJERO_REST_URL = 'https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero/COVCCallejero.svc/rest';
 const CALLEJERO_CODIGOS_REST_URL = 'https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero/COVCCallejeroCodigos.svc/rest';
 const COORDENADAS_REST_URL = 'https://ovc.catastro.meh.es/ovcservweb/OVCSWLocalizacionRC/OVCCoordenadas.asmx';
-const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
 const CATASTRO_FETCH_TIMEOUT_MS = 10_000;
 const CATASTRO_FETCH_ATTEMPTS = 3;
 
@@ -111,52 +109,6 @@ function getCatastroFallbackReason(error: unknown) {
   return error instanceof Error ? error.message : String(error);
 }
 
-async function searchNominatimStreets(params: {
-  municipality: string;
-  query: string;
-}): Promise<CatastroStreetSuggestion[]> {
-  try {
-    const { municipality, query } = params;
-    const searchQuery = `${query}, ${municipality}, Spain`;
-
-    const response = await fetch(
-      `${NOMINATIM_URL}?q=${encodeURIComponent(searchQuery)}&format=json&type=street&limit=10&email=noreply@anclora.app`,
-      {
-        signal: AbortSignal.timeout(5000),
-        headers: {
-          'User-Agent': 'AncloraEnergyScan/1.0 (+https://anclora.app)',
-        },
-      }
-    );
-
-    if (!response.ok) {
-      console.warn(`[Nominatim] Failed with status ${response.status}`);
-      return [];
-    }
-
-    const results = await response.json();
-    if (!Array.isArray(results)) return [];
-
-    console.log(`[Nominatim] Found ${results.length} results for "${query}" in ${municipality}`);
-
-    return results
-      .filter((result) => result.address?.road || result.address?.street)
-      .map((result, index) => ({
-        id: `nominatim-${index}`,
-        name: result.address?.road || result.address?.street || result.name || query,
-        type: 'CL',
-        municipality,
-        province: result.address?.state || 'ILLES BALEARS',
-        provinceCode: '7',
-        municipalityCode: '40',
-        streetCode: `nominatim-${index}`,
-      }))
-      .slice(0, 5);
-  } catch (error) {
-    console.warn('[Nominatim] Search failed:', error instanceof Error ? error.message : String(error));
-    return [];
-  }
-}
 
 export type CatastroStreetSuggestion = {
   id: string;
@@ -184,8 +136,14 @@ const streetCache = new Map<string, CatastroStreetSuggestion[]>();
 
 function normalizeStreetQuery(query: string) {
   return query
+    // Remove Catalan/Spanish prefixes (Carrer, Calle, Carrer de, Calle de, etc.)
+    .replace(/^(carrer\s+(de|d[''`]?)?|calle\s+(de|d[''`]?)?|avenida\s+(de|d[''`]?)?|avinguda\s+(de|d[''`]?)?)/i, '')
+    // Remove accents and diacritics (\u00e9 \u2192 e, \u00f1 \u2192 n, etc.)
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
+    // Remove apostrophes and special characters (d'Enric \u2192 dEnric \u2192 d Enric after space normalization)
+    .replace(/[''`]/g, ' ')
+    // Trim and normalize whitespace
     .trim()
     .replace(/\s+/g, ' ')
     .toUpperCase();
@@ -206,29 +164,20 @@ export async function getStreets(params: {
   const cached = streetCache.get(cacheKey);
   if (cached) return cached;
 
-  const url = buildUrl(CALLEJERO_REST_URL, 'ConsultaVia', {
+  // ObtenerCallejero is the correct endpoint for street search (ConsultaVia returns 404)
+  // TipoVia empty = search all street types (CL, AV, PG, etc.)
+  const url = buildUrl(CALLEJERO_REST_URL, 'ObtenerCallejero', {
     Provincia: province,
     Municipio: municipality,
     TipoVia: '',
-    NombreVia: normalizedQuery,
+    NomVia: normalizedQuery,
   });
-
-  console.log(`[Catastro] URL: ${url}`);
-  let streets: CatastroStreetSuggestion[] = [];
 
   try {
     const xml = await fetchCatastroXml(url, 'Failed to fetch streets');
-
-    // Extract street data using a more specific regex since they are inside <calle>
     const streetBlocks = xml.match(/<calle>[\s\S]*?<\/calle>/gi) || [];
 
-    console.log(`[Catastro] Searching for "${normalizedQuery}" in ${municipality}, ${province}:`, {
-      urlCalled: url,
-      xmlLength: xml.length,
-      streetBlocksFound: streetBlocks.length,
-    });
-
-    streets = streetBlocks.map(block => ({
+    const streets: CatastroStreetSuggestion[] = streetBlocks.map(block => ({
       id: extractTagValue(block, 'cv'),
       name: extractTagValue(block, 'nv'),
       type: extractTagValue(block, 'tv'),
@@ -239,42 +188,11 @@ export async function getStreets(params: {
       streetCode: extractTagValue(block, 'cv'),
     }));
 
-    console.log(`[Catastro] Extracted ${streets.length} streets`);
-
-    // If Catastro returns no results, try curated fallback
-    if (streets.length === 0) {
-      console.log(`[Fallback] Catastro returned 0, trying curated list for: ${normalizedQuery}`);
-      streets = getFallbackStreets({ province, municipality, query: normalizedQuery });
-      console.log(`[Fallback] Curated list: ${streets.length} found`);
-
-      // If curated fallback also empty, try Nominatim
-      if (streets.length === 0) {
-        console.log(`[Nominatim] Trying OpenStreetMap for: ${normalizedQuery}`);
-        streets = await searchNominatimStreets({ municipality, query: normalizedQuery });
-        console.log(`[Nominatim] Found ${streets.length} streets`);
-      }
-    }
+    streetCache.set(cacheKey, streets);
+    return streets;
   } catch (error) {
-    console.warn('[Catastro] API failed:', getCatastroFallbackReason(error));
-
-    // Try curated fallback
-    streets = getFallbackStreets({ province, municipality, query: normalizedQuery });
-    console.log(`[Fallback] After error, curated: ${streets.length} found`);
-
-    // If curated fallback empty, try Nominatim
-    if (streets.length === 0) {
-      console.log(`[Nominatim] Trying after API error for: ${normalizedQuery}`);
-      streets = await searchNominatimStreets({ municipality, query: normalizedQuery });
-      console.log(`[Nominatim] Found ${streets.length} streets`);
-    }
-
-    if (streets.length === 0) {
-      console.warn('[Search] All methods failed:', { province, municipality, query: normalizedQuery });
-    }
+    throw error;
   }
-
-  streetCache.set(cacheKey, streets);
-  return streets;
 }
 
 export async function resolveByCadastralReference(rc: string): Promise<CadastralMatch[]> {
