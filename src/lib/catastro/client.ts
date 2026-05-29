@@ -165,12 +165,13 @@ export async function getStreets(params: {
     NombreVia: normalizedQuery,
   });
   let streets: CatastroStreetSuggestion[] = [];
+
   try {
     const xml = await fetchCatastroXml(url, 'Failed to fetch streets');
-    
+
     // Extract street data using a more specific regex since they are inside <calle>
     const streetBlocks = xml.match(/<calle>[\s\S]*?<\/calle>/gi) || [];
-    
+
     streets = streetBlocks.map(block => ({
       id: extractTagValue(block, 'cv'),
       name: extractTagValue(block, 'nv'),
@@ -181,14 +182,21 @@ export async function getStreets(params: {
       municipalityCode: extractTagValue(block, 'cm'),
       streetCode: extractTagValue(block, 'cv'),
     }));
-  } catch (error) {
-    console.warn('Using fallback streets after Catastro street lookup failed:', getCatastroFallbackReason(error));
-    streets = getFallbackStreets({ province, municipality, query: normalizedQuery });
-    if (streets.length === 0) throw error;
-  }
 
-  if (streets.length === 0) {
+    // If Catastro returns no results, try fallback
+    if (streets.length === 0) {
+      streets = getFallbackStreets({ province, municipality, query: normalizedQuery });
+    }
+  } catch (error) {
+    // On Catastro error, silently try fallback (don't throw if fallback has results)
+    console.warn('Catastro API failed, trying fallback:', getCatastroFallbackReason(error));
     streets = getFallbackStreets({ province, municipality, query: normalizedQuery });
+
+    // If fallback also returns nothing, return empty array instead of throwing
+    // This allows the UI to show "no results" instead of "error"
+    if (streets.length === 0) {
+      console.warn('Both Catastro and fallback returned no results for:', { province, municipality, query: normalizedQuery });
+    }
   }
 
   streetCache.set(cacheKey, streets);
