@@ -215,7 +215,7 @@ export async function buildAssessmentPdfResponse(
         );
       }
 
-      reportData = createReportDataFromPayload(assessmentId, statelessPayload, language, currency, measurementSystem);
+      reportData = createReportDataFromPayload(assessmentId, statelessPayload, pdfLanguage, currency, measurementSystem);
       rawAttachments = statelessPayload.attachments || [];
     } else {
       const assessment = await prisma.assessment.findUnique({
@@ -305,9 +305,20 @@ export async function buildAssessmentPdfResponse(
         } : undefined,
       }));
 
+      const localeMap: Record<string, string> = {
+        es: 'es-ES',
+        ca: 'es-ES',
+        en: 'en-GB',
+        de: 'de-DE',
+        fr: 'fr-FR',
+        it: 'it-IT',
+        pt: 'pt-PT'
+      };
+      const dateLocale = localeMap[pdfLanguage] ?? 'es-ES';
+
       reportData = {
         id: assessment.id,
-        date: new Date(assessment.createdAt).toLocaleDateString(pdfLanguage === 'es' || pdfLanguage === 'ca' ? 'es-ES' : pdfLanguage === 'de' ? 'de-DE' : pdfLanguage === 'fr' ? 'fr-FR' : pdfLanguage === 'it' ? 'it-IT' : pdfLanguage === 'pt' ? 'pt-PT' : 'en-GB'),
+        date: new Date(assessment.createdAt).toLocaleDateString(dateLocale),
         propertyData,
         scoreResult,
         scenarios,

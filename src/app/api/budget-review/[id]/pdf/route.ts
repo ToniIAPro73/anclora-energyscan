@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { renderToStream } from '@react-pdf/renderer';
 import { BudgetReviewReport } from '@/lib/pdf/BudgetReviewReport';
-import { normalizeLanguage, normalizeSelectedLocale, toPdfLanguage } from '@/lib/preferences';
+import { normalizeSelectedLocale, toPdfLanguage } from '@/lib/preferences';
 import { getMonetizationCopy } from '@/lib/monetization/i18n';
 import type { BudgetLineItem } from '@/lib/ingestion/types';
 import type { KbPriceRef } from '@/lib/budget-review/advanced-analysis';
@@ -22,7 +22,6 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   const cookieLang = cookieHeader.match(/enerscan-language=(es|ca|en|de|fr|it|pt)/)?.[1];
   const url = new URL(req.url);
   const pdfLanguage = toPdfLanguage(normalizeSelectedLocale(url.searchParams.get('lang') || cookieLang));
-  const language = normalizeLanguage(pdfLanguage);
   const localeMap: Record<string, string> = { es: 'es-ES', ca: 'es-ES', en: 'en-GB', de: 'de-DE', fr: 'fr-FR', it: 'it-IT', pt: 'pt-PT' };
   const locale = localeMap[pdfLanguage] ?? 'es-ES';
 
@@ -49,8 +48,8 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   for await (const chunk of stream as any) chunks.push(chunk);
   const pdfBytes = Buffer.concat(chunks);
 
-  const t = getMonetizationCopy(language).budgetReview;
-  const filename = `${t.pdfFilename}-${review.id.slice(0, 8)}.pdf`;
+  const t = getMonetizationCopy(pdfLanguage).budgetReview;
+  const filename = `${t.pdfFilename}-${pdfLanguage}-${review.id.slice(0, 8)}.pdf`;
 
   return new NextResponse(pdfBytes as unknown as BodyInit, {
     headers: {

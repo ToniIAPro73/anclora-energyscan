@@ -9,7 +9,7 @@ import {
   PropertyDataV2,
   ScoreResultV2,
 } from "./domain/energy-assessment";
-import type { AppCurrency, AppLanguage, MeasurementSystem } from "./preferences";
+import type { AppCurrency, MeasurementSystem, PdfLanguage } from "./preferences";
 import { getPreferencesForLanguage } from "./preferences";
 import type { CadastralMatch } from "./catastro/types";
 
@@ -73,15 +73,26 @@ export function createStatelessPayload(
 export function createReportDataFromPayload(
   id: string,
   payload: StatelessAssessmentPayload,
-  language: AppLanguage = "es",
+  language: PdfLanguage = "es",
   currency?: AppCurrency,
   measurementSystem?: MeasurementSystem
 ): PremiumReportData {
   const defaults = getPreferencesForLanguage(language);
+  const localeMap: Record<string, string> = {
+    es: 'es-ES',
+    ca: 'es-ES',
+    en: 'en-GB',
+    de: 'de-DE',
+    fr: 'fr-FR',
+    it: 'it-IT',
+    pt: 'pt-PT'
+  };
+  const dateLocale = localeMap[language] ?? 'es-ES';
+
   return {
     id,
     publicRef: payload.publicRef,
-    date: new Date(payload.createdAt || Date.now()).toLocaleDateString(language === "es" ? "es-ES" : language === "de" ? "de-DE" : "en-US"),
+    date: new Date(payload.createdAt || Date.now()).toLocaleDateString(dateLocale),
     propertyData: payload.propertyData,
     scoreResult: payload.scoreResult,
     scenarios: generateScenarios(payload.propertyData, payload.scoreResult).map((scenario) => ({
