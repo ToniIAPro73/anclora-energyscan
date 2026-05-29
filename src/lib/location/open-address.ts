@@ -28,6 +28,38 @@ const CURATED_STREETS: CuratedStreet[] = [
     ],
     center: { lat: 39.5543655, lng: 2.6072105, zoom: 18 },
   },
+  {
+    id: '2468',
+    name: 'ANGEL GUIMERA',
+    type: 'CL',
+    province: 'ILLES BALEARS',
+    municipality: 'PALMA',
+    provinceCode: '7',
+    municipalityCode: '40',
+    streetCode: '2468',
+    aliases: [
+      'CARRER ANGEL GUIMERA',
+      'CARRER D ANGEL GUIMERA',
+      'CARRER ÁNGEL GUIMERA',
+    ],
+    center: { lat: 39.5495, lng: 2.6185, zoom: 18 },
+  },
+  {
+    id: '3289',
+    name: 'BARTOMEU',
+    type: 'CL',
+    province: 'ILLES BALEARS',
+    municipality: 'PALMA',
+    provinceCode: '7',
+    municipalityCode: '40',
+    streetCode: '3289',
+    aliases: [
+      'CARRER BARTOMEU',
+      'CARRER DE BARTOMEU',
+      'CARRER BARTOMEU ROSSELLÓ',
+    ],
+    center: { lat: 39.5510, lng: 2.6248, zoom: 18 },
+  },
 ];
 
 export function getFallbackStreets(params: {

@@ -172,6 +172,13 @@ export async function getStreets(params: {
     // Extract street data using a more specific regex since they are inside <calle>
     const streetBlocks = xml.match(/<calle>[\s\S]*?<\/calle>/gi) || [];
 
+    console.log(`[Catastro] Searching for "${normalizedQuery}" in ${municipality}, ${province}:`, {
+      urlCalled: url,
+      xmlLength: xml.length,
+      streetBlocksFound: streetBlocks.length,
+      sampleXml: xml.substring(0, 500),
+    });
+
     streets = streetBlocks.map(block => ({
       id: extractTagValue(block, 'cv'),
       name: extractTagValue(block, 'nv'),
@@ -183,14 +190,19 @@ export async function getStreets(params: {
       streetCode: extractTagValue(block, 'cv'),
     }));
 
+    console.log(`[Catastro] Extracted ${streets.length} streets from Catastro`);
+
     // If Catastro returns no results, try fallback
     if (streets.length === 0) {
+      console.log(`[Fallback] Catastro returned 0 results, trying fallback for: ${normalizedQuery}`);
       streets = getFallbackStreets({ province, municipality, query: normalizedQuery });
+      console.log(`[Fallback] Found ${streets.length} streets in curated list`);
     }
   } catch (error) {
     // On Catastro error, silently try fallback (don't throw if fallback has results)
-    console.warn('Catastro API failed, trying fallback:', getCatastroFallbackReason(error));
+    console.warn('[Catastro] API failed, trying fallback:', getCatastroFallbackReason(error));
     streets = getFallbackStreets({ province, municipality, query: normalizedQuery });
+    console.log(`[Fallback] Found ${streets.length} streets after API error`);
 
     // If fallback also returns nothing, return empty array instead of throwing
     // This allows the UI to show "no results" instead of "error"
