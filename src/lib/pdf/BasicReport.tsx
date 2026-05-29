@@ -3,11 +3,12 @@ import { Document, Image, Page, Text, View, StyleSheet } from '@react-pdf/render
 import { getLegalDisclaimer, translateConfidence, translateScoreText } from '../i18n';
 import { formatArea } from '../formatters';
 import type { EnergyLetter, PropertyDataV2, ScoreResultV2 } from '../domain/energy-assessment';
+import type { PdfLanguage } from '../preferences';
 
 export interface BasicReportData {
   assessmentRef: string;
   date: string;
-  language: 'es' | 'en' | 'de';
+  language: PdfLanguage;
   propertyData: Pick<PropertyDataV2, 'year' | 'area' | 'zipcode' | 'propertyType'>;
   scoreResult: Pick<ScoreResultV2, 'estimatedLetter' | 'confidence' | 'climateZone' | 'penalties' | 'strengths'>;
   address?: string;
@@ -165,10 +166,11 @@ function propertyTypeLabel(type: string, t: { propTypes: Record<string, string> 
 type Labels = typeof labels['es'];
 
 export function BasicReport({ data }: { data: BasicReportData }) {
-  const t: Labels = (labels[data.language] ?? labels.es) as Labels;
+  const dictLanguage = (data.language === 'ca' ? 'es' : (['es', 'en', 'de'].includes(data.language) ? data.language : 'en')) as 'es' | 'en' | 'de';
+  const t: Labels = labels[dictLanguage] as Labels;
   const letter = data.scoreResult.estimatedLetter as EnergyLetter;
   const letterColor = LETTER_COLORS[letter] ?? '#645D53';
-  const disclaimer = getLegalDisclaimer(data.language);
+  const disclaimer = getLegalDisclaimer(dictLanguage);
 
   return (
     <Document title={`${t.title} — ${data.assessmentRef}`} author="Anclora EnergyScan">
@@ -202,7 +204,7 @@ export function BasicReport({ data }: { data: BasicReportData }) {
             <View style={s.metaBox}>
               <View style={s.metaRow}>
                 <Text style={s.metaLabel}>{t.confidence}</Text>
-                <Text style={s.metaValue}>{translateConfidence(data.scoreResult.confidence, data.language)}</Text>
+                <Text style={s.metaValue}>{translateConfidence(data.scoreResult.confidence, dictLanguage)}</Text>
               </View>
               <View style={s.metaRow}>
                 <Text style={s.metaLabel}>{t.zone}</Text>
@@ -224,7 +226,7 @@ export function BasicReport({ data }: { data: BasicReportData }) {
               </View>
               <View style={s.metaRow}>
                 <Text style={s.metaLabel}>{t.area}</Text>
-                <Text style={s.metaValue}>{formatArea(data.propertyData.area, 'metric', data.language)}</Text>
+                <Text style={s.metaValue}>{formatArea(data.propertyData.area, 'metric', dictLanguage)}</Text>
               </View>
               <View style={s.metaRow}>
                 <Text style={s.metaLabel}>{t.zip}</Text>
@@ -243,7 +245,7 @@ export function BasicReport({ data }: { data: BasicReportData }) {
             data.scoreResult.penalties.map((p, i) => (
               <View key={i} style={{ flexDirection: 'row', marginBottom: 5, alignItems: 'flex-start' }}>
                 <View style={s.penaltyDot} />
-                <Text style={{ ...s.text, flex: 1, marginBottom: 0 }}>{translateScoreText(p, data.language)}</Text>
+                <Text style={{ ...s.text, flex: 1, marginBottom: 0 }}>{translateScoreText(p, dictLanguage)}</Text>
               </View>
             ))
           )}
@@ -258,7 +260,7 @@ export function BasicReport({ data }: { data: BasicReportData }) {
             data.scoreResult.strengths.map((str, i) => (
               <View key={i} style={{ flexDirection: 'row', marginBottom: 5, alignItems: 'flex-start' }}>
                 <View style={s.strengthDot} />
-                <Text style={{ ...s.text, flex: 1, marginBottom: 0 }}>{translateScoreText(str, data.language)}</Text>
+                <Text style={{ ...s.text, flex: 1, marginBottom: 0 }}>{translateScoreText(str, dictLanguage)}</Text>
               </View>
             ))
           )}

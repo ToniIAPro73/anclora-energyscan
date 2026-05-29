@@ -5,7 +5,7 @@ import { renderToStream } from '@react-pdf/renderer';
 import React from 'react';
 import { prisma } from '@/lib/prisma';
 import { parseStatelessAssessmentId, getPublicAssessmentRef } from '@/lib/stateless-assessment';
-import { normalizeLanguage } from '@/lib/preferences';
+import { toPdfLanguage } from '@/lib/preferences';
 import { BasicReport, type BasicReportData } from '@/lib/pdf/BasicReport';
 import type { EnergyLetter, PropertyType, ConfidenceLevel } from '@/lib/domain/energy-assessment';
 
@@ -26,20 +26,31 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   try {
     const url = new URL(req.url);
     const cookieHeader = req.headers.get('cookie') || '';
-    const cookieLanguage = cookieHeader.match(/enerscan-language=(es|en|de)/)?.[1];
-    const language = normalizeLanguage(url.searchParams.get('lang') || cookieLanguage);
+    const cookieLanguage = cookieHeader.match(/enerscan-language=(es|ca|en|de|fr|it|pt)/)?.[1];
+    const pdfLanguage = toPdfLanguage(url.searchParams.get('lang') || cookieLanguage);
 
     const statelessPayload = parseStatelessAssessmentId(params.id);
 
     let reportData: BasicReportData;
+
+    const localeMap: Record<string, string> = {
+      es: 'es-ES',
+      ca: 'es-ES',
+      en: 'en-GB',
+      de: 'de-DE',
+      fr: 'fr-FR',
+      it: 'it-IT',
+      pt: 'pt-PT'
+    };
+    const dateLocale = localeMap[pdfLanguage] ?? 'es-ES';
 
     if (statelessPayload) {
       const pd = statelessPayload.propertyData;
       const sr = statelessPayload.scoreResult;
       reportData = {
         assessmentRef: getPublicAssessmentRef(params.id),
-        date: new Date().toLocaleDateString(language === 'en' ? 'en-US' : language === 'de' ? 'de-DE' : 'es-ES'),
-        language,
+        date: new Date().toLocaleDateString(dateLocale),
+        language: pdfLanguage,
         propertyData: {
           year: pd.year,
           area: pd.area,
@@ -63,8 +74,8 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 
       reportData = {
         assessmentRef: getPublicAssessmentRef(params.id),
-        date: new Date(assessment.createdAt).toLocaleDateString(language === 'en' ? 'en-US' : language === 'de' ? 'de-DE' : 'es-ES'),
-        language,
+        date: new Date(assessment.createdAt).toLocaleDateString(dateLocale),
+        language: pdfLanguage,
         propertyData: {
           year: assessment.year,
           area: assessment.area,
@@ -91,10 +102,15 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     const pdfBytes = Buffer.concat(chunks);
 
     const ref = reportData.assessmentRef.toLowerCase().replace(/\s+/g, '-');
-    const filename =
-      language === 'en' ? `energyscan-free-report-${ref}.pdf`
-      : language === 'de' ? `energyscan-voreinschaetzung-${ref}.pdf`
-      : `energyscan-prediagnostico-${ref}.pdf`;
+    const filenameMap: Record<string, string> = {
+      en: `energyscan-free-report-${ref}.pdf`,
+      de: `energyscan-voreinschaetzung-${ref}.pdf`,
+      ca: `energyscan-prediagnostic-ca-${ref}.pdf`,
+      fr: `energyscan-pre-evaluation-fr-${ref}.pdf`,
+      it: `energyscan-pre-valutazione-it-${ref}.pdf`,
+      pt: `energyscan-pre-avaliacao-pt-${ref}.pdf`,
+    };
+    const filename = filenameMap[pdfLanguage] ?? `energyscan-prediagnostico-${ref}.pdf`;
 
     return new NextResponse(pdfBytes, {
       status: 200,
