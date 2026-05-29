@@ -611,4 +611,9 @@ export const dictionaryPT = {
   settingsDataDeleteTitle: "Eliminar conta",
   settingsDataDeleteDesc: "Elimine permanentemente a sua conta e todos os dados associados. Esta ação não pode ser desfeita. Contacte o suporte para solicitar a eliminação.",
   settingsSoonShort: "Em breve",
+  budgetReviewPageTitle: "Segunda opiniao sobre o seu orcamento de remodelacao",
+  budgetReviewPageIntro: "Carregue ou cole um orcamento e obtenha uma revisao indicativa de rubricas e alertas. Pode usa-lo sem o wizard.",
+  budgetReviewNotIncluded: "Budget Review nao esta incluido no PDF Premium. E uma revisao independente do orcamento.",
+  budgetReviewDemoLabel: "Ver um relatorio de exemplo",
+  budgetReviewLegal: "Budget Review nao substitui uma revisao tecnica, contratual ou legal.",
 } as unknown as Dictionary;

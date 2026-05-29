@@ -612,4 +612,9 @@ export const dictionaryFR = {
   settingsDataDeleteTitle: "Supprimer le compte",
   settingsDataDeleteDesc: "Supprimez définitivement votre compte et toutes les données associées. Cette action est irréversible. Contactez le support pour demander la suppression.",
   settingsSoonShort: "Bientôt",
+  budgetReviewPageTitle: "Deuxieme avis sur votre devis de renovation",
+  budgetReviewPageIntro: "Telechargez ou collez un devis et obtenez une analyse indicative des postes et alertes. Utilisable sans le wizard.",
+  budgetReviewNotIncluded: "Budget Review n est pas inclus dans le PDF Premium. C est une revision independante du devis.",
+  budgetReviewDemoLabel: "Voir un exemple de rapport",
+  budgetReviewLegal: "Budget Review ne remplace pas une expertise technique, contractuelle ou legale.",
 } as unknown as Dictionary;

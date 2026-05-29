@@ -619,4 +619,9 @@ export const dictionaryCA = {
   settingsDataDeleteTitle: "Eliminar compte",
   settingsDataDeleteDesc: "Elimina permanentment el teu compte i totes les dades associades. Aquesta acció no es pot desfer. Contacta amb suport per sol·licitar l'eliminació.",
   settingsSoonShort: "Pròx.",
+  budgetReviewPageTitle: "Segona opinió sobre el teu pressupost de reforma",
+  budgetReviewPageIntro: "Puja o enganxa un pressupost de reforma i obte una revisio orientativa. Pots usar-lo sense haver completat el wizard.",
+  budgetReviewNotIncluded: "Budget Review no esta inclos en el PDF Premium. Es una revisio independent del pressupost.",
+  budgetReviewDemoLabel: "Veure informe d exemple",
+  budgetReviewLegal: "Budget Review no substitueix una revisio tecnica, contractual ni legal.",
 } as unknown as Dictionary;

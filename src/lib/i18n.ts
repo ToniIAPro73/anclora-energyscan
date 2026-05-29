@@ -619,6 +619,11 @@ export const dictionaries = {
     settingsSideNotifications: "Notificaciones",
     settingsSidePrivacy: "Privacidad",
     settingsSideData: "Datos",
+    budgetReviewPageTitle: "Segunda opinión sobre tu presupuesto de reforma",
+    budgetReviewPageIntro: "Sube o pega un presupuesto de reforma y obtén una revisión orientativa de partidas, importes y posibles alertas antes de aceptarlo. Puedes usarlo sin haber completado el wizard energético.",
+    budgetReviewNotIncluded: "Budget Review no está incluido en el PDF Premium residencial. Es una revisión independiente del presupuesto. Para un diagnóstico completo de la vivienda, usa el wizard.",
+    budgetReviewDemoLabel: "Ver informe de ejemplo",
+    budgetReviewLegal: "Budget Review no sustituye una revisión técnica, contractual, legal ni una medición real de obra.",
   },
   en: {
     navHow: "How it works",
@@ -1228,6 +1233,11 @@ export const dictionaries = {
     settingsSideNotifications: "Notifications",
     settingsSidePrivacy: "Privacy",
     settingsSideData: "Data",
+    budgetReviewPageTitle: "Second opinion on your renovation quote",
+    budgetReviewPageIntro: "Upload or paste a renovation quote and get an indicative review of line items, amounts and possible alerts before accepting it. You can use this service without completing the energy wizard.",
+    budgetReviewNotIncluded: "Budget Review is not included in the residential Premium PDF. It is an independent review of the quote. For a full home energy diagnosis, use the wizard.",
+    budgetReviewDemoLabel: "See a sample report",
+    budgetReviewLegal: "Budget Review does not replace a technical, contractual, legal or in-person review. It does not validate real site measurements.",
   },
   de: {
     navHow: "Ablauf",
@@ -1837,6 +1847,11 @@ export const dictionaries = {
     settingsSideNotifications: "Benachrichtigungen",
     settingsSidePrivacy: "Datenschutz",
     settingsSideData: "Daten",
+    budgetReviewPageTitle: "Zweite Meinung zu Ihrem Sanierungsangebot",
+    budgetReviewPageIntro: "Laden Sie ein Sanierungsangebot hoch oder fügen Sie es ein und erhalten Sie eine orientierende Prüfung von Positionen, Beträgen und möglichen Hinweisen. Sie können diesen Service nutzen, ohne den Energie-Wizard abgeschlossen zu haben.",
+    budgetReviewNotIncluded: "Budget Review ist nicht im Premium-PDF für Wohngebäude enthalten. Es ist eine unabhängige Prüfung des Angebots. Für eine vollständige Energieanalyse nutzen Sie den Wizard.",
+    budgetReviewDemoLabel: "Beispielbericht ansehen",
+    budgetReviewLegal: "Budget Review ersetzt keine technische, vertragliche, rechtliche oder persönliche Prüfung. Es validiert keine realen Aufmaße.",
   },
 } as const;
 

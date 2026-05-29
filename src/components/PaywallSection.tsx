@@ -9,9 +9,9 @@ import { usePreferences } from './AppPreferencesProvider';
 import { trackEvent } from '@/lib/analytics';
 
 export function PaywallSection({ assessmentId, hasBudgetAttached = false }: { assessmentId: string; hasBudgetAttached?: boolean }) {
-  const { dictionary: t, language, currency, measurementSystem } = usePreferences();
+  const { dictionary: t, selectedLanguage, currency, measurementSystem } = usePreferences();
   const isLocalAssessment = assessmentId.startsWith('local_');
-  const demoPdfHref = `/api/assessment/demo/pdf?lang=${language}&currency=${currency}&units=${measurementSystem}`;
+  const demoPdfHref = `/api/assessment/demo/pdf?lang=${selectedLanguage}&currency=${currency}&units=${measurementSystem}`;
   const features = [
     t.paywallFeatureScenarios,
     t.paywallFeatureCosts,

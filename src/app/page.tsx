@@ -11,7 +11,7 @@ import { ScrollArrows } from '@/components/ScrollArrows';
 import { SocialRail, SocialRailMobile } from '@/components/SocialRail';
 
 export default function LandingPage() {
-  const { dictionary: t, language, currency, measurementSystem } = usePreferences();
+  const { dictionary: t, language, selectedLanguage, currency, measurementSystem } = usePreferences();
   const timeline = {
     es: [
       { year: 'Hoy', title: 'R.D. 390/2021', desc: 'CEE obligatorio para venta/alquiler.', status: 'Vigente', color: 'bg-[#00DC82]' },
@@ -242,7 +242,7 @@ export default function LandingPage() {
                     {t.startFree} <ArrowRight className="h-4 w-4" />
                   </Link>
                   <a
-                    href={`/api/assessment/demo/pdf?lang=${language}&currency=${currency}&units=${measurementSystem}`}
+                    href={`/api/assessment/demo/pdf?lang=${selectedLanguage}&currency=${currency}&units=${measurementSystem}`}
                     className="inline-flex items-center justify-center gap-2 rounded-full border border-[#00DC82]/30 px-6 py-3 text-sm font-heading font-semibold text-[#00DC82] hover:bg-[#00DC82]/10 transition"
                   >
                     {t.paywallDemoLink}
