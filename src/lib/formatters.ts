@@ -1,11 +1,15 @@
-import type { AppCurrency, AppLanguage, MeasurementSystem } from "./preferences";
+import type { AppCurrency, AppLanguage, MeasurementSystem, PdfLanguage } from "./preferences";
 
 export const SQFT_PER_M2 = 10.76391041671;
 export const DEFAULT_EUR_GBP_RATE = 0.86;
 
-export function getLocale(language: AppLanguage): string {
+export function getLocale(language: AppLanguage | PdfLanguage): string {
   if (language === "en") return "en-GB";
   if (language === "de") return "de-DE";
+  if (language === "ca") return "ca-ES";
+  if (language === "fr") return "fr-FR";
+  if (language === "it") return "it-IT";
+  if (language === "pt") return "pt-PT";
   return "es-ES";
 }
 
@@ -26,7 +30,7 @@ export function convertCurrencyToEur(value: number, currency: AppCurrency, rate 
 export function formatCurrency(
   valueEur: number,
   currency: AppCurrency,
-  options: { language?: AppLanguage; rate?: number; maximumFractionDigits?: number } = {}
+  options: { language?: AppLanguage | PdfLanguage; rate?: number; maximumFractionDigits?: number } = {}
 ): string {
   const language = options.language || (currency === "GBP" ? "en" : "es");
   const value = convertCurrencyFromEur(valueEur, currency, options.rate);
@@ -42,11 +46,11 @@ export function convertArea(valueM2: number, measurementSystem: MeasurementSyste
   return measurementSystem === "imperial" ? valueM2 * SQFT_PER_M2 : valueM2;
 }
 
-export function formatNumber(value: number, locale: AppLanguage): string {
+export function formatNumber(value: number, locale: AppLanguage | PdfLanguage): string {
   return new Intl.NumberFormat(getLocale(locale), { maximumFractionDigits: 0 }).format(value);
 }
 
-export function formatArea(valueM2: number, measurementSystem: MeasurementSystem, language: AppLanguage = "es"): string {
+export function formatArea(valueM2: number, measurementSystem: MeasurementSystem, language: AppLanguage | PdfLanguage = "es"): string {
   const converted = convertArea(valueM2, measurementSystem);
   const unit = measurementSystem === "imperial" ? "sq ft" : "m²";
   const maximumFractionDigits = converted < 10 ? 1 : 0;
@@ -58,14 +62,14 @@ export function formatCostRange(
   minEur: number,
   maxEur: number,
   currency: AppCurrency,
-  language: AppLanguage,
+  language: AppLanguage | PdfLanguage,
   midEur?: number
 ): string {
   const min = formatCurrency(minEur, currency, { language, maximumFractionDigits: 0 });
   const max = formatCurrency(maxEur, currency, { language, maximumFractionDigits: 0 });
   if (midEur && midEur > minEur && midEur < maxEur) {
     const ref = formatCurrency(midEur, currency, { language, maximumFractionDigits: 0 });
-    const refLabel = language === "en" ? "ref." : language === "de" ? "Ref." : "ref.";
+    const refLabel = language === "de" ? "Ref." : "ref.";
     return `${min} - ${max} (${refLabel} ${ref})`;
   }
   return `${min} - ${max}`;

@@ -1,5 +1,5 @@
 import type { ScenarioCostEstimate } from '../costs/types';
-import type { AppCurrency, AppLanguage, MeasurementSystem } from '../preferences';
+import type { AppCurrency, MeasurementSystem, PdfLanguage } from '../preferences';
 import type { CadastralMatch } from '../catastro/types';
 import type { EnergyCertificateCEE, ExtractedField, RehabBudgetAnalysis } from '../ingestion/types';
 
@@ -249,7 +249,7 @@ export interface PremiumReportData {
   conditionRiskItems?: import('@/lib/condition-risk/types').ConditionRiskItem[];
   logoDataUri?: string;
   brandName?: string;
-  language?: AppLanguage;
+  language?: PdfLanguage;
   currency?: AppCurrency;
   measurementSystem?: MeasurementSystem;
   isDemo?: boolean;

@@ -3,7 +3,7 @@ import type { VisionAnalysisResult } from '@/lib/vision/types';
 
 export type { VisionEntitlementLevel, VisionAnalysisResult };
 
-export type HermesLocale = 'es' | 'en' | 'de';
+export type HermesLocale = 'es' | 'ca' | 'en' | 'de' | 'fr' | 'it' | 'pt';
 
 export interface HermesVisionCuratorInput {
   assessmentId: string;

@@ -521,15 +521,16 @@ export function CadastreSearch({ onConfirm, onLocationChange, onMatchSelect, onA
                   <div className="flex justify-between items-start gap-4">
                     <div className="min-w-0">
                       <p className="text-xs font-bold text-[#00DC82]">{match.cadastralReference}</p>
-                      <p className="text-sm font-bold text-premium mt-1 line-clamp-1">
-                        {match.address}
-                        {(match.floor || match.door) && (
-                          <span className="text-muted font-normal ml-2">
-                            {match.floor && `${t.cadastralResultsFloor} ${match.floor}`}
-                            {match.door && ` · ${t.cadastralResultsDoor} ${match.door}`}
-                          </span>
-                        )}
-                      </p>
+                      <p className="text-sm font-bold text-premium mt-1 line-clamp-1">{match.address}</p>
+                      {(match.staircase || match.floor || match.door) && (
+                        <p className="text-xs text-[#00DC82]/80 font-semibold mt-0.5">
+                          {[
+                            match.staircase && `${t.cadastralResultsStaircase ?? 'Esc.'} ${match.staircase}`,
+                            match.floor && `${t.cadastralResultsFloor} ${match.floor}`,
+                            match.door && `${t.cadastralResultsDoor} ${match.door}`,
+                          ].filter(Boolean).join(' · ')}
+                        </p>
+                      )}
                       <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2">
                         {Boolean(match.surfaceBuiltM2 && match.surfaceBuiltM2 > 0) && (
                           <span className="text-[10px] text-muted font-semibold">{t.cadastralResultsBuiltArea}: {formatArea(match.surfaceBuiltM2!)}</span>
