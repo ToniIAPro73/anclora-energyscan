@@ -215,7 +215,7 @@ export async function getStreets(params: {
   const url = buildUrl(CALLEJERO_REST_URL, 'ConsultaVia', {
     Provincia: province,
     Municipio: municipality,
-    TipoVia: '',
+    TipoVia: 'CL', // Specify street type (CL = Calle)
     NombreVia: normalizedQuery,
   });
 
