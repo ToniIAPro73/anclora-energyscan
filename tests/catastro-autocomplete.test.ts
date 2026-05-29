@@ -27,7 +27,7 @@ describe('Catastro Street Autocomplete', () => {
     jest.resetAllMocks();
   });
 
-  it('should fetch and parse street suggestions', async () => {
+  it('should fetch and parse street suggestions from ObtenerCallejero endpoint', async () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
       text: () => Promise.resolve(MOCK_STREET_XML),
@@ -51,50 +51,40 @@ describe('Catastro Street Autocomplete', () => {
       streetCode: '1091',
     });
     expect(streets[1].name).toBe('MIQUEL ANGEL COLOMAR');
+
     const requestedUrl = (global.fetch as jest.Mock).mock.calls[0][0] as string;
-    expect(requestedUrl).toContain('/COVCCallejero.svc/rest/ConsultaVia?');
-    expect(requestedUrl).toContain('TipoVia=');
-    expect(requestedUrl).toContain('NombreVia=MIQUEL');
+    expect(requestedUrl).toContain('/COVCCallejero.svc/rest/ObtenerCallejero?');
+    expect(requestedUrl).toContain('NomVia=MIQUEL');
   });
 
-  it('should handle fetch errors gracefully by returning empty array', async () => {
+  it('should throw when Catastro API returns an error', async () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: false,
-      status: 500
+      status: 500,
+      text: () => Promise.resolve('Internal Server Error'),
     });
 
-    const result = await getStreets({
+    await expect(getStreets({
       province: 'TEST',
       municipality: 'TEST',
       query: 'TEST'
-    });
-
-    // Should return empty array instead of throwing when all methods fail
-    expect(result).toEqual([]);
+    })).rejects.toThrow('Failed to fetch streets');
   });
 
-  it('should return fallback street suggestions when Catastro rejects a known street lookup', async () => {
+  it('should normalize query removing accents and apostrophes before sending to Catastro', async () => {
     (global.fetch as jest.Mock).mockResolvedValue({
-      ok: false,
-      status: 403,
-      text: () => Promise.resolve('<error>Peticion denegada</error>'),
+      ok: true,
+      text: () => Promise.resolve(MOCK_STREET_XML),
     });
 
-    const streets = await getStreets({
+    await getStreets({
       province: 'ILLES BALEARS',
       municipality: 'PALMA',
-      query: 'MIQ'
+      query: "Carrer d'Enric Fajarnés"
     });
 
-    expect(streets).toContainEqual({
-      id: '1091',
-      name: 'MIQUEL ROSSELLO I ALEMANY',
-      type: 'CL',
-      province: 'ILLES BALEARS',
-      municipality: 'PALMA',
-      provinceCode: '7',
-      municipalityCode: '40',
-      streetCode: '1091',
-    });
+    const requestedUrl = (global.fetch as jest.Mock).mock.calls[0][0] as string;
+    // Catastro expects uppercase, no accents, no apostrophes, no street type prefix
+    expect(requestedUrl).toContain('NomVia=ENRIC+FAJARNES');
   });
 });
