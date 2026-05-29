@@ -9,9 +9,9 @@ import { usePreferences } from './AppPreferencesProvider';
 import { trackEvent } from '@/lib/analytics';
 
 export function PaywallSection({ assessmentId, hasBudgetAttached = false }: { assessmentId: string; hasBudgetAttached?: boolean }) {
-  const { dictionary: t, language, currency, measurementSystem } = usePreferences();
+  const { dictionary: t, selectedLanguage, currency, measurementSystem } = usePreferences();
   const isLocalAssessment = assessmentId.startsWith('local_');
-  const demoPdfHref = `/api/assessment/demo/pdf?lang=${language}&currency=${currency}&units=${measurementSystem}`;
+  const demoPdfHref = `/api/assessment/demo/pdf?lang=${selectedLanguage}&currency=${currency}&units=${measurementSystem}`;
   const features = [
     t.paywallFeatureScenarios,
     t.paywallFeatureCosts,
@@ -75,17 +75,13 @@ export function PaywallSection({ assessmentId, hasBudgetAttached = false }: { as
           {hasBudgetAttached && (
             <div className="rounded-2xl border border-[#FFB020]/20 bg-[#FFB020]/5 p-4 text-xs leading-relaxed text-[#FFB020]">
               <p className="font-semibold mb-1">
-                {language === 'en' ? 'Want to review this quote line by line?' : language === 'de' ? 'Möchten Sie dieses Angebot positionsweise prüfen?' : '¿Quieres revisar este presupuesto partida por partida?'}
+                {t.paywallBudgetUpsellTitle}
               </p>
               <p className="mb-2">
-                {language === 'en'
-                  ? 'The Premium PDF uses the attached quote as context, but does not review it line by line. Add Budget Review for an independent analysis.'
-                  : language === 'de'
-                  ? 'Das Premium-PDF nutzt das beigefügte Angebot als Kontext, prüft es aber nicht positionsweise. Fügen Sie Budget Review für eine unabhängige Analyse hinzu.'
-                  : 'El PDF Premium usa el presupuesto adjunto como contexto, pero no lo revisa partida por partida. Añade Budget Review para un análisis independiente.'}
+                {t.paywallBudgetUpsellCopy}
               </p>
               <Link href="/budget-review" className="inline-flex items-center gap-1 rounded-full border border-[#FFB020]/40 px-4 py-1.5 text-[11px] font-bold text-[#FFB020] hover:bg-[#FFB020]/10 transition">
-                {language === 'en' ? 'Add Budget Review' : language === 'de' ? 'Budget Review hinzufügen' : 'Añadir Budget Review'}
+                {t.paywallAddBudgetReview}
               </Link>
             </div>
           )}

@@ -1,4 +1,4 @@
-import type { AppLanguage } from '@/lib/preferences';
+import type { AppLanguage, PdfLanguage } from '@/lib/preferences';
 
 const es = {
   common: {
@@ -1890,8 +1890,9 @@ const de: typeof es = {
   },
 };
 
-export function getMonetizationCopy(language: AppLanguage) {
-  if (language === 'en') return en;
+export function getMonetizationCopy(language: AppLanguage | PdfLanguage) {
+  if (language === 'en' || language === 'fr' || language === 'it' || language === 'pt') return en;
   if (language === 'de') return de;
+  // es and ca → es
   return es;
 }

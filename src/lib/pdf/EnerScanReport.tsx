@@ -1347,8 +1347,8 @@ export const EnerScanReport = ({ data }: { data: PremiumReportData }) => {
   const reportTitle = t.title.replace('Anclora EnergyScan', appName);
   const reportRef = data.publicRef || getPublicAssessmentRef(data.id);
   const dictLang = toDictLanguage(language);
-  const scenarios = localizeScenarios(data.scenarios, dictLang);
-  const subsidies = localizeSubsidies(data.subsidies || [], dictLang);
+  const scenarios = localizeScenarios(data.scenarios, language);
+  const subsidies = localizeSubsidies(data.subsidies || [], language);
   const attachments = data.attachments || [];
   const imageAttachments = attachments.filter((attachment) => attachment.previewDataUri);
   const isCeeAttachment = (attachment: AssessmentAttachment) => attachment.category === 'CEE';
@@ -1464,7 +1464,7 @@ export const EnerScanReport = ({ data }: { data: PremiumReportData }) => {
     </Page>
 
     {/* Catastro images page — only rendered when images are available */}
-    {(data.catastroImages?.facadeDataUri || data.catastroImages?.mapDataUri) && (
+    {(data.catastroImages?.facadeDataUri || data.catastroImages?.schemeDataUri || data.catastroImages?.mapDataUri) && (
       <Page size="A4" style={styles.page}>
         <View style={styles.header} fixed>
           <View style={styles.brandHeader}>
@@ -1483,19 +1483,44 @@ export const EnerScanReport = ({ data }: { data: PremiumReportData }) => {
           <Text style={styles.sectionTitle}>{t.catastroImagesTitle}</Text>
           <Text style={{ ...styles.text, marginBottom: 10 }}>{t.catastroImagesSubtitle}</Text>
 
-          {data.catastroImages.facadeDataUri && (
-            <View style={{ marginBottom: 14 }}>
-              <Text style={{ ...styles.text, fontWeight: 'bold', marginBottom: 4 }}>{t.catastroFacadeLabel}</Text>
-              {/* eslint-disable-next-line jsx-a11y/alt-text */}
-              <Image src={data.catastroImages.facadeDataUri} style={{ width: '100%', maxHeight: 260, objectFit: 'contain', borderRadius: 4 }} />
+          {/* Facade + parcel scheme side by side when both available */}
+          {data.catastroImages.facadeDataUri && data.catastroImages.schemeDataUri ? (
+            <View style={{ flexDirection: 'row', gap: 10, marginBottom: 14 }}>
+              <View style={{ flex: 1 }}>
+                <Text style={{ ...styles.text, fontWeight: 'bold', marginBottom: 4 }}>{t.catastroFacadeLabel}</Text>
+                {/* eslint-disable-next-line jsx-a11y/alt-text */}
+                <Image src={data.catastroImages.facadeDataUri} style={{ width: '100%', maxHeight: 200, objectFit: 'contain', borderRadius: 4 }} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ ...styles.text, fontWeight: 'bold', marginBottom: 4 }}>{t.catastroSchemeLabel}</Text>
+                {/* eslint-disable-next-line jsx-a11y/alt-text */}
+                <Image src={data.catastroImages.schemeDataUri} style={{ width: '100%', maxHeight: 200, objectFit: 'contain', borderRadius: 4 }} />
+              </View>
             </View>
+          ) : (
+            <>
+              {data.catastroImages.facadeDataUri && (
+                <View style={{ marginBottom: 14 }}>
+                  <Text style={{ ...styles.text, fontWeight: 'bold', marginBottom: 4 }}>{t.catastroFacadeLabel}</Text>
+                  {/* eslint-disable-next-line jsx-a11y/alt-text */}
+                  <Image src={data.catastroImages.facadeDataUri} style={{ width: '100%', maxHeight: 240, objectFit: 'contain', borderRadius: 4 }} />
+                </View>
+              )}
+              {data.catastroImages.schemeDataUri && (
+                <View style={{ marginBottom: 14 }}>
+                  <Text style={{ ...styles.text, fontWeight: 'bold', marginBottom: 4 }}>{t.catastroSchemeLabel}</Text>
+                  {/* eslint-disable-next-line jsx-a11y/alt-text */}
+                  <Image src={data.catastroImages.schemeDataUri} style={{ width: '60%', maxHeight: 240, objectFit: 'contain', borderRadius: 4 }} />
+                </View>
+              )}
+            </>
           )}
 
           {data.catastroImages.mapDataUri && (
             <View style={{ marginBottom: 10 }}>
               <Text style={{ ...styles.text, fontWeight: 'bold', marginBottom: 4 }}>{t.catastroMapLabel}</Text>
               {/* eslint-disable-next-line jsx-a11y/alt-text */}
-              <Image src={data.catastroImages.mapDataUri} style={{ width: '100%', maxHeight: 220, objectFit: 'contain', borderRadius: 4 }} />
+              <Image src={data.catastroImages.mapDataUri} style={{ width: '100%', maxHeight: 200, objectFit: 'contain', borderRadius: 4 }} />
             </View>
           )}
         </View>

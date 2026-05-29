@@ -16,6 +16,9 @@ const FOTO_FACHADA_ENDPOINT =
 const WMS_ENDPOINT =
   'https://ovc.catastro.meh.es/cartografia/WMS/ServidorWMS.aspx';
 
+const INSPIRE_WFS_ENDPOINT =
+  'https://ovc.catastro.meh.es/INSPIRE/wfsCP.aspx';
+
 const FETCH_TIMEOUT_MS = 6000;
 
 function withTimeout(ms: number): AbortSignal {
@@ -54,6 +57,80 @@ export async function fetchCatastroFacadeImage(
     const base64 = Buffer.from(buffer).toString('base64');
     const mime = contentType.includes('png') ? 'image/png' : 'image/jpeg';
     return `data:${mime};base64,${base64}`;
+  } catch {
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Parcel scheme — INSPIRE WFS geometry + WMS tight bbox
+// ---------------------------------------------------------------------------
+
+/**
+ * Fetches the exact parcel polygon from the INSPIRE WFS endpoint, then
+ * renders a WMS image tightly zoomed to that parcel so it fills the frame.
+ * This replaces the old GeneraMapa.aspx approach (which required a browser session).
+ */
+export async function fetchCatastroParcelScheme(
+  cadastralReference: string,
+): Promise<string | null> {
+  try {
+    const rc14 = cadastralReference.slice(0, 14);
+    const wfsUrl = `${INSPIRE_WFS_ENDPOINT}?service=wfs&version=2&request=getfeature&STOREDQUERIE_ID=getParcel&srsname=EPSG:4258&refcat=${rc14}`;
+    const wfsResponse = await fetch(wfsUrl, { signal: withTimeout(FETCH_TIMEOUT_MS) });
+    if (!wfsResponse.ok) return null;
+    const xml = await wfsResponse.text();
+
+    // INSPIRE EPSG:4258 returns coordinates as "lat lng" pairs in posList
+    const posListMatch = xml.match(/<gml:posList[^>]*>([\s\S]*?)<\/gml:posList>/i);
+    if (!posListMatch) return null;
+    const vals = posListMatch[1].trim().split(/\s+/).map(Number).filter((n) => !isNaN(n));
+    if (vals.length < 4) return null;
+
+    // Extract lat/lng pairs (EPSG:4258 delivers lat first, then lng)
+    const lats: number[] = [];
+    const lngs: number[] = [];
+    for (let i = 0; i < vals.length - 1; i += 2) {
+      lats.push(vals[i]);
+      lngs.push(vals[i + 1]);
+    }
+
+    const minLat = Math.min(...lats);
+    const maxLat = Math.max(...lats);
+    const minLng = Math.min(...lngs);
+    const maxLng = Math.max(...lngs);
+
+    // Add a 15% margin around the parcel so it doesn't touch the edges
+    const latPad = Math.max((maxLat - minLat) * 0.25, 0.0002);
+    const lngPad = Math.max((maxLng - minLng) * 0.25, 0.0002);
+
+    const bbox = `${(minLng - lngPad).toFixed(7)},${(minLat - latPad).toFixed(7)},${(maxLng + lngPad).toFixed(7)},${(maxLat + latPad).toFixed(7)}`;
+
+    const params = new URLSearchParams({
+      SERVICE: 'WMS',
+      VERSION: '1.1.1',
+      REQUEST: 'GetMap',
+      LAYERS: 'Catastro',
+      STYLES: '',
+      FORMAT: 'image/png',
+      BGCOLOR: '0xFFFFFF',
+      TRANSPARENT: 'FALSE',
+      WIDTH: '300',
+      HEIGHT: '300',
+      SRS: 'EPSG:4326',
+      BBOX: bbox,
+    });
+
+    const wmsResponse = await fetch(`${WMS_ENDPOINT}?${params.toString()}`, {
+      signal: withTimeout(FETCH_TIMEOUT_MS),
+    });
+    if (!wmsResponse.ok) return null;
+    const contentType = wmsResponse.headers.get('content-type') ?? '';
+    if (!contentType.includes('image/')) return null;
+
+    const buffer = await wmsResponse.arrayBuffer();
+    const base64 = Buffer.from(buffer).toString('base64');
+    return `data:image/png;base64,${base64}`;
   } catch {
     return null;
   }
@@ -115,6 +192,8 @@ export async function fetchCatastroMapImage(
 
 export interface CatastroImages {
   facadeDataUri?: string;
+  /** Parcel tightly zoomed via INSPIRE geometry + WMS — highlights the specific parcel. */
+  schemeDataUri?: string;
   mapDataUri?: string;
 }
 
@@ -123,12 +202,14 @@ export async function fetchCatastroImages(
   lat: number | undefined,
   lng: number | undefined,
 ): Promise<CatastroImages> {
-  const [facadeDataUri, mapDataUri] = await Promise.all([
+  const [facadeDataUri, schemeDataUri, mapDataUri] = await Promise.all([
     cadastralReference ? fetchCatastroFacadeImage(cadastralReference) : Promise.resolve(null),
+    cadastralReference ? fetchCatastroParcelScheme(cadastralReference) : Promise.resolve(null),
     lat != null && lng != null ? fetchCatastroMapImage(lat, lng) : Promise.resolve(null),
   ]);
   return {
     facadeDataUri: facadeDataUri ?? undefined,
+    schemeDataUri: schemeDataUri ?? undefined,
     mapDataUri: mapDataUri ?? undefined,
   };
 }

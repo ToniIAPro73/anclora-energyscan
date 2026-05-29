@@ -11,7 +11,7 @@ import { ScrollArrows } from '@/components/ScrollArrows';
 import { SocialRail, SocialRailMobile } from '@/components/SocialRail';
 
 export default function LandingPage() {
-  const { dictionary: t, language, currency, measurementSystem } = usePreferences();
+  const { dictionary: t, language, selectedLanguage, currency, measurementSystem } = usePreferences();
   const timeline = {
     es: [
       { year: 'Hoy', title: 'R.D. 390/2021', desc: 'CEE obligatorio para venta/alquiler.', status: 'Vigente', color: 'bg-[#00DC82]' },
@@ -64,7 +64,7 @@ export default function LandingPage() {
                 {/* Premium products block */}
                 <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 mb-6">
                   <p className="text-[10px] font-heading font-semibold text-muted uppercase tracking-wider mb-3">
-                    {language === 'en' ? 'Premium reports' : language === 'de' ? 'Premium-Berichte' : 'Informes Premium'}
+                    {t.premiumReportsLabel}
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     {/* PDF Premium */}
@@ -74,7 +74,7 @@ export default function LandingPage() {
                       </div>
                       <div className="min-w-0">
                         <p className="text-xs font-heading font-bold text-premium leading-tight">
-                          {language === 'en' ? 'PDF Report' : language === 'de' ? 'PDF-Bericht' : 'Informe PDF'}
+                          {t.heroPdfReportLabel}
                         </p>
                         <p className="text-[11px] text-[#00DC82] font-semibold">9,90 €</p>
                       </div>
@@ -100,10 +100,10 @@ export default function LandingPage() {
                       </div>
                       <div className="min-w-0">
                         <p className="text-xs font-heading font-bold text-muted leading-tight">
-                          {language === 'en' ? 'Full Pack' : language === 'de' ? 'Komplettpaket' : 'Pack completo'}
+                          {t.heroFullPackLabel}
                         </p>
                         <p className="text-[11px] text-muted font-semibold">
-                          {language === 'en' ? 'Coming soon' : language === 'de' ? 'Bald verfügbar' : 'Próximamente'}
+                          {t.heroComingSoon}
                         </p>
                       </div>
                     </div>
@@ -139,10 +139,10 @@ export default function LandingPage() {
                 type="button"
                 onClick={() => document.getElementById('como-funciona')?.scrollIntoView({ behavior: 'smooth' })}
                 className="group flex flex-col items-center gap-2 animate-bounce focus:outline-none"
-                aria-label={language === 'en' ? 'Scroll down' : language === 'de' ? 'Nach unten scrollen' : 'Desplazarse hacia abajo'}
+                aria-label={t.heroScrollAriaLabel}
               >
                 <span className="text-[10px] font-heading font-semibold text-muted uppercase tracking-widest group-hover:text-[#00DC82] transition">
-                  {language === 'en' ? 'Discover' : language === 'de' ? 'Entdecken' : 'Descubrir'}
+                  {t.heroScrollDiscover}
                 </span>
                 <div className="w-6 h-10 rounded-full border-2 border-[#00DC82]/40 flex items-start justify-center p-1.5 group-hover:border-[#00DC82]/70 transition">
                   <div className="w-1.5 h-3 rounded-full bg-[#00DC82]/60 animate-pulse group-hover:bg-[#00DC82] transition" />
@@ -222,18 +222,10 @@ export default function LandingPage() {
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#262626] to-transparent"></div>
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <p className="text-xs text-[#00DC82] font-heading font-semibold tracking-wider uppercase mb-3">{
-                language === 'en' ? 'For residential users' : language === 'de' ? 'Für Wohnungsnutzer' : 'Para usuarios residenciales'
-              }</p>
-              <h2 className="font-heading font-bold text-3xl sm:text-4xl text-premium mb-4">{
-                language === 'en' ? 'What do you need to review today?' : language === 'de' ? 'Was möchten Sie heute prüfen?' : '¿Qué necesitas revisar hoy?'
-              }</h2>
+              <p className="text-xs text-[#00DC82] font-heading font-semibold tracking-wider uppercase mb-3">{t.useCasesResidentialBadge}</p>
+              <h2 className="font-heading font-bold text-3xl sm:text-4xl text-premium mb-4">{t.useCasesTitle}</h2>
               <p className="text-muted max-w-2xl mx-auto text-sm">
-                {language === 'en'
-                  ? 'You can analyse your home or review a quote without creating an account.'
-                  : language === 'de'
-                  ? 'Sie können Ihre Immobilie analysieren oder ein Angebot prüfen, ohne ein Konto zu erstellen.'
-                  : 'Puedes analizar tu vivienda o revisar un presupuesto sin crear cuenta.'}
+                {t.useCasesCopy}
               </p>
             </div>
 
@@ -243,22 +235,14 @@ export default function LandingPage() {
                 <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[#00DC82]/10 text-[#00DC82] self-start">
                   <Home className="h-6 w-6" />
                 </div>
-                <h3 className="font-heading font-bold text-xl text-premium mb-2">{
-                  language === 'en' ? 'Analyse my home' : language === 'de' ? 'Meine Immobilie analysieren' : 'Analizar mi vivienda'
-                }</h3>
-                <p className="text-sm text-muted leading-relaxed mb-6 flex-1">{
-                  language === 'en'
-                    ? 'To understand your home\'s energy situation, prioritise renovations and download a Premium report.'
-                    : language === 'de'
-                    ? 'Um die energetische Situation Ihrer Immobilie zu verstehen, Sanierungen zu priorisieren und einen Premium-Bericht herunterzuladen.'
-                    : 'Para entender la situación energética de tu vivienda, priorizar reformas y descargar un informe Premium.'
-                }</p>
+                <h3 className="font-heading font-bold text-xl text-premium mb-2">{t.productAnalyseHomeTitle}</h3>
+                <p className="text-sm text-muted leading-relaxed mb-6 flex-1">{t.productAnalyseHomeCopy}</p>
                 <div className="flex flex-col gap-3">
                   <Link href="/wizard" className="inline-flex items-center justify-center gap-2 rounded-full bg-[#00DC82] px-6 py-3 text-sm font-heading font-bold text-[#0A0A0A] transition hover:brightness-110">
                     {t.startFree} <ArrowRight className="h-4 w-4" />
                   </Link>
                   <a
-                    href={`/api/assessment/demo/pdf?lang=${language}&currency=${currency}&units=${measurementSystem}`}
+                    href={`/api/assessment/demo/pdf?lang=${selectedLanguage}&currency=${currency}&units=${measurementSystem}`}
                     className="inline-flex items-center justify-center gap-2 rounded-full border border-[#00DC82]/30 px-6 py-3 text-sm font-heading font-semibold text-[#00DC82] hover:bg-[#00DC82]/10 transition"
                   >
                     {t.paywallDemoLink}
@@ -271,25 +255,17 @@ export default function LandingPage() {
                 <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[#FFB020]/10 text-[#FFB020] self-start">
                   <FileText className="h-6 w-6" />
                 </div>
-                <h3 className="font-heading font-bold text-xl text-premium mb-2">{
-                  language === 'en' ? 'Review a renovation quote' : language === 'de' ? 'Ein Angebot prüfen' : 'Revisar un presupuesto'
-                }</h3>
-                <p className="text-sm text-muted leading-relaxed mb-6 flex-1">{
-                  language === 'en'
-                    ? 'To get a second opinion on a renovation quote before accepting it.'
-                    : language === 'de'
-                    ? 'Um eine zweite Meinung zu einem Sanierungsangebot zu erhalten, bevor Sie es annehmen.'
-                    : 'Para obtener una segunda opinión sobre un presupuesto de reforma antes de aceptarlo.'
-                }</p>
+                <h3 className="font-heading font-bold text-xl text-premium mb-2">{t.productReviewQuoteTitle}</h3>
+                <p className="text-sm text-muted leading-relaxed mb-6 flex-1">{t.productReviewQuoteCopy}</p>
                 <div className="flex flex-col gap-3">
                   <Link href="/budget-review" className="inline-flex items-center justify-center gap-2 rounded-full border border-[#FFB020]/40 px-6 py-3 text-sm font-heading font-bold text-[#FFB020] hover:bg-[#FFB020]/10 transition">
-                    {language === 'en' ? 'Review my quote' : language === 'de' ? 'Mein Angebot prüfen' : 'Revisar mi presupuesto'} <ArrowRight className="h-4 w-4" />
+                    {t.productReviewMyQuote} <ArrowRight className="h-4 w-4" />
                   </Link>
                   <Link
                     href="/budget-review?demo=1"
                     className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 px-6 py-3 text-sm font-heading font-semibold text-muted hover:text-premium hover:border-white/20 transition"
                   >
-                    {language === 'en' ? 'View Budget Review demo' : language === 'de' ? 'Budget-Review-Demo ansehen' : 'Ver Budget Review demo'}
+                    {t.productViewBudgetDemo}
                   </Link>
                 </div>
               </div>
@@ -299,19 +275,11 @@ export default function LandingPage() {
                 <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[#60A5FA]/10 text-[#60A5FA] self-start">
                   <Calculator className="h-6 w-6" />
                 </div>
-                <h3 className="font-heading font-bold text-xl text-premium mb-2">{
-                  language === 'en' ? 'Savings calculator' : language === 'de' ? 'Einsparpotenzial berechnen' : 'Calcular ahorro potencial'
-                }</h3>
-                <p className="text-sm text-muted leading-relaxed mb-6 flex-1">{
-                  language === 'en'
-                    ? 'Simulate a specific improvement measure and compare estimated investment, annual savings and payback period.'
-                    : language === 'de'
-                    ? 'Simulieren Sie eine konkrete Verbesserungsmaßnahme und vergleichen Sie Investition, Jahresersparnis und Amortisationszeit.'
-                    : 'Simula una medida concreta y compara inversión estimada, ahorro anual y plazo de retorno orientativos.'
-                }</p>
+                <h3 className="font-heading font-bold text-xl text-premium mb-2">{t.productSavingsCalcTitle}</h3>
+                <p className="text-sm text-muted leading-relaxed mb-6 flex-1">{t.productSavingsCalcCopy}</p>
                 <div className="flex flex-col gap-3">
                   <Link href="/calculadora-ahorro" className="inline-flex items-center justify-center gap-2 rounded-full border border-[#60A5FA]/40 px-6 py-3 text-sm font-heading font-bold text-[#60A5FA] hover:bg-[#60A5FA]/10 transition">
-                    {language === 'en' ? 'Open calculator' : language === 'de' ? 'Rechner öffnen' : 'Abrir calculadora'} <ArrowRight className="h-4 w-4" />
+                    {t.productOpenCalc} <ArrowRight className="h-4 w-4" />
                   </Link>
                 </div>
               </div>
@@ -320,12 +288,8 @@ export default function LandingPage() {
             {/* NOTA DIFERENCIAL */}
             <div className="rounded-2xl border border-[#FFB020]/20 bg-[#FFB020]/5 p-4 text-center">
               <p className="text-xs text-[#FFB020] leading-relaxed max-w-3xl mx-auto">
-                <span className="font-semibold">{language === 'en' ? 'Note:' : language === 'de' ? 'Hinweis:' : 'Nota:'}</span>{' '}
-                {language === 'en'
-                  ? 'If you upload a quote during the wizard, we use it as context for the energy report. For a line-by-line review, use Budget Review.'
-                  : language === 'de'
-                  ? 'Wenn Sie während des Wizards ein Angebot hochladen, verwenden wir es als Kontext für den Energiebericht. Für eine positionsweise Prüfung nutzen Sie Budget Review.'
-                  : 'Si subes un presupuesto durante el wizard, lo usamos como contexto para el informe energético. Si quieres revisarlo partida por partida, usa Budget Review.'}
+                <span className="font-semibold">{t.useCasesNote}</span>{' '}
+                {t.useCasesNoteCopy}
               </p>
             </div>
           </div>
@@ -373,11 +337,11 @@ export default function LandingPage() {
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
               <div className="surface-2 border rounded-2xl p-5 flex flex-col">
                 <p className="text-xs text-muted font-heading font-semibold uppercase tracking-wider mb-3">
-                  {language === 'en' ? 'Free' : language === 'de' ? 'Kostenlos' : 'Gratis'}
+                  {t.pricingFreeLabel}
                 </p>
                 <p className="font-heading font-bold text-3xl text-premium mb-1">0 €</p>
                 <p className="text-xs text-muted mb-4 flex-1">
-                  {language === 'en' ? 'Diagnostic + indicative rating' : language === 'de' ? 'Diagnose + orientierende Klasse' : 'Diagnóstico + letra orientativa'}
+                  {t.pricingFreeDiagnostic}
                 </p>
                 <Link href="/wizard" className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/15 px-4 py-2.5 text-xs font-heading font-bold text-muted hover:text-premium hover:border-white/25 transition">
                   {t.startFree} <ArrowRight className="h-3 w-3" />
@@ -385,44 +349,44 @@ export default function LandingPage() {
               </div>
               <div className="surface-2 border border-[#00DC82]/20 rounded-2xl p-5 flex flex-col">
                 <p className="text-xs text-[#00DC82] font-heading font-semibold uppercase tracking-wider mb-3">
-                  {language === 'en' ? 'PDF Report' : language === 'de' ? 'PDF-Bericht' : 'Informe PDF'}
+                  {t.pricingPdfReportLabel}
                 </p>
                 <p className="font-heading font-bold text-3xl text-[#00DC82] mb-1">9,90 €</p>
                 <p className="text-xs text-muted mb-4 flex-1">
-                  {language === 'en' ? 'Scenarios, costs & downloadable PDF' : language === 'de' ? 'Szenarien, Kosten & PDF-Download' : 'Escenarios, costes y PDF descargable'}
+                  {t.pricingPdfReportCopy}
                 </p>
                 <Link href="/wizard" className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#00DC82] px-4 py-2.5 text-xs font-heading font-bold text-[#0A0A0A] hover:brightness-110 transition">
-                  {language === 'en' ? 'Get report' : language === 'de' ? 'Bericht kaufen' : 'Obtener informe'} <ArrowRight className="h-3 w-3" />
+                  {t.pricingGetReport} <ArrowRight className="h-3 w-3" />
                 </Link>
               </div>
               <div className="surface-2 border border-[#FFB020]/20 rounded-2xl p-5 flex flex-col">
                 <p className="text-xs text-[#FFB020] font-heading font-semibold uppercase tracking-wider mb-3">Budget Review</p>
                 <p className="font-heading font-bold text-3xl text-[#FFB020] mb-1">19,90 €</p>
                 <p className="text-xs text-muted mb-4 flex-1">
-                  {language === 'en' ? 'Second opinion on renovation quotes' : language === 'de' ? 'Zweitmeinung zu Sanierungsangeboten' : 'Segunda opinión sobre presupuestos'}
+                  {t.pricingBudgetReviewCopy}
                 </p>
                 <Link href="/budget-review" className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#FFB020] px-4 py-2.5 text-xs font-heading font-bold text-[#0A0A0A] hover:brightness-110 transition">
-                  {language === 'en' ? 'Review quote' : language === 'de' ? 'Angebot prüfen' : 'Revisar presupuesto'} <ArrowRight className="h-3 w-3" />
+                  {t.pricingReviewQuote} <ArrowRight className="h-3 w-3" />
                 </Link>
               </div>
               <div className="surface-2 border border-white/10 border-dashed rounded-2xl p-5 flex flex-col opacity-75">
                 <p className="text-xs text-muted font-heading font-semibold uppercase tracking-wider mb-3">
-                  {language === 'en' ? 'Smart Reform Pack' : language === 'de' ? 'Reform-Paket' : 'Pack Reforma'}
+                  {t.pricingSmartReformPack}
                 </p>
                 <p className="font-heading font-bold text-xl text-muted mb-1">
-                  {language === 'en' ? 'Coming soon' : language === 'de' ? 'Bald' : 'Próximamente'}
+                  {t.pricingSoon}
                 </p>
                 <p className="text-xs text-muted mb-4 flex-1">
-                  {language === 'en' ? 'PDF + Budget Review in one payment' : language === 'de' ? 'PDF + Budget Review in einer Zahlung' : 'PDF Premium + Budget Review en un pago'}
+                  {t.pricingBundleCopy}
                 </p>
                 <div className="inline-flex w-full items-center justify-center rounded-full border border-white/10 px-4 py-2.5 text-xs font-heading font-semibold text-muted cursor-default">
-                  {language === 'en' ? 'Soon' : language === 'de' ? 'Bald' : 'Próximamente'}
+                  {t.pricingSoon}
                 </div>
               </div>
             </div>
             <div className="text-center">
               <Link href="/pricing" className="inline-flex items-center gap-2 text-sm font-heading font-semibold text-[#00DC82] hover:brightness-125 transition">
-                {language === 'en' ? 'See full plan details' : language === 'de' ? 'Alle Details' : 'Ver detalle completo de planes'} <ArrowRight className="h-3.5 w-3.5" />
+                {t.pricingSeeFullDetails} <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
           </div>

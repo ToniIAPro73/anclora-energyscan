@@ -1,4 +1,4 @@
-import type { AppLanguage } from '@/lib/preferences';
+import type { AppLanguage, PdfLanguage } from '@/lib/preferences';
 import type { BudgetLineItem } from '@/lib/ingestion/types';
 
 export type FindingStatus =
@@ -33,13 +33,20 @@ export type BudgetCategory =
   | 'general';
 
 // --- Status labels ---
-const statusLabels: Record<AppLanguage, Record<FindingStatus, string>> = {
+const statusLabels: Record<string, Record<FindingStatus, string>> = {
   es: {
     IN_RANGE: 'Dentro del rango orientativo',
     HIGH_REVIEW: 'Precio unitario elevado',
     LOW_REVIEW: 'Precio unitario bajo — revisar alcance',
     INCOMPLETE: 'Partida incompleta',
     REQUIRES_CLARIFICATION: 'Requiere aclaración',
+  },
+  ca: {
+    IN_RANGE: 'Dins del rang orientatiu',
+    HIGH_REVIEW: 'Preu unitari elevat',
+    LOW_REVIEW: 'Preu unitari baix — revisar abast',
+    INCOMPLETE: 'Partida incompleta',
+    REQUIRES_CLARIFICATION: 'Requereix aclariment',
   },
   en: {
     IN_RANGE: 'Within indicative range',
@@ -55,9 +62,30 @@ const statusLabels: Record<AppLanguage, Record<FindingStatus, string>> = {
     INCOMPLETE: 'Unvollständige Position',
     REQUIRES_CLARIFICATION: 'Erläuterung erforderlich',
   },
+  fr: {
+    IN_RANGE: 'Dans la plage indicative',
+    HIGH_REVIEW: 'Prix unitaire élevé',
+    LOW_REVIEW: 'Prix unitaire bas — vérifier le périmètre',
+    INCOMPLETE: 'Poste incomplet',
+    REQUIRES_CLARIFICATION: 'Nécessite une clarification',
+  },
+  it: {
+    IN_RANGE: 'Nell\'intervallo indicativo',
+    HIGH_REVIEW: 'Prezzo unitario elevato',
+    LOW_REVIEW: 'Prezzo unitario basso — verificare il perimetro',
+    INCOMPLETE: 'Voce incompleta',
+    REQUIRES_CLARIFICATION: 'Richiede chiarimento',
+  },
+  pt: {
+    IN_RANGE: 'Dentro do intervalo indicativo',
+    HIGH_REVIEW: 'Preço unitário elevado',
+    LOW_REVIEW: 'Preço unitário baixo — rever âmbito',
+    INCOMPLETE: 'Rubrica incompleta',
+    REQUIRES_CLARIFICATION: 'Requer esclarecimento',
+  },
 };
 
-export function getFindingStatusLabel(status: FindingStatus, lang: AppLanguage = 'es'): string {
+export function getFindingStatusLabel(status: FindingStatus, lang: AppLanguage | PdfLanguage = 'es'): string {
   return (statusLabels[lang] ?? statusLabels.es)[status];
 }
 
@@ -248,8 +276,10 @@ const suggestedQuestions: Record<AppLanguage, Record<BudgetCategory, string[]>> 
   },
 };
 
-export function getSuggestedQuestions(category: BudgetCategory, lang: AppLanguage = 'es'): string[] {
-  return (suggestedQuestions[lang] ?? suggestedQuestions.es)[category] ?? suggestedQuestions.es.general;
+export function getSuggestedQuestions(category: BudgetCategory, lang: AppLanguage | PdfLanguage = 'es'): string[] {
+  // CA/FR/IT/PT fall back to ES or EN (suggestedQuestions only has es/en/de)
+  const key = (lang === 'ca') ? 'es' : (lang === 'fr' || lang === 'it' || lang === 'pt') ? 'en' : lang;
+  return ((suggestedQuestions as Record<string, Record<BudgetCategory, string[]>>)[key] ?? suggestedQuestions.es)[category] ?? suggestedQuestions.es.general;
 }
 
 // --- Advanced findings builder ---
@@ -313,16 +343,20 @@ export type BudgetAdvancedAnalysis = {
   priceReferences?: KbPriceRef[];
 };
 
-const legalNotices: Record<AppLanguage, string> = {
+const legalNotices: Record<string, string> = {
   es: 'Análisis automático orientativo. No sustituye la revisión de un técnico, arquitecto, aparejador ni asesor legal.',
+  ca: 'Anàlisi automàtica orientativa. No substitueix la revisió d\'un tècnic, arquitecte, aparellador ni assessor legal.',
   en: 'Indicative automatic analysis. Does not replace the review of a qualified technician, architect, surveyor or legal adviser.',
   de: 'Orientierende automatische Analyse. Ersetzt nicht die Prüfung durch qualifizierte Fachleute, Architekten oder Rechtsberater.',
+  fr: 'Analyse automatique indicative. Ne remplace pas l\'examen d\'un technicien, architecte, métreur ou conseiller juridique qualifié.',
+  it: 'Analisi automatica indicativa. Non sostituisce la revisione di un tecnico, architetto, geometra o consulente legale qualificato.',
+  pt: 'Análise automática indicativa. Não substitui a revisão de um técnico, arquiteto, agrimensor ou consultor jurídico qualificado.',
 };
 
 export function buildBudgetAdvancedAnalysis(
   lineItems: BudgetLineItem[],
   totalAmount: number | undefined,
-  lang: AppLanguage = 'es',
+  lang: AppLanguage | PdfLanguage = 'es',
   kbPriceRefs?: KbPriceRef[],
 ): BudgetAdvancedAnalysis {
   const descriptions = lineItems.map((i) => i.description).filter(Boolean) as string[];

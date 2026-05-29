@@ -1,4 +1,4 @@
-import type { AppLanguage } from './preferences';
+import type { AppLanguage, PdfLanguage } from './preferences';
 import type { ImprovementScenario, SubsidyInfoItem } from './domain/energy-assessment';
 
 type ExtLang = AppLanguage | 'ca' | 'fr' | 'it' | 'pt';
@@ -459,7 +459,7 @@ const subsidyCopy: Record<ExtLang, Record<string, Pick<SubsidyInfoItem, 'title' 
   },
 };
 
-export function localizeScenarios(scenarios: ImprovementScenario[], language: AppLanguage): ImprovementScenario[] {
+export function localizeScenarios(scenarios: ImprovementScenario[], language: AppLanguage | PdfLanguage): ImprovementScenario[] {
   const lang = language as ExtLang;
   if (lang === 'es') return scenarios;
   const copy = scenarioCopy[lang] ?? scenarioCopy.en;
@@ -474,7 +474,7 @@ export function localizeScenarios(scenarios: ImprovementScenario[], language: Ap
   }));
 }
 
-export function localizeSubsidies(subsidies: SubsidyInfoItem[], language: AppLanguage): SubsidyInfoItem[] {
+export function localizeSubsidies(subsidies: SubsidyInfoItem[], language: AppLanguage | PdfLanguage): SubsidyInfoItem[] {
   const lang = language as ExtLang;
   if (lang === 'es') return subsidies;
   const copy = subsidyCopy[lang] ?? subsidyCopy.en;

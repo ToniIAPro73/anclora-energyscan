@@ -1,6 +1,6 @@
 import React from 'react';
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
-import type { AppLanguage } from '@/lib/preferences';
+import type { AppLanguage, PdfLanguage } from '@/lib/preferences';
 import { getMonetizationCopy } from '@/lib/monetization/i18n';
 import { buildBudgetAdvancedAnalysis, type KbPriceRef } from '@/lib/budget-review/advanced-analysis';
 import type { BudgetLineItem } from '@/lib/ingestion/types';
@@ -50,7 +50,7 @@ export type BudgetReviewReportData = {
   currency: string;
   extractionConfidence?: number;
   lineItems: BudgetLineItem[];
-  language: AppLanguage;
+  language: AppLanguage | PdfLanguage;
   kbPriceRefs?: KbPriceRef[];
 };
 
