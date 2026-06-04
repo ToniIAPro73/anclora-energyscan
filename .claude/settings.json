@@ -58,7 +58,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "file=$(echo \"$CLAUDE_TOOL_INPUT\" | jq -r '.file_path // empty' 2>/dev/null); case \"$file\" in */.env|*/.env.*|.env|.env.*|*/prisma/migrations/*|prisma/migrations/*) echo \"BLOCKED: edición de $file requiere confirmación manual\"; exit 2;; esac"
+            "command": "file=$(echo \"$CLAUDE_TOOL_INPUT\" | jq -r '.file_path // empty' 2>/dev/null); case \"$file\" in */.env|*/.env.*|.env|.env.*|*/prisma/migrations/*|prisma/migrations/*) echo \"BLOCKED: edici\u00f3n de $file requiere confirmaci\u00f3n manual\"; exit 2;; esac"
           }
         ]
       }
@@ -78,6 +78,18 @@
           {
             "type": "command",
             "command": "file=$(echo \"$CLAUDE_TOOL_RESPONSE\" | jq -r '.filePath // empty' 2>/dev/null); case \"$file\" in tmp/*|output/*) find tmp/ output/ -type f -mtime +1 -delete 2>/dev/null;; esac"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "memanto memory sync --project-dir .",
+            "timeout": 30
           }
         ]
       }
