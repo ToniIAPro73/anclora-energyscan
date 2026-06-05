@@ -1,7 +1,7 @@
 import { classifyEnergyDocument } from './energy-document-classifier';
 import { MinerUDocumentParser } from './mineru-parser';
 import { NativePdfParser } from './native-pdf-parser';
-import type { DocumentParserEngine, ParseDocumentInput, ParseDocumentResult, ParsedDocument } from './types';
+import type { ParseDocumentInput, ParseDocumentResult, ParsedDocument } from './types';
 
 type ParserDeps = {
   nativeParser: { parse(input: ParseDocumentInput): Promise<ParsedDocument> };
