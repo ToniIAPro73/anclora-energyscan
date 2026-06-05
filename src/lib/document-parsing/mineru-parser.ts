@@ -8,6 +8,12 @@ import type { ParseDocumentInput, ParsedDocument } from './types';
 
 const execFileAsync = promisify(execFile);
 
+export function sanitizeTempInputFileName(fileName?: string) {
+  const baseName = path.basename(fileName || 'document.pdf');
+  const cleaned = baseName.replace(/[^a-zA-Z0-9._-]/g, '-');
+  return cleaned || 'document.pdf';
+}
+
 function resolveMineruWrapperPath() {
   return process.env.MINERU_AGENT_INGEST_PATH
     ?? `${process.env.HOME}/projects/agent-tooling/mineru/bin/mineru-agent-ingest.sh`;
@@ -51,7 +57,7 @@ export class MinerUDocumentParser {
     }
 
     const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'energyscan-mineru-'));
-    const tempInputPath = path.join(tempRoot, input.fileName || 'document.pdf');
+    const tempInputPath = path.join(tempRoot, sanitizeTempInputFileName(input.fileName));
 
     try {
       await writeFile(tempInputPath, input.buffer);

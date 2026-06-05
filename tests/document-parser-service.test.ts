@@ -1,4 +1,5 @@
 import { DocumentParserService } from '@/lib/document-parsing/service';
+import { sanitizeTempInputFileName } from '@/lib/document-parsing/mineru-parser';
 
 describe('DocumentParserService', () => {
   const input = {
@@ -71,5 +72,10 @@ describe('DocumentParserService', () => {
     const result = await service.parsePdf({ ...input, engine: 'fallback' });
     expect(result.engine).toBe('native');
     expect(result.requestedEngine).toBe('fallback');
+  });
+
+  it('sanitizes temp input file names for MinerU execution', () => {
+    expect(sanitizeTempInputFileName('../unsafe name?.pdf')).toBe('unsafe-name-.pdf');
+    expect(sanitizeTempInputFileName('nested/path/cee final 2026.pdf')).toBe('cee-final-2026.pdf');
   });
 });
