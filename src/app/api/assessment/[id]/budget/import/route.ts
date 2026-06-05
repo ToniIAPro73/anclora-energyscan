@@ -1,13 +1,16 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { readAttachmentBytes } from '@/lib/blob-storage';
-import { extractTextFromPdf } from '@/lib/ocr/pdf-extractor';
+import { DocumentParserService } from '@/lib/document-parsing/service';
 import { parseBudgetAnalysisText } from '@/lib/ocr/budget-parser';
 import { budgetToPrismaCreate } from '@/lib/ingestion/persistence';
 import type { EnergyLetter } from '@/lib/ingestion/types';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
+export const runtime = 'nodejs';
+
+const parserService = new DocumentParserService();
 
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   try {
@@ -31,8 +34,14 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 
     const currentCertificate = assessment.energyCertificates[0];
     const { bytes } = await readAttachmentBytes(attachment.path);
-    const { fullText } = await extractTextFromPdf(new Uint8Array(bytes));
-    const budget = parseBudgetAnalysisText(fullText, {
+    const bodyEngine = typeof body.engine === 'string' ? body.engine : 'auto';
+    const parsedDocument = await parserService.parsePdf({
+      buffer: new Uint8Array(bytes),
+      fileName: attachment.name,
+      mimeType: attachment.type,
+      engine: bodyEngine,
+    });
+    const budget = parseBudgetAnalysisText(parsedDocument.text || parsedDocument.markdown || '', {
       currentLetter: (currentCertificate?.globalLetter || assessment.estimatedLetter) as EnergyLetter | undefined,
       targetLetter: (body.targetLetter || assessment.targetLetter) as EnergyLetter | undefined,
       currentNonRenewableEP: currentCertificate?.nonRenewableEPKwhM2Year || undefined,
@@ -48,12 +57,23 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       where: { id: attachmentId },
       data: {
         ocrStatus: 'done',
-        ocrData: { sourceKind: 'budget_pdf', extracted: { normalizedAnalysis: budget }, processedAt: new Date().toISOString() },
+        ocrData: {
+          sourceKind: 'budget_pdf',
+          parserEngine: parsedDocument.engine,
+          parserWarnings: parsedDocument.warnings,
+          extracted: { normalizedAnalysis: budget },
+          processedAt: new Date().toISOString(),
+        },
         ocrProcessedAt: new Date(),
       },
     });
 
-    return NextResponse.json({ ok: true, budget: { ...budget, id: created.id }, warnings: budget.warnings });
+    return NextResponse.json({
+      ok: true,
+      parserEngine: parsedDocument.engine,
+      budget: { ...budget, id: created.id },
+      warnings: [...parsedDocument.warnings, ...budget.warnings],
+    });
   } catch (error) {
     console.error('Budget import failed:', error);
     return NextResponse.json({ error: 'Failed to import budget' }, { status: 500 });
