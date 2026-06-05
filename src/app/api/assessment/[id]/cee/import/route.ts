@@ -1,13 +1,16 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { readAttachmentBytes } from '@/lib/blob-storage';
-import { extractTextFromPdf } from '@/lib/ocr/pdf-extractor';
+import { DocumentParserService } from '@/lib/document-parsing/service';
 import { parseCeeToCertificate } from '@/lib/ocr/cee-parser';
 import { certificateToPrismaCreate, fieldsToPrismaCreateMany } from '@/lib/ingestion/persistence';
 import { Prisma } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
+export const runtime = 'nodejs';
+
+const parserService = new DocumentParserService();
 
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   try {
@@ -24,9 +27,15 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     }
 
     const { bytes } = await readAttachmentBytes(attachment.path);
-    const { fullText, textQuality } = await extractTextFromPdf(new Uint8Array(bytes));
-    const certificate = parseCeeToCertificate(fullText, {
-      sourceFormat: textQuality === 'empty' ? 'PDF_OCR' : 'PDF_TEXT',
+    const parsedDocument = await parserService.parsePdf({
+      buffer: new Uint8Array(bytes),
+      fileName: attachment.name,
+      mimeType: attachment.type,
+      engine: typeof body.engine === 'string' ? body.engine : 'auto',
+    });
+    const textQuality = parsedDocument.metadata?.textQuality;
+    const certificate = parseCeeToCertificate(parsedDocument.text || parsedDocument.markdown || '', {
+      sourceFormat: parsedDocument.engine === 'mineru' || textQuality === 'empty' ? 'PDF_OCR' : 'PDF_TEXT',
     });
     const created = await prisma.energyCertificate.create({
       data: certificateToPrismaCreate({ assessmentId: params.id, attachmentId, certificate }),
@@ -40,12 +49,24 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       where: { id: attachmentId },
       data: {
         ocrStatus: certificate.extractionStatus === 'PARSED' ? 'done' : 'done',
-        ocrData: { sourceKind: 'cee_pdf', extracted: { normalizedCertificate: certificate }, processedAt: new Date().toISOString() } as Prisma.InputJsonValue,
+        ocrData: {
+          sourceKind: 'cee_pdf',
+          parserEngine: parsedDocument.engine,
+          parserWarnings: parsedDocument.warnings,
+          extracted: { normalizedCertificate: certificate },
+          processedAt: new Date().toISOString(),
+        } as Prisma.InputJsonValue,
         ocrProcessedAt: new Date(),
       },
     });
 
-    return NextResponse.json({ ok: true, certificate, appliedFields: certificate.extractedFields || [] });
+    return NextResponse.json({
+      ok: true,
+      parserEngine: parsedDocument.engine,
+      certificate,
+      appliedFields: certificate.extractedFields || [],
+      warnings: parsedDocument.warnings,
+    });
   } catch (error) {
     console.error('CEE import failed:', error);
     return NextResponse.json({ error: 'Failed to import CEE' }, { status: 500 });

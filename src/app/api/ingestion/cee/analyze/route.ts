@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server';
-import { extractTextFromPdf } from '@/lib/ocr/pdf-extractor';
+import { DocumentParserService } from '@/lib/document-parsing/service';
+import type { DocumentParserEngine } from '@/lib/document-parsing/types';
 import { parseCeeToCertificate } from '@/lib/ocr/cee-parser';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
+export const runtime = 'nodejs';
+
+const parserService = new DocumentParserService();
 
 async function readInput(req: Request) {
   const contentType = req.headers.get('content-type') || '';
@@ -12,6 +16,7 @@ async function readInput(req: Request) {
     return {
       text: typeof body.text === 'string' ? body.text : undefined,
       fileName: typeof body.fileName === 'string' ? body.fileName : 'cee.pdf',
+      engine: (typeof body.engine === 'string' ? body.engine : 'auto') as DocumentParserEngine,
     };
   }
 
@@ -24,11 +29,18 @@ async function readInput(req: Request) {
   if (file.size > 10 * 1024 * 1024) throw new Error('El PDF supera el limite de 10 MB');
 
   const bytes = new Uint8Array(await file.arrayBuffer());
-  const extracted = await extractTextFromPdf(bytes);
-  return {
-    text: extracted.fullText,
+  const parsedDocument = await parserService.parsePdf({
+    buffer: bytes,
     fileName: file.name,
-    textQuality: extracted.textQuality,
+    mimeType: file.type,
+    engine: (formData.get('engine')?.toString() ?? 'auto') as DocumentParserEngine,
+  });
+  return {
+    text: parsedDocument.text || parsedDocument.markdown || '',
+    fileName: file.name,
+    parserWarnings: parsedDocument.warnings,
+    parserEngine: parsedDocument.engine,
+    textQuality: parsedDocument.metadata?.textQuality,
   };
 }
 
@@ -38,13 +50,14 @@ export async function POST(req: Request) {
     const certificate = parseCeeToCertificate(input.text || '', {
       sourceFormat: input.textQuality === 'empty' ? 'PDF_OCR' : 'PDF_TEXT',
     });
-    const warnings = [];
+    const warnings = [...(input.parserWarnings ?? [])];
     if (input.textQuality === 'weak') warnings.push('La extraccion de texto del PDF es parcial. Revisa los datos antes de aplicarlos.');
     if (certificate.extractionStatus === 'NEEDS_REVIEW') warnings.push('Faltan campos clave del CEE o hay ambiguedad en el documento.');
 
     return NextResponse.json({
       ok: true,
       fileName: input.fileName,
+      parserEngine: input.parserEngine,
       certificate,
       appliedFields: certificate.extractedFields || [],
       warnings,

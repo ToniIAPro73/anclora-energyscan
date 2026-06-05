@@ -1,10 +1,14 @@
 import { NextResponse } from 'next/server';
-import { extractTextFromPdf } from '@/lib/ocr/pdf-extractor';
+import { DocumentParserService } from '@/lib/document-parsing/service';
+import type { DocumentParserEngine } from '@/lib/document-parsing/types';
 import { parseBudgetAnalysisText } from '@/lib/ocr/budget-parser';
 import type { EnergyLetter } from '@/lib/ingestion/types';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
+export const runtime = 'nodejs';
+
+const parserService = new DocumentParserService();
 
 async function readInput(req: Request) {
   const contentType = req.headers.get('content-type') || '';
@@ -20,6 +24,7 @@ async function readInput(req: Request) {
       propertyType: typeof body.propertyType === 'string' ? body.propertyType : undefined,
       climateZone: typeof body.climateZone === 'string' ? body.climateZone : undefined,
       fileName: typeof body.fileName === 'string' ? body.fileName : 'presupuesto.pdf',
+      engine: (typeof body.engine === 'string' ? body.engine : 'auto') as DocumentParserEngine,
     };
   }
 
@@ -32,10 +37,17 @@ async function readInput(req: Request) {
   if (file.size > 10 * 1024 * 1024) throw new Error('El PDF supera el limite de 10 MB');
 
   const bytes = new Uint8Array(await file.arrayBuffer());
-  const extracted = await extractTextFromPdf(bytes);
+  const parsedDocument = await parserService.parsePdf({
+    buffer: bytes,
+    fileName: file.name,
+    mimeType: file.type,
+    engine: (formData.get('engine')?.toString() ?? 'auto') as DocumentParserEngine,
+  });
   return {
-    text: extracted.fullText,
-    textQuality: extracted.textQuality,
+    text: parsedDocument.text || parsedDocument.markdown || '',
+    parserWarnings: parsedDocument.warnings,
+    parserEngine: parsedDocument.engine,
+    textQuality: parsedDocument.metadata?.textQuality,
     currentLetter: formData.get('currentLetter') as EnergyLetter | null || undefined,
     targetLetter: formData.get('targetLetter') as EnergyLetter | null || undefined,
     usefulAreaM2: Number(formData.get('usefulAreaM2')) || undefined,
@@ -57,13 +69,14 @@ export async function POST(req: Request) {
       propertyType: input.propertyType,
       climateZone: input.climateZone,
     });
-    const warnings = [...budget.warnings];
+    const warnings = [...(input.parserWarnings ?? []), ...budget.warnings];
     if (input.textQuality === 'weak') warnings.push('La extraccion de texto del PDF es parcial. Revisa las partidas detectadas.');
     if (budget.extractionStatus === 'NEEDS_REVIEW') warnings.push('El presupuesto se ha analizado parcialmente y requiere revision.');
 
     return NextResponse.json({
       ok: true,
       fileName: input.fileName,
+      parserEngine: input.parserEngine,
       budget,
       warnings,
     });
