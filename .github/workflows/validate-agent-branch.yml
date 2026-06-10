@@ -1,10 +1,12 @@
-name: CI
+name: Validate agent branch
 
 on:
-  pull_request:
-    branches: [development, staging, production]
   push:
-    branches: [development, staging, production, main]
+    branches:
+      - "feat/**"
+      - "fix/**"
+      - "chore/**"
+      - "hotfix/**"
 
 env:
   DATABASE_URL: "file:./dev.db"
@@ -14,6 +16,7 @@ env:
 
 jobs:
   validate:
+    name: Validate agent branch
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -41,3 +44,7 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Success
+        if: success()
+        run: echo "✓ Agent branch validated successfully"
