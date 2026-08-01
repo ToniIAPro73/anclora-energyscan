@@ -16,6 +16,12 @@ const geistMono = localFont({
   variable: "--font-geist-mono",
   weight: "100 900",
 });
+// Fuente contractual Premium (ANCLORA_BRANDING_TYPOGRAPHY): DM Sans body + display.
+const dmSans = localFont({
+  src: "./fonts/DMSansVF.woff2",
+  variable: "--font-dm-sans",
+  weight: "100 1000",
+});
 
 export const metadata: Metadata = {
   title: "Anclora EnergyScan",
@@ -60,7 +66,7 @@ export default async function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${dmSans.variable} antialiased`}
       >
         <SessionProviderWrapper session={session}>
           <AppPreferencesProvider>

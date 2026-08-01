@@ -51,7 +51,7 @@ html {
 body {
   background-color: var(--bg);
   color: var(--fg);
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-dm-sans), 'DM Sans', system-ui, -apple-system, sans-serif;
   transition: background-color 220ms ease, color 220ms ease;
 }
 
