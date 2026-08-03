@@ -10,13 +10,13 @@
 
 Geführter Wohnungs-Assistent, der einen nachvollziehbaren Energie-Score berechnet, mit Verbesserungsszenarien, Katasterintegration und Premium-Berichten.
 
-[Español](./README.md) · [English](./README.en.md) · **Deutsch**
+[Español](./README.md) · [Català](./README.ca.md) · [English](./README.en.md) · **Deutsch** · [Français](./README.fr.md) · [Italiano](./README.it.md) · [Português](./README.pt.md)
 
 <br />
 
 ![Anclora](https://img.shields.io/badge/Anclora-ecosystem-111827)
 ![Kategorie](https://img.shields.io/badge/kategorie-Premium-C07860)
-![Sprachen](https://img.shields.io/badge/sprachen-ES%20%7C%20EN%20%7C%20DE-047857)
+![Sprachen](https://img.shields.io/badge/produktsprachen-7-047857)
 
 </div>
 
@@ -72,9 +72,7 @@ npm run dev
 
 ## Unterstützte Sprachen
 
-- Español (Standard)
-- English
-- Deutsch
+Das Produkt unterstützt in der Produktion 7 Sprachen: Español (Standard), Català, English, Deutsch, Français, Italiano, Português (`PREMIUM_LOCALES`, `src/lib/anclora-language-toggle.ts`). Diese Dokumentation wird in allen 7 Produktsprachen gepflegt.
 
 ## Dokumentation und Governance
 

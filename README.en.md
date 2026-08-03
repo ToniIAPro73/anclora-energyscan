@@ -10,13 +10,13 @@
 
 Guided residential wizard that computes a traceable energy score, with improvement scenarios, cadastral integration, and Premium reports.
 
-[Español](./README.md) · **English** · [Deutsch](./README.de.md)
+[Español](./README.md) · [Català](./README.ca.md) · **English** · [Deutsch](./README.de.md) · [Français](./README.fr.md) · [Italiano](./README.it.md) · [Português](./README.pt.md)
 
 <br />
 
 ![Anclora](https://img.shields.io/badge/Anclora-ecosystem-111827)
 ![Category](https://img.shields.io/badge/category-Premium-C07860)
-![Languages](https://img.shields.io/badge/languages-ES%20%7C%20EN%20%7C%20DE-047857)
+![Languages](https://img.shields.io/badge/product%20languages-7-047857)
 
 </div>
 
@@ -72,9 +72,7 @@ npm run dev
 
 ## Supported languages
 
-- Español (default)
-- English
-- Deutsch
+The production product supports 7 languages: Español (default), Català, English, Deutsch, Français, Italiano, Português (`PREMIUM_LOCALES`, `src/lib/anclora-language-toggle.ts`). This documentation is maintained in all 7 product languages.
 
 ## Documentation and governance
 

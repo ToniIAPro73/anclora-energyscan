@@ -10,13 +10,13 @@
 
 Wizard residencial guiado que calcula un score energético trazable, con escenarios de mejora, integración catastral e informes Premium.
 
-**Español** · [English](./README.en.md) · [Deutsch](./README.de.md)
+**Español** · [Català](./README.ca.md) · [English](./README.en.md) · [Deutsch](./README.de.md) · [Français](./README.fr.md) · [Italiano](./README.it.md) · [Português](./README.pt.md)
 
 <br />
 
 ![Anclora](https://img.shields.io/badge/Anclora-ecosystem-111827)
 ![Categoría](https://img.shields.io/badge/categoría-Premium-C07860)
-![Idiomas](https://img.shields.io/badge/idiomas-ES%20%7C%20EN%20%7C%20DE-047857)
+![Idiomas](https://img.shields.io/badge/idiomas%20producto-7-047857)
 
 </div>
 
@@ -72,9 +72,7 @@ npm run dev
 
 ## Idiomas soportados
 
-- Español (predeterminado)
-- English
-- Deutsch
+El producto en producción soporta 7 idiomas: Español (predeterminado), Català, English, Deutsch, Français, Italiano, Português (`PREMIUM_LOCALES`, `src/lib/anclora-language-toggle.ts`). Esta documentación se mantiene en los 7 idiomas del producto.
 
 ## Documentación y gobernanza
 
