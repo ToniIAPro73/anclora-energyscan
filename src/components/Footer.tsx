@@ -16,7 +16,7 @@ export default function Footer() {
           <div>
             <div className="flex items-center gap-2 font-heading font-bold text-lg text-premium mb-4">
               <Image
-                src="/brand/logo-anclora-energy-scan.png"
+                src="/brand/anclora-energyscan.png"
                 alt="Anclora EnergyScan"
                 width={32}
                 height={32}

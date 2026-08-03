@@ -2,86 +2,91 @@
 
 <div align="center">
 
-<img src="./public/brand/logo-anclora-energy-scan.jpg" alt="Anclora Energyscan" width="120" />
+<img src="./public/brand/anclora-energyscan.png" alt="Anclora EnergyScan" width="132" />
 
-# Anclora Energyscan
+# Anclora EnergyScan
 
-### Aviso legal: Este proyecto no genera un Certificado de Eficiencia Energética oficial ni documentación con validez administrativa
+### Orientative energy pre-diagnosis for homes
+
+Guided residential wizard that computes a traceable energy score, with improvement scenarios, cadastral integration, and Premium reports.
 
 [Español](./README.md) · **English** · [Deutsch](./README.de.md)
 
 <br />
 
 ![Anclora](https://img.shields.io/badge/Anclora-ecosystem-111827)
-![Documentation](https://img.shields.io/badge/documentation-premium-BFA46A)
-![Languages](https://img.shields.io/badge/languages-ES%20%7C%20EN-047857)
+![Category](https://img.shields.io/badge/category-Premium-C07860)
+![Languages](https://img.shields.io/badge/languages-ES%20%7C%20EN%20%7C%20DE-047857)
 
 </div>
 
 ---
 
 > [!IMPORTANT]
-> Internal Anclora ecosystem repository. Do not publish operational details, credentials,
-> real data or sensitive logic outside approved channels.
+> Internal Anclora ecosystem repository. EnergyScan does not issue an official Energy Performance Certificate or administratively valid documentation — it is an orientative pre-diagnosis. Do not publish operational details, credentials, or sensitive logic outside authorized channels.
 
-## At a glance
+## What it is
 
-| Area | Definition |
-| --- | --- |
-| Purpose | Aviso legal: Este proyecto no genera un Certificado de Eficiencia Energética oficial ni documentación con validez administrativa |
-| Family | `premium` |
-| Visibility | `private` |
-| Role | Internal working repository |
+Anclora EnergyScan guides the user through a wizard covering building envelope, systems, renewables, climate, and dwelling type, then computes an explainable energy score with a confidence level. From the diagnosis it generates comparable improvement scenarios and an unlockable Premium report.
 
-## Conceptual workflow
+## Category in the ecosystem
 
-```text
-Internal context
-      ↓
-Controlled configuration and data
-      ↓
-Product logic
-      ↓
-Technical review
-      ↓
-Delivery or operational support
-```
+| Field | Value |
+|---|---|
+| Category | Premium |
+| Brand accent | `#00DC82` |
+| Typography | DM Sans |
+| Canonical repository | `anclora-energyscan` |
 
-## Local start
+## Key features
+
+- Guided residential wizard (envelope, systems, renewables, climate, dwelling type)
+- Traceable energy scoring with confidence level
+- Improvement and orientative savings scenarios
+- Cadastral integration and parcel visualization (MapLibre)
+- OCR on submitted documentation (Tesseract)
+- Generative AI assistance (Anthropic Claude)
+- PDF reports, Premium unlock via Stripe
+- Provider, partner, and lead network
+
+## Technology stack
+
+| Area | Technology |
+|---|---|
+| Framework | Next.js, React |
+| Database | Prisma, PostgreSQL |
+| Authentication | NextAuth |
+| Generative AI | Anthropic Claude SDK |
+| Cadastral maps | MapLibre GL |
+| OCR | Tesseract.js |
+| PDF | react-pdf, pdf-lib, pdfjs-dist |
+| Payments | Stripe |
+| Storage | Vercel Blob |
+
+## Local setup
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Technology
+## Supported languages
 
-| Area | Detail |
-| --- | --- |
-| Next.js | Detected in repository |
-| React | Detected in repository |
-| TypeScript | Detected in repository |
-| Tailwind CSS | Detected in repository |
-| Prisma | Detected in repository |
-| Zod | Detected in repository |
-| Stripe | Detected in repository |
-| Jest | Detected in repository |
+- Español (default)
+- English
+- Deutsch
 
-## Documentation
+## Documentation and governance
 
-- [Documentacion](./docs)
-
-## Governance
-
-- Canonical product: `anclora-energyscan`
-- Vault: `/mnt/c/Users/antonio.ballesterosa/Desktop/Proyectos/Boveda-Anclora`
-- Contracts: `contracts/` and `docs/governance/`
-- Brand asset: `present`
+- Brand and governance contracts: [`docs/standards/`](./docs/standards/)
+- Anclora Vault (source of truth): `contracts/` and `docs/governance/`
 
 ---
 
 <div align="center">
 
-### Anclora Group · Internal use
+### Anclora Group
+
+Internal use.
 
 </div>

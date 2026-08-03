@@ -36,7 +36,7 @@ function isPdfAttachment(attachment: { type: string; name: string }) {
 async function getReportLogoDataUri() {
   if (cachedLogoDataUri) return cachedLogoDataUri;
 
-  const logoPath = path.join(process.cwd(), 'public', 'brand', 'logo-anclora-energy-scan.png');
+  const logoPath = path.join(process.cwd(), 'public', 'brand', 'anclora-energyscan.png');
   const logo = await readFile(logoPath);
   cachedLogoDataUri = `data:image/png;base64,${logo.toString('base64')}`;
   return cachedLogoDataUri;

@@ -7,7 +7,7 @@ Fuente: icono canonico 1024x1024 RGBA (identico al de anclora-design-system).
 """
 from PIL import Image
 
-SRC = "public/brand/logo-anclora-energy-scan.png"
+SRC = "public/brand/anclora-energyscan.png"
 
 def circular_crop(src_path: str) -> Image.Image:
     im = Image.open(src_path).convert("RGBA")

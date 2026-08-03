@@ -20,7 +20,7 @@ export default function AuthPage() {
           <div className="flex flex-col items-center pt-8 pb-5 px-8">
             <div style={{width: "50px", height: "50px"}} className="mb-2 drop-shadow-[0_12px_24px_rgba(0,0,0,0.30)]">
               <Image
-                src="/brand/logo-anclora-energy-scan.png"
+                src="/brand/anclora-energyscan.png"
                 alt="Anclora EnergyScan"
                 width={50}
                 height={50}

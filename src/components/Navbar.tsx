@@ -103,7 +103,7 @@ export default function Navbar({
       <nav className="mx-auto flex h-16 max-w-[96rem] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <Link href={logoHref} className="flex min-w-0 shrink-0 items-center gap-2 font-heading font-bold text-lg text-premium xl:text-xl">
           <Image
-            src="/brand/logo-anclora-energy-scan.png"
+            src="/brand/anclora-energyscan.png"
             alt="Anclora EnergyScan"
             width={36}
             height={36}

@@ -2,50 +2,66 @@
 
 <div align="center">
 
-<img src="./public/brand/logo-anclora-energy-scan.jpg" alt="Anclora Energyscan" width="120" />
+<img src="./public/brand/anclora-energyscan.png" alt="Anclora EnergyScan" width="132" />
 
-# Anclora Energyscan
+# Anclora EnergyScan
 
-### Aviso legal: Este proyecto no genera un Certificado de Eficiencia Energética oficial ni documentación con validez administrativa
+### Prediagnóstico energético orientativo para viviendas
+
+Wizard residencial guiado que calcula un score energético trazable, con escenarios de mejora, integración catastral e informes Premium.
 
 **Español** · [English](./README.en.md) · [Deutsch](./README.de.md)
 
 <br />
 
 ![Anclora](https://img.shields.io/badge/Anclora-ecosystem-111827)
-![Documentation](https://img.shields.io/badge/documentation-premium-BFA46A)
-![Languages](https://img.shields.io/badge/languages-ES%20%7C%20EN-047857)
+![Categoría](https://img.shields.io/badge/categoría-Premium-C07860)
+![Idiomas](https://img.shields.io/badge/idiomas-ES%20%7C%20EN%20%7C%20DE-047857)
 
 </div>
 
 ---
 
 > [!IMPORTANT]
-> Repositorio interno del ecosistema Anclora. No publicar detalles operativos, credenciales,
-> datos reales ni logica sensible fuera de los canales autorizados.
+> Repositorio interno del ecosistema Anclora. EnergyScan no genera un Certificado de Eficiencia Energética oficial ni documentación con validez administrativa — es un prediagnóstico orientativo. No publicar detalles operativos, credenciales ni lógica sensible fuera de canales autorizados.
 
-## Vista rapida
+## Qué es
 
-| Area | Definicion |
-| --- | --- |
-| Proposito | Aviso legal: Este proyecto no genera un Certificado de Eficiencia Energética oficial ni documentación con validez administrativa |
-| Familia | `premium` |
-| Visibilidad | `private` |
-| Rol | Repositorio de trabajo interno |
+Anclora EnergyScan guía al usuario por un wizard sobre envolvente, sistemas, renovables, clima y tipología de la vivienda, y calcula un score energético explicable con nivel de confianza. A partir del diagnóstico genera escenarios de mejora comparables y un informe desbloqueable en modalidad Premium.
 
-## Flujo conceptual
+## Categoría en el ecosistema
 
-```text
-Contexto interno
-      ↓
-Configuracion y datos controlados
-      ↓
-Logica de producto
-      ↓
-Revision tecnica
-      ↓
-Entrega o soporte operativo
-```
+| Campo | Valor |
+|---|---|
+| Categoría | Premium |
+| Acento de marca | `#00DC82` |
+| Tipografía | DM Sans |
+| Repositorio canónico | `anclora-energyscan` |
+
+## Funcionalidades principales
+
+- Wizard residencial guiado (envolvente, sistemas, renovables, clima, tipología)
+- Scoring energético trazable con nivel de confianza
+- Escenarios de mejora y ahorro orientativo
+- Integración catastral y visualización de parcela (MapLibre)
+- OCR sobre documentación aportada (Tesseract)
+- Asistencia de IA generativa (Anthropic Claude)
+- Informes en PDF, desbloqueo Premium vía Stripe
+- Red de proveedores, partners y leads
+
+## Stack tecnológico
+
+| Área | Tecnología |
+|---|---|
+| Framework | Next.js, React |
+| Base de datos | Prisma, PostgreSQL |
+| Autenticación | NextAuth |
+| IA generativa | Anthropic Claude SDK |
+| Mapas catastrales | MapLibre GL |
+| OCR | Tesseract.js |
+| PDF | react-pdf, pdf-lib, pdfjs-dist |
+| Pagos | Stripe |
+| Almacenamiento | Vercel Blob |
 
 ## Arranque local
 
@@ -54,34 +70,23 @@ npm install
 npm run dev
 ```
 
-## Tecnologia
+## Idiomas soportados
 
-| Area | Detalle |
-| --- | --- |
-| Next.js | Detectado en el repositorio |
-| React | Detectado en el repositorio |
-| TypeScript | Detectado en el repositorio |
-| Tailwind CSS | Detectado en el repositorio |
-| Prisma | Detectado en el repositorio |
-| Zod | Detectado en el repositorio |
-| Stripe | Detectado en el repositorio |
-| Jest | Detectado en el repositorio |
+- Español (predeterminado)
+- English
+- Deutsch
 
-## Documentacion
+## Documentación y gobernanza
 
-- [Documentacion](./docs)
-
-## Gobernanza
-
-- Producto canonico: `anclora-energyscan`
-- Boveda: `/mnt/c/Users/antonio.ballesterosa/Desktop/Proyectos/Boveda-Anclora`
-- Contratos: `contracts/` y `docs/governance/`
-- Asset de marca: `presente`
+- Contratos de marca y gobernanza: [`docs/standards/`](./docs/standards/)
+- Bóveda Anclora (fuente de verdad): `contracts/` y `docs/governance/`
 
 ---
 
 <div align="center">
 
-### Anclora Group · Uso interno
+### Anclora Group
+
+Uso interno.
 
 </div>

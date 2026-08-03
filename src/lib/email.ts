@@ -76,7 +76,7 @@ function layout(
   variant: 'success' | 'info' | 'rejected' = 'success',
 ) {
   const appUrl = getAppUrl();
-  const logoUrl = `${appUrl}/brand/logo-anclora-energy-scan.png`;
+  const logoUrl = `${appUrl}/brand/anclora-energyscan.png`;
   const support = getSupportEmail();
 
   const accent = variant === 'rejected' ? '#FFB020' : '#00DC82';
