@@ -58,6 +58,7 @@ prompt*.md
 
 # screenshots e imágenes locales (no se versiona material binario de capturas)
 *.png
+!public/brand/*.png
 docs/screenshots/
 docs/manual/screenshots/
 
