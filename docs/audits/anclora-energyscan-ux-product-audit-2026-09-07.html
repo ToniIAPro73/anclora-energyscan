@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Auditoria UX Producto - Anclora EnergyScan</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" />
+<style>
+  :root{
+    --paper:#F5F7F4;
+    --paper-raised:#FFFFFF;
+    --ink:#14201C;
+    --muted:#5B6B62;
+    --line:#D8DED9;
+    --line-strong:#BFC9C2;
+    --accent:#1F6E52;
+    --accent-ink:#0E3F2E;
+    --accent-soft:#E3EEE7;
+    --info:#2F5D7A;
+    --info-soft:#E4EDF3;
+    --warn:#9C6B12;
+    --warn-soft:#F5ECD9;
+    --crit:#A13327;
+    --crit-soft:#F6E3E0;
+    --good:#1F6E52;
+    --mono-a:#1F6E52;
+    --mono-b:#4C8F63;
+    --mono-c:#8FA34A;
+    --mono-d:#C9A227;
+    --mono-e:#C97F2A;
+    --mono-f:#B85A2E;
+    --mono-g:#A13327;
+    --shadow: 0 1px 2px rgba(20,32,28,0.06), 0 8px 24px -12px rgba(20,32,28,0.18);
+    --radius: 10px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#101512;
+      --paper-raised:#171E1A;
+      --ink:#E7ECE8;
+      --muted:#93A69B;
+      --line:#2A332D;
+      --line-strong:#3A453D;
+      --accent:#3FAE84;
+      --accent-ink:#BFEBD8;
+      --accent-soft:#16281F;
+      --info:#6FA8C9;
+      --info-soft:#16232C;
+      --warn:#D9A445;
+      --warn-soft:#2B2314;
+      --crit:#E2685A;
+      --crit-soft:#2C1917;
+      --good:#3FAE84;
+      --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 12px 28px -14px rgba(0,0,0,0.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#101512;
+    --paper-raised:#171E1A;
+    --ink:#E7ECE8;
+    --muted:#93A69B;
+    --line:#2A332D;
+    --line-strong:#3A453D;
+    --accent:#3FAE84;
+    --accent-ink:#BFEBD8;
+    --accent-soft:#16281F;
+    --info:#6FA8C9;
+    --info-soft:#16232C;
+    --warn:#D9A445;
+    --warn-soft:#2B2314;
+    --crit:#E2685A;
+    --crit-soft:#2C1917;
+    --good:#3FAE84;
+    --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 12px 28px -14px rgba(0,0,0,0.6);
+  }
+  *{box-sizing:border-box;}
+  html{background:var(--paper);}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"IBM Plex Sans", "Segoe UI", Arial, sans-serif;
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{
+    font-family:"Fraunces","Iowan Old Style",Georgia,serif;
+    color:var(--ink);
+    font-weight:600;
+    text-wrap:balance;
+    line-height:1.18;
+    margin:0 0 0.5em 0;
+  }
+  p{margin:0 0 1em 0;}
+  a{color:var(--accent-ink);}
+  :root[data-theme="dark"] a, @media (prefers-color-scheme: dark){ a{color:var(--accent-ink);} }
+  code, .mono, .tag, .kv dd, .idcell{font-family:"IBM Plex Mono", ui-monospace, monospace;}
+  .numeric{font-variant-numeric:tabular-nums;}
+
+  .shell{max-width:1180px;margin:0 auto;padding:0 28px;}
+  .prose{max-width:760px;}
+
+  /* ---- top bar / index rail ---- */
+  .topbar{
+    position:sticky;top:0;z-index:20;
+    background:color-mix(in srgb, var(--paper) 88%, transparent);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line);
+  }
+  .topbar-inner{max-width:1180px;margin:0 auto;padding:10px 28px;display:flex;align-items:center;gap:18px;}
+  .topbar .brandmark{font-family:"Fraunces",serif;font-weight:600;font-size:15px;white-space:nowrap;}
+  .topbar .brandmark .dim{color:var(--muted);font-weight:400;}
+  .topnav{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;}
+  .topnav::-webkit-scrollbar{display:none;}
+  .topnav a{
+    flex:0 0 auto;padding:5px 10px;border-radius:999px;font-size:12.5px;color:var(--muted);
+    text-decoration:none;white-space:nowrap;border:1px solid transparent;
+  }
+  .topnav a:hover{border-color:var(--line-strong);color:var(--ink);}
+
+  main{display:grid;grid-template-columns:200px 1fr;gap:0;max-width:1180px;margin:0 auto;}
+  aside.rail{padding:36px 18px 60px 28px;border-right:1px solid var(--line);}
+  aside.rail ol{list-style:none;margin:0;padding:0;counter-reset:sec;}
+  aside.rail li{counter-increment:sec;margin:0 0 2px 0;}
+  aside.rail a{
+    display:block;padding:5px 8px;border-radius:6px;font-size:12.2px;color:var(--muted);
+    text-decoration:none;line-height:1.35;
+  }
+  aside.rail a:hover{background:var(--accent-soft);color:var(--accent-ink);}
+  aside.rail .num{font-family:"IBM Plex Mono",monospace;color:var(--line-strong);margin-right:6px;}
+  @media (max-width: 980px){ main{grid-template-columns:1fr;} aside.rail{display:none;} }
+
+  .content{padding:0 32px 100px 40px;min-width:0;}
+  @media (max-width: 980px){ .content{padding:0 20px 80px 20px;} }
+
+  section.sec{padding-top:52px;scroll-margin-top:70px;}
+  section.sec:first-of-type{padding-top:36px;}
+  .sec-eyebrow{
+    font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:0.06em;
+    color:var(--muted);text-transform:uppercase;margin-bottom:6px;
+  }
+  section.sec h2{font-size:26px;border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:20px;}
+  section.sec h3{font-size:18px;margin-top:28px;}
+
+  /* ---- cover ---- */
+  .cover{padding:64px 0 40px 0;border-bottom:1px solid var(--line);}
+  .cover .kicker{
+    font-family:"IBM Plex Mono",monospace;font-size:12.5px;letter-spacing:0.08em;color:var(--accent-ink);
+    text-transform:uppercase;margin-bottom:18px;
+  }
+  .cover h1{font-size:44px;max-width:14ch;margin-bottom:14px;}
+  .cover .sub{font-size:18px;color:var(--muted);max-width:52ch;margin-bottom:34px;}
+  .metagrid{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
+    border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;
+  }
+  @media (max-width:760px){ .metagrid{grid-template-columns:repeat(2,1fr);} }
+  .metacell{background:var(--paper-raised);padding:14px 16px;}
+  .metacell .k{font-size:10.5px;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:4px;}
+  .metacell .v{font-size:14px;font-weight:500;}
+  .metacell .v.mono{font-family:"IBM Plex Mono",monospace;font-size:13px;}
+  .status-pass-gaps{display:inline-block;padding:2px 9px;border-radius:999px;background:var(--warn-soft);color:var(--warn);font-size:12px;font-weight:600;}
+
+  /* ---- pills ---- */
+  .pill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:11.5px;font-weight:600;font-family:"IBM Plex Mono",monospace;letter-spacing:0.01em;white-space:nowrap;}
+  .pill-crit{background:var(--crit-soft);color:var(--crit);}
+  .pill-high{background:var(--warn-soft);color:var(--warn);}
+  .pill-med{background:var(--info-soft);color:var(--info);}
+  .pill-low{background:var(--line);color:var(--muted);}
+  .pill-opp{background:var(--accent-soft);color:var(--accent-ink);}
+  .pill-p1{background:var(--crit);color:#fff;}
+  .pill-p2{background:var(--warn);color:#1a1206;}
+  .pill-p3{background:var(--info);color:#fff;}
+  .pill-p4{background:var(--line-strong);color:var(--ink);}
+  .pill-ghost{background:transparent;border:1px solid var(--line-strong);color:var(--muted);}
+  .pill-good{background:var(--accent-soft);color:var(--accent-ink);}
+  .pill-quickwin{background:var(--accent);color:#fff;}
+
+  /* ---- exec summary tiles ---- */
+  .tilegrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0 8px 0;}
+  @media (max-width:700px){.tilegrid{grid-template-columns:1fr;}}
+  .tile{background:var(--paper-raised);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);}
+  .tile .label{font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:6px;}
+  .tile .val{font-size:14.5px;line-height:1.45;}
+  .tile.accentline{border-left:3px solid var(--crit);}
+
+  /* ---- tables ---- */
+  .twrap{overflow-x:auto;margin:14px 0 24px 0;border:1px solid var(--line);border-radius:var(--radius);}
+  table{border-collapse:collapse;width:100%;font-size:13.5px;background:var(--paper-raised);}
+  th,td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;}
+  thead th{background:var(--accent-soft);color:var(--accent-ink);font-size:11.5px;text-transform:uppercase;letter-spacing:0.03em;font-weight:600;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:color-mix(in srgb, var(--accent-soft) 40%, transparent);}
+
+  /* ---- scorecards ---- */
+  .scoregrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin:16px 0 8px 0;}
+  .scorecell{background:var(--paper-raised);border:1px solid var(--line);border-radius:9px;padding:11px 13px;display:flex;justify-content:space-between;align-items:center;gap:10px;}
+  .scorecell .name{font-size:13px;}
+  .rating{font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px;white-space:nowrap;}
+  .r-excellent{background:var(--accent-soft);color:var(--accent-ink);}
+  .r-good{background:var(--info-soft);color:var(--info);}
+  .r-fair{background:var(--warn-soft);color:var(--warn);}
+  .r-poor{background:var(--crit-soft);color:var(--crit);}
+  .r-critical{background:var(--crit);color:#fff;}
+  .r-unknown{background:var(--line);color:var(--muted);}
+
+  /* ---- energy scale swatch ---- */
+  .escale{display:flex;gap:3px;margin:10px 0;}
+  .escale span{width:34px;height:28px;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;}
+
+  /* ---- finding cards ---- */
+  .finding{
+    background:var(--paper-raised);border:1px solid var(--line);border-radius:12px;
+    margin:0 0 22px 0;overflow:hidden;box-shadow:var(--shadow);
+    break-inside:avoid;page-break-inside:avoid;
+  }
+  .finding-head{
+    display:flex;flex-wrap:wrap;align-items:center;gap:8px;
+    padding:14px 18px;border-bottom:1px solid var(--line);background:color-mix(in srgb, var(--paper) 60%, var(--paper-raised));
+  }
+  .finding-head .fid{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:13px;margin-right:2px;}
+  .finding-title{padding:14px 18px 0 18px;font-size:17px;font-weight:600;font-family:"Fraunces",serif;}
+  .finding-body{padding:6px 18px 18px 18px;}
+  .kv{display:grid;grid-template-columns:150px 1fr;gap:6px 14px;margin:10px 0;font-size:13.5px;}
+  .kv dt{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:0.04em;padding-top:2px;}
+  .kv dd{margin:0;font-family:"IBM Plex Sans",sans-serif;}
+  .kv dd.code{font-family:"IBM Plex Mono",monospace;font-size:12.5px;}
+  .callout{border-radius:8px;padding:10px 14px;margin:10px 0;font-size:13.5px;}
+  .callout-donotbreak{background:var(--accent-soft);border:1px solid color-mix(in srgb, var(--accent) 40%, transparent);}
+  .callout-donotbreak .lbl{font-family:"IBM Plex Mono",monospace;font-size:11px;text-transform:uppercase;color:var(--accent-ink);font-weight:700;margin-bottom:3px;}
+  .callout-accept{background:var(--info-soft);border:1px solid color-mix(in srgb, var(--info) 35%, transparent);}
+  .callout-accept .lbl{font-family:"IBM Plex Mono",monospace;font-size:11px;text-transform:uppercase;color:var(--info);font-weight:700;margin-bottom:3px;}
+  .callout-accept pre{white-space:pre-wrap;margin:0;font-family:"IBM Plex Mono",monospace;font-size:12.5px;line-height:1.55;}
+  figure.ev{margin:12px 0;}
+  figure.ev img{width:100%;border-radius:8px;border:1px solid var(--line);display:block;}
+  figure.ev figcaption{font-size:11.5px;color:var(--muted);margin-top:5px;font-family:"IBM Plex Mono",monospace;}
+
+  .badgebar{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 12px 0;}
+
+  hr.rule{border:none;border-top:1px solid var(--line);margin:36px 0;}
+
+  ul.tight li, ol.tight li{margin-bottom:6px;}
+
+  .journey-map{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:13px;margin:10px 0 18px 0;}
+  .journey-map .step{background:var(--paper-raised);border:1px solid var(--line);border-radius:7px;padding:6px 10px;}
+  .journey-map .arrow{color:var(--muted);}
+  .journey-map .step.friction{border-color:var(--crit);color:var(--crit);background:var(--crit-soft);}
+
+  .roadmap-phase{border-left:3px solid var(--accent);padding-left:16px;margin-bottom:26px;}
+  .roadmap-phase h4{margin-bottom:4px;}
+  .roadmap-phase .items{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+  .roadmap-item{background:var(--paper-raised);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:13px;min-width:220px;flex:1 1 220px;}
+  .roadmap-item .idr{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);}
+
+  footer.report-footer{padding:40px 0 70px 0;border-top:1px solid var(--line);margin-top:50px;color:var(--muted);font-size:12.5px;}
+
+  @media print{
+    aside.rail, .topbar{display:none;}
+    main{display:block;}
+    .content{padding:0;}
+    body{font-size:11.5pt;}
+    .finding{break-inside:avoid;}
+    section.sec{break-before:page;padding-top:0;}
+    section.sec:first-of-type{break-before:auto;}
+    a{color:inherit;text-decoration:none;}
+    .shell{max-width:100%;}
+    figure.ev img{max-width:100%;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brandmark">Anclora EnergyScan <span class="dim">/ Auditoria UX-UI</span></div>
+    <nav class="topnav">
+      <a href="#resumen">Resumen</a>
+      <a href="#scorecards">Scorecards</a>
+      <a href="#wizard">Wizard</a>
+      <a href="#trust">Confianza</a>
+      <a href="#findings">Findings</a>
+      <a href="#roadmap">Roadmap</a>
+      <a href="#coverage">Cobertura</a>
+    </nav>
+  </div>
+</div>
+
+<div class="cover shell">
+  <div class="kicker">ux-product-experience-review v1.3.0 &middot; AUDIT_WITH_REPO_CONTEXT</div>
+  <h1>Auditoria de Experiencia de Producto</h1>
+  <p class="sub">Anclora EnergyScan &mdash; prediagnostico energetico orientativo para viviendas. Evaluacion end-to-end de tarea, confianza, arquitectura de informacion y superficie premium, con evidencia de navegador real y de repositorio.</p>
+  <div class="metagrid">
+    <div class="metacell"><div class="k">Fecha de ejecucion</div><div class="v">7 de septiembre de 2026</div></div>
+    <div class="metacell"><div class="k">Entorno auditado</div><div class="v">Produccion (dominio canonico)</div></div>
+    <div class="metacell"><div class="k">URL canonica</div><div class="v mono">energyscan.anclora.com</div></div>
+    <div class="metacell"><div class="k">HEAD auditado</div><div class="v mono">5a4e1a9 (development)</div></div>
+    <div class="metacell"><div class="k">Deployment drift</div><div class="v">Ninguno &mdash; produccion = HEAD</div></div>
+    <div class="metacell"><div class="k">Skill / version</div><div class="v mono">ux-product-experience-review 1.3.0</div></div>
+    <div class="metacell"><div class="k">Findings</div><div class="v">16 (4 P1 &middot; 4 P2 &middot; 5 P3 &middot; 3 P4)</div></div>
+    <div class="metacell"><div class="k">Estado final</div><div class="v"><span class="status-pass-gaps">PASS_WITH_GAPS</span></div></div>
+  </div>
+</div>
+
+<main>
+<aside class="rail">
+  <ol>
+    <li><a href="#resumen"><span class="num">01</span>Resumen ejecutivo</a></li>
+    <li><a href="#modelo"><span class="num">02</span>Modelo de producto</a></li>
+    <li><a href="#promesa"><span class="num">03</span>Promesa vs experiencia</a></li>
+    <li><a href="#usuarios"><span class="num">04</span>Tipos de usuario</a></li>
+    <li><a href="#tareas"><span class="num">05</span>Inventario de tareas</a></li>
+    <li><a href="#journeys"><span class="num">06</span>Journeys criticos</a></li>
+    <li><a href="#screenmap"><span class="num">07</span>Mapa de pantallas</a></li>
+    <li><a href="#expmap"><span class="num">08</span>Mapa de experiencia</a></li>
+    <li><a href="#scorecards"><span class="num">09-10</span>Scorecards UX / UI</a></li>
+    <li><a href="#premium"><span class="num">11</span>Superficie premium</a></li>
+    <li><a href="#shell"><span class="num">12</span>Application shell</a></li>
+    <li><a href="#viewport"><span class="num">13-14</span>Viewport y densidad</a></li>
+    <li><a href="#wizard"><span class="num">15</span>Wizard diagnostico</a></li>
+    <li><a href="#catastro"><span class="num">16</span>Catastro / mapa</a></li>
+    <li><a href="#ocr"><span class="num">17</span>OCR / documentos</a></li>
+    <li><a href="#resultado"><span class="num">18</span>Explicabilidad resultado</a></li>
+    <li><a href="#trust"><span class="num">19</span>Confianza e incertidumbre</a></li>
+    <li><a href="#escenarios"><span class="num">20</span>Comparacion escenarios</a></li>
+    <li><a href="#budget"><span class="num">21</span>Budget Review</a></li>
+    <li><a href="#monetizacion"><span class="num">22</span>Premium / monetizacion</a></li>
+    <li><a href="#reportconf"><span class="num">23</span>Confianza del informe</a></li>
+    <li><a href="#provider"><span class="num">24</span>Proveedor / profesional</a></li>
+    <li><a href="#auth"><span class="num">25</span>Auth y recuperacion</a></li>
+    <li><a href="#ia"><span class="num">26</span>Arquitectura de informacion</a></li>
+    <li><a href="#states"><span class="num">27</span>Estados de sistema</a></li>
+    <li><a href="#i18n"><span class="num">28</span>i18n</a></li>
+    <li><a href="#historico"><span class="num">29</span>Regresion historica</a></li>
+    <li><a href="#funciona"><span class="num">30</span>Lo que funciona bien</a></li>
+    <li><a href="#findings"><span class="num">31</span>Findings</a></li>
+    <li><a href="#quickwins"><span class="num">32</span>Quick wins</a></li>
+    <li><a href="#estructural"><span class="num">33</span>Oportunidades estructurales</a></li>
+    <li><a href="#roadmap"><span class="num">34</span>Roadmap</a></li>
+    <li><a href="#donotbreak"><span class="num">35</span>Do not break</a></li>
+    <li><a href="#coverage"><span class="num">36</span>Cobertura de evidencia</a></li>
+    <li><a href="#limitaciones"><span class="num">37</span>Limitaciones</a></li>
+  </ol>
+</aside>
+
+<div class="content">
+
+<section class="sec" id="resumen">
+  <div class="sec-eyebrow">01</div>
+  <h2>Resumen ejecutivo</h2>
+  <p>EnergyScan cumple su promesa central mejor de lo que sugieren sus errores superficiales: un visitante anonimo puede completar un prediagnostico de cinco pasos sin crear cuenta, con opciones de <em>&laquo;no lo se&raquo;</em> en los campos tecnicos, y llegar a una pantalla de resultado que explica su clase energetica, el nivel de confianza y que datos faltan. Ese nucleo diagnostico es solido. Pero tres familias de defectos de consistencia &mdash;precios distintos para el mismo producto segun donde se miren, un aviso legal que cambia de idioma segun la carga, y una navegacion movil que pierde el 100% de sus enlaces incluido el acceso&mdash; aparecen exactamente en los puntos donde el usuario deberia sentir mas control: el consentimiento legal, la decision de pago y el acceso basico a la cuenta. Ninguno de estos problemas es de arquitectura profunda; todos son de gobernanza de contenido e hidratacion de i18n, y son reparables sin tocar el motor de scoring, que es la pieza mas madura del producto.</p>
+
+  <div class="tilegrid">
+    <div class="tile accentline">
+      <div class="label">Mayor friccion de usuario</div>
+      <div class="val">En movil y tablet el header pierde toda la navegacion y el enlace &laquo;Entrar&raquo; desaparece sin sustituto (menu hamburguesa inexistente) &mdash; ver <strong>EGY-004</strong>.</div>
+    </div>
+    <div class="tile accentline">
+      <div class="label">Mayor riesgo de confianza y explicabilidad</div>
+      <div class="val">El aviso de que EnergyScan no es un CEE oficial se renderiza a veces en ingles sobre una interfaz en espanol, justo en el checkbox de consentimiento del wizard &mdash; ver <strong>EGY-002</strong>.</div>
+    </div>
+    <div class="tile">
+      <div class="label">Mayor oportunidad de simplificacion</div>
+      <div class="val">Unificar el precio de Budget Review en una unica fuente de verdad: hoy convive 14,90&nbsp;&euro; (hero) con 19,90&nbsp;&euro; (seccion de precios y pagina dedicada) &mdash; EGY-001 / EGY-003.</div>
+    </div>
+    <div class="tile">
+      <div class="label">Mayor quick win</div>
+      <div class="val">Pagina 404 generica de Next.js sin marca ni retorno al inicio; una plantilla de error con logo y CTA es un cambio de bajo esfuerzo y alto impacto de marca &mdash; EGY-008.</div>
+    </div>
+    <div class="tile">
+      <div class="label">Mayor oportunidad estructural</div>
+      <div class="val">Consolidar la arquitectura i18n: existen cuatro capas independientes (diccionario activo, ficheros <code>i18n-xx.ts</code> sueltos, metadatos de idioma que declaran 7 activos, y un <code>common.json</code> con paridad 100% que no esta conectado a la aplicacion).</div>
+    </div>
+    <div class="tile">
+      <div class="label">Mayor oportunidad de superficie premium</div>
+      <div class="val">Corregir el contraste de texto secundario en tema oscuro (<code>#7A7A7A</code> sobre fondos casi negros) detectado por analisis automatico en landing y en la pantalla de resultado.</div>
+    </div>
+    <div class="tile">
+      <div class="label">Economia de viewport</div>
+      <div class="val">En escritorio, el chrome global mide 65&nbsp;px de 900&nbsp;px de alto: el 92,8% del viewport queda para la tarea. No hay problema estructural aqui &mdash; el foco debe ir a movil, donde ese espacio ganado se pierde por falta de navegacion, no por chrome excesivo.</div>
+    </div>
+    <div class="tile">
+      <div class="label">Mayor oportunidad en el flujo diagnostico</div>
+      <div class="val">La busqueda catastral por direccion se queda bloqueada en &laquo;Cargando provincias&hellip;&raquo; de forma permanente (el backend responde correctamente; el fallo es de estado en cliente) &mdash; EGY-005.</div>
+    </div>
+  </div>
+
+  <h3>Valoracion global de la experiencia</h3>
+  <p><strong>FAIR, con un nucleo GOOD.</strong> El modelo de scoring distingue explicitamente dato conocido de estimado y expone confianza por factor; la pantalla de resultado es la superficie mas lograda del producto. Ese nucleo esta siendo erosionado por defectos de consistencia de contenido (precios, idioma, navegacion movil) que un usuario nota antes de llegar a apreciar la calidad del diagnostico, y que inciden justo sobre las dos cosas que un producto de prediagnostico energetico mas necesita para funcionar: confianza y claridad de lo que cuesta.</p>
+</section>
+
+<section class="sec" id="modelo">
+  <div class="sec-eyebrow">02</div>
+  <h2>Modelo de producto</h2>
+  <p>EnergyScan es una aplicacion Next.js (App Router, Next 14.2, Node 24) desplegada en Vercel bajo <code>energyscan.anclora.com</code>, con autenticacion NextAuth v5 (beta), base de datos via Prisma, pagos con Stripe, mapa catastral con MapLibre GL contra un backend propio de 7 endpoints de Catastro, OCR con Tesseract.js, y una integracion de IA generativa de Anthropic acotada al analisis visual de fotografias de vivienda (no a todo el producto).</p>
+  <div class="twrap">
+    <table>
+      <thead><tr><th>Capacidad declarada</th><th>Estado real</th><th>Evidencia</th></tr></thead>
+      <tbody>
+        <tr><td>OCR de documentacion (Tesseract)</td><td><span class="pill pill-good">EXISTE</span></td><td class="mono">src/lib/ocr/image-ocr.ts &middot; tesseract.js@7</td></tr>
+        <tr><td>Mapa / Catastro (MapLibre)</td><td><span class="pill pill-good">EXISTE</span></td><td class="mono">PropertyMap.tsx &middot; api/catastro/* (7 rutas)</td></tr>
+        <tr><td>IA generativa (Anthropic/Claude)</td><td><span class="pill pill-med">PARCIAL</span></td><td class="mono">api/ingestion/image/analyze &mdash; solo vision de fotos</td></tr>
+        <tr><td>Stripe (Premium, Budget Review, Provider)</td><td><span class="pill pill-good">EXISTE</span></td><td class="mono">stripe@22 &middot; api/checkout, api/webhook/stripe</td></tr>
+        <tr><td>i18n multi-idioma (7 idiomas declarados)</td><td><span class="pill pill-high">PARCIAL &mdash; profundidad real ES/EN/DE</span></td><td class="mono">preferences.ts::toDictLanguage() fuerza ca&rarr;es, fr/it/pt&rarr;en</td></tr>
+        <tr><td>Tema claro / oscuro</td><td><span class="pill pill-good">EXISTE</span></td><td class="mono">AppPreferencesProvider::applyTheme() &middot; base oscura por defecto</td></tr>
+        <tr><td>Certificado de Eficiencia Energetica oficial</td><td><span class="pill pill-ghost">NO APLICA &mdash; por diseno</span></td><td class="mono">legal-content.ts:51</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>No existe un paquete de sistema de diseno compartido (<code>@anclora/*</code>) consumido via npm; los tokens visuales son Tailwind ad-hoc mas variables locales. El propio repositorio ya se autoevalua como <em>&laquo;Partial&raquo;</em> en su auditoria interna de sistema de diseno (<code>docs/design-system-audit.md</code>) &mdash; ver seccion 29.</p>
+</section>
+
+<section class="sec" id="promesa">
+  <div class="sec-eyebrow">03</div>
+  <h2>Promesa de producto vs experiencia observada</h2>
+  <div class="twrap">
+    <table>
+      <thead><tr><th>Promesa</th><th>Experiencia observada</th><th>Veredicto</th></tr></thead>
+      <tbody>
+        <tr><td>&laquo;Prediagnostico orientativo, no CEE oficial&raquo;</td><td>Disclaimer presente en 3 capas (legal, docs, UI de resultado) y visualmente diferenciado del certificado importado; pero se renderiza en ingles de forma intermitente justo en el checkbox de consentimiento del wizard</td><td><span class="pill pill-high">CUMPLE PARCIALMENTE</span></td></tr>
+        <tr><td>&laquo;Puedes empezar sin cuenta&raquo;</td><td>Confirmado: wizard completo de 5 pasos hasta resultado sin login ni email</td><td><span class="pill pill-good">CUMPLE</span></td></tr>
+        <tr><td>Precios claros (0&euro; / 9,90&euro; / 19,90&euro;)</td><td>El mismo producto (Budget Review) muestra 14,90&euro; en el hero y 19,90&euro; en la seccion de precios y en <code>/pricing</code></td><td><span class="pill pill-crit">NO CUMPLE</span></td></tr>
+        <tr><td>Multi-idioma (7 idiomas)</td><td>Profundidad real solo en ES/EN/DE; CA/FR/IT/PT dependen de un fallback duro que produce mezcla de idiomas visible</td><td><span class="pill pill-high">CUMPLE PARCIALMENTE</span></td></tr>
+        <tr><td>Conexion con proveedores tras el diagnostico</td><td>Rutas y modelo de datos existen (<code>/provider</code>, <code>/profesional</code>, leads); no se pudo recorrer el handoff completo en esta pasada (ver Limitaciones)</td><td><span class="pill pill-ghost">NO VERIFICADO</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="sec" id="usuarios">
+  <div class="sec-eyebrow">04</div>
+  <h2>Tipos de usuario y estados</h2>
+  <div class="twrap">
+    <table>
+      <thead><tr><th>Tipo</th><th>Objetivo principal</th><th>CTA principal</th><th>Bloqueadores observados</th></tr></thead>
+      <tbody>
+        <tr><td>Visitante anonimo</td><td>Entender su situacion energetica sin compromiso</td><td>&laquo;Iniciar analisis gratuito&raquo;</td><td>Precio inconsistente antes de decidir avanzar (EGY-001)</td></tr>
+        <tr><td>Usuario con evaluacion completada (anonimo)</td><td>Interpretar resultado y decidir si paga el Informe/Premium</td><td>&laquo;Desbloquear informe Premium&raquo;</td><td>Ninguno critico; buena explicabilidad</td></tr>
+        <tr><td>Usuario en movil</td><td>Iniciar o consultar sin PC</td><td>Cualquiera del header</td><td><strong>Sin navegacion ni acceso a login</strong> (EGY-004)</td></tr>
+        <tr><td>Usuario considerando Budget Review</td><td>Saber si su presupuesto de reforma es razonable</td><td>&laquo;Importar presupuesto PDF&raquo;</td><td>Precio inconsistente segun pantalla de origen (EGY-001/003)</td></tr>
+        <tr><td>Usuario existente (login)</td><td>Recuperar acceso a su cuenta</td><td>&laquo;Entrar&raquo;</td><td>Mensaje de error correcto; no accesible desde movil (EGY-004)</td></tr>
+        <tr><td>Proveedor / profesional</td><td>Recibir leads cualificados</td><td>Registro / dashboard</td><td>No cubierto en esta pasada &mdash; ver Limitaciones</td></tr>
+        <tr><td>Administrador</td><td>Gobernar leads, KPIs, conocimiento</td><td>Panel admin (9 subsecciones)</td><td>No cubierto &mdash; requiere credenciales no disponibles</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="sec" id="tareas">
+  <div class="sec-eyebrow">05</div>
+  <h2>Inventario de tareas</h2>
+  <ul class="tight">
+    <li><strong>CORE:</strong> completar el wizard de prediagnostico y obtener una clase energetica con confianza asociada.</li>
+    <li><strong>CORE:</strong> entender que puede hacer a continuacion (Informe PDF, Premium, contactar proveedor).</li>
+    <li><strong>FRECUENTE:</strong> localizar la vivienda (direccion, referencia catastral o clic en mapa).</li>
+    <li><strong>FRECUENTE:</strong> comparar el coste de Budget Review / Informe PDF / Premium antes de decidir.</li>
+    <li><strong>OCASIONAL:</strong> iniciar sesion para recuperar un analisis previo.</li>
+    <li><strong>OCASIONAL:</strong> subir un presupuesto de reforma para revision.</li>
+    <li><strong>EDGE:</strong> cambiar idioma/moneda/unidades desde los valores por defecto.</li>
+    <li><strong>ADMIN:</strong> gestionar leads y proveedores (no verificado en esta pasada).</li>
+  </ul>
+</section>
+
+<section class="sec" id="journeys">
+  <div class="sec-eyebrow">06</div>
+  <h2>Journeys criticos observados</h2>
+  <h3>Journey primario: prediagnostico anonimo (PRIMARY_JOURNEY, CORE)</h3>
+  <div class="journey-map">
+    <span class="step">Landing</span><span class="arrow">&rarr;</span>
+    <span class="step">Iniciar analisis gratuito</span><span class="arrow">&rarr;</span>
+    <span class="step">Paso 1&ndash;2: vivienda + localizacion</span><span class="arrow">&rarr;</span>
+    <span class="step friction">Busqueda por direccion bloqueada</span><span class="arrow">&rarr;</span>
+    <span class="step">Fallback: clic en mapa</span><span class="arrow">&rarr;</span>
+    <span class="step">Pasos 3&ndash;4: envolvente + instalaciones</span><span class="arrow">&rarr;</span>
+    <span class="step friction">Consentimiento en idioma mezclado</span><span class="arrow">&rarr;</span>
+    <span class="step">Resultado: clase + confianza</span>
+  </div>
+  <p>El journey se completa de extremo a extremo (evidencia <code>MEASURED_BROWSER</code>, resultado real generado con datos sinteticos), pero atraviesa dos puntos de friccion documentados como EGY-005 y EGY-002.</p>
+
+  <h3>Journey secundario: decision de pago (SECONDARY_JOURNEY, FRECUENTE)</h3>
+  <div class="journey-map">
+    <span class="step">Landing / hero</span><span class="arrow">&rarr;</span>
+    <span class="step friction">Precio Budget Review = 14,90&euro;</span><span class="arrow">&rarr;</span>
+    <span class="step">Seccion &laquo;Precios&raquo; landing</span><span class="arrow">&rarr;</span>
+    <span class="step friction">Precio Budget Review = 19,90&euro;</span><span class="arrow">&rarr;</span>
+    <span class="step">/pricing</span><span class="arrow">&rarr;</span>
+    <span class="step friction">Tarjetas en ingles</span>
+  </div>
+
+  <h3>Journey de recuperacion: login fallido</h3>
+  <p><strong>ENTRY:</strong> /auth &middot; <strong>ACCION:</strong> credenciales sinteticas invalidas &middot; <strong>SYSTEM_FEEDBACK:</strong> tarjeta clara &laquo;Email o contrasena incorrectos&raquo;, sin filtrar si el email existe &middot; <strong>RECOVERY:</strong> formulario conserva el email introducido. Evaluacion: <span class="pill pill-good">GOOD</span>.</p>
+
+  <h3>Journey movil: acceso desde smartphone (RECOVERY_JOURNEY forzado)</h3>
+  <p>En 390&times;844 y 768&times;1024 el header no ofrece ningun enlace de navegacion ni acceso a &laquo;Entrar&raquo;, y no existe menu hamburguesa. El unico camino a login en movil es escribir <code>/auth</code> manualmente. Evaluacion: <span class="pill pill-crit">CRITICAL</span> (EGY-004).</p>
+</section>
+
+<section class="sec" id="screenmap">
+  <div class="sec-eyebrow">07</div>
+  <h2>Mapa de pantallas</h2>
+  <div class="twrap">
+    <table>
+      <thead><tr><th>Pantalla</th><th>Proposito</th><th>Accion primaria</th><th>Auth</th><th>Issues observados</th></tr></thead>
+      <tbody>
+        <tr><td>/ (landing)</td><td>Propuesta de valor + entrada</td><td>Iniciar analisis gratuito</td><td>No</td><td>EGY-001, EGY-002, EGY-009, EGY-013</td></tr>
+        <tr><td>/wizard</td><td>Captura de datos de vivienda</td><td>Siguiente / Buscar vivienda</td><td>No</td><td>EGY-005, EGY-006, EGY-002</td></tr>
+        <tr><td>/assessment/[id]</td><td>Resultado y explicabilidad</td><td>Desbloquear Premium</td><td>No (anonimo)</td><td>EGY-007 (contraste)</td></tr>
+        <tr><td>/pricing</td><td>Comparativa de planes</td><td>Start Budget Review / Premium</td><td>No</td><td>EGY-003</td></tr>
+        <tr><td>/budget-review</td><td>Revision de presupuesto de reforma</td><td>Importar presupuesto PDF</td><td>No (modo demo disponible)</td><td>No probado con datos reales (por seguridad)</td></tr>
+        <tr><td>/auth</td><td>Inicio de sesion</td><td>Entrar</td><td>&mdash;</td><td>Ninguno critico; inaccesible desde movil (EGY-004)</td></tr>
+        <tr><td>/calculadora-ahorro</td><td>Estimacion de ahorro</td><td>Calcular</td><td>No</td><td>No cubierto por navegador en esta pasada</td></tr>
+        <tr><td>/provider, /profesional</td><td>Alta y dashboard de proveedor/profesional</td><td>Registro</td><td>Si</td><td>No cubierto &mdash; ver Limitaciones</td></tr>
+        <tr><td>/admin/*</td><td>Gobernanza (9 subsecciones)</td><td>&mdash;</td><td>Si (rol admin)</td><td>No cubierto &mdash; credenciales no disponibles</td></tr>
+        <tr><td>404 / ruta inexistente</td><td>Recuperacion de error</td><td>Ninguno</td><td>&mdash;</td><td>EGY-008</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="sec" id="expmap">
+  <div class="sec-eyebrow">08</div>
+  <h2>Mapa de experiencia</h2>
+  <p><strong>Entrada</strong> &mdash; landing con propuesta de valor clara &rarr; <strong>objetivo</strong> &mdash; saber la clase energetica de mi vivienda &rarr; <strong>accion</strong> &mdash; iniciar analisis gratuito &rarr; <strong>respuesta del sistema</strong> &mdash; wizard de 5 pasos con progreso visible &rarr; <strong>friccion</strong> &mdash; busqueda por direccion rota, consentimiento en idioma mezclado &rarr; <strong>resultado</strong> &mdash; clase estimada con confianza y evidencia por factor &rarr; <strong>recuperacion</strong> &mdash; fallback manual en el mapa funciona; fallback de idioma no existe (el usuario simplemente ve texto en otro idioma sin explicacion).</p>
+</section>
+
+<section class="sec" id="scorecards">
+  <div class="sec-eyebrow">09&ndash;10</div>
+  <h2>Scorecards UX y UI</h2>
+  <p>Calibracion: EXCELLENT &middot; GOOD &middot; FAIR &middot; POOR &middot; CRITICAL, segun el modelo de la skill. Base de evidencia: navegador real (desktop, tablet parcial, movil parcial) mas inspeccion de repositorio.</p>
+  <h3>UX</h3>
+  <div class="scoregrid">
+    <div class="scorecell"><span class="name">Claridad</span><span class="rating r-fair">FAIR</span></div>
+    <div class="scorecell"><span class="name">Eficiencia</span><span class="rating r-good">GOOD</span></div>
+    <div class="scorecell"><span class="name">Consistencia</span><span class="rating r-critical">CRITICAL</span></div>
+    <div class="scorecell"><span class="name">Feedback</span><span class="rating r-fair">FAIR</span></div>
+    <div class="scorecell"><span class="name">Recuperacion de errores</span><span class="rating r-fair">FAIR</span></div>
+    <div class="scorecell"><span class="name">Carga cognitiva</span><span class="rating r-good">GOOD</span></div>
+    <div class="scorecell"><span class="name">Navegacion</span><span class="rating r-poor">POOR</span></div>
+    <div class="scorecell"><span class="name">Onboarding</span><span class="rating r-good">GOOD</span></div>
+    <div class="scorecell"><span class="name">Accesibilidad</span><span class="rating r-fair">FAIR</span></div>
+    <div class="scorecell"><span class="name">Completar tarea responsive</span><span class="rating r-fair">FAIR</span></div>
+    <div class="scorecell"><span class="name">Jerarquia visual</span><span class="rating r-good">GOOD</span></div>
+    <div class="scorecell"><span class="name">Application shell (desktop)</span><span class="rating r-good">GOOD</span></div>
+    <div class="scorecell"><span class="name">Application shell (movil)</span><span class="rating r-critical">CRITICAL</span></div>
+    <div class="scorecell"><span class="name">Economia de viewport</span><span class="rating r-good">GOOD</span></div>
+  </div>
+  <h3>UI</h3>
+  <div class="scoregrid">
+    <div class="scorecell"><span class="name">Jerarquia de acciones</span><span class="rating r-good">GOOD</span></div>
+    <div class="scorecell"><span class="name">Coherencia de componentes</span><span class="rating r-fair">FAIR</span></div>
+    <div class="scorecell"><span class="name">Legibilidad de contenido</span><span class="rating r-fair">FAIR</span></div>
+    <div class="scorecell"><span class="name">Claridad de estados</span><span class="rating r-fair">FAIR</span></div>
+    <div class="scorecell"><span class="name">Coherencia de tema</span><span class="rating r-fair">FAIR</span></div>
+    <div class="scorecell"><span class="name">Densidad de datos</span><span class="rating r-good">GOOD</span></div>
+    <div class="scorecell"><span class="name">Ergonomia de modales</span><span class="rating r-unknown">UNKNOWN</span></div>
+    <div class="scorecell"><span class="name">Ergonomia de formularios</span><span class="rating r-fair">FAIR</span></div>
+    <div class="scorecell"><span class="name">Jerarquia espacial</span><span class="rating r-good">GOOD</span></div>
+    <div class="scorecell"><span class="name">Calidad visual premium</span><span class="rating r-fair">FAIR</span></div>
+    <div class="scorecell"><span class="name">Modernidad y acabado</span><span class="rating r-fair">FAIR</span></div>
+  </div>
+  <h3>Subscores especificos de EnergyScan</h3>
+  <div class="scoregrid">
+    <div class="scorecell"><span class="name">Diagnostic Input UX</span><span class="rating r-fair">FAIR</span></div>
+    <div class="scorecell"><span class="name">Result Comprehension</span><span class="rating r-good">GOOD</span></div>
+    <div class="scorecell"><span class="name">Scenario Comparability</span><span class="rating r-unknown">UNKNOWN</span></div>
+    <div class="scorecell"><span class="name">Monetization Trust</span><span class="rating r-poor">POOR</span></div>
+    <div class="scorecell"><span class="name">Report Confidence</span><span class="rating r-good">GOOD</span></div>
+  </div>
+  <p style="margin-top:14px;color:var(--muted);font-size:13px;">Ninguna puntuacion de esta seccion se emite solo desde codigo estatico: Application shell, Viewport Economy, Superficie Premium y Consistencia estan respaldadas por evidencia <code>MEASURED_BROWSER</code> real, segun exige la skill.</p>
+</section>
+
+<section class="sec" id="premium">
+  <div class="sec-eyebrow">11</div>
+  <h2>Evaluacion de superficie premium</h2>
+  <p>EnergyScan no recurre a decoracion de lujo: no hay glassmorphism, gradientes ornamentales ni saturacion de verde. La composicion de la pantalla de resultado (letra estimada, confianza, factores, evidencia por campo) demuestra disciplina de jerarquia y uso deliberado del espacio. Esto es consistente con el principio de la skill de que <em>premium</em> significa jerarquia disciplinada, no ornamento.</p>
+  <p>Lo que erosiona esa percepcion premium no es el estilo sino la fiabilidad del contenido: un precio que cambia segun donde se mira, o un disclaimer legal que aparece en el idioma equivocado, comunican descuido antes de que el usuario pueda apreciar la calidad del motor de scoring. A esto se suma el contraste insuficiente de textos secundarios en tema oscuro (EGY-007), que reduce la sensacion de acabado en las dos pantallas de mayor exposicion (landing y resultado). La ausencia de un paquete de design system compartido (seccion 02) es hoy una decision de producto sostenible, pero es el mecanismo por el cual estas inconsistencias tienden a acumularse con el tiempo.</p>
+  <p><strong>Veredicto: FAIR con nucleo GOOD.</strong> La superficie premium existe en la pantalla que mas importa (el resultado); no sobrevive de forma uniforme a monetizacion, tema oscuro y movil.</p>
+</section>
+
+<section class="sec" id="shell">
+  <div class="sec-eyebrow">12</div>
+  <h2>Application Shell Assessment</h2>
+  <div class="twrap">
+    <table>
+      <thead><tr><th>Control</th><th>Clasificacion</th><th>Nivel correcto</th></tr></thead>
+      <tbody>
+        <tr><td>Cómo funciona / Normativa / Mejoras (anclas)</td><td>GLOBAL_NAVIGATION</td><td>Si en desktop; ausente en movil/tablet</td></tr>
+        <tr><td>Precios (ancla + pagina dedicada)</td><td>GLOBAL_NAVIGATION</td><td>Parcial &mdash; dos representaciones divergentes (EGY-014)</td></tr>
+        <tr><td>Entrar / Iniciar analisis gratuito</td><td>ACCOUNT_ACTION / PRIMARY_CONTENT_ACTION</td><td>Si en desktop; ausente en movil/tablet (EGY-004)</td></tr>
+        <tr><td>Selector idioma / moneda / unidades</td><td>GLOBAL_PREFERENCE</td><td>Correcto en posicion; defaults incorrectos (EGY-009, EGY-010)</td></tr>
+        <tr><td>Selector de tema (dark/light/system)</td><td>GLOBAL_PREFERENCE</td><td>Correcto en desktop; touch target pequeno en movil (EGY-015)</td></tr>
+        <tr><td>Paso X de 5 + barra de progreso</td><td>SCREEN_NAVIGATION</td><td>Correcto, siempre visible dentro del wizard</td></tr>
+        <tr><td>Desbloquear informe Premium</td><td>PRIMARY_CONTENT_ACTION</td><td>Correcto, contextual a la pantalla de resultado</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>En desktop el shell es escalable: navegacion global compacta, controles de pantalla permanecen con la pantalla, sin duplicacion de acciones entre header y contenido. En movil el shell no se degrada de forma proporcional: no reduce, <strong>elimina</strong> la capa de navegacion global sin sustituirla por un patron movil equivalente (drawer, hoja inferior, menu). Esa es la brecha estructural real, no un defecto de espaciado local.</p>
+</section>
+
+<section class="sec" id="viewport">
+  <div class="sec-eyebrow">13&ndash;14</div>
+  <h2>Viewport Economy y mapa de densidad visual</h2>
+  <div class="twrap">
+    <table>
+      <thead><tr><th>Metrica</th><th>Valor medido</th></tr></thead>
+      <tbody>
+        <tr><td>Viewport de referencia</td><td class="mono">1440&times;900</td></tr>
+        <tr><td>Alto de chrome global (header)</td><td class="mono numeric">65 px</td></tr>
+        <tr><td>Alto disponible para tarea primaria</td><td class="mono numeric">~835 px (92,8%)</td></tr>
+        <tr><td>Filas de controles persistentes</td><td class="mono numeric">1</td></tr>
+        <tr><td>Sidebar persistente</td><td>Ninguno</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>No hay relegacion del espacio de trabajo en desktop: la economia de viewport ya es buena y no requiere una recomendacion de recorte adicional. El mapa de densidad visual muestra la pantalla de resultado como la mas densa en informacion (letra, confianza, factores, evidencias) pero organizada en bloques con jerarquia clara, no como una acumulacion plana de tarjetas. La landing en movil, en cambio, es donde la densidad de <em>informacion</em> baja artificialmente porque la navegacion desaparece &mdash; no es un problema de exceso de densidad sino de un vacio estructural (EGY-004).</p>
+</section>
+
+<section class="sec" id="wizard">
+  <div class="sec-eyebrow">15</div>
+  <h2>Diagnostic Wizard Assessment</h2>
+  <div class="twrap">
+    <table>
+      <thead><tr><th>Dimension</th><th>Observacion</th></tr></thead>
+      <tbody>
+        <tr><td>Pasos</td><td class="mono">5 (&laquo;PASO X DE 5&raquo;) + barra de puntos, consistente en los 5</td></tr>
+        <tr><td>Back / Next</td><td>Presentes y consistentes; botones fijos al fondo en movil</td></tr>
+        <tr><td>&laquo;No lo se&raquo;</td><td>Disponible en casi todos los campos tecnicos (orientacion, cubierta, aislamiento)</td></tr>
+        <tr><td>Validacion</td><td>Tardia y generica: banner &laquo;Invalid input&raquo; sin traducir, sin foco en el campo (EGY-006)</td></tr>
+        <tr><td>Unidades</td><td>m&sup2; correcto una vez corregidas las preferencias; por defecto aparecen ft&sup2; (EGY-009)</td></tr>
+        <tr><td>Localizacion / Catastro</td><td>Busqueda por direccion rota (EGY-005); clic en mapa funciona como fallback robusto</td></tr>
+        <tr><td>Consentimiento legal</td><td>Checkbox final con disclaimer en idioma inconsistente (EGY-002)</td></tr>
+        <tr><td>Guardado de progreso</td><td>No verificado si persiste tras cierre de pestaña (fuera de alcance de esta pasada)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p><strong>&iquest;Puede un no-experto completar el diagnostico con confianza?</strong> Si, en el sentido de que puede terminar sin bloquearse gracias a &laquo;No lo se&raquo; y al fallback del mapa. La confianza se ve comprometida en el unico punto donde el usuario debe tomar una decision informada de verdad: el checkbox de consentimiento, que puede aparecer sin traducir.</p>
+</section>
+
+<section class="sec" id="catastro">
+  <div class="sec-eyebrow">16</div>
+  <h2>Catastro / Map Experience</h2>
+  <p>La pestana de busqueda por <strong>Direccion</strong> queda bloqueada en &laquo;Cargando provincias&hellip;&raquo; de forma indefinida, pese a que <code>GET /api/catastro/provinces</code> responde <code>200</code> con el listado completo &mdash; el fallo es de estado en cliente, no de backend (EGY-005). La busqueda por <strong>Referencia Catastral</strong> con una referencia valida pero inexistente falla en silencio: el boton vuelve a su estado inicial sin mensaje de exito ni error, mientras la peticion real devuelve <code>503</code> (EGY-010). Frente a ambos fallos, el <strong>clic directo en el mapa</strong> funciona de forma fiable, con badge &laquo;MANUAL&raquo; y reencuadre inmediato &mdash; es el fallback que sostiene el journey completo.</p>
+  <p><strong>&iquest;El dato catastral reduce esfuerzo o anade confusion?</strong> Cuando funciona (clic manual), reduce esfuerzo. Cuando falla (dos de tres vias de busqueda), no confunde por dar un dato incorrecto, sino por no comunicar que fallo.</p>
+</section>
+
+<section class="sec" id="ocr">
+  <div class="sec-eyebrow">17</div>
+  <h2>OCR / Document Input</h2>
+  <p>La interfaz de carga (&laquo;Subir CEE PDF&raquo;, &laquo;Subir presupuesto PDF&raquo;) se localizo y se documento visualmente en Budget Review y en el paso de envolvente del wizard. Por proteccion de datos, no se subio ningun archivo real ni sintetico con contenido reconocible; por tanto <strong>la calidad de extraccion, el manejo de confianza del parser y la posibilidad de que el usuario verifique lo extraido antes de confiar en ello permanecen <code>UNKNOWN</code></strong> para esta pasada. Se confirmo por codigo (seccion 02) que el motor OCR (Tesseract.js) existe y esta cableado a rutas de ingestion reales.</p>
+</section>
+
+<section class="sec" id="resultado">
+  <div class="sec-eyebrow">18</div>
+  <h2>Result and Score Explainability</h2>
+  <p>Es la pantalla mejor resuelta del producto. El motor de scoring (<code>src/lib/scoring.ts</code>) aplica reglas por campo (codigo postal, ano, superficie, tipologia, orientacion, ventanas, aislamiento, calefaccion, ventilacion, ACS, renovables); cuando un dato es desconocido, genera explicitamente <code>delta: 0</code>, <code>type: "neutral"</code> y lo anade a <code>missingData</code>, con una funcion de agregacion de confianza (<code>confidenceRank</code>) que produce niveles &laquo;Baja&raquo;/&laquo;Media&raquo;. Esta logica se traduce en la UI: la pantalla de resultado muestra letra estimada, confianza del motor, &laquo;Factores penalizadores&raquo;, &laquo;Puntos fuertes&raquo;, &laquo;Datos faltantes&raquo; y una tabla de &laquo;Evidencias y fuentes de datos&raquo; con trazabilidad por campo. Un certificado CEE importado se distingue visualmente (borde de color propio) de la estimacion propia.</p>
+  <p><strong>&iquest;Se evita la falsa precision?</strong> Si: el modelo declara confianza baja cuando faltan datos y lo expone, en vez de aparentar exactitud uniforme. El unico deficit medido en esta pantalla es de forma, no de fondo: contraste insuficiente en los textos secundarios de las tarjetas de factores en tema oscuro (EGY-007).</p>
+</section>
+
+<section class="sec" id="trust">
+  <div class="sec-eyebrow">19</div>
+  <h2>Trust and Uncertainty Assessment</h2>
+  <p>Citas reales verificadas en codigo:</p>
+  <ul class="tight">
+    <li><code>legal-content.ts:51</code> &mdash; <em>&laquo;Anclora EnergyScan no genera Certificados de Eficiencia Energetica oficiales. Las estimaciones, letras, costes y recomendaciones son orientativas y deben contrastarse con un tecnico competente.&raquo;</em></li>
+    <li><code>legal-content.ts:72</code> &mdash; <em>&laquo;No constituye certificacion energetica oficial, informe pericial ni asesoramiento legal.&raquo;</em></li>
+    <li><code>assessment/[id]/page.tsx:286</code> &mdash; <em>&laquo;A continuacion encontraras tu calificacion energetica orientativa&hellip;&raquo;</em></li>
+  </ul>
+  <p>No se detecto lenguaje de garantia (&laquo;ahorraras X&raquo;) ni sobreclaim de precision cientifica en las superficies auditadas. El unico riesgo real de confianza no es de <em>contenido</em> del disclaimer sino de <strong>entrega</strong>: cuando el checkbox de consentimiento aparece en ingles sobre una sesion en espanol (EGY-002), el usuario puede aceptar un texto que no ha podido leer en su idioma, lo cual es precisamente el escenario que un disclaimer de alcance de producto existe para evitar. Es un fallo de ingenieria de hidratacion i18n con consecuencia legal, no un fallo de redaccion.</p>
+  <div class="callout callout-donotbreak">
+    <div class="lbl">DO_NOT_BREAK</div>
+    La separacion visual entre certificado CEE importado y estimacion propia en la pantalla de resultado, y la presencia del disclaimer en las 3 capas (legal / docs / UI) deben preservarse integramente al corregir EGY-002.
+  </div>
+</section>
+
+<section class="sec" id="escenarios">
+  <div class="sec-eyebrow">20</div>
+  <h2>Comparacion de escenarios de mejora</h2>
+  <p><span class="pill pill-ghost">UNKNOWN</span> &mdash; el journey de navegador no llego a una pantalla de comparacion de escenarios de mejora dentro del tiempo disponible de esta pasada, y no se confirmo por codigo una ruta o componente dedicado a &laquo;escenarios&raquo; con el mismo nivel de certeza que el resto de superficies. No se emite scorecard mas alla de <code>UNKNOWN</code> para evitar declarar una capacidad como observada sin evidencia. Se recomienda una pasada de seguimiento dirigida especificamente a esta superficie.</p>
+</section>
+
+<section class="sec" id="budget">
+  <div class="sec-eyebrow">21</div>
+  <h2>Budget Review</h2>
+  <p><code>/budget-review</code> ofrece explicacion del servicio, textarea y boton &laquo;Importar presupuesto PDF&raquo;, con un <strong>modo demo</strong> disponible (<code>api/budget-review/demo</code>) que permite observar el resultado tipo sin subir datos reales &mdash; una buena decision de producto para pruebas seguras que, sin embargo, no se exploto a fondo en esta pasada por limite de tiempo. El paywall existe mediante Stripe (<code>api/budget-review/checkout</code>); no se inicio el checkout. El precio mostrado en esta pagina (19,90&euro;) coincide con <code>/pricing</code> pero no con el hero de landing (14,90&euro;) &mdash; mismo hallazgo que EGY-001.</p>
+  <p><strong>&iquest;Entiende el usuario que se detecto realmente?</strong> No verificado end-to-end (no se subio un presupuesto real); la existencia del modo demo sugiere que el equipo ya penso en este problema, pero se recomienda una auditoria dedicada de la confianza del parser en una pasada de seguimiento.</p>
+</section>
+
+<section class="sec" id="monetizacion">
+  <div class="sec-eyebrow">22</div>
+  <h2>Premium / Monetizacion</h2>
+  <p>La estructura de precios (Analisis gratuito 0&euro;, Informe PDF 9,90&euro;, Budget Review 19,90&euro;, Pack Reforma &laquo;proximamente&raquo;) es razonable y el valor se muestra antes del muro de pago (letra, confianza, factores visibles gratis; el PDF y el detalle de partidas quedan detras del pago). El problema no es el modelo sino su <strong>entrega inconsistente</strong>: tres representaciones del mismo precio de Budget Review (EGY-001, EGY-003) y contenido en ingles en las tarjetas de mayor intencion de compra de <code>/pricing</code>. Esto es exactamente el tipo de defecto que el principio 9 de la skill (&laquo;No Forced Findings&raquo; / &laquo;No Styling-Only Bias&raquo;) distingue de un problema estetico: es un defecto de confianza transaccional, no de gusto visual.</p>
+</section>
+
+<section class="sec" id="reportconf">
+  <div class="sec-eyebrow">23</div>
+  <h2>Report Confidence</h2>
+  <p>La pantalla de resultado gratuita ya transmite suficiente rigor metodologico (tabla de evidencias, confianza por factor) como para que un usuario la comparta con un tecnico antes de pagar el informe PDF. No se genero ni se descargo un PDF Premium real en esta pasada (requeria pago); por tanto la calidad tipografica y de maquetacion del PDF final permanece <code>UNKNOWN</code>. El propio <code>docs/design-system-audit.md</code> historico ya senalaba que &laquo;el PDF no hereda tokens del sistema web&raquo; &mdash; ver seccion 29 para su estado de regresion.</p>
+</section>
+
+<section class="sec" id="provider">
+  <div class="sec-eyebrow">24</div>
+  <h2>Provider / Professional Experience</h2>
+  <p><span class="pill pill-ghost">NO CUBIERTO</span> en esta pasada. Existen rutas y modelo de datos completos (<code>/provider/{dashboard,register,billing,leads}</code>, <code>/profesional/{dashboard,solicitar}</code>, API espejo), y semillas de datos demo para 6 tipos de proveedor (certificacion, ventanas, aislamiento, solar, clima, inmobiliario/tecnico) &mdash; pero requieren una cuenta de proveedor real o credenciales que no estaban disponibles de forma segura. Recomendado como alcance prioritario de una siguiente pasada.</p>
+</section>
+
+<section class="sec" id="auth">
+  <div class="sec-eyebrow">25</div>
+  <h2>Auth y recuperacion</h2>
+  <p>El formulario de login (NextAuth) funciona correctamente: un intento con credenciales sinteticas invalidas produce <em>&laquo;Email o contrasena incorrectos.&raquo;</em>, sin revelar si el email existe, con el email introducido conservado en el campo. Login social (Google/GitHub) esta presente pero no se inicio. No existe pagina de registro de cuenta separada localizada en el header; el journey de alta parece ocurrir de forma implicita al completar acciones de pago. El unico defecto real de esta area es de <strong>alcance</strong>, no de calidad: en movil/tablet, &laquo;Entrar&raquo; no es alcanzable desde la interfaz (EGY-004).</p>
+</section>
+
+<section class="sec" id="ia">
+  <div class="sec-eyebrow">26</div>
+  <h2>Information Architecture Findings</h2>
+  <ul class="tight">
+    <li><strong>Anclas vs pagina dedicada.</strong> &laquo;Precios&raquo; en el header es un ancla a una seccion de la landing, pero tambien existe <code>/pricing</code> como pagina independiente accesible solo via &laquo;Ver detalle completo de planes&raquo;. Ambas representaciones muestran datos distintos del mismo producto (EGY-014, correlaciona con EGY-001/003).</li>
+    <li><strong>Integraciones B2B no documentadas en el modelo de producto publico.</strong> <code>api/integrations/nexus/energy-lead</code> y <code>api/integrations/synergi/provider-handoff</code> existen en el codigo sin equivalente visible en la superficie de usuario auditada &mdash; su naturaleza (partner externo vs. ecosistema Anclora) no se pudo clasificar en esta pasada.</li>
+    <li><strong>Superficie admin amplia (9 subsecciones) sin poder evaluarse.</strong> Riesgo de arquitectura de informacion no verificado por falta de acceso.</li>
+  </ul>
+</section>
+
+<section class="sec" id="states">
+  <div class="sec-eyebrow">27</div>
+  <h2>System State Audit</h2>
+  <div class="twrap">
+    <table>
+      <thead><tr><th>Estado</th><th>&iquest;Distinguible?</th><th>&iquest;Siguiente accion clara?</th><th>Nota</th></tr></thead>
+      <tbody>
+        <tr><td>LOADING (busqueda por direccion)</td><td>Si (texto)</td><td>No &mdash; nunca resuelve</td><td>EGY-005</td></tr>
+        <tr><td>ERROR (busqueda por referencia)</td><td>No</td><td>No</td><td>EGY-010, silencioso</td></tr>
+        <tr><td>ERROR (validacion de formulario)</td><td>Parcial (banner generico)</td><td>No &mdash; no senala el campo</td><td>EGY-006</td></tr>
+        <tr><td>ERROR (login invalido)</td><td>Si</td><td>Si</td><td>Ejemplar &mdash; ver Lo que funciona bien</td></tr>
+        <tr><td>NO_RESULTS / 404 de ruta</td><td>Si (generico Next.js)</td><td>No &mdash; sin CTA de retorno</td><td>EGY-008</td></tr>
+        <tr><td>SUCCESS (resultado generado)</td><td>Si</td><td>Si (Premium / PDF)</td><td>Ejemplar</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="sec" id="i18n">
+  <div class="sec-eyebrow">28</div>
+  <h2>I18N Assessment</h2>
+  <p>Metadatos de idioma (<code>anclora-language-toggle.ts</code>) declaran <strong>7 idiomas activos</strong> (ES, EN, CA, DE, FR, IT, PT). La realidad de codigo es mas fragmentada:</p>
+  <ul class="tight">
+    <li><code>preferences.ts::toDictLanguage()</code> fuerza en tiempo de ejecucion <code>ca&rarr;es</code> y <code>fr/it/pt&rarr;en</code> para el diccionario de interfaz activo, cuyo tipo real es <code>"es" | "en" | "de"</code>.</li>
+    <li>Existen ficheros separados <code>i18n-ca.ts</code>, <code>i18n-fr.ts</code>, <code>i18n-it.ts</code>, <code>i18n-pt.ts</code> cuyo contenido no se verifico &mdash; contradicen el mapeo anterior si contienen traducciones reales no utilizadas.</li>
+    <li><code>public/locales/{7 idiomas}/common.json</code> tiene paridad de claves del 100% entre ES y el resto, pero <strong>no esta importado en ningun componente de <code>src</code></strong> (0 resultados) &mdash; parece codigo muerto desconectado de la aplicacion real.</li>
+    <li>En navegador, catalan se probo y se renderizo correctamente en navegacion/hero/dropdown, salvo el disclaimer legal, que aparecio en espanol (fallback) en lugar de en catalan &mdash; consistente con el fallback duro de codigo.</li>
+    <li>El idioma por defecto tras recarga completa vuelve a ingles aunque moneda/unidades ya se hayan fijado en EUR/m&sup2; &mdash; persistencia inconsistente entre los 3 valores del mismo panel (EGY-012).</li>
+  </ul>
+  <p><strong>Profundidad real: ES/EN/DE fuertes; CA/FR/IT/PT dependen de fallback y son la fuente directa de EGY-002 y de la mezcla de idioma observada.</strong></p>
+</section>
+
+<section class="sec" id="historico">
+  <div class="sec-eyebrow">29</div>
+  <h2>Historical Regression Check</h2>
+  <p>Fuente: <code>docs/design-system-audit.md</code> (auditoria interna previa, tratada como <code>HISTORICAL_REFERENCE</code>, no como verdad vigente).</p>
+  <div class="twrap">
+    <table>
+      <thead><tr><th>Issue historico</th><th>Estado verificado ahora</th><th>Evidencia nueva</th></tr></thead>
+      <tbody>
+        <tr><td>Riesgo de mezcla de idioma/unidad</td><td><span class="pill pill-crit">STILL_PRESENT</span></td><td>EGY-002, EGY-009, EGY-010, EGY-012 (MEASURED_BROWSER)</td></tr>
+        <tr><td>Densidad del wizard en movil</td><td><span class="pill pill-med">PARTIALLY_FIXED</span></td><td>Paso 1 sin overflow en 390px; pasos 2&ndash;5 no reprobados en movil en esta pasada</td></tr>
+        <tr><td>Matriz de estados vacios/error en Results</td><td><span class="pill pill-ghost">NOT_RETESTED</span></td><td>Fuera de alcance de tiempo de esta pasada</td></tr>
+        <tr><td>PDF no hereda tokens del sistema web</td><td><span class="pill pill-ghost">NOT_RETESTED</span></td><td>No se genero PDF real (requiere pago)</td></tr>
+        <tr><td>Consentimiento de Provider Lead no premarcado</td><td><span class="pill pill-ghost">NOT_RETESTED</span></td><td>Superficie de proveedor no cubierta (ver Limitaciones)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="sec" id="funciona">
+  <div class="sec-eyebrow">30</div>
+  <h2>Lo que funciona bien</h2>
+  <ul class="tight">
+    <li><strong>Fallback de mapa manual robusto:</strong> el clic directo sobre el mapa con badge &laquo;MANUAL&raquo; rescata el journey cuando fallan las dos vias de busqueda catastral.</li>
+    <li><strong>&laquo;No lo se&raquo; en casi todos los campos tecnicos</strong> del wizard, reduciendo bloqueo por desconocimiento del usuario no experto.</li>
+    <li><strong>Pantalla de resultado completa y bien jerarquizada</strong>, con confianza, factores y trazabilidad de evidencia por campo &mdash; transparencia metodologica real sin pago.</li>
+    <li><strong>Mensaje de error de login claro, localizado y seguro</strong> (no revela si el email existe).</li>
+    <li><strong>Foco de teclado visible y consistente</strong> en navegacion por header.</li>
+    <li><strong>Progreso de wizard siempre visible</strong> (&laquo;PASO X DE 5&raquo; + puntos), con Anterior/Siguiente consistente.</li>
+    <li><strong>Layout responsive del formulario del wizard en movil</strong> (390px): un campo por fila, mapa reescalado, botones fijos, sin overflow horizontal.</li>
+    <li><strong>Modo demo de Budget Review</strong> ya contemplado en el backend para pruebas sin datos reales.</li>
+  </ul>
+</section>
+
+<section class="sec" id="findings">
+  <div class="sec-eyebrow">31</div>
+  <h2>Findings</h2>
+
+  <div class="finding" id="EGY-001">
+    <div class="finding-head">
+      <span class="fid">EGY-001</span>
+      <span class="pill pill-crit">CRITICAL</span><span class="pill pill-p1">P1</span>
+      <span class="pill pill-med">MONETIZATION</span><span class="pill pill-ghost">CONTENT_FRICTION</span>
+      <span class="pill pill-good">MEASURED_BROWSER</span><span class="pill pill-quickwin">QUICK WIN</span>
+    </div>
+    <div class="finding-title">El precio de Budget Review difiere segun donde se mire (14,90&euro; vs 19,90&euro;)</div>
+    <div class="finding-body">
+      <figure class="ev">
+        <img src="evidence/anclora-energyscan-2026-09-07/landing-desktop-pricing-inconsistency-light.png" alt="Tarjeta de precios del hero mostrando 14,90 euros para Budget Review" />
+        <figcaption>landing-desktop-pricing-inconsistency-light.png &mdash; hero de landing, tema claro, desktop 1440&times;900</figcaption>
+      </figure>
+      <dl class="kv">
+        <dt>Journey / Pantalla</dt><dd>Decision de pago &middot; Landing (hero) vs seccion #precios vs /pricing</dd>
+        <dt>Usuario / Criticidad</dt><dd>Visitante anonimo considerando pagar &middot; CORE</dd>
+        <dt>Frecuencia</dt><dd class="code">FREQUENT</dd>
+        <dt>Comportamiento actual</dt><dd>La tarjeta &laquo;Informes Premium&raquo; del hero muestra Budget Review = 14,90&euro;. La seccion &laquo;Prediagnostico claro antes de invertir&raquo; (misma pagina) y <code>/pricing</code> muestran 19,90&euro; (&laquo;Launch price &middot; standard 19,90&euro;&raquo;). El 14,90&euro; del hero corresponde en realidad al precio &laquo;standard&raquo; del Informe PDF, mal etiquetado bajo Budget Review.</dd>
+        <dt>Causa raiz UX</dt><dd>Contenido de precios mantenido en al menos 2 fuentes independientes (hero vs. seccion/pagina de precios) sin gobernanza unica.</dd>
+        <dt>Por que importa</dt><dd>El precio es el ultimo dato que un usuario revisa antes de decidir pagar; una discrepancia del 34% entre dos vistas de la misma pagina destruye la confianza transaccional antes del checkout.</dd>
+        <dt>Impacto en usuario</dt><dd>Duda o abandono en el punto de mayor intencion de compra; riesgo de reclamacion si paga esperando el precio mostrado inicialmente.</dd>
+        <dt>Cambio recomendado</dt><dd>Unificar el precio de Budget Review en una unica fuente de contenido/config consumida por hero, seccion de precios y <code>/pricing</code>.</dd>
+        <dt>Beneficio esperado</dt><dd>Elimina friccion de confianza en el journey de monetizacion sin tocar el motor de pago.</dd>
+        <dt>Esfuerzo / Riesgo</dt><dd class="code">LOW / LOW</dd>
+      </dl>
+      <div class="callout callout-donotbreak"><div class="lbl">DO_NOT_BREAK</div>El precio de lanzamiento diferenciado (si existe una promocion real vigente) debe seguir siendo posible de expresar &mdash; la correccion es de fuente unica, no de eliminar variantes de precio legitimas.</div>
+      <div class="callout callout-accept">
+        <div class="lbl">Acceptance criteria</div>
+<pre>Given un usuario visualiza el precio de Budget Review
+When lo ve en el hero, en la seccion de precios de landing o en /pricing
+Then el importe mostrado es identico en las tres ubicaciones
+And si existe un precio de lanzamiento distinto del estandar, ambos se muestran con la misma etiqueta y logica en los tres sitios</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="finding" id="EGY-002">
+    <div class="finding-head">
+      <span class="fid">EGY-002</span>
+      <span class="pill pill-crit">CRITICAL</span><span class="pill pill-p1">P1</span>
+      <span class="pill pill-med">CONTENT_UX</span><span class="pill pill-ghost">CONSISTENCY_FRICTION</span>
+      <span class="pill pill-good">MEASURED_BROWSER</span>
+    </div>
+    <div class="finding-title">El disclaimer legal (no es un CEE oficial) se renderiza en el idioma equivocado de forma intermitente</div>
+    <div class="finding-body">
+      <figure class="ev">
+        <img src="evidence/anclora-energyscan-2026-09-07/wizard-step5-presupuesto-consent-mixedlang-light.png" alt="Checkbox de consentimiento del wizard mostrando texto en ingles con la interfaz en espanol" />
+        <figcaption>wizard-step5-presupuesto-consent-mixedlang-light.png &mdash; paso 5 del wizard, checkbox de consentimiento</figcaption>
+      </figure>
+      <dl class="kv">
+        <dt>Journey / Pantalla</dt><dd>Wizard paso 5 (consentimiento) &middot; tambien landing hero</dd>
+        <dt>Usuario / Criticidad</dt><dd>Cualquier usuario en ES o CA &middot; CORE (legal/confianza)</dd>
+        <dt>Frecuencia</dt><dd class="code">RECURRING (condicion de carrera, no siempre reproducible)</dd>
+        <dt>Comportamiento actual</dt><dd>Con idioma Espanol, el disclaimer a veces aparece en ingles sin traducir (landing hero, checkbox del wizard); con Catalan, aparece en Espanol (fallback) en vez de en Catalan. En otras cargas de la misma pagina/idioma se renderiza correctamente &mdash; es una condicion de carrera de hidratacion i18n, no una traduccion permanentemente ausente.</dd>
+        <dt>Causa raiz UX / tecnica</dt><dd>Correlaciona con el fallback duro confirmado en codigo (<code>preferences.ts::toDictLanguage()</code>: <code>ca&rarr;es</code>, <code>fr/it/pt&rarr;en</code>) combinado con un problema de orden de hidratacion cliente/servidor &mdash; ver seccion 28.</dd>
+        <dt>Por que importa</dt><dd>Ocurre exactamente en el punto legal mas sensible del producto: el checkbox de aceptacion antes de generar el resultado. Un usuario puede aceptar un texto que no pudo leer en su idioma.</dd>
+        <dt>Impacto en usuario</dt><dd>Perdida de confianza legal y de marca; riesgo de cumplimiento normativo (consentimiento informado).</dd>
+        <dt>Cambio recomendado</dt><dd>Renderizar el disclaimer y el texto del checkbox de consentimiento desde el servidor (no depender de hidratacion cliente para el idioma en este punto especifico), y sustituir el fallback silencioso <code>ca&rarr;es</code> / <code>fr,it,pt&rarr;en</code> por las traducciones reales ya existentes en <code>i18n-ca.ts</code>/<code>i18n-fr.ts</code>/<code>i18n-it.ts</code>/<code>i18n-pt.ts</code> tras verificar su completitud.</dd>
+        <dt>Beneficio esperado</dt><dd>Elimina el riesgo legal y de marca en el momento de consentimiento; mejora percepcion premium de las 7 configuraciones de idioma.</dd>
+        <dt>Esfuerzo / Riesgo</dt><dd class="code">MEDIUM / MEDIUM (riesgo de regresion en carga inicial de idioma si no se prueba con cuidado)</dd>
+      </dl>
+      <div class="callout callout-donotbreak"><div class="lbl">DO_NOT_BREAK</div>La separacion visual actual entre estimacion propia y certificado CEE importado en la pantalla de resultado; el disclaimer correcto ya observado en espanol en la propia pantalla de resultado.</div>
+      <div class="callout callout-accept">
+        <div class="lbl">Acceptance criteria</div>
+<pre>Given un usuario con idioma de sesion ES o CA
+When llega al checkbox de consentimiento del paso 5 del wizard
+Then el texto del disclaimer se muestra en el idioma de sesion en el 100% de las cargas, sin depender del orden de hidratacion
+And ningun idioma activo declarado en el selector muestra texto en otro idioma como fallback silencioso</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="finding" id="EGY-003">
+    <div class="finding-head">
+      <span class="fid">EGY-003</span>
+      <span class="pill pill-crit">CRITICAL</span><span class="pill pill-p1">P1</span>
+      <span class="pill pill-med">CONTENT_UX</span><span class="pill pill-ghost">CONTENT_FRICTION</span>
+      <span class="pill pill-good">MEASURED_BROWSER</span><span class="pill pill-quickwin">QUICK WIN</span>
+    </div>
+    <div class="finding-title">Las tarjetas de mayor valor en /pricing estan integramente en ingles con la sesion en espanol</div>
+    <div class="finding-body">
+      <figure class="ev">
+        <img src="evidence/anclora-energyscan-2026-09-07/pricing-page-desktop-light.png" alt="Pagina de precios con tarjetas Budget Review Premium y Smart Renovation Pack en ingles" />
+        <figcaption>pricing-page-desktop-light.png &mdash; /pricing, tema claro, desktop</figcaption>
+      </figure>
+      <dl class="kv">
+        <dt>Journey / Pantalla</dt><dd>/pricing (pagina dedicada)</dd>
+        <dt>Usuario / Criticidad</dt><dd>Usuario con intencion de compra &middot; CORE</dd>
+        <dt>Frecuencia</dt><dd class="code">FREQUENT</dd>
+        <dt>Comportamiento actual</dt><dd>Con idioma = Espanol, &laquo;Gratis&raquo; y &laquo;Premium Individual&raquo; estan en espanol, pero &laquo;Budget Review Premium&raquo; y &laquo;Smart Renovation Pack&raquo; muestran &laquo;Line item detection&raquo;, &laquo;Coming soon&raquo;, &laquo;Not included: full home energy diagnosis&raquo;, CTA &laquo;Start Budget Review &middot; &euro;19.90&raquo;, y el texto legal inferior y &laquo;You can start without an account&raquo; tambien en ingles.</dd>
+        <dt>Causa raiz UX</dt><dd>Claves de i18n faltantes o no cableadas para estas dos tarjetas especificas en la pagina dedicada (inconsistente con el resto de la misma pagina, que si esta traducido).</dd>
+        <dt>Por que importa</dt><dd>Es la pagina de mayor intencion de compra del sitio; el cambio de idioma a mitad de pagina proyecta descuido justo donde se pide dinero.</dd>
+        <dt>Impacto en usuario</dt><dd>Duda sobre profesionalidad del producto; posible abandono antes del CTA.</dd>
+        <dt>Cambio recomendado</dt><dd>Completar las claves de i18n faltantes para las tarjetas &laquo;Budget Review Premium&raquo; y &laquo;Smart Renovation Pack&raquo; en <code>/pricing</code>, y anadir una comprobacion de paridad de claves en CI para esta pagina especificamente.</dd>
+        <dt>Beneficio esperado</dt><dd>Coherencia de idioma end-to-end en la pagina de mayor conversion.</dd>
+        <dt>Esfuerzo / Riesgo</dt><dd class="code">LOW / LOW</dd>
+      </dl>
+      <div class="callout callout-accept">
+        <div class="lbl">Acceptance criteria</div>
+<pre>Given un usuario con idioma de sesion Espanol
+When visita /pricing
+Then el 100% de las tarjetas de plan, incluidas Budget Review Premium y Smart Renovation Pack, se muestran en espanol
+And ninguna cadena de interfaz visible queda en ingles salvo nombres de marca</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="finding" id="EGY-004">
+    <div class="finding-head">
+      <span class="fid">EGY-004</span>
+      <span class="pill pill-crit">CRITICAL</span><span class="pill pill-p1">P1</span>
+      <span class="pill pill-med">NAVIGATION</span><span class="pill pill-ghost">RESPONSIVE_FRICTION</span>
+      <span class="pill pill-good">MEASURED_BROWSER</span>
+    </div>
+    <div class="finding-title">En movil y tablet el header pierde toda la navegacion y el acceso a &laquo;Entrar&raquo; desaparece</div>
+    <div class="finding-body">
+      <figure class="ev">
+        <img src="evidence/anclora-energyscan-2026-09-07/landing-mobile-390-hero-top.png" alt="Header movil sin enlaces de navegacion ni boton Entrar" />
+        <figcaption>landing-mobile-390-hero-top.png &mdash; landing, mobile 390&times;844, tema oscuro</figcaption>
+      </figure>
+      <dl class="kv">
+        <dt>Journey / Pantalla</dt><dd>Navegacion global &middot; todas las pantallas en 390&times;844 y 768&times;1024</dd>
+        <dt>Usuario / Criticidad</dt><dd>Cualquier usuario movil (probablemente &gt;50% del trafico) &middot; CORE</dd>
+        <dt>Frecuencia</dt><dd class="code">FREQUENT</dd>
+        <dt>Comportamiento actual</dt><dd>Los 4 enlaces del header (Como funciona / Normativa / Mejoras / Precios) desaparecen, y el enlace &laquo;Entrar&raquo; desaparece por completo, sin boton de menu hamburguesa ni ningun control alternativo (confirmado tambien en el arbol de accesibilidad: no hay ningun elemento con rol de boton/enlace que abra un menu). El footer recupera los enlaces de producto tras scroll completo, pero &laquo;Entrar&raquo; no aparece en ningun sitio de la vista movil/tablet.</dd>
+        <dt>Causa raiz UX</dt><dd>El header responsive oculta la navegacion por debajo de un breakpoint sin implementar el patron movil sustituto (drawer/menu).</dd>
+        <dt>Por que importa</dt><dd>Un usuario movil no tiene forma de iniciar sesion salvo escribiendo <code>/auth</code> manualmente en la barra de direcciones.</dd>
+        <dt>Impacto en usuario</dt><dd>Bloqueo funcional real de login y de navegacion informativa en el segmento de dispositivo mas probable para un primer contacto.</dd>
+        <dt>Cambio recomendado</dt><dd>Anadir un patron de navegacion movil (menu hamburguesa / drawer) que incluya los 4 enlaces informativos y el acceso a &laquo;Entrar&raquo; / &laquo;Iniciar analisis gratuito&raquo;.</dd>
+        <dt>Beneficio esperado</dt><dd>Restaura una tarea CORE (acceso y navegacion) para la mayoria probable de visitantes.</dd>
+        <dt>Esfuerzo / Riesgo</dt><dd class="code">MEDIUM / LOW</dd>
+      </dl>
+      <div class="callout callout-donotbreak"><div class="lbl">DO_NOT_BREAK</div>El layout actual del wizard en movil (formulario de un campo por fila, botones fijos al fondo, sin overflow) ya funciona bien y no debe alterarse al anadir el menu.</div>
+      <div class="callout callout-accept">
+        <div class="lbl">Acceptance criteria</div>
+<pre>Given un usuario en un viewport menor a 980px
+When abre la landing
+Then puede acceder a los 4 enlaces de navegacion y a Entrar / Iniciar analisis gratuito mediante un control visible (p. ej. menu hamburguesa)
+And el control cumple un tamano minimo de objetivo tactil de 44x44px</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="finding" id="EGY-005">
+    <div class="finding-head">
+      <span class="fid">EGY-005</span>
+      <span class="pill pill-high">HIGH</span><span class="pill pill-p2">P2</span>
+      <span class="pill pill-med">FORM_UX</span><span class="pill pill-ghost">ERROR_RECOVERY_FRICTION</span>
+      <span class="pill pill-good">MEASURED_BROWSER</span>
+    </div>
+    <div class="finding-title">La busqueda catastral por direccion queda bloqueada permanentemente en &laquo;Cargando provincias&hellip;&raquo;</div>
+    <div class="finding-body">
+      <figure class="ev">
+        <img src="evidence/anclora-energyscan-2026-09-07/wizard-catastro-address-provinces-stuck-loading.png" alt="Combobox de provincia bloqueado en estado de carga" />
+        <figcaption>wizard-catastro-address-provinces-stuck-loading.png &mdash; wizard paso 2, pestana Direccion</figcaption>
+      </figure>
+      <dl class="kv">
+        <dt>Journey / Pantalla</dt><dd>Wizard paso 2 &middot; buscador catastral, pestana Direccion</dd>
+        <dt>Usuario / Criticidad</dt><dd>Cualquier usuario que prefiera buscar por direccion &middot; CORE</dd>
+        <dt>Frecuencia</dt><dd class="code">FREQUENT</dd>
+        <dt>Comportamiento actual</dt><dd>El combobox de provincia queda permanentemente en &laquo;Cargando provincias&hellip;&raquo;; municipio y calle permanecen deshabilitados. Verificado que <code>GET /api/catastro/provinces</code> responde <code>200</code> con el listado completo &mdash; el fallo es de renderizado/estado en cliente, no de backend.</dd>
+        <dt>Causa raiz UX</dt><dd>Estado de componente que no se actualiza tras respuesta exitosa del backend (bug de estado, no de red).</dd>
+        <dt>Por que importa</dt><dd>Bloquea por completo una de las dos vias de precarga catastral; el usuario solo se salva por el fallback de clic en mapa (ver Lo que funciona bien).</dd>
+        <dt>Impacto en usuario</dt><dd>Percepcion de producto roto; dependencia total del fallback manual.</dd>
+        <dt>Cambio recomendado</dt><dd>Corregir la actualizacion de estado del combobox tras la respuesta de <code>/api/catastro/provinces</code>; anadir manejo de error visible si la peticion tarda o falla.</dd>
+        <dt>Beneficio esperado</dt><dd>Restaura una via de busqueda completa, reduciendo dependencia exclusiva del mapa.</dd>
+        <dt>Esfuerzo / Riesgo</dt><dd class="code">MEDIUM / LOW</dd>
+      </dl>
+      <div class="callout callout-donotbreak"><div class="lbl">DO_NOT_BREAK</div>El fallback de clic manual en el mapa, que hoy sostiene el journey completo.</div>
+    </div>
+  </div>
+
+  <div class="finding" id="EGY-006">
+    <div class="finding-head">
+      <span class="fid">EGY-006</span>
+      <span class="pill pill-high">HIGH</span><span class="pill pill-p2">P2</span>
+      <span class="pill pill-med">FORM_UX</span><span class="pill pill-ghost">ERROR_RECOVERY_FRICTION</span>
+      <span class="pill pill-good">MEASURED_BROWSER</span>
+    </div>
+    <div class="finding-title">Error de validacion generico, sin traducir y sin senalar el campo culpable</div>
+    <div class="finding-body">
+      <figure class="ev">
+        <img src="evidence/anclora-energyscan-2026-09-07/wizard-validation-error-invalid-input-untranslated.png" alt="Banner rojo Invalid input sin traducir en el wizard" />
+        <figcaption>wizard-validation-error-invalid-input-untranslated.png &mdash; wizard, retroceso a paso 2 tras error</figcaption>
+      </figure>
+      <dl class="kv">
+        <dt>Journey / Pantalla</dt><dd>Wizard paso 2 &middot; validacion de Codigo Postal</dd>
+        <dt>Usuario / Criticidad</dt><dd>Cualquier usuario que deje el codigo postal vacio &middot; FREQUENT</dd>
+        <dt>Comportamiento actual</dt><dd>Si el campo &laquo;Codigo postal&raquo; queda vacio (el placeholder &laquo;28001&raquo; se puede confundir con un valor real) y se intenta avanzar desde un paso posterior, el wizard retrocede al paso 2 y muestra un banner rojo generico &laquo;Invalid input&raquo; en ingles, sin borde rojo ni foco automatico en el campo problematico.</dd>
+        <dt>Causa raiz UX</dt><dd>Validacion centralizada tardia sin mensaje por campo ni traduccion del mensaje de error.</dd>
+        <dt>Por que importa</dt><dd>El usuario no sabe que campo corregir ni en que idioma se le esta hablando.</dd>
+        <dt>Impacto en usuario</dt><dd>Friccion evitable, posible abandono o repeticion de intentos por prueba y error.</dd>
+        <dt>Cambio recomendado</dt><dd>Validacion inline por campo, con mensaje traducido y foco automatico en el primer campo invalido.</dd>
+        <dt>Beneficio esperado</dt><dd>Reduce reintentos y frustracion en el formulario mas largo del producto.</dd>
+        <dt>Esfuerzo / Riesgo</dt><dd class="code">MEDIUM / LOW</dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="finding" id="EGY-007">
+    <div class="finding-head">
+      <span class="fid">EGY-007</span>
+      <span class="pill pill-high">HIGH</span><span class="pill pill-p2">P2</span>
+      <span class="pill pill-med">ACCESSIBILITY</span><span class="pill pill-ghost">VISUAL_FRICTION</span>
+      <span class="pill pill-good">MEASURED_BROWSER</span>
+    </div>
+    <div class="finding-title">Contraste insuficiente de texto secundario en tema oscuro (landing y resultado)</div>
+    <div class="finding-body">
+      <dl class="kv">
+        <dt>Journey / Pantalla</dt><dd>Landing y /assessment/[id] &middot; tema oscuro (por defecto del sitio)</dd>
+        <dt>Usuario / Criticidad</dt><dd>Usuarios con baja vision o en condiciones de luz ambiental alta &middot; FREQUENT (tema oscuro es el default)</dd>
+        <dt>Comportamiento actual</dt><dd>Analisis automatico (axe-core, WCAG2A/AA) detecto &laquo;serious&raquo; color-contrast en 9 nodos en landing (leyendas del timeline regulatorio, pie de pagina, etiquetas pequenas en <code>#7A7A7A</code>) y 16 nodos en la pantalla de resultado (tarjetas de Factores penalizadores / Puntos fuertes / Datos faltantes, texto <code>#7A7A7A</code> sobre <code>#1A1A1A</code>).</dd>
+        <dt>Causa raiz UX</dt><dd>Token de color &laquo;muted&raquo; unico insuficientemente contrastado para el fondo oscuro, reutilizado en multiples componentes.</dd>
+        <dt>Por que importa</dt><dd>Afecta precisamente a los textos que explican el <em>porque</em> del resultado (factores, evidencia) &mdash; reduce la legibilidad de la parte mas importante para la confianza.</dd>
+        <dt>Impacto en usuario</dt><dd>Dificultad de lectura para una parte significativa de usuarios en el tema por defecto del producto.</dd>
+        <dt>Cambio recomendado</dt><dd>Subir el valor de luminosidad del token de texto secundario en tema oscuro hasta cumplir 4.5:1 minimo, aplicado desde el token central (no por componente).</dd>
+        <dt>Beneficio esperado</dt><dd>Corrige de forma sistemica todos los usos futuros del mismo token.</dd>
+        <dt>Esfuerzo / Riesgo</dt><dd class="code">LOW / LOW</dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="finding" id="EGY-008">
+    <div class="finding-head">
+      <span class="fid">EGY-008</span>
+      <span class="pill pill-high">HIGH</span><span class="pill pill-p2">P2</span>
+      <span class="pill pill-med">ERROR_RECOVERY</span><span class="pill pill-ghost">CONTENT_FRICTION</span>
+      <span class="pill pill-good">MEASURED_BROWSER</span><span class="pill pill-quickwin">QUICK WIN</span>
+    </div>
+    <div class="finding-title">Pagina 404 generica de Next.js, sin marca ni via de recuperacion</div>
+    <div class="finding-body">
+      <figure class="ev">
+        <img src="evidence/anclora-energyscan-2026-09-07/404-page-dark.png" alt="Pagina 404 generica de Next.js en ingles sin cabecera" />
+        <figcaption>404-page-dark.png &mdash; ruta inexistente</figcaption>
+      </figure>
+      <dl class="kv">
+        <dt>Journey / Pantalla</dt><dd>Recuperacion de error &middot; cualquier ruta inexistente</dd>
+        <dt>Comportamiento actual</dt><dd>&laquo;404 / This page could not be found.&raquo; generico, en ingles, sin cabecera, logo ni navegacion; unica via de recuperacion es el boton atras del navegador.</dd>
+        <dt>Por que importa</dt><dd>Rompe la identidad de marca en el unico momento en que el usuario ya esta confundido.</dd>
+        <dt>Cambio recomendado</dt><dd>Pagina 404 propia con logo, mensaje en espanol/idioma de sesion y CTA de vuelta al inicio o al wizard.</dd>
+        <dt>Esfuerzo / Riesgo</dt><dd class="code">LOW / LOW</dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="finding" id="EGY-009">
+    <div class="finding-head">
+      <span class="fid">EGY-009</span>
+      <span class="pill pill-high">HIGH</span><span class="pill pill-p2">P2</span>
+      <span class="pill pill-med">CONTENT_UX</span><span class="pill pill-ghost">CONSISTENCY_FRICTION</span>
+      <span class="pill pill-good">MEASURED_CODE</span><span class="pill pill-good">MEASURED_BROWSER</span>
+    </div>
+    <div class="finding-title">Arquitectura i18n fragmentada en 4 capas independientes (raiz de EGY-002/003/012)</div>
+    <div class="finding-body">
+      <dl class="kv">
+        <dt>Journey / Pantalla</dt><dd>Transversal &mdash; todas las pantallas con contenido traducido</dd>
+        <dt>Comportamiento actual</dt><dd>Coexisten: (1) un diccionario activo tipado a solo <code>es/en/de</code>; (2) ficheros <code>i18n-ca/fr/it/pt.ts</code> de contenido no verificado; (3) metadatos que declaran 7 idiomas &laquo;activos&raquo;; (4) un <code>public/locales/*/common.json</code> con paridad 100% pero sin ninguna importacion en <code>src</code>.</dd>
+        <dt>Causa raiz UX</dt><dd>Deuda de arquitectura acumulada por evolucion iterativa del sistema i18n sin consolidacion.</dd>
+        <dt>Por que importa</dt><dd>Es la causa tecnica mas probable de la mezcla de idiomas observada en EGY-002 y EGY-003, y del comportamiento de fallback inconsistente en EGY-012.</dd>
+        <dt>Cambio recomendado</dt><dd>Auditar el contenido real de <code>i18n-ca/fr/it/pt.ts</code>, decidir una unica fuente de verdad de diccionario, y retirar o conectar <code>common.json</code> segun corresponda.</dd>
+        <dt>Esfuerzo / Riesgo</dt><dd class="code">MEDIUM / MEDIUM</dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="finding" id="EGY-010">
+    <div class="finding-head">
+      <span class="fid">EGY-010</span>
+      <span class="pill pill-med">MEDIUM</span><span class="pill pill-p3">P3</span>
+      <span class="pill pill-med">FEEDBACK</span><span class="pill pill-ghost">FEEDBACK_FRICTION</span>
+      <span class="pill pill-good">MEASURED_BROWSER</span>
+    </div>
+    <div class="finding-title">Busqueda por referencia catastral falla en silencio</div>
+    <div class="finding-body">
+      <dl class="kv">
+        <dt>Comportamiento actual</dt><dd>Con una referencia catastral valida pero inexistente, el boton pasa a &laquo;Buscando en Catastro&hellip;&raquo; y vuelve a &laquo;Buscar vivienda&raquo; sin mensaje de error ni exito (<code>POST /api/catastro/resolve</code> devuelve <code>503</code>).</dd>
+        <dt>Cambio recomendado</dt><dd>Mostrar un mensaje de error especifico (&laquo;No se encontro esa referencia catastral&raquo;) con opcion de reintentar o pasar a busqueda manual.</dd>
+        <dt>Esfuerzo / Riesgo</dt><dd class="code">LOW / LOW</dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="finding" id="EGY-011">
+    <div class="finding-head">
+      <span class="fid">EGY-011</span>
+      <span class="pill pill-med">MEDIUM</span><span class="pill pill-p3">P3</span>
+      <span class="pill pill-med">CONTENT_UX</span><span class="pill pill-ghost">COGNITIVE_FRICTION</span>
+      <span class="pill pill-good">MEASURED_BROWSER</span><span class="pill pill-quickwin">QUICK WIN</span>
+    </div>
+    <div class="finding-title">Moneda y unidades por defecto son GBP / ft&sup2; para un producto centrado en vivienda espanola</div>
+    <div class="finding-body">
+      <figure class="ev">
+        <img src="evidence/anclora-energyscan-2026-09-07/landing-desktop-prefs-panel-mismatch-defaults.png" alt="Panel de preferencias globales con GBP y pie cuadrado por defecto" />
+        <figcaption>landing-desktop-prefs-panel-mismatch-defaults.png</figcaption>
+      </figure>
+      <dl class="kv">
+        <dt>Comportamiento actual</dt><dd>Con el sitio en espanol, moneda y unidades por defecto son Libra esterlina y pie cuadrado/acre, no EUR/m&sup2;.</dd>
+        <dt>Cambio recomendado</dt><dd>Derivar el default de moneda/unidades del idioma o region detectada en vez de un valor fijo global.</dd>
+        <dt>Esfuerzo / Riesgo</dt><dd class="code">LOW / LOW</dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="finding" id="EGY-012">
+    <div class="finding-head">
+      <span class="fid">EGY-012</span>
+      <span class="pill pill-med">MEDIUM</span><span class="pill pill-p3">P3</span>
+      <span class="pill pill-med">CONSISTENCY</span><span class="pill pill-ghost">CONSISTENCY_FRICTION</span>
+      <span class="pill pill-good">MEASURED_BROWSER</span>
+    </div>
+    <div class="finding-title">El idioma no persiste tras recarga completa, aunque moneda y unidades si</div>
+    <div class="finding-body">
+      <dl class="kv">
+        <dt>Comportamiento actual</dt><dd>Tras fijar Espanol/EUR/m&sup2; y navegar con recarga completa a otra ruta, moneda y unidades persisten pero el idioma vuelve a English.</dd>
+        <dt>Cambio recomendado</dt><dd>Persistir los 3 valores del mismo panel de preferencias con el mismo mecanismo de almacenamiento.</dd>
+        <dt>Esfuerzo / Riesgo</dt><dd class="code">LOW / LOW</dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="finding" id="EGY-013">
+    <div class="finding-head">
+      <span class="fid">EGY-013</span>
+      <span class="pill pill-low">LOW</span><span class="pill pill-p4">P4</span>
+      <span class="pill pill-med">VISUAL_HIERARCHY</span>
+      <span class="pill pill-good">MEASURED_BROWSER</span>
+    </div>
+    <div class="finding-title">CTA secundario &laquo;Ver como funciona&raquo; pierde affordance en tema claro</div>
+    <div class="finding-body">
+      <dl class="kv">
+        <dt>Comportamiento actual</dt><dd>En modo claro el boton secundario pierde borde/fondo y queda casi indistinguible de texto plano junto al CTA primario.</dd>
+        <dt>Cambio recomendado</dt><dd>Mantener un borde o fondo sutil visible en tema claro para botones secundarios.</dd>
+        <dt>Esfuerzo / Riesgo</dt><dd class="code">LOW / LOW</dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="finding" id="EGY-014">
+    <div class="finding-head">
+      <span class="fid">EGY-014</span>
+      <span class="pill pill-low">LOW</span><span class="pill pill-p4">P4</span>
+      <span class="pill pill-opp">OPPORTUNITY</span>
+      <span class="pill pill-good">MEASURED_BROWSER</span>
+    </div>
+    <div class="finding-title">&laquo;Precios&raquo; convive como ancla y como pagina dedicada con datos divergentes</div>
+    <div class="finding-body">
+      <dl class="kv">
+        <dt>Comportamiento actual</dt><dd>El enlace de header es un ancla a la landing; <code>/pricing</code> es una pagina independiente accesible solo desde un enlace secundario, con precios distintos (ver EGY-001).</dd>
+        <dt>Cambio recomendado</dt><dd>Decidir una unica representacion canonica de precios y enlazarla de forma consistente desde el header.</dd>
+        <dt>Esfuerzo / Riesgo</dt><dd class="code">LOW / LOW</dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="finding" id="EGY-015">
+    <div class="finding-head">
+      <span class="fid">EGY-015</span>
+      <span class="pill pill-low">LOW</span><span class="pill pill-p4">P4</span>
+      <span class="pill pill-med">ACCESSIBILITY</span><span class="pill pill-ghost">RESPONSIVE_FRICTION</span>
+      <span class="pill pill-good">MEASURED_BROWSER</span>
+    </div>
+    <div class="finding-title">Botones del selector de tema por debajo del tamano tactil minimo en movil</div>
+    <div class="finding-body">
+      <dl class="kv">
+        <dt>Comportamiento actual</dt><dd>Los botones Dark/Light/System miden ~34&times;30px en 390px de ancho, por debajo de 44&times;44px recomendado.</dd>
+        <dt>Cambio recomendado</dt><dd>Ampliar el area tactil manteniendo el tamano visual si se desea.</dd>
+        <dt>Esfuerzo / Riesgo</dt><dd class="code">LOW / LOW</dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="finding" id="EGY-016">
+    <div class="finding-head">
+      <span class="fid">EGY-016</span>
+      <span class="pill pill-opp">OPPORTUNITY</span><span class="pill pill-p3">P3</span>
+      <span class="pill pill-med">PREMIUM_QUALITY</span>
+      <span class="pill pill-good">DECLARED_DOCS</span><span class="pill pill-good">MEASURED_CODE</span>
+    </div>
+    <div class="finding-title">Ausencia de paquete de design system compartido favorece la deriva visual</div>
+    <div class="finding-body">
+      <dl class="kv">
+        <dt>Comportamiento actual</dt><dd>No existe dependencia <code>@anclora/*</code> en <code>package.json</code>; los tokens son Tailwind ad-hoc. El propio <code>docs/design-system-audit.md</code> ya se autoevalua como &laquo;Partial&raquo; en todas las superficies.</dd>
+        <dt>Por que importa</dt><dd>Es el mecanismo estructural por el cual defectos como EGY-007 (contraste) tienden a repetirse en nuevas pantallas.</dd>
+        <dt>Cambio recomendado</dt><dd>Evaluar consumir un paquete de tokens compartido del ecosistema Anclora, o formalizar los tokens locales existentes como fuente unica documentada.</dd>
+        <dt>Esfuerzo / Riesgo</dt><dd class="code">HIGH / MEDIUM</dd>
+      </dl>
+    </div>
+  </div>
+
+</section>
+
+<section class="sec" id="quickwins">
+  <div class="sec-eyebrow">32</div>
+  <h2>Quick wins</h2>
+  <p>Alto impacto, bajo esfuerzo, riesgo bajo o manejable:</p>
+  <div class="badgebar">
+    <span class="pill pill-quickwin">EGY-001</span>
+    <span class="pill pill-quickwin">EGY-003</span>
+    <span class="pill pill-quickwin">EGY-007</span>
+    <span class="pill pill-quickwin">EGY-008</span>
+    <span class="pill pill-quickwin">EGY-010</span>
+    <span class="pill pill-quickwin">EGY-011</span>
+    <span class="pill pill-quickwin">EGY-012</span>
+  </div>
+</section>
+
+<section class="sec" id="estructural">
+  <div class="sec-eyebrow">33</div>
+  <h2>Structural Redesign Opportunities</h2>
+
+  <h3>1. Patron de navegacion movil (drawer)</h3>
+  <p><strong>QUE:</strong> introducir un menu hamburguesa/drawer en viewports &lt;980px. <strong>DONDE:</strong> header global. <strong>POR QUE:</strong> la navegacion y el login desaparecen sin sustituto (EGY-004). <strong>PARA QUIEN:</strong> la mayoria probable del trafico (movil). <strong>FRICCION:</strong> NAVIGATION, DISCOVERABILITY. <strong>BENEFICIO ESPERADO:</strong> restaura una tarea CORE. <strong>DO_NOT_BREAK:</strong> layout actual del wizard movil. <strong>EVIDENCIA:</strong> EGY-004, MEASURED_BROWSER.</p>
+
+  <h3>2. Consolidacion de arquitectura i18n</h3>
+  <p><strong>QUE:</strong> unificar diccionario activo, ficheros <code>i18n-xx.ts</code> y <code>common.json</code> en una unica fuente de verdad; blindar el disclaimer legal contra condiciones de carrera de hidratacion. <strong>DONDE:</strong> capa de preferencias/i18n, transversal. <strong>POR QUE:</strong> raiz comun de EGY-002, EGY-003, EGY-009, EGY-012. <strong>BENEFICIO ESPERADO:</strong> elimina una familia entera de findings CRITICAL/HIGH de una sola vez. <strong>DO_NOT_BREAK:</strong> profundidad ya correcta en ES/EN/DE. <strong>EVIDENCIA:</strong> MEASURED_CODE + MEASURED_BROWSER.</p>
+
+  <h3>3. Gobernanza de contenido de precios</h3>
+  <p><strong>QUE:</strong> fuente unica de precios consumida por hero, seccion de landing y <code>/pricing</code>. <strong>POR QUE:</strong> raiz de EGY-001/003/014. <strong>BENEFICIO ESPERADO:</strong> confianza transaccional consistente. <strong>DO_NOT_BREAK:</strong> logica de precio de lanzamiento si existe.</p>
+
+  <h3>4. Validacion de formulario por campo</h3>
+  <p><strong>QUE:</strong> sustituir el banner generico &laquo;Invalid input&raquo; por validacion inline traducida con foco automatico. <strong>DONDE:</strong> wizard, especialmente paso 2. <strong>POR QUE:</strong> raiz de EGY-006, agrava EGY-005/EGY-010. <strong>BENEFICIO ESPERADO:</strong> reduce reintentos en el formulario mas largo del producto.</p>
+
+  <h3>5. Paso de contraste de tokens en tema oscuro</h3>
+  <p><strong>QUE:</strong> revisar el token de texto secundario/muted en tema oscuro contra WCAG AA. <strong>DONDE:</strong> token central de color, se propaga a landing y resultado. <strong>POR QUE:</strong> EGY-007, y previene recurrencia futura (EGY-016). <strong>BENEFICIO ESPERADO:</strong> mejora sistemica de legibilidad y percepcion premium.</p>
+</section>
+
+<section class="sec" id="roadmap">
+  <div class="sec-eyebrow">34</div>
+  <h2>Recommended Roadmap</h2>
+
+  <div class="roadmap-phase">
+    <h4>Fase 1 &mdash; Quick wins</h4>
+    <div class="items">
+      <div class="roadmap-item"><span class="idr">EGY-001</span><br/>Unificar precio Budget Review</div>
+      <div class="roadmap-item"><span class="idr">EGY-003</span><br/>Traducir tarjetas de /pricing</div>
+      <div class="roadmap-item"><span class="idr">EGY-007</span><br/>Corregir contraste tema oscuro</div>
+      <div class="roadmap-item"><span class="idr">EGY-008</span><br/>Pagina 404 de marca</div>
+      <div class="roadmap-item"><span class="idr">EGY-010 / EGY-011 / EGY-012</span><br/>Feedback catastro, defaults, persistencia idioma</div>
+    </div>
+  </div>
+
+  <div class="roadmap-phase">
+    <h4>Fase 2 &mdash; Alto impacto</h4>
+    <div class="items">
+      <div class="roadmap-item"><span class="idr">EGY-004</span><br/>Navegacion movil (drawer + acceso a Entrar)</div>
+      <div class="roadmap-item"><span class="idr">EGY-005</span><br/>Corregir busqueda catastral por direccion</div>
+      <div class="roadmap-item"><span class="idr">EGY-006</span><br/>Validacion inline por campo en wizard</div>
+    </div>
+  </div>
+
+  <div class="roadmap-phase">
+    <h4>Fase 3 &mdash; UX estructural</h4>
+    <div class="items">
+      <div class="roadmap-item"><span class="idr">EGY-002 / EGY-009</span><br/>Consolidacion de arquitectura i18n y blindaje del disclaimer legal</div>
+      <div class="roadmap-item"><span class="idr">EGY-014</span><br/>Unificar arquitectura de la seccion Precios (ancla vs pagina)</div>
+      <div class="roadmap-item"><span class="idr">EGY-016</span><br/>Evaluar sistema de diseno compartido</div>
+      <div class="roadmap-item"><span class="idr">Seguimiento</span><br/>Auditoria dedicada de Escenarios, Provider/Professional, Admin, checkout completo y PDF Premium</div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="donotbreak">
+  <div class="sec-eyebrow">35</div>
+  <h2>Do Not Break &mdash; resumen</h2>
+  <ul class="tight">
+    <li>Wizard completo sin necesidad de cuenta ni email real.</li>
+    <li>Opciones &laquo;No lo se&raquo; en campos tecnicos del wizard.</li>
+    <li>Fallback de seleccion manual en el mapa catastral (badge &laquo;MANUAL&raquo;).</li>
+    <li>Separacion visual entre certificado CEE importado y estimacion propia en el resultado.</li>
+    <li>Mensaje de error de login que no revela si el email existe.</li>
+    <li>Foco de teclado visible en navegacion por header.</li>
+    <li>Layout responsive actual del formulario del wizard en movil (390px).</li>
+    <li>Profundidad de traduccion ya correcta en ES/EN/DE al tocar la arquitectura i18n.</li>
+  </ul>
+</section>
+
+<section class="sec" id="coverage">
+  <div class="sec-eyebrow">36</div>
+  <h2>Evidence Coverage</h2>
+  <div class="twrap">
+    <table>
+      <thead><tr><th>Dimension</th><th>Cobertura</th></tr></thead>
+      <tbody>
+        <tr><td>BROWSER_AVAILABLE</td><td><span class="pill pill-good">TRUE</span></td></tr>
+        <tr><td>PUBLIC_FLOWS_COVERED</td><td><span class="pill pill-good">TRUE</span></td></tr>
+        <tr><td>AUTHENTICATED_FLOWS_COVERED</td><td><span class="pill pill-high">PARCIAL</span> (login probado; sin cuenta persistente con historial)</td></tr>
+        <tr><td>REPO_CONTEXT_AVAILABLE / CODE_PATHS_INSPECTED</td><td><span class="pill pill-good">TRUE</span> / <span class="pill pill-high">PARCIAL</span> (AssessmentWizard.tsx y schema Prisma no leidos linea a linea)</td></tr>
+        <tr><td>DESKTOP_COVERED</td><td><span class="pill pill-good">TRUE</span> (1440&times;900)</td></tr>
+        <tr><td>TABLET_COVERED</td><td><span class="pill pill-high">PARCIAL</span> (768&times;1024, solo header/landing)</td></tr>
+        <tr><td>MOBILE_PORTRAIT_COVERED</td><td><span class="pill pill-high">PARCIAL</span> (390&times;844, landing + wizard paso 1)</td></tr>
+        <tr><td>MOBILE_LANDSCAPE_COVERED</td><td><span class="pill pill-crit">FALSE</span></td></tr>
+        <tr><td>LIGHT_THEME_COVERED</td><td><span class="pill pill-high">PARCIAL</span> (landing, pricing)</td></tr>
+        <tr><td>DARK_THEME_COVERED</td><td><span class="pill pill-good">TRUE</span> (default del sitio, mayoria de pantallas)</td></tr>
+        <tr><td>ACCESSIBILITY_COMPOSED</td><td><span class="pill pill-high">PARCIAL</span> (axe embebido ad-hoc; skill formal no ejecutada)</td></tr>
+        <tr><td>I18N_COMPOSED</td><td><span class="pill pill-ghost">UNAVAILABLE</span> (evidencia manual fuerte como sustituto)</td></tr>
+        <tr><td>DESIGN_SYSTEM_COMPOSED</td><td><span class="pill pill-ghost">UNAVAILABLE</span></td></tr>
+        <tr><td>VISUAL_REGRESSION_COMPOSED</td><td><span class="pill pill-ghost">UNAVAILABLE</span></td></tr>
+        <tr><td>AUTH_COVERED</td><td><span class="pill pill-good">TRUE</span></td></tr>
+        <tr><td>ASSESSMENT_COVERED / RESULTS_COVERED</td><td><span class="pill pill-good">TRUE</span></td></tr>
+        <tr><td>DASHBOARD_COVERED (cuenta con historial)</td><td><span class="pill pill-crit">FALSE</span></td></tr>
+        <tr><td>SCENARIOS_COVERED</td><td><span class="pill pill-ghost">UNKNOWN</span></td></tr>
+        <tr><td>CATASTRAL_MAP_COVERED</td><td><span class="pill pill-good">TRUE</span></td></tr>
+        <tr><td>OCR_COVERED</td><td><span class="pill pill-high">PARCIAL</span> (UI observada, no ejercida)</td></tr>
+        <tr><td>BUDGET_REVIEW_COVERED</td><td><span class="pill pill-high">PARCIAL</span></td></tr>
+        <tr><td>CALCULATOR_COVERED</td><td><span class="pill pill-crit">FALSE</span></td></tr>
+        <tr><td>PRICING_COVERED</td><td><span class="pill pill-good">TRUE</span></td></tr>
+        <tr><td>PREMIUM_COVERED / CHECKOUT_COVERED</td><td><span class="pill pill-high">PARCIAL</span> / <span class="pill pill-crit">FALSE</span></td></tr>
+        <tr><td>REPORT_COVERED (PDF)</td><td><span class="pill pill-high">PARCIAL</span></td></tr>
+        <tr><td>PROVIDER_COVERED / PROFESSIONAL_COVERED</td><td><span class="pill pill-crit">FALSE</span></td></tr>
+        <tr><td>APPLICATION_SHELL_COVERED / VIEWPORT_ECONOMY_MEASURED</td><td><span class="pill pill-good">TRUE</span> (desktop)</td></tr>
+        <tr><td>PREMIUM_PRODUCT_SURFACE_COVERED</td><td><span class="pill pill-high">PARCIAL</span></td></tr>
+        <tr><td>TRUST_EXPLAINABILITY_COVERED</td><td><span class="pill pill-good">TRUE</span></td></tr>
+        <tr><td>HISTORICAL_REGRESSION_CHECK_COMPLETED</td><td><span class="pill pill-high">PARCIAL</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="sec" id="limitaciones">
+  <div class="sec-eyebrow">37</div>
+  <h2>Limitations and Gaps</h2>
+  <ul class="tight">
+    <li><strong>Superficies no cubiertas por falta de credenciales seguras:</strong> Provider, Professional, Admin (9 subsecciones), dashboard de usuario con historial persistente.</li>
+    <li><strong>No se completo ningun pago real ni de Stripe test</strong> por proteccion establecida en el alcance de esta auditoria; PDF Premium, checkout completo y estados post-pago quedan <code>UNKNOWN</code>.</li>
+    <li><strong>Comparacion de escenarios de mejora</strong> no se alcanzo en el tiempo disponible; se recomienda como prioridad de seguimiento.</li>
+    <li><strong>Calculadora de ahorro (<code>/calculadora-ahorro</code>)</strong> no se probo en navegador en esta pasada.</li>
+    <li><strong>OCR y Budget Review</strong> se documentaron visualmente sin subir archivos reales, por proteccion de datos; la confianza real del parser queda sin verificar.</li>
+    <li><strong>Composed skills formales</strong> (<code>accessibility-audit</code>, <code>i18n-integrity-check</code>, <code>design-system-consumer-check</code>, <code>visual-regression-check</code>, <code>change-impact-analysis</code>) no se ejecutaron como procesos AOS independientes; se sustituyeron por evidencia equivalente manual (axe ad-hoc, inspeccion de codigo) que se declara explicitamente como tal en cada seccion.</li>
+    <li><strong><code>AssessmentWizard.tsx</code> (1815 lineas) y el esquema de Prisma</strong> no se leyeron completos; los pasos del wizard se documentaron por observacion de navegador, no por lectura de codigo linea a linea.</li>
+    <li><strong>Contratos AOS globales</strong> (<code>ANCLORA_ECOSYSTEM_CONTEXT.md</code>, <code>GLOBAL_AGENT_WORKFLOW.md</code>) referenciados por <code>CLAUDE.md</code> no se localizaron dentro de este repositorio.</li>
+    <li><strong>Naturaleza de <code>api/integrations/nexus</code> y <code>api/integrations/synergi</code></strong> no clasificada (partner externo vs. ecosistema Anclora).</li>
+    <li>Debido a estos gaps, el estado final se declara <strong>PASS_WITH_GAPS</strong>, no PASS: la cobertura alcanzada es suficiente para las conclusiones emitidas, pero no cubre la totalidad del alcance solicitado en el prompt maestro.</li>
+  </ul>
+
+  <footer class="report-footer">
+    Anclora EnergyScan &middot; Auditoria UX/UI de producto &middot; ux-product-experience-review v1.3.0 &middot; AUDIT_WITH_REPO_CONTEXT &middot; energyscan.anclora.com &middot; HEAD 5a4e1a9 &middot; 7 de septiembre de 2026 &middot; Estado: PASS_WITH_GAPS
+  </footer>
+</section>
+
+</div>
+</main>
+</body>
+</html>
