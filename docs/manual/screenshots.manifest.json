@@ -1,0 +1,238 @@
+{
+  "$comment": "Estado: CURRENT = UI vigente (solo branding actualizado); STALE = UI obsoleta, pendiente de recaptura; PLACEHOLDER = imagen de relleno o ausente; STATIC = asset de marca, no se captura.",
+  "version": 1,
+  "change": "CHG-0014",
+  "generated": "2026-09-25",
+  "product": "Anclora EnergyScan",
+  "screenshots_dir": "docs/manual/screenshots",
+  "env_file": ".env.local",
+  "app_url_default": "http://localhost:3000",
+  "start": "npm run dev",
+  "generator": "npm run manual:pdf",
+  "outputs": [
+    "public/manuals/anclora-energyscan-manual-usuario-es.pdf",
+    "public/manuals/anclora-energyscan-user-manual-en.pdf",
+    "public/manuals/anclora-energyscan-benutzerhandbuch-de.pdf"
+  ],
+  "qa_domains": [
+    "@anclora.local"
+  ],
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "device_scale_factor": 1,
+  "cookies": [],
+  "roles": {
+    "qa": {
+      "login": "manual",
+      "login_path": "/auth",
+      "email_env": "MANUAL_QA_EMAIL",
+      "password_env": "MANUAL_QA_PASSWORD",
+      "default_email": "qa.energyscan@anclora.local"
+    }
+  },
+  "required_env": [],
+  "data": "Vivienda y evaluación sintéticas de la cuenta QA (dirección ficticia o referencia catastral de prueba).",
+  "screens": [
+    {
+      "file": "logo.png",
+      "mode": "static",
+      "role": "-",
+      "status": "PLACEHOLDER",
+      "instructions": "Ausente (carpeta ignorada por git): copiar public/brand/anclora-energyscan.png (logo Premium) a docs/manual/screenshots/logo.png antes de generar."
+    },
+    {
+      "file": "hero-dark.png",
+      "mode": "assisted",
+      "role": "guest",
+      "path": "/",
+      "status": "PLACEHOLDER",
+      "instructions": "Ausente en el repo — Página de inicio en modo oscuro (sección «1. Qué es Anclora EnergyScan»)"
+    },
+    {
+      "file": "auth-dark.png",
+      "mode": "assisted",
+      "role": "guest",
+      "path": "/",
+      "status": "PLACEHOLDER",
+      "instructions": "Ausente en el repo — Pantalla de acceso (sección «3.1 Crear cuenta o iniciar sesión»)"
+    },
+    {
+      "file": "hero-light.png",
+      "mode": "assisted",
+      "role": "guest",
+      "path": "/",
+      "status": "PLACEHOLDER",
+      "instructions": "Ausente en el repo — Página de inicio en modo claro (sección «3.2 Preferencias de idioma, tema, moneda y unidades»)"
+    },
+    {
+      "file": "home-dark.png",
+      "mode": "assisted",
+      "role": "guest",
+      "path": "/",
+      "status": "PLACEHOLDER",
+      "instructions": "Ausente en el repo — Página de inicio completa (sección «4.1 Página de inicio»)"
+    },
+    {
+      "file": "imagen-pag9-es.png",
+      "mode": "assisted",
+      "role": "guest",
+      "path": "/",
+      "status": "PLACEHOLDER",
+      "instructions": "Ausente en el repo — Calculadora de ahorro energético (sección «4.2 Calculadora de ahorro energético»)"
+    },
+    {
+      "file": "wizard-dark.png",
+      "mode": "assisted",
+      "role": "qa",
+      "path": "/",
+      "status": "PLACEHOLDER",
+      "instructions": "Ausente en el repo — Wizard de prediagnóstico (sección «4.3 Wizard de prediagnóstico»)"
+    },
+    {
+      "file": "wizard-target-dark.png",
+      "mode": "assisted",
+      "role": "qa",
+      "path": "/",
+      "status": "PLACEHOLDER",
+      "instructions": "Ausente en el repo — Selección de letra objetivo energética (sección «4.3.1 Selección de clasificación energética objetivo»)"
+    },
+    {
+      "file": "wizard-map-dark.png",
+      "mode": "assisted",
+      "role": "qa",
+      "path": "/",
+      "status": "PLACEHOLDER",
+      "instructions": "Ausente en el repo — Datos de la vivienda con buscador catastral y mapa (sección «4.4 Búsqueda catastral y mapa del inmueble»)"
+    },
+    {
+      "file": "assessment-target-viability-dark.png",
+      "mode": "assisted",
+      "role": "qa",
+      "path": "/",
+      "status": "PLACEHOLDER",
+      "instructions": "Ausente en el repo — Viabilidad de objetivo de letra (sección «4.5 Resultado gratuito»)"
+    },
+    {
+      "file": "assessment-photos-premium-banner-dark.png",
+      "mode": "assisted",
+      "role": "qa",
+      "path": "/",
+      "status": "PLACEHOLDER",
+      "instructions": "Ausente en el repo — Banner de fotografías guardadas como evidencia (sección «4.5 Resultado gratuito»)"
+    },
+    {
+      "file": "assessment-free-pdf-dark.png",
+      "mode": "assisted",
+      "role": "qa",
+      "path": "/",
+      "status": "PLACEHOLDER",
+      "instructions": "Ausente en el repo — Descarga de PDF gratuito (sección «4.5 Resultado gratuito»)"
+    },
+    {
+      "file": "imagen-pag15-es.png",
+      "mode": "assisted",
+      "role": "guest",
+      "path": "/",
+      "status": "PLACEHOLDER",
+      "instructions": "Ausente en el repo — Dashboard conectado en escritorio (sección «5. Mi panel EnergyScan»)"
+    },
+    {
+      "file": "dashboard-connected-mobile.png",
+      "mode": "assisted",
+      "role": "qa",
+      "path": "/",
+      "status": "PLACEHOLDER",
+      "instructions": "Ausente en el repo — Dashboard conectado en móvil (sección «5.6 Vista móvil»)"
+    },
+    {
+      "file": "pricing-dark.png",
+      "mode": "assisted",
+      "role": "qa",
+      "path": "/",
+      "status": "PLACEHOLDER",
+      "instructions": "Ausente en el repo — Página de precios (sección «6. Informe Premium y pagos»)"
+    },
+    {
+      "file": "budget-review-dark.png",
+      "mode": "assisted",
+      "role": "qa",
+      "path": "/",
+      "status": "PLACEHOLDER",
+      "instructions": "Ausente en el repo — Segunda opinión de presupuesto (sección «7. Segunda opinión de presupuesto»)"
+    },
+    {
+      "file": "profesional-solicitar-dark.png",
+      "mode": "assisted",
+      "role": "qa",
+      "path": "/",
+      "status": "PLACEHOLDER",
+      "instructions": "Ausente en el repo — Formulario de solicitud profesional (sección «8.3 Solicitar acceso beta»)"
+    },
+    {
+      "file": "profesional-dashboard-dark.png",
+      "mode": "assisted",
+      "role": "qa",
+      "path": "/",
+      "status": "PLACEHOLDER",
+      "instructions": "Ausente en el repo — Panel profesional beta (sección «8.5 Panel profesional»)"
+    },
+    {
+      "file": "provider-register-dark.png",
+      "mode": "assisted",
+      "role": "qa",
+      "path": "/",
+      "status": "PLACEHOLDER",
+      "instructions": "Ausente en el repo — Registro de proveedor (sección «9.3 Registro de proveedor»)"
+    },
+    {
+      "file": "imagen-pag30-es.jpeg",
+      "mode": "assisted",
+      "role": "guest",
+      "path": "/",
+      "status": "PLACEHOLDER",
+      "instructions": "Ausente en el repo — Panel de proveedor (sección «9.5 Panel de proveedor»)"
+    },
+    {
+      "file": "imagen-pag31-es.jpeg",
+      "mode": "assisted",
+      "role": "guest",
+      "path": "/",
+      "status": "PLACEHOLDER",
+      "instructions": "Ausente en el repo — Leads de proveedor (sección «9.6 Leads asignados»)"
+    },
+    {
+      "file": "imagen-pag33-es.jpeg",
+      "mode": "assisted",
+      "role": "guest",
+      "path": "/",
+      "status": "PLACEHOLDER",
+      "instructions": "Ausente en el repo — Créditos de proveedor (sección «9.10 Créditos y billing»)"
+    },
+    {
+      "file": "cookies-banner-dark.png",
+      "mode": "assisted",
+      "role": "qa",
+      "path": "/",
+      "status": "PLACEHOLDER",
+      "instructions": "Ausente en el repo — Panel de cookies (sección «10.1 Banner de cookies»)"
+    },
+    {
+      "file": "cookies-settings-dark.png",
+      "mode": "assisted",
+      "role": "qa",
+      "path": "/",
+      "status": "PLACEHOLDER",
+      "instructions": "Ausente en el repo — Configuración de cookies (sección «10.2 Configuración detallada»)"
+    },
+    {
+      "file": "legal-dark.png",
+      "mode": "assisted",
+      "role": "qa",
+      "path": "/",
+      "status": "PLACEHOLDER",
+      "instructions": "Ausente en el repo — Aviso legal (sección «13. Aviso legal»)"
+    }
+  ]
+}
