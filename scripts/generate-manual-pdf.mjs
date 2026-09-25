@@ -74,6 +74,8 @@ const passPdfPath = path.join(tmpDir, `manual-${langArg}-pass.pdf`);
 
 // ─── Chrome detection ──────────────────────────────────────────────────────────
 const chrome = [
+  process.env.MANUAL_CHROME_PATH,
+  '/Users/toni/Library/Caches/ms-playwright/chromium-1234/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing',
   '/usr/bin/google-chrome',
   '/usr/bin/google-chrome-stable',
   '/usr/bin/chromium',
@@ -274,6 +276,12 @@ function injectCoverVisual(coverHtml) {
 }
 
 // ─── Markdown to HTML ──────────────────────────────────────────────────────────
+function imageSrc(relPath, alt) {
+  if (existsSync(path.join(manualDir, relPath))) return relPath;
+  const label = `Captura pendiente: ${alt || path.basename(relPath)}`;
+  return `data:image/svg+xml;base64,${Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="180"><rect width="100%" height="100%" fill="#eef1f6"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="28" fill="#39445a">${label}</text></svg>`).toString('base64')}`;
+}
+
 function markdownToHtml(markdown) {
   const lines = markdown.split(/\r?\n/);
   let html = '';
@@ -299,8 +307,8 @@ function markdownToHtml(markdown) {
 
     const image = trimmed.match(/^!\[(.*?)\]\((.*?)\)$/);
     if (image) {
-      const src = image[2];
       const alt = image[1];
+      const src = imageSrc(image[2], alt);
       const isDark = /dark/i.test(src) || /dark/i.test(alt);
       const isLight = /light/i.test(src) || /light/i.test(alt);
       const isMobile = /mobile/i.test(src) || /mobile/i.test(alt);
@@ -318,8 +326,8 @@ function markdownToHtml(markdown) {
       const nextTrimmed = lines[j]?.trim() ?? '';
       const nextImage = nextTrimmed.match(/^!\[(.*?)\]\((.*?)\)$/);
       if (nextImage) {
-        const src = nextImage[2];
         const alt = nextImage[1];
+        const src = imageSrc(nextImage[2], alt);
         const isDark = /dark/i.test(src) || /dark/i.test(alt);
         const isLight = /light/i.test(src) || /light/i.test(alt);
         const isMobile = /mobile/i.test(src) || /mobile/i.test(alt);
@@ -524,7 +532,7 @@ a { color: inherit; text-decoration: none; }
   font-size: 46pt;
   line-height: 0.97;
   font-weight: 600;
-  text-shadow: 0 3mm 10mm rgba(0, 0, 0, 0.35);
+  text-shadow: none; /* sin sombra difusa: Chrome la rasteriza como un rectángulo oscuro */
 }
 .cover-subtitle {
   margin: 7mm auto 0;
@@ -547,7 +555,7 @@ a { color: inherit; text-decoration: none; }
   padding: 3mm 6mm;
   background: linear-gradient(135deg, #e0c472, #c7a451);
   border-radius: 999px;
-  box-shadow: 0 2mm 8mm rgba(0, 0, 0, 0.32);
+  box-shadow: none; /* idem: evita el recuadro oscuro detrás de versión y fecha */
   letter-spacing: 0.03em;
 }
 .cover-rating {
