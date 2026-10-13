@@ -120,3 +120,57 @@ For dedicated human QA: Use designated production test identity. Never use Toni'
 
 DEFAULT_BRANCH=development
 PROMOTION_POLICY=Default development-only operation; no automatic promotion. Explicit current-task user authorization permits only the repository-supported governed promotion path, subject to all gates.
+
+## Anclora Single Flow v1 (flujo único)
+
+Fuente canónica: `../anclora-mods/ANCLORA_FLUJO_UNICO_V1.md`. Este bloque prevalece sobre cualquier valor anterior de las mismas claves en este fichero; si una clave aparece más de una vez, vale la última.
+
+```text
+ANCLORA_FLOW_VERSION=1
+ANCLORA_MODS_DIR=../anclora-mods
+
+GIT_WORKFLOW_MODEL=FULL_PROMOTION
+WORKING_BRANCH=development
+DEFAULT_BRANCH=development
+FEATURE_BRANCHES=DISALLOWED
+PUSH_TARGET=origin/development
+STOP_AFTER_DEVELOPMENT_PUSH=true
+PROMOTION_FLOW=development->staging->production->main
+PROMOTION_MECHANISM=.github/workflows/promote.yml
+AUTO_PROMOTE=false
+EXPLICIT_PROMOTION_ALLOWED=true
+PROMOTION_AUTHORIZATION_TOKEN=PROMOTE=FULL
+PROMOTION_AUTHORIZATION_SCOPE=UNTIL_CHAIN_COMPLETE
+PROMOTION_REQUIRES_PRE_STEP_GATES=true
+PROMOTION_STOP_ON_GATE_FAILURE=true
+PROMOTION_FORCE_PUSH_ALLOWED=false
+PROMOTION_OLD_AUTHORIZATION_PERSISTS=false
+POST_PROMOTION_QA=REQUIRED
+
+HOSTING_PROVIDER=vercel
+DEPLOYMENT_ENGINE=vercel-git
+PRODUCTION_DEPLOY_BRANCH=main
+MAIN_DEPLOYS=true
+ENV_URL_DEVELOPMENT=vercel-preview:development
+ENV_URL_STAGING=vercel-preview:staging
+ENV_URL_PRODUCTION=https://energyscan.anclora.com
+
+PRODUCTION_BACKED_DEVELOPMENT=true
+PRODUCTION_DATA_IS_FICTITIOUS=true
+SINGLE_OPERATOR_PRODUCTION=true
+SINGLE_OPERATOR_REVIEW_TRIGGER=SECOND_OPERATOR_OR_EXTERNAL_USERS
+REAL_DATA_MUTATION_ALLOWED=false
+
+QA_IDENTITY_REQUIRED_FOR_RUNTIME_TESTS=true
+QA_CREDENTIALS_FILE=.env.qa.local
+QA_CREDENTIALS_VARS=QA_EMAIL,QA_PASSWORD
+QA_BOOTSTRAP_TOOL=scripts/qa/bootstrap-local-credentials.ts
+QA_CREDENTIAL_PRINTING=FORBIDDEN
+QA_CREDENTIAL_LOGGING=NEVER
+QA_ADMIN_PRIVILEGES=false
+
+VALIDATION_CHECKLIST_REQUIRED=true
+VALIDATION_CHECKLIST_FILE=docs/VALIDATION_CHECKLIST.md
+```
+
+Las credenciales de QA siguen el estándar de `ANCLORA_FLUJO_UNICO_V1.md` §5: cuenta persistente, credenciales en `.env.qa.local`, que se cargan sin imprimirlas.

@@ -19,7 +19,6 @@
       "Bash(vercel whoami *)",
       "Bash(vercel env *)",
       "Bash(vercel ls *)",
-      "Bash(vercel --prod --yes)",
       "Bash(curl -s -X POST https://anclora-energyscan-c56e7dyii-pmi140979-6354s-projects.vercel.app/api/assessment/cmp5znb1n000004l7of86j9qq/vision/analyze -H 'Content-Type: application/json' -d '{\"lang\":\"es\"}' --max-time 30)",
       "Bash(curl -sv -X POST https://anclora-energyscan-c56e7dyii-pmi140979-6354s-projects.vercel.app/api/assessment/cmp5znb1n000004l7of86j9qq/vision/analyze -H 'Content-Type: application/json' -d '{\"lang\":\"es\"}' --max-time 30)",
       "Bash(vercel curl *)",
@@ -40,8 +39,7 @@
       "Bash(git -C /Users/toni/Developer/anclora/anclora-energyscan add .github/workflows/ci.yml .gitignore README.md package.json LICENSE .claude/settings.json docs/screenshots/)",
       "Bash(git -C /Users/toni/Developer/anclora/anclora-energyscan rm --cached Captura1.png Captura2.png Captura3.png)",
       "Bash(git -C /Users/toni/Developer/anclora/anclora-energyscan ls-files --others docs/screenshots/)",
-      "Bash(git -C /Users/toni/Developer/anclora/anclora-energyscan commit -m ' *)",
-      "Bash(git -C /Users/toni/Developer/anclora/anclora-energyscan push origin main)"
+      "Bash(git -C /Users/toni/Developer/anclora/anclora-energyscan commit -m ' *)"
     ],
     "additionalDirectories": [
       "/Users/toni/.claude/projects/-home-toni-projects-anclora-energyscan/memory",

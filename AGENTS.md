@@ -112,10 +112,9 @@ Todo desarrollo en este repo sigue la metodología SDD unificada del ecosistema 
 
 ### Flujo de trabajo Git
 
-- Rama base de desarrollo: **`development`**
-- Los agentes crean ramas desde `development`: `feat/<agente>-<descripcion>`, `fix/...`, `chore/...`
-- Las ramas se mergean de vuelta a `development` via PR
-- Promoción manual: `development → staging → production → main`
+- Rama de trabajo: **`development`** (trabajo directo, sin ramas temporales salvo orden expresa de Toni)
+- Push solo a `origin/development`; nunca con force
+- Promoción: `development → staging → production → main` con `promote.yml`, solo tras `PROMOTE=FULL` escrito por Toni
 - Nunca commitear directamente en `main`, `staging` ni `production`
 
 ### Principios de desarrollo (Specboot)

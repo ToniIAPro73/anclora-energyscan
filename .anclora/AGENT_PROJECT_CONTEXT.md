@@ -135,3 +135,16 @@ Repository-specific runtime minima are defined in [`PRODUCTION_RUNTIME.md`](PROD
 
 - Operational Rules: `../AGENTS.md`
 - Governance: [`../../anclora-governance/`](../../anclora-governance/)
+
+## Flujo único Anclora v1
+
+Fuente canónica: sección «Anclora Single Flow v1» de `PRODUCTION_RUNTIME.md` y `../anclora-mods/ANCLORA_FLUJO_UNICO_V1.md`.
+
+1. Trabaja directamente en `development`, sin ramas temporales (salvo orden expresa de Toni). Push solo a `origin/development`, nunca con force.
+2. Verifica antes de entregar: gates (`QA_MODE`) y comprobación funcional y visual con la cuenta de QA (credenciales de `.env.qa.local`, cargadas sin imprimirlas). Los datos de la aplicación son ficticios.
+3. Sobrescribe `docs/VALIDATION_CHECKLIST.md` (plantilla: `../anclora-mods/anclora-workflow/templates/validation-checklist.md`) en el mismo commit.
+4. Detente tras el push. No declares la fase aceptada: la acepta Toni.
+5. Promociona (`staging → production → main`, con `promote.yml`) solo tras `PROMOTE=FULL` escrito por Toni, un salto cada vez y parando ante el primer fallo.
+6. Controles automáticos: `../anclora-mods/README.md`. Si un control bloquea algo legítimo, no lo evites: explícalo.
+
+Esta sección prevalece sobre cualquier cláusula de `AGENTS.md`, `CLAUDE.md`, `GEMINI.md` o `docs/` que ordene ramas por agente o prohíba trabajar en `development`.
