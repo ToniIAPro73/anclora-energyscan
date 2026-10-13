@@ -1,5 +1,6 @@
 import { formatOrphanedBlobPurgeReport } from '../src/lib/orphaned-assessment-blob-purge';
 import { getConfiguredBlobPurgeBatchLimit, runOrphanedAssessmentBlobPurge } from '../src/lib/orphaned-assessment-blob-purge-runtime';
+import { BlobPurgeStageError, formatBlobPurgeDiagnostic, toBlobPurgeDiagnostic, type BlobPurgeStage } from '../src/lib/blob-purge-diagnostics';
 
 function parseArgs(args: string[]) {
   let apply = false;
@@ -21,20 +22,31 @@ function parseArgs(args: string[]) {
 }
 
 async function main() {
-  const { apply, batchLimit } = parseArgs(process.argv.slice(2));
-  if (!process.env.BLOB_READ_WRITE_TOKEN || !process.env.DATABASE_URL) {
-    console.error('Required storage configuration is unavailable.');
-    process.exitCode = 1;
-    return;
-  }
+  let stage: BlobPurgeStage = 'CONFIGURATION';
+  try {
+    const { apply, batchLimit } = parseArgs(process.argv.slice(2));
+    if (!process.env.BLOB_READ_WRITE_TOKEN || !process.env.DATABASE_URL) {
+      console.error('Required storage configuration is unavailable.');
+      process.exitCode = 1;
+      return;
+    }
 
-  const configuredBatchLimit = batchLimit ?? getConfiguredBlobPurgeBatchLimit();
-  const result = await runOrphanedAssessmentBlobPurge({ apply, batchLimit: configuredBatchLimit });
-  console.log(formatOrphanedBlobPurgeReport(result, apply));
-  if (result.failed > 0) process.exitCode = 1;
+    const configuredBatchLimit = batchLimit ?? getConfiguredBlobPurgeBatchLimit();
+    stage = 'DB_CONNECT';
+    const result = await runOrphanedAssessmentBlobPurge(
+      { apply, batchLimit: configuredBatchLimit },
+      undefined,
+      (diagnostic) => console.error(formatBlobPurgeDiagnostic(diagnostic)),
+    );
+    console.log(formatOrphanedBlobPurgeReport(result, apply));
+    if (result.failed > 0) process.exitCode = 1;
+  } catch (error) {
+    const diagnostic = error instanceof BlobPurgeStageError
+      ? error.diagnostic
+      : toBlobPurgeDiagnostic(stage, error);
+    console.error(formatBlobPurgeDiagnostic(diagnostic));
+    process.exitCode = 1;
+  }
 }
 
-main().catch(() => {
-  console.error('Blob purge failed; no object paths or identifiers are displayed.');
-  process.exitCode = 1;
-});
+void main();

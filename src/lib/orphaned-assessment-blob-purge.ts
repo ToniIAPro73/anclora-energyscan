@@ -1,4 +1,5 @@
 import { ASSESSMENT_RETENTION_MS } from './assessment-retention';
+import { toBlobPurgeDiagnostic, type BlobPurgeDiagnostic } from './blob-purge-diagnostics';
 
 export const ENERGYSCAN_ASSESSMENT_BLOB_PREFIXES = ['assessment-drafts/', 'assessments/'] as const;
 export const BLOB_PURGE_PAGE_SIZE = 1000;
@@ -48,6 +49,7 @@ export type OrphanedBlobPurgeDeps = {
   list: (options: { prefix: string; cursor?: string; limit: number }) => Promise<BlobListPage>;
   findReferencedPaths: (pathnames: string[]) => Promise<string[]>;
   delete: (pathname: string) => Promise<unknown>;
+  onDeleteFailure?: (diagnostic: BlobPurgeDiagnostic) => void;
 };
 
 function emptyMatrix(): BlobPurgeMatrix {
@@ -177,8 +179,9 @@ export async function purgeOrphanedAssessmentBlobs(
       try {
         await deps.delete(candidate.pathname);
         deleted += 1;
-      } catch {
+      } catch (error) {
         failed += 1;
+        deps.onDeleteFailure?.(toBlobPurgeDiagnostic('DELETE', error));
       }
     }
   }
