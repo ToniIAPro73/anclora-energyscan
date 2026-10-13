@@ -1,15 +1,15 @@
 # Matriz de gates F0
 
-**Commit de referencia del análisis:** `4870403dfd8237dfa82b2aecc9bd4270cd766bd0`. Cada gate se actualizará con el SHA realmente implementado.
+**Commit de referencia del análisis:** `4870403dfd8237dfa82b2aecc9bd4270cd766bd0`. ES-0.1 fue validada por Toni y promocionada a `main` (verificación Git: `origin/main` y `origin/development` coinciden en `0065396bb893a838542adbda2e4903c1280c42a0`). La aceptación de fase no convierte las comprobaciones técnicas sin evidencia en PASS; se conservan explícitamente como `NOT_RUN` o como limitaciones.
 
 El agente ejecuta los gates técnicos internos. Toni es el validador inicial del producto y acepta o pide cambios en cada fase. La validación externa no bloquea desarrollo; puede ser requisito antes de exponer públicamente una capacidad o afirmación que dependa de ella.
 
-Las filas describen comprobaciones que deben ejecutarse, no resultados actuales. Los resultados del análisis previo son `NOT_RUN`; ningún `PASS` se hereda de reportes históricos.
+Las filas de ES-0.2–ES-0.4 y el gate padre describen comprobaciones pendientes, no resultados actuales. El estado de fase ES-0.1 registra la aceptación de Toni y la promoción; la evidencia técnica histórica y sus límites se detallan abajo. Ningún `PASS` técnico se hereda de reportes históricos.
 
 | Req → tarea | Comprobación | Fixture/dataset | Método | Criterio de aceptación | Evidencia mínima | Aceptación producto | Estado |
 |---|---|---|---|---|---|---|---|
-| R01–04 → ES-0.1 | CRUD owner A/B, anon, profesional sin/con grant y revocado; demo/stateless manipulado; rutas de adjuntos | Usuarios, assessments, adjuntos sintéticos; Blob mock | Tests focales e inspección de rutas/storage | 0 accesos cruzados permitidos en N casos; publicar N/población; authz antes de I/O | SHA, casos, resultado redactado, fixture hash | Toni | BLOCKED — suite focal parcial; Blob local no permite validar el éxito real |
-| R02–03 → ES-0.1 | GET/DELETE válido/ausente, Auth error, IDOR, demo, Blob failure, MIME/tamaño/replay/callback | Archivos falsos y storage mock | Tests focales | Denegación antes de I/O no autorizado; éxito válido; fallo sin metadatos engañosos | Aserciones/estados categóricos sin URL, token ni path | Toni | BLOCKED — el token Blob local es rechazado; éxito real pendiente |
+| R01–04 → ES-0.1 | CRUD owner A/B, anon, profesional sin/con grant y revocado; demo/stateless manipulado; rutas de adjuntos | Usuarios, assessments, adjuntos sintéticos; Blob mock | Tests focales e inspección de rutas/storage | 0 accesos cruzados permitidos en N casos; publicar N/población; authz antes de I/O | SHA, casos, resultado redactado, fixture hash | Toni | FASE VALIDADA Y PROMOCIONADA; cobertura exhaustiva de matriz/grants no acreditada en los informes disponibles |
+| R02–03 → ES-0.1 | GET/DELETE válido/ausente, Auth error, IDOR, demo, Blob failure, MIME/tamaño/replay/callback | Archivos falsos y storage mock | Tests focales | Denegación antes de I/O no autorizado; éxito válido; fallo sin metadatos engañosos | Aserciones/estados categóricos sin URL, token ni path | Toni | FASE VALIDADA Y PROMOCIONADA; éxito real de Blob, replay y callback criptográfico siguen sin evidencia en los informes disponibles |
 | R05 → ES-0.2 | Data-flow entrada→Blob→OCR/visión→DB→PDF/logs→retención; proveedores | Código, esquema y fixtures sintéticos | Revisión manual | 100% rutas/proveedores inventariados o brecha registrada; minimización y límites definidos | Mapa con fecha y salida sanitizada | Toni | NOT_RUN |
 | R05/R11 → ES-0.2 | Redacción de centinelas sintéticos en logs de error | JSON sintético con valores falsos | Test focal futuro | 0 centinelas sensibles en salida; publicar campos/casos evaluados | Fixture hash y salida sanitizada | Toni | NOT_RUN |
 | R06–07 → ES-0.3 | Assessment/Evidence Matrix/CEE/budget/score/PDF con fuentes, conflictos, vacíos y baja confianza | Assessment sintético | Test focal de evidencia/scoring/report | Campos críticos muestran fuente/estado/ausencia; desconocido no es cero; EnergyScan no se presenta como CEE oficial | Aserciones/snapshot y PDF sintético si aplica | Toni | NOT_RUN |
@@ -20,6 +20,31 @@ Las filas describen comprobaciones que deben ejecutarse, no resultados actuales.
 | Gate padre → ES-F0 | Revisar lote, resultados y riesgos | Fixtures sintéticos | Verificación documental/técnica | PASS si checks críticos pertinentes pasan y riesgo crítico/alto está corregido o contenido; FAIL con fallo reproducible; BLOCKED solo por dependencia técnica/seguridad concreta | SHA, comandos/salidas sanitizadas y decisión | Toni | NOT_RUN |
 
 ## Evidencia ejecutada para ES-0.1
+
+### Estado de fase y sincronización (2026-10-13)
+
+- Toni validó ES-0.1 y la fase fue promocionada a `main`. `git fetch origin --prune` mostró `origin/main`, `origin/staging`, `origin/production` y `origin/development` en `0065396bb893a838542adbda2e4903c1280c42a0`; el first-parent de `main` incluye los commits de ES-0.1 y sus mejoras posteriores.
+- La aceptación de Toni se registra separada de la cobertura automatizada. Las notas históricas que dicen que Toni debía validar o que ES-0.1 no había sido aceptada quedan supersedidas por esta decisión posterior.
+- Aún no hay evidencia en los informes versionados de éxito autenticado con Blob conectado a Preview, acceso profesional con grant/revocación, replay ni validación criptográfica real del callback. Se mantienen como límites `NOT_RUN`; no se reescriben como resultados PASS.
+- Mejoras incorporadas durante ES-0.1: mensajes claros para errores de acceso en `/auth` (incluido `OAuthAccountNotLinked`); `scripts/qa/teardown-qa-data.ts` declarado como `QA_TEARDOWN_TOOL` y ejecutado una vez; runbook de QA visual en `docs/qa/visual-qa-runbook.md`.
+- Estado de entorno declarado por Toni: Preview de `development` conectado con `AUTH_SECRET`, Neon (misma base de datos que Production por contrato) y Vercel Blob. Esta configuración no se verificó mediante el panel de Vercel en esta actualización documental.
+- Pendientes declarados: Stripe test no configurado en Preview (solo Production); login Google solo existe en Production; `.anclora/global` enlaza a una ruta VPS inexistente en este checkout; el mensaje del teardown no distingue registro no encontrado de fallo real; el placeholder de `zipcode` puede aparentar un valor y el error `Invalid input` no identifica el campo.
+
+### Siguiente fase: ES-0.2
+
+Privacidad, ingesta y retención (P0), dependiente del inventario F0. Alcance y criterios permanecen en `tasks.md`, `plan.md` y `spec.md`: trazar recepción→Blob→parser/OCR/visión→DB→PDF/logs→retención/borrado; inventariar proveedores y brechas; definir minimización/logging/retención; implementar redacción verificable con centinelas sintéticos. Salida de aceptación: rutas/proveedores inventariados o brechas registradas, fixtures/evidencia sin PII y ningún centinela sintético en los logs.
+
+Plan breve para su ejecución, sin ampliar criterios:
+
+1. Inventariar flujo y consumidores desde recepción hasta retención/borrado, incluidos errores y logs.
+2. Identificar proveedores, regiones, categorías de datos, finalidad, acceso y retención; marcar explícitamente cualquier tramo no verificable.
+3. Resolver con Toni las decisiones de producto que cambien tratamiento o retención antes de activar ese tratamiento.
+4. Crear centinelas y fixtures sintéticos; añadir pruebas focales de redacción y ausencia de centinelas en logs.
+5. Implementar minimización/redacción acordada y documentar resultados, SHA y limitaciones.
+
+Riesgos y dependencias: el runtime es `PRODUCTION_BACKED` y no se crearán bases de datos alternativas; no usar documentos reales ni enviar documentos a proveedores en pruebas. Una migración, si se demuestra necesaria, tiene mínimo `QA_MINIMUM_FOR_DATABASE_MIGRATION=FULL`; un cambio de autenticación tiene mínimo `QA_MINIMUM_FOR_AUTH=FULL`; cualquier promoción tiene mínimo `QA_MINIMUM_FOR_RELEASE_PROMOTION=FULL`. Sin migración, auth ni UI, aplicar QA proporcional: revisión del flujo, pruebas focales con centinelas sintéticos y `git diff --check`; QA visual queda fuera si no cambia UI.
+
+Decisiones de Toni: aprobar finalidad, plazo de retención y condiciones de habilitación para proveedores externos cuando afecten al comportamiento o al tratamiento; decidir si hace falta tratamiento externo en desarrollo. La inspección puede documentar proveedores existentes y brechas sin activar servicios.
 
 Resultados comprobados sobre el código del commit de implementación que acompaña esta evidencia (SHA comunicado en la entrega):
 
@@ -72,4 +97,4 @@ Esta actualización sustituye el estado de la comprobación visual autenticada i
 - Se verificó el estado de error en escritorio. El éxito autenticado con Blob válido, apertura/descarga y borrado real siguen `NOT_RUN` por token Blob inválido. Mobile, acceso real desde otra identidad, replay y callback criptográfico real también siguen `NOT_RUN`.
 - Tests focales: `npm test -- --runInBand tests/attachment-access.test.ts tests/blob-upload-authorization.test.ts tests/assessment-upload-association.test.ts` — PASS, 3 suites / 22 tests. Suite completa: `npm test -- --runInBand` — PASS, 66 suites / 453 tests. Typecheck, lint, build y `git diff --check` — PASS; el build conserva dos advertencias de APIs de compresión `jose` en Edge Runtime.
 
-El gate técnico de código está comprobado con tests y gates PASS. La verificación de la ruta real de éxito permanece `BLOCKED` por el token Blob local inválido. Toni debe validar los pasos bloqueantes del checklist cuando el entorno autorizado disponga de Blob válido; la fase no queda aceptada.
+En el momento de ese seguimiento, el gate técnico tenía tests y gates PASS, pero la verificación de la ruta real de éxito estaba `BLOCKED` por el token Blob local inválido. El estado posterior de fase (aceptación de Toni y promoción a `main`) consta arriba. Esa decisión no cambia el resultado histórico ni aporta evidencia técnica nueva para las rutas que siguen sin probar.

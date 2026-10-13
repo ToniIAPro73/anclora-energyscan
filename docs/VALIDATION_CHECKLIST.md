@@ -1,51 +1,35 @@
-# Checklist de validación — runbook de QA visual y referencias de agentes (2026-10-13)
+# Checklist de validación — sincronización de estado ES-0.1 y plan ES-0.2 (2026-10-13)
 
 > Este fichero se sobrescribe en cada entrega. El historial queda en Git.
 
 **Repositorio:** anclora-energyscan
-
-**Rama y commit:** development @ `bb1e9f4` (base de esta ampliación; SHA final en Git)
-
-**Entorno de validación:** localhost con variables `development` de Vercel y Preview protegido de `development`
-
-**Datos:** ficticios. Cuenta persistente: `qa.energyscan@anclora.local`; no se creó ni eliminó identidad.
+**Rama y commit:** development @ `0065396bb893a838542adbda2e4903c1280c42a0` (SHA base revisado para esta edición documental)
+**Entorno de validación:** [Preview de development](https://anclora-energyscan-git-development-pmi140979-6354s-projects.vercel.app) · runtime local
+**Datos:** ficticios (declaración de Toni). Cuenta: `qa.energyscan@anclora.local` (persistente; no usada en esta edición).
 
 ## 1. Qué cambia
 
-- Añade un runbook reproducible para QA visual en local y en el Preview protegido, con sesión QA, capturas y limpieza.
-- Añade una referencia al runbook en `AGENTS.md`.
-- Añade el mismo puntero fuera del bloque de ecosistema en `CLAUDE.md` y `GEMINI.md`.
+- Registra ES-0.1 como validada por Toni y promocionada a `main`; `origin/main` y `origin/development` coinciden en el SHA base revisado.
+- Marca ES-0.2 como siguiente fase y ES-0.3/ES-0.4 como pendientes, conservando intactos sus criterios de aceptación.
+- Conserva en los informes las limitaciones de evidencia técnica y los pendientes conocidos de Preview, QA teardown y zipcode.
+- Propone el plan de ES-0.2 en `specs/energyscan/000-seguridad-verdad/gates.md`; no implementa esa fase.
 
 ## 2. Ya comprobado por el agente
 
 | Comprobación | Comando o método | Resultado | SHA |
 | --- | --- | --- | --- |
-| Identidad solicitada | `whoami`; `echo $HOME` | PASS; `toni`, `/Users/toni` | `40ac3d4` |
-| Estado y sincronización | `git status --short`; `git fetch origin --prune`; `git pull --ff-only origin development` | PASS; árbol limpio y actualizado | `40ac3d4` |
-| Arranque local con override | `vc env run -- sh -c 'AUTH_URL=http://localhost:3000 npm run dev'` | PASS; servidor listo en `http://localhost:3000` | `40ac3d4` |
-| Login local QA | `agent-browser --session qa-local-check auth login qa-es01 --url http://localhost:3000/auth` tras rechazar cookies | PASS; perfil autenticado | `40ac3d4` |
-| Sesión local | `agent-browser --session qa-local-check eval "fetch('/api/auth/session').then(async r=>{const raw=await r.text();let data={};try{data=raw?JSON.parse(raw):{}}catch{};return {status:r.status,authenticated:Boolean(data?.user?.email)}})"` | PASS; HTTP 200, `authenticated: true`; solo se imprimió estado | `40ac3d4` |
-| Capturas local | `agent-browser set viewport 1440 900` y `390 844`; screenshots en directorio `mktemp` bajo `/tmp` | PASS; escritorio y móvil guardados en sistema temporal y borrados al terminar | `40ac3d4` |
-| Acceso protegido Preview | `vc env pull` temporal con `--environment preview --git-branch development`; OIDC fresco pasado en `--headers` | PASS; abrió `/auth` del Preview; fichero temporal eliminado | `40ac3d4` |
-| Login y sesión Preview | Perfil `qa-es01`; `fetch('/api/auth/session')` con manejo de cuerpo vacío | PASS; HTTP 200, sesión autenticada; sin imprimir datos | `40ac3d4` |
-| Cierre y limpieza | `agent-browser --session ... close`; `Ctrl-C`; `unlink` de capturas y temporal OIDC | PASS; navegadores y servidor cerrados; temporales borrados | `40ac3d4` |
-| Datos de aplicación | Ninguna valoración ni adjunto creado durante esta validación visual | PASS; no hacía falta ejecutar teardown en esta sesión | `40ac3d4` |
-| Referencias de agentes | `rg -n 'Antes de cualquier prueba visual' AGENTS.md CLAUDE.md GEMINI.md` | PASS; cada archivo remite al runbook; los dos punteros añadidos están fuera del bloque de ecosistema | `bb1e9f4` |
-| Lint | `npm run lint` | PASS; `next lint` sin warnings ni errores | `40ac3d4` |
-| Typecheck | `npx tsc --noEmit` | PASS; sin errores | `40ac3d4` |
-
-Errores observados y corrección:
-
-- Arrancar con `vc env run -- npm run dev` sin `AUTH_URL=http://localhost:3000` provocó `TypeError: Invalid URL` y `/api/auth/session` devolvió 500. El arranque documentado con el override local funciona.
-- `vc env run` reutilizó un token OIDC caducado; el navegador mostró `Login – Vercel`. `vc env pull` con `--environment development --git-branch development` fue rechazado con `Invalid request: target must be "preview" when specifying a gitBranch`. La variante comprobada es `--environment preview --git-branch development` a un fichero temporal; el token resultante estaba fresco y el acceso funcionó.
-- El guardia rechazó `rm -f` con `rm -f style commands are not permitted. Use a safer approach`. Se limpió el temporal con `unlink` sobre el fichero concreto.
+| Identidad | `whoami && echo $HOME` | PASS; `toni`, `/Users/toni` | `0065396` |
+| Estado y sincronización | `git status --short`; `git fetch origin --prune`; `git pull --ff-only origin development` | PASS; árbol limpio antes de editar, `development` actualizado | `0065396` |
+| Relación de ramas y promoción | `git rev-parse HEAD`; `git rev-parse origin/development`; `git rev-parse origin/main`; `git log --first-parent --format='%h %ad %s' --date=short origin/main -12` | PASS; main y development coinciden; first-parent incluye ES-0.1 y mejoras posteriores | `0065396` |
+| Revisión de límites de contexto | `git diff --check`; revisión del diff documental | PASS; criterios no alterados; aceptación y cobertura técnica diferenciadas | `0065396` |
 
 ## 3. Pruebas no ejecutadas (NOT_RUN)
 
 | Prueba | Motivo concreto |
 | --- | --- |
-| Tests y build | Cambio solo de documentación; el encargo pide lint y typecheck, no repetir test ni build. Ejecutar gates en paralelo con build puede colisionar en `.next/types`. |
-| Teardown de datos | QA visual no creó valoraciones ni adjuntos; el runbook documenta `npm run qa:teardown` para los IDs creados en futuras pruebas. No se usó SQL ni Prisma directo. |
+| Tests, lint, typecheck y build de la aplicación | Cambio exclusivamente documental; no se modificó código de aplicación. |
+| QA funcional y visual en Preview/local | No cambió interfaz ni comportamiento. La tarea pide revisar manualmente el estado de la spec. La configuración Preview se registra según lo indicado por Toni, no se volvió a comprobar en Vercel. |
+| Verificación live de Neon, Blob, Stripe o Google | No necesaria para sincronizar documentos; evita operaciones runtime ajenas a esta tarea. |
 
 ## 4. Checklist para validar en la aplicación
 
@@ -53,34 +37,33 @@ Marca cada punto. Un fallo en un punto marcado **[BLOQUEANTE]** impide promocion
 
 | # | Dónde | Pasos | Resultado esperado | Cuenta o configuración | Bloqueante |
 | --- | --- | --- | --- | --- | --- |
-| 1 | `AGENTS.md`, `CLAUDE.md`, `GEMINI.md` y `docs/qa/visual-qa-runbook.md` | Lee el runbook y confirma que los tres ficheros de instrucciones apuntan a él; verifica que los dos nuevos punteros están fuera del bloque `ANCLORA-ECOSYSTEM-CONTEXT`. | Claude Code, agy y los demás agentes reciben el mismo enlace al procedimiento. | Sin abrir ni imprimir archivos `.env*`. | Sí |
-| 2 | Local, `/auth` | Arranca con `vc env run -- sh -c 'AUTH_URL=http://localhost:3000 npm run dev'`; abre con agent-browser, rechaza opcionales y autentica con `qa-es01`. | Login correcto; `/api/auth/session` responde 200 y sesión autenticada. | Variables `development`; cuenta persistente QA. | Sí |
-| 3 | Preview de `development` | Sigue la renovación OIDC temporal del runbook, accede a `/auth`, rechaza cookies y entra con `qa-es01`. | No aparece Vercel Login; sesión autenticada y el fichero temporal se elimina. | Token fresco; no compartir su valor. | Sí |
-| 4 | Escritorio y móvil | Sigue los pasos de captura del runbook y revisa las imágenes guardadas temporalmente. | Capturas legibles a 1440×900 y 390×844, fuera del repositorio; temporales eliminados después. | Sesión QA. | No |
+| 1 | `specs/energyscan/README.md`, `000-seguridad-verdad/tasks.md`, `plan.md` y `gates.md` | Revisa estado de fases, historial de ES-0.1 y límites técnicos anotados. | ES-0.1 figura validada/promocionada; ES-0.2 es la siguiente; límites sin evidencia no aparecen como PASS. | Validación de Toni; no requiere login. | Sí |
+| 2 | `specs/energyscan/000-seguridad-verdad/gates.md` — plan ES-0.2 | Confirma objetivo, dependencia, tareas, riesgos, QA mínimo y decisiones pendientes de Toni. | El plan refleja las tareas y criterios existentes de ES-0.2 sin añadir alcance o criterios. | Spec vigente; sin datos reales. | Sí |
 
 ### Casos negativos y de borde
 
 | # | Caso | Resultado esperado |
 | --- | --- | --- |
-| 1 | Token OIDC caducado en `vc env run` | Vercel Login indica que el acceso no se completó; renovar con `vc env pull` a un temporal para Preview/development. |
-| 2 | `vc env pull --environment development --git-branch development` | Vercel lo rechaza; usar `--environment preview --git-branch development`. |
-| 3 | `zipcode` vacío | El placeholder `28001` parece un valor, pero el envío falla con `Invalid input`; escribir un código postal sintético explícito. |
+| 1 | El informe histórico dice que éxito Blob estaba bloqueado, pero ES-0.1 después fue aceptada | Se conserva el resultado histórico; la aceptación posterior se registra por separado, sin inventar evidencia del éxito Blob. |
+| 2 | Google o Stripe test se prueban desde Preview | No se infiere fallo funcional de producción; Google y Stripe test siguen pendientes de configuración en Preview según el estado declarado. |
+| 3 | Campo `zipcode` vacío con placeholder `28001` | Se reconoce que el placeholder no completa el campo y que el error actual no identifica su nombre. |
 
 ### Estados de interfaz afectados
 
-- [ ] Vacío · [x] Cargando · [x] Error · [x] Éxito · [x] Móvil · [x] Escritorio · [ ] Modo oscuro
+- [ ] Vacío · [ ] Cargando · [ ] Error · [ ] Éxito · [ ] Móvil · [ ] Escritorio · [ ] Modo oscuro (no aplica: entrega documental)
 
 ## 5. Riesgos y limitaciones
 
-- El runtime local es `PRODUCTION_BACKED`; trata los datos como ficticios y elimina solo los registros creados para QA con la herramienta contractual.
-- El Preview solo dispone de Neon y Blob después de conectar esas integraciones al entorno Preview.
-- Google y Stripe están configurados solo en Production; no uses el Preview para concluir que esos proveedores funcionan o fallan.
-- El placeholder del campo `zipcode` puede ocultar que el campo obligatorio sigue vacío.
-- No mostrar ni leer en consola los contenidos de `.env*` ni imprimir secretos. El runbook usa únicamente estados de presencia/caducidad y el resultado funcional.
+- El estado de conexión de Preview con `AUTH_SECRET`, Neon compartido con Production y Blob procede de la declaración de Toni; no se inspeccionó la configuración de Vercel en esta tarea.
+- Stripe test no está configurado en Preview; Google login solo está disponible en Production.
+- `.anclora/global` apunta a una ruta VPS que no existe en este checkout. No se modificó `.anclora/`.
+- El mensaje de `qa:teardown` no distingue “no encontrada” de un fallo real.
+- El placeholder de `zipcode` puede aparentar un valor y el formulario muestra `Invalid input` sin identificar el campo.
+- La evidencia versionada aún no acredita Blob real exitoso, grants/revocación profesional, replay ni callback criptográfico real; esto no revoca la aceptación de fase informada por Toni.
 
 ## 6. Decisión de Toni
 
-- [ ] Leí el runbook y confirmo que sus comandos reflejan el flujo real
+- [ ] Revisé que el estado de la spec es correcto
 - [ ] Todos los puntos bloqueantes pasan
 - [ ] Se promociona: escribir `PROMOTE=FULL` (staging → production → main)
 - [ ] No se promociona. Motivo: ______________________

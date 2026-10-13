@@ -1,6 +1,6 @@
 # F0 — Plan de desarrollo
 
-**Estado:** activo para desarrollo en `development`. Toni valida inicialmente cada entrega junto con el agente. Revisiones externas y piloto de usuarios quedan para gates de publicación, afirmaciones profesionales/reguladas o validación de mercado.
+**Estado:** activo para desarrollo en `development`. ES-0.1 fue validada por Toni y promocionada a `main`; ES-0.2 es el siguiente lote. Toni valida inicialmente cada entrega junto con el agente. Revisiones externas y piloto de usuarios quedan para gates de publicación, afirmaciones profesionales/reguladas o validación de mercado.
 
 ## Arquitectura actual confirmada y propuesta
 

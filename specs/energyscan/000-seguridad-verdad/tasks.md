@@ -1,8 +1,10 @@
 # F0 — Tareas de desarrollo
 
-**Estado:** ES-0.1–ES-0.4 se ejecutan directamente en `development`. Toni valida inicialmente producto y alcance junto con el agente. El agente implementa y aporta evidencia técnica. No hay requisito de panel de validadores ni piloto previo a la implementación. Toda prueba que aún no se haya ejecutado está `NOT_RUN`.
+**Estado:** ES-0.1 fue validada por Toni y promocionada a `main`. La siguiente tarea es ES-0.2; ES-0.3 y ES-0.4 siguen pendientes. Las tareas se ejecutan directamente en `development`. Toni valida inicialmente producto y alcance junto con el agente. El agente implementa y aporta evidencia técnica. No hay requisito de panel de validadores ni piloto previo a la implementación. Toda prueba que aún no se haya ejecutado está `NOT_RUN`.
 
 ## ES-0.1 — Autorización de adjuntos y upload (P0)
+
+**Estado de fase:** VALIDADA POR TONI Y PROMOCIONADA A `main`. Los límites de cobertura técnica aún no documentados se conservan como pendientes de evidencia en `gates.md`; no alteran esta decisión de fase.
 
 **Objetivo:** restringir cada operación por actor, recurso y acción; cerrar IDOR/BOLA.
 **Rutas confirmadas:** `src/app/api/assessment/[id]/attachments/[attachmentId]/route.ts`, `src/app/api/blob/upload/route.ts`, `src/lib/stateless-assessment.ts`, `src/lib/blob-storage.ts`. Confirmar consumidores antes de cambiar interfaces.

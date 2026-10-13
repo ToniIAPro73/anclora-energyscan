@@ -1,13 +1,13 @@
 # Índice de specs EnergyScan
 
-Estado global: roadmap activo de desarrollo. Se trabaja en `development` por fases; Toni valida inicialmente cada entrega junto con el agente. Fases posteriores se refinan al acercarse su ejecución. Validación externa de usuarios, revisión profesional y revisión legal se planifican para decisiones de mercado o preparación pública que las requieran; no son prerrequisitos generales de implementación interna.
+Estado global: roadmap activo de desarrollo. ES-0.1 fue validada por Toni y promocionada a `main`; ES-0.2 es la siguiente fase de F0. Se trabaja en `development` por fases; Toni valida inicialmente cada entrega junto con el agente. Fases posteriores se refinan al acercarse su ejecución. Validación externa de usuarios, revisión profesional y revisión legal se planifican para decisiones de mercado o preparación pública que las requieran; no son prerrequisitos generales de implementación interna.
 
 | ID | Fase | Prioridad | Dependencia | Estado | Spec/tarea | Gate |
 |---|---:|---|---|---|---|---|
-| ES-0.1 | 0 | P0 | Ninguna | EN DESARROLLO | [000-seguridad-verdad/spec.md](000-seguridad-verdad/spec.md), [tasks.md](000-seguridad-verdad/tasks.md) | AuthZ completa y matriz sin acceso cruzado |
-| ES-0.2 | 0 | P0 | Inventario F0 | EN DESARROLLO | idem | Inventario de datos, minimización y retención con controles claros |
-| ES-0.3 | 0 | P0 | ES-0.1 inventario | EN DESARROLLO | idem | Claims/procedencia trazables; revisión externa previa a exposición pública cuando aplique |
-| ES-0.4 | 0 | P1 | ES-0.1–0.3 | EN DESARROLLO | idem | Baseline reproducible; piloto y método son validación posterior |
+| ES-0.1 | 0 | P0 | Ninguna | VALIDADA POR TONI · PROMOCIONADA A MAIN | [000-seguridad-verdad/spec.md](000-seguridad-verdad/spec.md), [tasks.md](000-seguridad-verdad/tasks.md) | AuthZ completa y matriz sin acceso cruzado |
+| ES-0.2 | 0 | P0 | Inventario F0 | SIGUIENTE · PENDIENTE DE INICIO | idem | Inventario de datos, minimización y retención con controles claros |
+| ES-0.3 | 0 | P0 | ES-0.1 inventario | PENDIENTE | idem | Claims/procedencia trazables; revisión externa previa a exposición pública cuando aplique |
+| ES-0.4 | 0 | P1 | ES-0.1–0.3 | PENDIENTE | idem | Baseline reproducible; piloto y método son validación posterior |
 | ES-1.1 | 1 | P1 | F0 | PROPUESTA | [Roadmap](../../docs/energyscan-roadmap.md#registro-de-tareas-padre-22) | Exactitud/cobertura por campo en corpus autorizado |
 | ES-1.2 | 1 | P1 | ES-1.1 | PROPUESTA | idem | Comparabilidad explicable, unidades/IVA compatibles |
 | ES-1.3 | 1 | P1 | ES-1.1–1.2 | PROPUESTA | idem | Revisión accionable y corregible |

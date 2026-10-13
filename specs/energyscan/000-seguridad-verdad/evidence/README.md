@@ -1,6 +1,6 @@
 # Evidencia futura F0
 
-No se ha creado ni añadido evidencia de pruebas en la edición documental. Los gates permanecen `NOT_RUN` hasta su ejecución contra un SHA de implementación.
+ES-0.1 fue validada por Toni y promocionada a `main`. Los informes históricos de ejecución y sus límites constan en `../gates.md`; la decisión de fase no sustituye los resultados técnicos, y las comprobaciones pendientes siguen identificadas allí. ES-0.2–ES-0.4 aún no tienen evidencia de ejecución.
 
 Cuando se ejecute una fase:
 
