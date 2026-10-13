@@ -1,42 +1,49 @@
-# Checklist de validación — ejecución de teardown QA (2026-10-13)
+# Checklist de validación — runbook de QA visual (2026-10-13)
 
 > Este fichero se sobrescribe en cada entrega. El historial queda en Git.
 
 **Repositorio:** anclora-energyscan
 
-**Rama y commit:** development @ `7b83101` (base de esta entrega; SHA de documentación en Git)
+**Rama y commit:** development @ `40ac3d4` (base de esta entrega; SHA de documentación en Git)
 
-**Entorno de validación:** runtime local con variables de `development` de Vercel; `AUTH_URL` local para el flujo QA
+**Entorno de validación:** localhost con variables `development` de Vercel y Preview protegido de `development`
 
-**Datos:** ficticios. Cuenta persistente: `qa.energyscan@anclora.local`; no se eliminó.
+**Datos:** ficticios. Cuenta persistente: `qa.energyscan@anclora.local`; no se creó ni eliminó identidad.
 
-## 1. Qué se ejecutó
+## 1. Qué cambia
 
-- Se eliminó la valoración QA `cmv6tpfhp000006ia0rptcr36` usando exclusivamente `scripts/qa/teardown-qa-data.ts`.
-- La herramienta confirmó `APPLIED — VERIFIED ZERO` para valoraciones, adjuntos y análisis de adjuntos.
-- La identidad QA se conservó y pudo iniciar sesión en el entorno local con configuración de `development`.
-- `--delete-identity` no se ejecutó.
+- Añade un runbook reproducible para QA visual en local y en el Preview protegido, con sesión QA, capturas y limpieza.
+- Añade una referencia al runbook en `AGENTS.md`.
 
 ## 2. Ya comprobado por el agente
 
 | Comprobación | Comando o método | Resultado | SHA |
 | --- | --- | --- | --- |
-| Estado inicial y actualización | `git status --short`; `git fetch origin --prune`; `git pull --ff-only origin development` | PASS; árbol limpio, rama `development`, base `7b83101` | `7b83101` |
-| Herramienta contractual | Lectura de `.anclora/PRODUCTION_RUNTIME.md` | PASS; declara `QA_TEARDOWN_TOOL=scripts/qa/teardown-qa-data.ts` | `7b83101` |
-| Dry-run inicial | `npm run qa:teardown -- --assessment-id cmv6tpfhp000006ia0rptcr36` | PASS; `assessments: 1`, `attachments: 0`, `attachmentAnalyses: 0`; sin cambios | `7b83101` |
-| Borrado autorizado | `npm run qa:teardown -- --assessment-id cmv6tpfhp000006ia0rptcr36 --apply` | PASS; `APPLIED — VERIFIED ZERO`; `assessments: 0`, `attachments: 0`, `attachmentAnalyses: 0` | `7b83101` |
-| Dry-run posterior con el mismo ID | `npm run qa:teardown -- --assessment-id cmv6tpfhp000006ia0rptcr36` | Resultado esperado tras borrar: la valoración ya no existe. La herramienta abortó y solo mostró `QA teardown failed; no secrets or database details are displayed.` | `7b83101` |
-| Login de identidad QA | `agent-browser` en `http://localhost:3000/auth`, runtime con variables `development` y `AUTH_URL` local; comprobación de `/api/auth/session` | PASS; HTTP `200`, sesión autenticada. No se imprimieron credenciales ni datos de sesión | `7b83101` |
-| Eliminación de identidad QA | No se ejecutó `--delete-identity` | PASS; la identidad sigue disponible y pudo iniciar sesión | `7b83101` |
+| Identidad solicitada | `whoami`; `echo $HOME` | PASS; `toni`, `/Users/toni` | `40ac3d4` |
+| Estado y sincronización | `git status --short`; `git fetch origin --prune`; `git pull --ff-only origin development` | PASS; árbol limpio y actualizado | `40ac3d4` |
+| Arranque local con override | `vc env run -- sh -c 'AUTH_URL=http://localhost:3000 npm run dev'` | PASS; servidor listo en `http://localhost:3000` | `40ac3d4` |
+| Login local QA | `agent-browser --session qa-local-check auth login qa-es01 --url http://localhost:3000/auth` tras rechazar cookies | PASS; perfil autenticado | `40ac3d4` |
+| Sesión local | `agent-browser --session qa-local-check eval "fetch('/api/auth/session').then(async r=>{const raw=await r.text();let data={};try{data=raw?JSON.parse(raw):{}}catch{};return {status:r.status,authenticated:Boolean(data?.user?.email)}})"` | PASS; HTTP 200, `authenticated: true`; solo se imprimió estado | `40ac3d4` |
+| Capturas local | `agent-browser set viewport 1440 900` y `390 844`; screenshots en directorio `mktemp` bajo `/tmp` | PASS; escritorio y móvil guardados en sistema temporal y borrados al terminar | `40ac3d4` |
+| Acceso protegido Preview | `vc env pull` temporal con `--environment preview --git-branch development`; OIDC fresco pasado en `--headers` | PASS; abrió `/auth` del Preview; fichero temporal eliminado | `40ac3d4` |
+| Login y sesión Preview | Perfil `qa-es01`; `fetch('/api/auth/session')` con manejo de cuerpo vacío | PASS; HTTP 200, sesión autenticada; sin imprimir datos | `40ac3d4` |
+| Cierre y limpieza | `agent-browser --session ... close`; `Ctrl-C`; `unlink` de capturas y temporal OIDC | PASS; navegadores y servidor cerrados; temporales borrados | `40ac3d4` |
+| Datos de aplicación | Ninguna valoración ni adjunto creado durante esta validación visual | PASS; no hacía falta ejecutar teardown en esta sesión | `40ac3d4` |
+| Lint | `npm run lint` | PASS; `next lint` sin warnings ni errores | `40ac3d4` |
+| Typecheck | `npx tsc --noEmit` | PASS; sin errores | `40ac3d4` |
 
-La salida del `--apply` es la verificación de recuentos cero. El dry-run posterior no es un método válido para confirmar un ID borrado: el guardia exige que la valoración exista y aborta cuando no la encuentra. El mensaje genérico no distingue ese caso de un fallo real; queda pendiente mejorar el diagnóstico de la herramienta. No se hicieron consultas SQL ni operaciones directas con Prisma.
+Errores observados y corrección:
+
+- Arrancar con `vc env run -- npm run dev` sin `AUTH_URL=http://localhost:3000` provocó `TypeError: Invalid URL` y `/api/auth/session` devolvió 500. El arranque documentado con el override local funciona.
+- `vc env run` reutilizó un token OIDC caducado; el navegador mostró `Login – Vercel`. `vc env pull` con `--environment development --git-branch development` fue rechazado con `Invalid request: target must be "preview" when specifying a gitBranch`. La variante comprobada es `--environment preview --git-branch development` a un fichero temporal; el token resultante estaba fresco y el acceso funcionó.
+- El guardia rechazó `rm -f` con `rm -f style commands are not permitted. Use a safer approach`. Se limpió el temporal con `unlink` sobre el fichero concreto.
 
 ## 3. Pruebas no ejecutadas (NOT_RUN)
 
 | Prueba | Motivo concreto |
 | --- | --- |
-| Login de QA directamente en Preview | El acceso automatizado al deployment redirigió a la pantalla de login de Vercel; el flujo habitual de QA se validó en local con las variables de `development`. |
-| Repetición del dry-run del ID tras el borrado con salida de recuentos | La herramienta rechaza IDs inexistentes y devuelve un mensaje genérico. El `--apply` ya informó `APPLIED — VERIFIED ZERO` con los tres recuentos a cero. |
+| Tests y build | Cambio solo de documentación; el encargo pide lint y typecheck, no repetir test ni build. Ejecutar gates en paralelo con build puede colisionar en `.next/types`. |
+| Teardown de datos | QA visual no creó valoraciones ni adjuntos; el runbook documenta `npm run qa:teardown` para los IDs creados en futuras pruebas. No se usó SQL ni Prisma directo. |
 
 ## 4. Checklist para validar en la aplicación
 
@@ -44,30 +51,34 @@ Marca cada punto. Un fallo en un punto marcado **[BLOQUEANTE]** impide promocion
 
 | # | Dónde | Pasos | Resultado esperado | Cuenta o configuración | Bloqueante |
 | --- | --- | --- | --- | --- | --- |
-| 1 | Preview de `development`, `/auth` | Inicia sesión con la cuenta QA persistente usando su método de acceso habitual. | Inicio correcto; la sesión queda autenticada. | Cuenta QA del contrato; no usar la cuenta personal de Toni. | Sí |
-| 2 | Aplicación, lista de valoraciones | Busca `cmv6tpfhp000006ia0rptcr36`. | La valoración eliminada no aparece. | Sesión QA. | Sí |
-| 3 | Herramienta QA, modo simulación | Si se repite el dry-run para el ID eliminado, confirma que la valoración sigue ausente; espera que la herramienta devuelva su error genérico actual. | No se recrean ni eliminan datos; el mensaje se interpreta junto con `APPLIED — VERIFIED ZERO`. | No añadir `--apply`; no usar `--delete-identity`. | No |
+| 1 | `docs/qa/visual-qa-runbook.md` | Lee el runbook completo y confirma que los comandos y resultados reflejan el flujo QA actual. | Comandos claros para local y Preview, con token OIDC oculto, sesión, capturas y limpieza. | Sin abrir ni imprimir archivos `.env*`. | Sí |
+| 2 | Local, `/auth` | Arranca con `vc env run -- sh -c 'AUTH_URL=http://localhost:3000 npm run dev'`; abre con agent-browser, rechaza opcionales y autentica con `qa-es01`. | Login correcto; `/api/auth/session` responde 200 y sesión autenticada. | Variables `development`; cuenta persistente QA. | Sí |
+| 3 | Preview de `development` | Sigue la renovación OIDC temporal del runbook, accede a `/auth`, rechaza cookies y entra con `qa-es01`. | No aparece Vercel Login; sesión autenticada y el fichero temporal se elimina. | Token fresco; no compartir su valor. | Sí |
+| 4 | Escritorio y móvil | Sigue los pasos de captura del runbook y revisa las imágenes guardadas temporalmente. | Capturas legibles a 1440×900 y 390×844, fuera del repositorio; temporales eliminados después. | Sesión QA. | No |
 
 ### Casos negativos y de borde
 
 | # | Caso | Resultado esperado |
 | --- | --- | --- |
-| 1 | Ejecutar dry-run con el ID ya eliminado | La herramienta aborta porque no encuentra la valoración. El mensaje actual no identifica explícitamente “no encontrada”; mejora pendiente. |
-| 2 | Iniciar sesión con la cuenta QA persistente | La sesión funciona; la identidad permanece. |
-| 3 | Seleccionar `--delete-identity` | No se ejecutó ni forma parte de esta validación. No eliminar la identidad QA. |
+| 1 | Token OIDC caducado en `vc env run` | Vercel Login indica que el acceso no se completó; renovar con `vc env pull` a un temporal para Preview/development. |
+| 2 | `vc env pull --environment development --git-branch development` | Vercel lo rechaza; usar `--environment preview --git-branch development`. |
+| 3 | `zipcode` vacío | El placeholder `28001` parece un valor, pero el envío falla con `Invalid input`; escribir un código postal sintético explícito. |
 
 ### Estados de interfaz afectados
 
-- [ ] Vacío · [ ] Cargando · [ ] Error · [x] Éxito · [ ] Móvil · [x] Escritorio · [ ] Modo oscuro
+- [ ] Vacío · [x] Cargando · [x] Error · [x] Éxito · [x] Móvil · [x] Escritorio · [ ] Modo oscuro
 
 ## 5. Riesgos y limitaciones
 
-- El mensaje genérico `QA teardown failed; no secrets or database details are displayed.` no diferencia un ID inexistente de otros fallos del teardown. Mejorar el diagnóstico es trabajo pendiente; no se cambió el código de la herramienta.
-- El acceso de navegador automatizado al Preview fue redirigido por la protección de Vercel. El login se verificó mediante el flujo local de QA con variables de `development`; Toni puede repetirlo directamente en Preview.
-- La identidad QA sigue persistente. `--delete-identity` no se ejecutó.
+- El runtime local es `PRODUCTION_BACKED`; trata los datos como ficticios y elimina solo los registros creados para QA con la herramienta contractual.
+- El Preview solo dispone de Neon y Blob después de conectar esas integraciones al entorno Preview.
+- Google y Stripe están configurados solo en Production; no uses el Preview para concluir que esos proveedores funcionan o fallan.
+- El placeholder del campo `zipcode` puede ocultar que el campo obligatorio sigue vacío.
+- No mostrar ni leer en consola los contenidos de `.env*` ni imprimir secretos. El runbook usa únicamente estados de presencia/caducidad y el resultado funcional.
 
 ## 6. Decisión de Toni
 
+- [ ] Leí el runbook y confirmo que sus comandos reflejan el flujo real
 - [ ] Todos los puntos bloqueantes pasan
 - [ ] Se promociona: escribir `PROMOTE=FULL` (staging → production → main)
 - [ ] No se promociona. Motivo: ______________________
