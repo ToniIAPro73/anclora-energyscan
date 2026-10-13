@@ -1,6 +1,7 @@
 import sharp from 'sharp';
 import { createWorker } from 'tesseract.js';
 import { ImageOcrData } from './types';
+import { logSafeError } from '@/lib/safe-logger';
 
 export async function extractTextFromImage(imageBytes: Buffer): Promise<ImageOcrData> {
   const data: ImageOcrData = {
@@ -43,8 +44,8 @@ export async function extractTextFromImage(imageBytes: Buffer): Promise<ImageOcr
     else if (data.detectedSignals!.includes('placa solar')) data.probableCategory = 'renewables';
     else if (data.detectedSignals!.includes('ventana')) data.probableCategory = 'windows';
 
-  } catch (error) {
-    console.error('Image OCR failed:', error);
+  } catch {
+    logSafeError('ocr_processing_failed');
   }
 
   return data;

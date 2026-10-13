@@ -27,6 +27,7 @@ import { resolveVisionEntitlement } from '@/lib/vision/vision-entitlements';
 import { curateVisionFindingsForReport } from '@/lib/agents/hermes-vision-curator';
 import type { VisionAnalysisResult } from '@/lib/vision/types';
 import { getOwnedAssessment } from '@/lib/assessment-authorization';
+import { logSafeError } from '@/lib/safe-logger';
 
 let cachedLogoDataUri: string | undefined;
 
@@ -94,8 +95,8 @@ async function enrichAttachmentsForPdf(
           annexNote: `Documento PDF aportado por el usuario. Después de este resumen se incorporan todas sus páginas en formato original, sin sustituir el CEE oficial ni validar administrativamente su contenido.`,
         };
       }
-    } catch (error) {
-      console.error(`Could not read attachment for PDF annex: ${attachment.name}`, error);
+    } catch {
+      logSafeError('attachment_read_failed');
       return {
         ...attachment,
         annexNote: 'No se pudo leer el archivo desde el almacenamiento temporal al generar el PDF.',
@@ -121,8 +122,8 @@ async function getAttachmentBytes(attachment: AssessmentAttachment): Promise<Buf
     } else {
       return await readFile(attachmentPath);
     }
-  } catch (error) {
-    console.error(`Error reading attachment bytes for ${attachment.name}:`, error);
+  } catch {
+    logSafeError('attachment_read_failed');
     return null;
   }
 }
@@ -136,8 +137,8 @@ async function loadPremiumSourcesForAssessment(assessmentId: string) {
     ]);
 
     return { energyCertificates, rehabBudgets, dataFieldSources };
-  } catch (error) {
-    console.warn('Premium sources unavailable for PDF report:', error);
+  } catch {
+    logSafeError('assessment_sources_unavailable');
     return { energyCertificates: [], rehabBudgets: [], dataFieldSources: [] };
   }
 }
@@ -476,9 +477,9 @@ export async function buildAssessmentPdfResponse(
             }
           }
         }
-      } catch (hermesErr) {
+      } catch {
         // Hermes failure must never block PDF generation
-        console.warn('[pdf] hermes-vision-curator failed:', hermesErr instanceof Error ? hermesErr.message : hermesErr);
+        logSafeError('pdf_vision_curation_failed');
         trackEvent('hermes_vision_curator_failed', { assessmentId: reportData.id });
       }
     }
@@ -579,8 +580,8 @@ export async function buildAssessmentPdfResponse(
         'Content-Disposition': `attachment; filename="${filename}"`
       }
     });
-  } catch (error) {
-    console.error('Error generating PDF:', error);
+  } catch {
+    logSafeError('pdf_generation_failed');
     return NextResponse.json({ error: 'Failed to generate PDF' }, { status: 500 });
   }
 }

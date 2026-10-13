@@ -1,4 +1,5 @@
 import { PDFDocument } from 'pdf-lib';
+import { logSafeError } from '@/lib/safe-logger';
 
 export type PdfAnnex = {
   name: string;
@@ -22,9 +23,9 @@ export async function appendPdfAnnexes(mainPdfBytes: Uint8Array, annexes: PdfAnn
       for (const page of pages) {
         outputPdf.addPage(page);
       }
-    } catch (error) {
+    } catch {
       // Do not break the entire report generation if one attachment is corrupt.
-      console.error('Could not append PDF annex:', { name: annex.name, error });
+      logSafeError('attachment_read_failed');
     }
   }
 

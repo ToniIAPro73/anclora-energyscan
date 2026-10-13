@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getMunicipalities } from '@/lib/catastro/client';
+import { logSafeError } from '@/lib/safe-logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,8 +15,8 @@ export async function GET(request: NextRequest) {
   try {
     const municipalities = await getMunicipalities(province);
     return NextResponse.json(municipalities);
-  } catch (error) {
-    console.error('Error fetching municipalities:', error);
+  } catch {
+    logSafeError('catastro_data_unavailable');
     return NextResponse.json({ error: 'Failed to fetch municipalities' }, { status: 500 });
   }
 }

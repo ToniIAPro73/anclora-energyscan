@@ -82,8 +82,8 @@ export function CadastreSearch({ onConfirm, onLocationChange, onMatchSelect, onA
         const data = await res.json();
         setProvinces(data);
       }
-    } catch (err) {
-      console.error('Failed to fetch provinces', err);
+    } catch {
+      console.error('Failed to fetch provinces');
     } finally {
       setProvincesLoading(false);
     }
@@ -103,8 +103,8 @@ export function CadastreSearch({ onConfirm, onLocationChange, onMatchSelect, onA
         const data = await res.json();
         setMunicipalities(data);
       }
-    } catch (err) {
-      console.error('Failed to fetch municipalities', err);
+    } catch {
+      console.error('Failed to fetch municipalities');
     } finally {
       setMunicipalitiesLoading(false);
     }
@@ -165,8 +165,8 @@ export function CadastreSearch({ onConfirm, onLocationChange, onMatchSelect, onA
           setShowSuggestions(true);
           setStreetError(data?.error || t.wizardCatastroErrorService);
         }
-      } catch (err) {
-        console.error('Failed to fetch streets', err);
+      } catch {
+        console.error('Failed to fetch streets');
         setStreetSuggestions([]);
         setShowSuggestions(true);
         setStreetError(t.wizardCatastroErrorService);
@@ -252,8 +252,8 @@ export function CadastreSearch({ onConfirm, onLocationChange, onMatchSelect, onA
       } else {
         setError(data.error?.message || t.wizardCatastroErrorService);
       }
-    } catch (err) {
-      console.error('Catastro search failed:', err);
+    } catch {
+      console.error('Catastro search failed');
       setError(t.wizardCatastroErrorService);
     } finally {
       setLoading(false);

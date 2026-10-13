@@ -362,8 +362,8 @@ export default function AssessmentWizard() {
         } else {
           console.warn('Geocode API returned non-ok response:', res.status);
         }
-      } catch (err) {
-        console.error('Auto-geocoding failed:', err);
+      } catch {
+          console.error('Auto-geocoding failed');
       }
     }, 600);
   }, [t.wizardMapLocationAddress, geocodeTimeoutRef, setValue]);
@@ -470,8 +470,8 @@ export default function AssessmentWizard() {
         setMapSourceLabel(t.wizardMapLocationManual);
         setMapSelectionMessage(t.wizardMapNoCadastralData);
       }
-    } catch (err) {
-      console.error('Parcel select failed:', err);
+    } catch {
+      console.error('Parcel select failed');
       setMapSourceLabel(t.wizardMapLocationManual);
       setMapSelectionMessage(t.wizardMapCadastralLookupFailed);
     } finally {
@@ -1229,7 +1229,7 @@ export default function AssessmentWizard() {
         setUploadProgress(null);
       }
     } catch (error) {
-      console.error(error);
+      console.error('Assessment submission failed');
       setFileError(error instanceof Error ? error.message : 'No se pudo completar la valoración');
       setIsSubmitting(false);
       setUploadProgress(null);

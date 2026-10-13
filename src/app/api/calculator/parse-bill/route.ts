@@ -3,6 +3,7 @@ import { extractTextFromPdf } from '@/lib/ocr/pdf-extractor';
 import { extractTextFromImage } from '@/lib/ocr/image-ocr';
 import { parseUtilityBillText } from '@/lib/ocr/bill-parser';
 import { prisma } from '@/lib/prisma';
+import { logSafeError } from '@/lib/safe-logger';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 const ALLOWED_TYPES = new Set([
@@ -78,8 +79,8 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ ok: true, data: parsed });
-  } catch (err) {
-    console.error('[parse-bill] Error:', err);
+  } catch {
+    logSafeError('calculator_bill_parse_failed');
     return NextResponse.json({ ok: false, error: 'Internal server error' }, { status: 500 });
   }
 }

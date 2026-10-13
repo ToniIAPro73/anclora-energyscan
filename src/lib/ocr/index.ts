@@ -5,6 +5,7 @@ import { parseCeeText } from './cee-parser';
 import { parseCeeToCertificate } from './cee-parser';
 import { parseBudgetAnalysisText, parseBudgetText } from './budget-parser';
 import { extractTextFromImage } from './image-ocr';
+import { logSafeError } from '@/lib/safe-logger';
 
 export async function processAttachmentOcr(input: {
   attachment: {
@@ -88,7 +89,7 @@ export async function processAttachmentOcr(input: {
     };
 
   } catch (error) {
-    console.error(`OCR processing failed for ${attachment.name}:`, error);
+    logSafeError('ocr_processing_failed');
     return {
       sourceKind,
       status: 'failed',

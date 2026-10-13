@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { logSafeError } from '@/lib/safe-logger';
 
 const CATASTRO_WMS_URL = 'https://ovc.catastro.meh.es/Cartografia/WMS/ServidorWMS.aspx';
 const MAX_WIDTH = 1600;
@@ -71,8 +72,8 @@ export async function GET(request: NextRequest) {
         'Cache-Control': 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800',
       },
     });
-  } catch (error) {
-    console.warn('Catastro WMS fetch failed:', error instanceof Error ? error.message : String(error));
+  } catch {
+  logSafeError('catastro_lookup_failed');
     return transparentImageResponse();
   }
 }

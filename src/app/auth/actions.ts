@@ -107,7 +107,6 @@ export async function requestPasswordReset(_: AuthActionState, formData: FormDat
       body: JSON.stringify({ email: user.email, resetUrl }),
     });
   } else if (process.env.NODE_ENV !== 'production') {
-    console.info(`EnergyScan password reset URL for ${user.email}: ${resetUrl}`);
     return { ok: true, resetUrl };
   }
 

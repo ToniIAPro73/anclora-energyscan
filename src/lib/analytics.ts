@@ -1,3 +1,5 @@
+import { logSafeError } from '@/lib/safe-logger';
+
 export type AnalyticsEvent =
   | 'wizard_started'
   | 'wizard_step_completed'
@@ -86,10 +88,8 @@ async function persistEvent(event: AnalyticsEvent, payload: Record<string, unkno
         metadataJson: JSON.parse(JSON.stringify(payload)),
       },
     });
-  } catch (error) {
-    if (process.env.NODE_ENV === 'development') {
-      console.debug('[analytics:event-log-failed]', event, error instanceof Error ? error.message : String(error));
-    }
+  } catch {
+    if (process.env.NODE_ENV === 'development') logSafeError('analytics_event_failed');
   }
 }
 
@@ -113,18 +113,13 @@ async function sendPostHog(event: AnalyticsEvent, payload: Record<string, unknow
       properties: payload,
     }),
     cache: 'no-store',
-  }).catch((error) => {
-    if (process.env.NODE_ENV === 'development') {
-      console.debug('[analytics:posthog-failed]', event, error instanceof Error ? error.message : String(error));
-    }
+    }).catch(() => {
+    if (process.env.NODE_ENV === 'development') logSafeError('analytics_event_failed');
   });
 }
 
 export function trackEvent(event: AnalyticsEvent, payload?: Record<string, unknown>) {
   const sanitized = sanitizeAnalyticsPayload(payload || {});
-  if (process.env.NODE_ENV === 'development') {
-    console.debug('[analytics]', event, sanitized);
-  }
   if (isBrowser()) return;
   void persistEvent(event, sanitized);
   void sendPostHog(event, sanitized);

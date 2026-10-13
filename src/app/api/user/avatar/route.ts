@@ -2,6 +2,7 @@ import { put } from '@vercel/blob';
 import { NextResponse } from 'next/server';
 import { lightAuth as auth } from '@/auth.config';
 import { prisma } from '@/lib/prisma';
+import { logSafeError } from '@/lib/safe-logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -57,9 +58,8 @@ export async function POST(request: Request): Promise<NextResponse> {
     });
 
     return NextResponse.json({ url: blob.url });
-  } catch (err) {
-    console.error('[avatar upload]', err);
-    const message = err instanceof Error ? err.message : 'Error desconocido';
-    return NextResponse.json({ error: `No se pudo subir el avatar: ${message}` }, { status: 500 });
+  } catch {
+    logSafeError('avatar_upload_failed');
+    return NextResponse.json({ error: 'No se pudo subir el avatar.' }, { status: 500 });
   }
 }

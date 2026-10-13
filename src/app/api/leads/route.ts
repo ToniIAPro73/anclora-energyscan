@@ -6,6 +6,7 @@ import { isStatelessAssessmentId } from '@/lib/stateless-assessment';
 import { lightAuth as auth } from '@/auth.config';
 import { sendProviderLeadNotificationEmail } from '@/lib/email';
 import { trackEvent } from '@/lib/analytics';
+import { logSafeError } from '@/lib/safe-logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,12 +42,11 @@ function checkLeadRateLimit(req: Request) {
   return null;
 }
 
-function logLeadEvent(event: string, details: Record<string, unknown>) {
+function logLeadEvent(event: string) {
   console.info(JSON.stringify({
     scope: 'lead-intake',
     event,
     timestamp: new Date().toISOString(),
-    ...details,
   }));
 }
 
@@ -54,7 +54,7 @@ export async function POST(req: Request) {
   const session = await auth().catch(() => null);
   const limited = checkLeadRateLimit(req);
   if (limited) {
-    logLeadEvent('rate_limited', { client: limited.key, retryAfterSeconds: limited.retryAfterSeconds });
+    logLeadEvent('rate_limited');
     return NextResponse.json(
       { ok: false, error: 'Demasiadas solicitudes. Inténtalo de nuevo en unos segundos.', retryAfterSeconds: limited.retryAfterSeconds },
       { status: 429 }
@@ -65,13 +65,13 @@ export async function POST(req: Request) {
   try {
     payload = await req.json();
   } catch {
-    logLeadEvent('invalid_json', { reason: 'parse_failed' });
+    logLeadEvent('invalid_json');
     return NextResponse.json({ error: 'Payload JSON inválido' }, { status: 400 });
   }
 
   const parsed = leadRequestSchema.safeParse(payload);
   if (!parsed.success) {
-    logLeadEvent('validation_failed', { issues: parsed.error.issues.map((issue) => ({ path: issue.path.join('.'), message: issue.message })) });
+    logLeadEvent('validation_failed');
     return NextResponse.json({ error: 'Datos de lead inválidos', details: parsed.error.format() }, { status: 400 });
   }
 
@@ -168,13 +168,7 @@ export async function POST(req: Request) {
       },
     });
 
-    logLeadEvent('persisted', {
-      leadId: lead.id,
-      assessmentId: assessmentId || null,
-      providerId: providerId || null,
-      partnerId: partnerId || null,
-      source: data.source || 'provider_marketplace',
-    });
+    logLeadEvent('persisted');
     trackEvent('lead_submitted', {
       leadId: lead.id,
       assessmentId,
@@ -193,16 +187,8 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ ok: true, lead });
-  } catch (error) {
-    console.error(JSON.stringify({
-      scope: 'lead-intake',
-      event: 'persistence_failed_using_fallback',
-      timestamp: new Date().toISOString(),
-      error: error instanceof Error ? error.message : String(error),
-      assessmentId: assessmentId || null,
-      providerId: providerId || null,
-      partnerId: partnerId || null,
-    }));
+  } catch {
+    logSafeError('lead_request_failed');
     const attributionExpiresAt = calculateAttributionExpiry(attributionMonths);
     return NextResponse.json({
       ok: true,

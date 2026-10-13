@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { confirmBudgetReviewCheckoutFromSession } from '@/lib/budget-review/payment-status';
+import { logSafeError } from '@/lib/safe-logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,8 +10,8 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   await confirmBudgetReviewCheckoutFromSession({
     reviewId: params.id,
     stripeSessionId: url.searchParams.get('session_id'),
-  }).catch((error) => {
-    console.error('Budget review status confirmation failed:', error);
+  }).catch(() => {
+    logSafeError('budget_review_failed');
   });
 
   const review = await prisma.budgetReview.findUnique({

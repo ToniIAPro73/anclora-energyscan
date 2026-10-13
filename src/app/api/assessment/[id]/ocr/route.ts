@@ -6,6 +6,7 @@ import { readFile } from 'fs/promises';
 import path from 'path';
 import { Prisma } from '@prisma/client';
 import { isOwnedAssessment } from '@/lib/assessment-authorization';
+import { logSafeError } from '@/lib/safe-logger';
 
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
@@ -31,8 +32,8 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
       assessmentId: params.id,
       attachments,
     });
-  } catch (error) {
-    console.error('Error fetching OCR status:', error);
+  } catch {
+    logSafeError('ocr_status_failed');
     return NextResponse.json({ error: 'Failed to fetch OCR status' }, { status: 500 });
   }
 }
@@ -107,13 +108,13 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         });
 
         results.push({ id: attachment.id, status: ocrResult.status });
-      } catch (error) {
-        console.error(`OCR failed for attachment ${attachment.id}:`, error);
+      } catch {
+        logSafeError('ocr_processing_failed');
         await prisma.assessmentAttachment.update({
           where: { id: attachment.id },
           data: {
             ocrStatus: 'failed',
-            ocrError: error instanceof Error ? error.message : String(error),
+            ocrError: 'OCR processing failed.',
           },
         });
         results.push({ id: attachment.id, status: 'failed' });
@@ -125,8 +126,8 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       results,
     });
 
-  } catch (error) {
-    console.error('Error triggering OCR:', error);
+  } catch {
+    logSafeError('ocr_request_failed');
     return NextResponse.json({ error: 'Failed to process OCR' }, { status: 500 });
   }
 }

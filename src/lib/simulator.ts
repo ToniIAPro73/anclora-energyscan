@@ -2,6 +2,7 @@ import { EnergyLetter, ImprovementScenario, PropertyDataV2, ScoreResultV2 } from
 import { calculateScenarioCostEstimate } from "./costs/cost-engine";
 import { mapPropertyType } from "./costs/quantity-resolver";
 import { measuresForSimulatorScenario } from "./costs/scenario-matrix";
+import { logSafeError } from "@/lib/safe-logger";
 
 const LETTER_SCORE_CEILING: Record<EnergyLetter, number> = {
   A: 15,
@@ -290,8 +291,8 @@ export function generateScenarios(propertyData: PropertyDataV2, result: ScoreRes
         letterGainTarget: template.letterGainMax,
       });
       return costEstimate ? { ...scenario, costEstimate } : scenario;
-    } catch (error) {
-      console.error('Cost estimate generation failed:', error);
+    } catch {
+      logSafeError('cost_estimate_failed');
       return scenario;
     }
   });

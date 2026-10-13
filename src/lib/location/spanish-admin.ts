@@ -1,4 +1,5 @@
 import type { Municipality, Province } from '@/lib/catastro/types';
+import { logSafeError } from '@/lib/safe-logger';
 
 type ProvinceFallback = Province & {
   ineCode: string;
@@ -110,8 +111,8 @@ export async function getFallbackMunicipalities(province: string): Promise<Munic
         };
       })
       .sort((left, right) => left.name.localeCompare(right.name, 'es'));
-  } catch (error) {
-    console.warn('Fallback municipalities unavailable:', error instanceof Error ? error.message : String(error));
+  } catch {
+    logSafeError('catastro_data_unavailable');
     return CURATED_FALLBACK_MUNICIPALITIES[provinceFallback.id] || [];
   }
 }

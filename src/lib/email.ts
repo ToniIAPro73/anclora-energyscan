@@ -1,5 +1,6 @@
 import { createHash } from 'crypto';
 import { prisma } from '@/lib/prisma';
+import { logSafeError } from '@/lib/safe-logger';
 
 export type EmailLanguage = 'es' | 'en' | 'de';
 export type EmailType = 'premium_purchase' | 'checkout_recovery' | 'provider_lead_notification' | 'consent_confirmation' | 'provider_verified' | 'professional_approved' | 'professional_rejected';
@@ -212,8 +213,8 @@ async function createEmailLog(input: {
         metadataJson: input.metadata ? JSON.parse(JSON.stringify(input.metadata)) : undefined,
       },
     });
-  } catch (error) {
-    console.warn('Email log persistence skipped:', error);
+  } catch {
+    logSafeError('email_log_persistence_failed');
   }
 }
 

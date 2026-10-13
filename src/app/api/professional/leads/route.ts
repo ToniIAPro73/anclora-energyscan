@@ -6,6 +6,7 @@ import { prisma } from '@/lib/prisma';
 import { normalizeLanguage } from '@/lib/preferences';
 import { getMonetizationCopy } from '@/lib/monetization/i18n';
 import { sendConsentConfirmationEmail } from '@/lib/email';
+import { logSafeError } from '@/lib/safe-logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -96,7 +97,7 @@ export async function POST(req: Request) {
     withdrawToken: consentWithdrawToken,
     professionalName: session.user.name || session.user.email,
     language,
-  }).catch((err) => console.warn('Consent email send failed:', err));
+  }).catch(() => logSafeError('lead_email_failed'));
 
   return NextResponse.json({ ok: true, leadId: lead.id });
 }

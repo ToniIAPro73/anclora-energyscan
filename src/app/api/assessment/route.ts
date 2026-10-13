@@ -28,6 +28,7 @@ import { EnergyCertificateCEE, RehabBudgetAnalysis } from '@/lib/ingestion/types
 import { budgetToPrismaCreate, certificateToPrismaCreate, fieldsToPrismaCreateMany } from '@/lib/ingestion/persistence';
 import { Prisma } from '@prisma/client';
 import { trackEvent } from '@/lib/analytics';
+import { logSafeError } from '@/lib/safe-logger';
 import { isOwnedDraftPath } from '@/lib/assessment-authorization';
 
 export const dynamic = 'force-dynamic';
@@ -151,24 +152,24 @@ async function readRequest(req: Request) {
   if (typeof cadastralDataRaw === 'string') {
     try {
       cadastralData = JSON.parse(cadastralDataRaw);
-    } catch (e) {
-      console.warn('Failed to parse cadastralData from multipart', e);
+    } catch {
+      logSafeError('assessment_parse_failed');
     }
   }
   let energyCertificate = null;
   if (typeof energyCertificateRaw === 'string') {
     try {
       energyCertificate = JSON.parse(energyCertificateRaw);
-    } catch (e) {
-      console.warn('Failed to parse energyCertificate from multipart', e);
+    } catch {
+      logSafeError('assessment_parse_failed');
     }
   }
   let rehabBudget = null;
   if (typeof rehabBudgetRaw === 'string') {
     try {
       rehabBudget = JSON.parse(rehabBudgetRaw);
-    } catch (e) {
-      console.warn('Failed to parse rehabBudget from multipart', e);
+    } catch {
+      logSafeError('assessment_parse_failed');
     }
   }
   return { rawData, files, uploadedAttachments: [], uploadedSourceDocuments: [], sourceFiles, cadastralData, energyCertificate, rehabBudget };
@@ -468,8 +469,8 @@ export async function POST(req: Request) {
         } : undefined
       }
       });
-    } catch (databaseError) {
-      console.error('Assessment database write failed:', databaseError);
+    } catch {
+      logSafeError('assessment_write_failed');
       if (hasAttachments) {
         await Promise.all([
           ...uploadedAttachments.map((attachment) => deleteStoredAttachment(`blob:${attachment.pathname}`).catch(() => undefined)),
@@ -539,8 +540,8 @@ export async function POST(req: Request) {
             }) as Prisma.RehabBudgetCreateInput,
           });
         }
-      } catch (premiumSourceError) {
-        console.warn('Premium source persistence skipped:', premiumSourceError);
+      } catch {
+        logSafeError('assessment_source_persistence_failed');
       }
     } catch {
       const rollback = await Promise.allSettled([
@@ -550,9 +551,9 @@ export async function POST(req: Request) {
         ...uploadedSourceDocuments.map((attachment) => deleteStoredAttachment(`blob:${attachment.pathname}`)),
       ]);
       if (rollback.some((result) => result.status === 'rejected')) {
-        console.error('Assessment attachment rollback was incomplete');
+        logSafeError('assessment_attachment_rollback_incomplete');
       }
-      console.error('Assessment attachment persistence failed');
+      logSafeError('assessment_attachment_persistence_failed');
       return NextResponse.json({ error: 'No se pudo guardar la valoración con sus adjuntos' }, { status: 503 });
     }
 
@@ -579,8 +580,8 @@ export async function POST(req: Request) {
         ...uploadedAttachments.map(serializeAttachment),
       ]
     });
-  } catch (error) {
-    console.error(error);
+  } catch {
+    logSafeError('assessment_write_failed');
     return NextResponse.json({ error: 'Failed to create assessment' }, { status: 500 });
   }
 }

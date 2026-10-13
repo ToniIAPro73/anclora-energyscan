@@ -6,6 +6,7 @@ import { parseBudgetAnalysisText } from '@/lib/ocr/budget-parser';
 import { budgetToPrismaCreate } from '@/lib/ingestion/persistence';
 import type { EnergyLetter } from '@/lib/ingestion/types';
 import { getOwnedAssessment } from '@/lib/assessment-authorization';
+import { logSafeError } from '@/lib/safe-logger';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -77,8 +78,8 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       budget: { ...budget, id: created.id },
       warnings: [...parsedDocument.warnings, ...budget.warnings],
     });
-  } catch (error) {
-    console.error('Budget import failed:', error);
+  } catch {
+    logSafeError('budget_import_failed');
     return NextResponse.json({ error: 'Failed to import budget' }, { status: 500 });
   }
 }

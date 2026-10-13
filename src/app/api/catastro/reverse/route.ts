@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { CatastroStreetServiceError, resolveByCoordinates } from '@/lib/catastro/client';
 import { CatastroCoordinatesInputSchema, type CatastroResolveResponse } from '@/lib/catastro/types';
+import { logSafeError } from '@/lib/safe-logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,13 +39,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(response);
   } catch (error) {
-    const status = error instanceof CatastroStreetServiceError ? error.status : 500;
     const isRateLimited = error instanceof CatastroStreetServiceError && (error.status === 403 || error.status === 429);
-    console.error('Error reverse-resolving catastro coordinates:', {
-      status,
-      response: error instanceof CatastroStreetServiceError ? error.responseText?.slice(0, 240) : undefined,
-      error: error instanceof Error ? error.message : String(error),
-    });
+    logSafeError('catastro_lookup_failed');
 
     return NextResponse.json({
       ok: false,

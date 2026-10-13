@@ -9,6 +9,8 @@ import { selectImagesForVisionAnalysis } from '@/lib/vision/select-vision-images
 import { trackEvent } from '@/lib/analytics';
 import { Prisma } from '@prisma/client';
 import { getOwnedAssessment } from '@/lib/assessment-authorization';
+import { isEligiblePropertyPhoto, preparePropertyPhoto } from '@/lib/vision/property-photo';
+import { logSafeError } from '@/lib/safe-logger';
 
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
@@ -66,9 +68,11 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       include: { analysis: true },
     });
 
+    const propertyPhotos = allAttachments.filter((attachment) => isEligiblePropertyPhoto(attachment));
+
     const selectedIds = new Set(
       selectImagesForVisionAnalysis({
-        attachments: allAttachments,
+      attachments: propertyPhotos,
         maxImages: entitlement.maxImages,
         force,
       }).map((a) => a.id),
@@ -114,9 +118,10 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         }
 
         const { bytes } = await readAttachmentBytes(attachment.path);
-        const base64 = bytes.toString('base64');
+        const safePhoto = await preparePropertyPhoto(bytes);
+        const base64 = safePhoto.toString('base64');
 
-        const result = await analyzeImageWithOpenRouter(base64, attachment.type, lang);
+        const result = await analyzeImageWithOpenRouter(base64, 'image/jpeg', lang);
 
         await prisma.attachmentAnalysis.update({
           where: { attachmentId: attachment.id },
@@ -134,13 +139,12 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         });
 
         results.push({ id: attachment.id, status: 'DONE' });
-      } catch (err) {
+      } catch {
         failed++;
-        const msg = err instanceof Error ? err.message : String(err);
-        console.error(`[vision/analyze] attachment=${attachment.id}`, msg);
+        logSafeError('vision_attachment_analysis_failed');
         await prisma.attachmentAnalysis.update({
           where: { attachmentId: attachment.id },
-          data: { status: 'FAILED', errorMessage: msg },
+          data: { status: 'FAILED', errorMessage: 'Analysis failed.' },
         });
         results.push({ id: attachment.id, status: 'FAILED' });
       }
@@ -156,7 +160,6 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       selectedImages: selectedAttachments.length,
       processed: results.length - failed,
       failed,
-      model: process.env.OPENROUTER_VISION_MODEL ?? 'google/gemini-2.5-flash-lite',
     });
 
     return NextResponse.json({
@@ -168,8 +171,8 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       failed,
       results,
     });
-  } catch (err) {
-    console.error('[vision/analyze]', err);
+  } catch {
+    logSafeError('vision_analysis_request_failed');
     return NextResponse.json({ error: 'Vision analysis failed' }, { status: 500 });
   }
 }

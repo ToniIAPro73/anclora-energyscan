@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { CatastroStreetServiceError, resolveByCadastralReference, resolveByAddress, resolveByCoordinates } from '@/lib/catastro/client';
 import { CatastroResolveRequestSchema, type CatastroResolveResponse } from '@/lib/catastro/types';
+import { logSafeError } from '@/lib/safe-logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,11 +50,7 @@ export async function POST(request: NextRequest) {
     const status = error instanceof CatastroStreetServiceError ? error.status : 500;
     const isRateLimited = error instanceof CatastroStreetServiceError && (error.status === 403 || error.status === 429);
     const isExternalFailure = error instanceof CatastroStreetServiceError;
-    console.error('Error resolving catastro:', {
-      status,
-      response: error instanceof CatastroStreetServiceError ? error.responseText?.slice(0, 240) : undefined,
-      error: error instanceof Error ? error.message : String(error),
-    });
+    logSafeError('catastro_lookup_failed');
     return NextResponse.json({ 
       ok: false, 
       error: { 

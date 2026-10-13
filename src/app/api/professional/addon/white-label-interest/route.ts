@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { lightAuth as auth } from '@/auth.config';
 import { prisma } from '@/lib/prisma';
 import { sendTransactionalEmail, getSupportEmail, getAppUrl } from '@/lib/email';
+import { logSafeError } from '@/lib/safe-logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,7 +47,7 @@ export async function POST() {
       `<p><a href="${appUrl}/admin/providers">Ver panel admin</a></p>`,
       `</div>`,
     ].join(''),
-  }).catch((err) => console.warn('White label interest email failed:', err));
+  }).catch(() => logSafeError('white_label_email_failed'));
 
   return NextResponse.json({ ok: true });
 }

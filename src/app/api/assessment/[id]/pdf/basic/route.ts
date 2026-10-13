@@ -9,6 +9,7 @@ import { toPdfLanguage } from '@/lib/preferences';
 import { BasicReport, type BasicReportData } from '@/lib/pdf/BasicReport';
 import type { EnergyLetter, PropertyType, ConfidenceLevel } from '@/lib/domain/energy-assessment';
 import { getOwnedAssessment } from '@/lib/assessment-authorization';
+import { logSafeError } from '@/lib/safe-logger';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
@@ -123,8 +124,8 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
         'Cache-Control': 'no-store',
       },
     });
-  } catch (err) {
-    console.error('[basic-pdf] error', err);
+  } catch {
+    logSafeError('basic_pdf_failed');
     return NextResponse.json({ error: 'internal_error' }, { status: 500 });
   }
 }

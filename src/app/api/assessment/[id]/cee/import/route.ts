@@ -6,6 +6,7 @@ import { parseCeeToCertificate } from '@/lib/ocr/cee-parser';
 import { certificateToPrismaCreate, fieldsToPrismaCreateMany } from '@/lib/ingestion/persistence';
 import { Prisma } from '@prisma/client';
 import { isOwnedAssessment } from '@/lib/assessment-authorization';
+import { logSafeError } from '@/lib/safe-logger';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -69,8 +70,8 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       appliedFields: certificate.extractedFields || [],
       warnings: parsedDocument.warnings,
     });
-  } catch (error) {
-    console.error('CEE import failed:', error);
+  } catch {
+    logSafeError('cee_import_failed');
     return NextResponse.json({ error: 'Failed to import CEE' }, { status: 500 });
   }
 }

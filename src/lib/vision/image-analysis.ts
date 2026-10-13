@@ -53,7 +53,8 @@ export async function analyzePropertyImage(
   language: 'es' | 'en' | 'de' = 'es',
 ): Promise<ImageAnalysisResult> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
+  // Opt-in only; this provider is disabled by default and must also have a key to run.
+  if (process.env.ENABLE_ANTHROPIC_IMAGE_ANALYSIS !== 'true' || !apiKey) {
     return { relevant: true, category: 'facade', findings: [], confidence: 'low' };
   }
 

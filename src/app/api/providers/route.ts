@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { formatProviderCategory, parseJsonArray } from '@/lib/domain/partners';
+import { logSafeError } from '@/lib/safe-logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -102,8 +103,8 @@ export async function GET(req: Request) {
     });
     const providers = rows.map(publicProvider);
     return NextResponse.json({ providers: filterProviders(providers, filters) });
-  } catch (error) {
-    console.error('Provider list failed, using fallback:', error);
+  } catch {
+    logSafeError('provider_list_failed');
     const providers = fallbackProviders.map(publicProvider);
     return NextResponse.json({ providers: filterProviders(providers, filters), fallback: true });
   }

@@ -3,6 +3,7 @@ import { resolveByAddress, resolveByCadastralReference, getStreets } from '@/lib
 import { getCoordinatesForLocation } from '@/lib/location/geocoding';
 import { geocodeWithOpenStreetMap, getFallbackAddressTarget } from '@/lib/location/open-address';
 import type { CadastralMatch } from '@/lib/catastro/types';
+import { logSafeError } from '@/lib/safe-logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -249,15 +250,15 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  } catch (error) {
-    console.error('Geocode error:', error);
+  } catch {
+    logSafeError('catastro_lookup_failed');
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
 async function resolveAddressSafely(params: Parameters<typeof resolveByAddress>[0]) {
-  return resolveByAddress(params).catch((error) => {
-    console.warn('Catastro address lookup failed, continuing with geocode fallback:', error instanceof Error ? error.message : String(error));
+  return resolveByAddress(params).catch(() => {
+    logSafeError('catastro_fallback_used');
     return [] as CadastralMatch[];
   });
 }

@@ -2,11 +2,21 @@ import { normalizeVisionOutput, stripCodeFences } from './normalize';
 import { VISION_SYSTEM_PROMPT, buildVisionUserPrompt } from './prompts';
 import type { VisionAnalysisResult } from './types';
 
-const PRIMARY_MODEL = process.env.OPENROUTER_VISION_MODEL ?? 'google/gemini-2.5-flash-lite';
-const FALLBACK_MODEL = process.env.OPENROUTER_VISION_FALLBACK_MODEL ?? 'qwen/qwen2.5-vl-72b-instruct';
 const OPENROUTER_BASE = 'https://openrouter.ai/api/v1';
 const MAX_TOKENS = 512;
 const TIMEOUT_MS = 28_000;
+export const FREE_VISION_MODEL_ALLOWLIST = [
+  'google/gemma-4-26b-a4b-it:free',
+  'qwen/qwen3.8-27b:free',
+] as const;
+
+function configuredModels() {
+  const configured = [
+    process.env.OPENROUTER_VISION_MODEL ?? FREE_VISION_MODEL_ALLOWLIST[0],
+    process.env.OPENROUTER_VISION_FALLBACK_MODEL ?? FREE_VISION_MODEL_ALLOWLIST[1],
+  ];
+  return Array.from(new Set(configured.filter((model) => FREE_VISION_MODEL_ALLOWLIST.includes(model as typeof FREE_VISION_MODEL_ALLOWLIST[number]))));
+}
 
 interface OpenRouterMessage {
   role: 'user' | 'assistant' | 'system';
@@ -30,7 +40,12 @@ async function callOpenRouter(
         'HTTP-Referer': 'https://energyscan.anclora.com',
         'X-Title': 'Anclora EnergyScan',
       },
-      body: JSON.stringify({ model, messages, max_tokens: MAX_TOKENS }),
+      body: JSON.stringify({
+        model,
+        messages,
+        max_tokens: MAX_TOKENS,
+        provider: { data_collection: 'deny' },
+      }),
       signal: controller.signal,
     });
 
@@ -74,13 +89,14 @@ export async function analyzeImageWithOpenRouter(
   language: 'es' | 'en' | 'de' = 'es',
 ): Promise<VisionAnalysisResult> {
   const apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey) {
+  const models = configuredModels();
+  if (!apiKey || !models.length) {
     return {
       imageType: 'unknown',
       relevant: true,
       confidence: 'low',
       findings: [],
-      warnings: ['Análisis visual no disponible (clave de API no configurada).'],
+      warnings: ['Análisis visual no disponible con la configuración actual.'],
       reportSummary: null,
       model: 'none',
     };
@@ -89,14 +105,14 @@ export async function analyzeImageWithOpenRouter(
   const messages = buildMessages(base64Image, mimeType, language);
 
   // Try primary model, fall back on error
-  for (const model of [PRIMARY_MODEL, FALLBACK_MODEL]) {
+  for (const model of models) {
     try {
       const raw = await callOpenRouter(model, messages, apiKey);
       const json = stripCodeFences(raw);
       const parsed = JSON.parse(json) as unknown;
       return normalizeVisionOutput(parsed, model);
-    } catch (err) {
-      console.warn(`[openrouter-vision] model=${model} failed:`, err instanceof Error ? err.message : err);
+    } catch {
+      console.warn('[openrouter-vision] endpoint unavailable; falling back safely');
     }
   }
 

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { analyzePropertyImage } from '@/lib/vision/image-analysis';
 import { normalizeLanguage } from '@/lib/preferences';
+import { logSafeError } from '@/lib/safe-logger';
+import { preparePropertyPhoto } from '@/lib/vision/property-photo';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
@@ -27,12 +29,13 @@ export async function POST(req: Request) {
     }
 
     const buffer = await file.arrayBuffer();
-    const base64 = Buffer.from(buffer).toString('base64');
-    const result = await analyzePropertyImage(base64, file.type as AllowedMime, lang);
+    const safePhoto = await preparePropertyPhoto(Buffer.from(buffer));
+    const base64 = safePhoto.toString('base64');
+    const result = await analyzePropertyImage(base64, 'image/jpeg', lang);
 
     return NextResponse.json({ ok: true, result });
-  } catch (err) {
-    console.error('[image/analyze]', err);
+  } catch {
+    logSafeError('image_analysis_request_failed');
     return NextResponse.json({ ok: false, error: 'Analysis failed' }, { status: 500 });
   }
 }

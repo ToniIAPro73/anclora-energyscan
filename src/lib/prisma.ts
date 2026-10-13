@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { Pool } from 'pg'
+import { logSafeError } from '@/lib/safe-logger'
 
 const databaseUrl = process.env.DATABASE_URL || ''
 const isPostgres = databaseUrl.startsWith('postgres') || databaseUrl.startsWith('postgresql')
@@ -12,8 +13,8 @@ function createPrismaClient() {
     try {
       const pool = new Pool({ connectionString: databaseUrl })
       return new PrismaClient({ adapter: new PrismaPg(pool) })
-    } catch (error) {
-      console.error('Prisma: Failed to initialize PostgreSQL adapter:', error)
+    } catch {
+      logSafeError('assessment_write_failed')
     }
   }
 
