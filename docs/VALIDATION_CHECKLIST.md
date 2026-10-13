@@ -14,7 +14,7 @@
 - El upload anónimo se deniega; un payload, ID, URL o estado de demo no concede permisos.
 - La asociación válida se guarda bajo la evaluación propietaria. Si falla la persistencia de la evaluación o sus metadatos, la API informa error e intenta compensar los objetos almacenados.
 - Profesionales sin propiedad/grant explícito quedan denegados por defecto.
-- El ejemplo `.env.qa.example` documenta variables sin secretos. `scripts/qa/bootstrap-local-credentials.ts` crea o rota únicamente la identidad QA contractual, guarda el secreto localmente y rechaza sobrescribir credenciales existentes.
+- El ejemplo `.env.example` documenta (comentadas) las variables QA sin secretos. `scripts/qa/bootstrap-local-credentials.ts` crea o rota únicamente la identidad QA contractual, guarda el secreto localmente y rechaza sobrescribir credenciales existentes.
 
 ## 2. Ya comprobado por el agente
 
