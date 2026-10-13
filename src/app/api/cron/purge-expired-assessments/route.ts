@@ -22,7 +22,7 @@ export async function POST(request: Request) {
 
   try {
     const result = await purgeExpiredAssessmentData();
-    if (result.failed) return NextResponse.json(result, { status: 503 });
+    if (result.failed || result.orphanedBlobs.failed) return NextResponse.json(result, { status: 503 });
     return NextResponse.json(result);
   } catch {
     logSafeError('assessment_purge_failed');

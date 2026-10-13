@@ -20,6 +20,7 @@
     "budget-review:demo": "node scripts/generate-budget-review-demo.mjs",
     "seed:admin-demo": "ts-node --compiler-options '{\"module\":\"commonjs\"}' scripts/reset-admin-demo-data.ts",
     "qa:teardown": "ts-node --compiler-options '{\"module\":\"commonjs\"}' scripts/qa/teardown-qa-data.ts",
+    "blob:purge-assessment-orphans": "ts-node --require tsconfig-paths/register --compiler-options '{\"module\":\"commonjs\"}' scripts/purge-orphaned-assessment-blobs.ts",
     "anclora:locale-copy-check": "node scripts/check-locale-copy-quality.mjs"
   },
   "dependencies": {
@@ -64,6 +65,7 @@
     "tailwindcss": "^3.4.1",
     "ts-jest": "^29.4.9",
     "ts-node": "^10.9.2",
+    "tsconfig-paths": "^3.15.0",
     "typescript": "^5"
   }
 }

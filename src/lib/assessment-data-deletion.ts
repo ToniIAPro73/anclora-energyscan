@@ -3,10 +3,21 @@ import { prisma } from '@/lib/prisma';
 import type { Prisma, PrismaClient } from '@prisma/client';
 import { deleteStoredAttachment } from '@/lib/blob-storage';
 import { getAssessmentRetentionCutoff } from '@/lib/assessment-retention';
+import type { OrphanedBlobPurgeResult } from '@/lib/orphaned-assessment-blob-purge';
 
 type AssessmentDataDeps = {
   prisma: PrismaClient;
   deleteStoredAttachment: (path: string) => Promise<unknown>;
+  purgeOrphanedBlobs?: () => Promise<OrphanedBlobPurgeResult>;
+};
+
+const defaultAssessmentDataDeps: AssessmentDataDeps = {
+  prisma,
+  deleteStoredAttachment,
+  purgeOrphanedBlobs: async () => {
+    const { runOrphanedAssessmentBlobPurge } = await import('./orphaned-assessment-blob-purge-runtime');
+    return runOrphanedAssessmentBlobPurge({ apply: true });
+  },
 };
 
 export function validateAssessmentAttachmentPath(pathValue: string, assessmentId: string, userId?: string | null) {
@@ -76,7 +87,7 @@ export async function deleteAssessmentData(
   return true;
 }
 
-export async function purgeExpiredAssessmentData(now: Date | number = Date.now(), deps: AssessmentDataDeps = { prisma, deleteStoredAttachment }) {
+export async function purgeExpiredAssessmentData(now: Date | number = Date.now(), deps: AssessmentDataDeps = defaultAssessmentDataDeps) {
   const cutoff = getAssessmentRetentionCutoff(now);
   const expired = await deps.prisma.assessment.findMany({
     where: { createdAt: { lte: cutoff } },
@@ -93,5 +104,21 @@ export async function purgeExpiredAssessmentData(now: Date | number = Date.now()
       failed += 1;
     }
   }
-  return { considered: expired.length, deleted, failed };
+  const orphanedBlobs = deps.purgeOrphanedBlobs
+    ? await deps.purgeOrphanedBlobs()
+    : {
+      scanned: 0,
+      matrix: {
+        '0-30': { a: { count: 0, sizeBytes: 0 }, b: { count: 0, sizeBytes: 0 }, c: { count: 0, sizeBytes: 0 } },
+        '31-90': { a: { count: 0, sizeBytes: 0 }, b: { count: 0, sizeBytes: 0 }, c: { count: 0, sizeBytes: 0 } },
+        'over-90': { a: { count: 0, sizeBytes: 0 }, b: { count: 0, sizeBytes: 0 }, c: { count: 0, sizeBytes: 0 } },
+      },
+      candidateCount: 0,
+      batchLimit: 0,
+      attempted: 0,
+      deleted: 0,
+      failed: 0,
+      deferred: 0,
+    } satisfies OrphanedBlobPurgeResult;
+  return { considered: expired.length, deleted, failed, orphanedBlobs };
 }

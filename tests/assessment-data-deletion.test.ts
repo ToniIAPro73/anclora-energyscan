@@ -27,7 +27,21 @@ function createDeps() {
   tx.assessmentAttachment.findMany.mockResolvedValue([
     { id: 'attachment_fixture', path: 'blob:assessments/assessment_fixture/photo.png' },
   ]);
-  return { deps: { prisma: prisma as unknown as PrismaClient, deleteStoredAttachment: jest.fn().mockResolvedValue(undefined) }, prisma, tx };
+  const purgeOrphanedBlobs = jest.fn().mockResolvedValue({
+    scanned: 0,
+    matrix: {
+      '0-30': { a: { count: 0, sizeBytes: 0 }, b: { count: 0, sizeBytes: 0 }, c: { count: 0, sizeBytes: 0 } },
+      '31-90': { a: { count: 0, sizeBytes: 0 }, b: { count: 0, sizeBytes: 0 }, c: { count: 0, sizeBytes: 0 } },
+      'over-90': { a: { count: 0, sizeBytes: 0 }, b: { count: 0, sizeBytes: 0 }, c: { count: 0, sizeBytes: 0 } },
+    },
+    candidateCount: 0,
+    batchLimit: 100,
+    attempted: 0,
+    deleted: 0,
+    failed: 0,
+    deferred: 0,
+  });
+  return { deps: { prisma: prisma as unknown as PrismaClient, deleteStoredAttachment: jest.fn().mockResolvedValue(undefined), purgeOrphanedBlobs }, prisma, tx };
 }
 
 describe('assessment data deletion and retention purge', () => {
@@ -65,6 +79,7 @@ describe('assessment data deletion and retention purge', () => {
     expect(prisma.assessment.findMany).toHaveBeenCalledWith(expect.objectContaining({
       where: { createdAt: { lte: new Date('2026-01-02T00:00:00.000Z') } },
     }));
-    expect(result).toEqual({ considered: 1, deleted: 1, failed: 0 });
+    expect(result).toMatchObject({ considered: 1, deleted: 1, failed: 0, orphanedBlobs: { failed: 0 } });
+    expect(deps.purgeOrphanedBlobs).toHaveBeenCalledTimes(1);
   });
 });
