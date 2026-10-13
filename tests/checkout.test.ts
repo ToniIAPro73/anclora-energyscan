@@ -1,7 +1,7 @@
 jest.mock('@/lib/prisma', () => ({
   prisma: {
     assessment: {
-      findUnique: jest.fn(),
+      findFirst: jest.fn(),
       update: jest.fn(),
     },
   },
@@ -51,20 +51,23 @@ describe('POST /api/checkout', () => {
     const payload = await response.json();
     expect(response.status).toBe(400);
     expect(payload.error).toBe('persisted_assessment_required');
-    expect(prisma.assessment.findUnique).not.toHaveBeenCalled();
+    expect(prisma.assessment.findFirst).not.toHaveBeenCalled();
   });
 
   it('returns 404 for missing assessment', async () => {
-    (prisma.assessment.findUnique as jest.Mock).mockResolvedValue(null);
+    (prisma.assessment.findFirst as jest.Mock).mockResolvedValue(null);
     const response = await POST(new Request('http://localhost:3000/api/checkout', {
       method: 'POST',
       body: JSON.stringify({ assessmentId: 'missing' }),
     }));
     expect(response.status).toBe(404);
+    expect(prisma.assessment.findFirst).toHaveBeenCalledWith(expect.objectContaining({
+      where: { id: 'missing', createdAt: { gt: expect.any(Date) } },
+    }));
   });
 
   it('does not create duplicate checkout for paid assessment', async () => {
-    (prisma.assessment.findUnique as jest.Mock).mockResolvedValue({
+    (prisma.assessment.findFirst as jest.Mock).mockResolvedValue({
       id: 'assess_paid',
       isDemo: false,
       paidAt: new Date(),
@@ -81,7 +84,7 @@ describe('POST /api/checkout', () => {
   });
 
   it('creates Stripe checkout with assessment metadata', async () => {
-    (prisma.assessment.findUnique as jest.Mock).mockResolvedValue({
+    (prisma.assessment.findFirst as jest.Mock).mockResolvedValue({
       id: 'assess_123',
       userId: 'user_123',
       isDemo: false,
