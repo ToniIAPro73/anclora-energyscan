@@ -72,6 +72,22 @@ Sin cambios a criterios de aceptación ni migración. Alcance estricto: prefijos
 | Simulación real Blob Preview | `vc env run -e preview --git-branch development` + CLI sin `--apply` | BLOCKED | `BLOB_READ_WRITE_TOKEN` no lo entrega el entorno Preview al CLI. Se comprobó presencia booleana, no su valor. Para evitar fallback inadvertido a credenciales locales se quitó la carga automática local del CLI. No hubo llamada a Blob, no hay matriz de recuentos y no se borraron objetos |
 | `git diff --check` | Validación previa al commit documental | PASS | Sin errores de whitespace |
 
+### ES-0.2 — corrección de arranque CLI (código `3067c3e30584c72cf7c675003d2c059f825b48c9`)
+
+La corrección reemplaza los alias `@/` de la cadena CLI/Prisma por imports relativos y quita `tsconfig-paths/register` (sin `baseUrl`) y su dependencia directa. No cambia configuración Next ni comportamiento de la aplicación.
+
+| Gate/comprobación | Comando | Resultado | Evidencia |
+|---|---|---|---|
+| Lint | `npm run lint` | PASS | Sin avisos ni errores ESLint |
+| Typecheck | `npx tsc --noEmit` | PASS | Sin errores TypeScript |
+| Tests | `npm test -- --runInBand` | PASS; 78 suites / 501 tests | Incluye arranque CLI con variables ausentes y prueba de inicio de `qa:teardown` con URL sintética |
+| Build | `npm run build` | PASS | Dos advertencias existentes de compresión `jose` para Edge Runtime |
+| Smoke del CLI sin credenciales | `env -u BLOB_READ_WRITE_TOKEN -u DATABASE_URL npm run blob:purge-assessment-orphans` | PASS de arranque; termina en código 1 intencional | Salida exacta `Required storage configuration is unavailable.`; sin `MODULE_NOT_FOUND` y sin llamadas a proveedores |
+| QA teardown | `npm run qa:teardown` desde prueba con URL sintética no enrutable y sin Blob token | PASS de carga; modo sin argumentos falla cerrado | Cargó los módulos compartidos antes del rechazo de argumentos; no consultó la base ni borró datos |
+| QA bootstrap | Smoke de módulos compartidos con variables ausentes | PASS de carga | `prisma` y `password` cargaron; no se ejecutó el bootstrap que podría crear/rotar la identidad QA |
+
+La simulación real de Blob sigue pendiente para Toni, quien ejecutará el CLI desde un entorno con el token Preview disponible. No se ejecutó `--apply` ni se promocionó.
+
 El inventario [`es-0.2-data-flow-inventory.md`](es-0.2-data-flow-inventory.md) incluye las formas de clave, clasificación, salidas agregadas y alternativas de programación. No se modificó ni creó configuración en `.anclora/`. La simulación real queda como acción pendiente: Toni debe habilitar una forma segura para que el CLI reciba el token del entorno Preview y revisar sus recuentos antes de decidir si se ejecuta `--apply`. No se programó la purga.
 
 - Visual: `anclora-visual-qa doctor`, `anclora-visual-qa check http://127.0.0.1:3000/wizard`, navegación `agent-browser` hasta el paso de adjuntos, fixture PNG sintético, envío sin sesión y captura del estado de denegación — PASS. Captura local: `/tmp/es01-upload-unauth-final.png`. La sesión local de Auth.js devolvió `500` por `Invalid URL` con el valor redactado; se observó el modo cerrado y la UI pidió iniciar sesión. No se ejercitó una sesión autenticada real ni se conectó a Neon/Blob.

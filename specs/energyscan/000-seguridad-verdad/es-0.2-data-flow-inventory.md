@@ -1,6 +1,6 @@
 # ES-0.2 — Inventario de flujo, proveedores y retención
 
-**Actualizado:** 2026-10-13 · **Código revisado:** `11505916d59137c98285d71449b20e815d99be23` · **Estado:** purga de borradores huérfanos implementada y gates locales PASS; simulación contra Blob Preview BLOCKED porque Vercel CLI no entrega el token Blob de Preview. Sin resultados inventados ni borrados reales.
+**Actualizado:** 2026-10-13 · **Código revisado:** `3067c3e30584c72cf7c675003d2c059f825b48c9` · **Estado:** arranque del CLI corregido y gates PASS; simulación contra Blob Preview sigue pendiente porque Toni la ejecutará con acceso a su entorno. Sin borrados reales en este cambio.
 
 ## Decisiones firmes de Toni
 
@@ -200,3 +200,11 @@ El mismo purgador se integra a `POST /api/cron/purge-expired-assessments`, que c
 | GitHub Actions schedule | Puede invocar por HTTP `POST` al endpoint actual | Workflow programado en la rama por defecto que envíe `Authorization: Bearer $CRON_SECRET`; guardar el secreto en Repository Secrets; workflow solo se ejecuta desde la rama por defecto | GitHub Free incluye una cuota de minutos para repos privados, sujeta a límites/uso; horarios pueden retrasarse o perderse bajo carga. [Eventos schedule](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows), [límites de minutos](https://docs.github.com/en/actions/reference/limits), [secrets](https://docs.github.com/en/actions/reference/security/secrets) |
 
 Toni decide opción, horario, entorno y manejo operativo de errores. No se creó workflow, horario, GET ni secreto.
+
+## Corrección de arranque del CLI (código `3067c3e30584c72cf7c675003d2c059f825b48c9`)
+
+El primer arranque añadió `tsconfig-paths/register`, pero el `tsconfig.json` no declara `baseUrl`; por ello el cargador avisaba que se omitía y `src/lib/prisma.ts` no resolvía `@/lib/safe-logger`. La corrección final elimina el cargador y el paquete directo innecesario, y usa imports relativos en `src/lib/prisma.ts` y `src/lib/assessment-data-deletion.ts`. No se cambió configuración de Next ni comportamiento de la aplicación.
+
+La cadena compartida afectaba tres CLIs: `blob:purge-assessment-orphans` (purge runtime → Prisma), `qa:teardown` (assessment deletion → Prisma/blob storage) y `qa:bootstrap-local-credentials` (Prisma/password). Los imports relativos corrigen la resolución en las tres. `qa:teardown` se inició con una URL sintética no enrutable y argumentos ausentes; cargó los módulos y falló de forma cerrada antes de consultar la base. El módulo compartido de Prisma/password del bootstrap se cargó con configuración vacía; no se ejecutó el bootstrap contra DB porque crea o rota la identidad QA. La inspección de `scripts/` y `prisma/` no encontró otros imports `@/` directos; los scripts de migración, seed y reset no usan la cadena afectada.
+
+Comprobación requerida del CLI: `env -u BLOB_READ_WRITE_TOKEN -u DATABASE_URL npm run blob:purge-assessment-orphans` terminó con código 1 y el mensaje exacto `Required storage configuration is unavailable.`; no mostró `MODULE_NOT_FOUND`, y no pudo contactar Blob ni Neon. Prueba automatizada en `tests/blob-purge-cli-startup.test.ts` verifica esa guarda y el arranque de la cadena de teardown con datos sintéticos.

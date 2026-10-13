@@ -37,6 +37,8 @@
 
 **Cierre técnico de borradores huérfanos (código `11505916d59137c98285d71449b20e815d99be23`):** purga estricta de `assessment-drafts/` y `assessments/` integrada al endpoint existente y al CLI; simulación por defecto y borrado solo con `--apply`. Gates lint/typecheck/tests/build: PASS (77 suites/499 tests). Simulación del almacén Preview: BLOCKED porque Vercel CLI no entrega `BLOB_READ_WRITE_TOKEN`; no se consultó ningún almacén ni se borró objeto real. Revisar la evidencia y los límites en [`gates.md`](gates.md) y el inventario. Criterios de aceptación intactos.
 
+**Corrección de arranque CLI (código `3067c3e30584c72cf7c675003d2c059f825b48c9`):** imports relativos en la cadena compartida de Prisma/borrado; eliminado `tsconfig-paths/register` sin `baseUrl`. Arranque sin variables probado hasta el mensaje de configuración esperado; `qa:teardown` cargó módulos y falló cerrado con argumentos ausentes. Gates completos: PASS (78 suites/501 tests). La simulación real queda para Toni.
+
 ## ES-0.3 — Claims, CEE y estimación (P0)
 
 **Objetivo:** que interfaz, informes y estimaciones sean trazables y no aparenten certificación. **Reuso:** `src/lib/evidence/evidence-matrix.ts`, `scoring.ts`, `budget-review/service.ts`, `advanced-analysis.ts`, `costs/`, `pdf/`, locales. Revisar ES/EN/DE y locales CA/FR/IT/PT, PDFs, manual, SEO, emails y páginas legales dentro del alcance.
