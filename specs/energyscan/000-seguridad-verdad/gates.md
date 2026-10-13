@@ -4,20 +4,20 @@
 
 El agente ejecuta los gates técnicos internos. Toni es el validador inicial del producto y acepta o pide cambios en cada fase. La validación externa no bloquea desarrollo; puede ser requisito antes de exponer públicamente una capacidad o afirmación que dependa de ella.
 
-Las filas de ES-0.2–ES-0.4 y el gate padre describen comprobaciones pendientes, no resultados actuales. El estado de fase ES-0.1 registra la aceptación de Toni y la promoción; la evidencia técnica histórica y sus límites se detallan abajo. Ningún `PASS` técnico se hereda de reportes históricos.
+Las filas de ES-0.2 registran resultados técnicos y límites por SHA; las filas de ES-0.3 y ES-0.4 siguen pendientes. El gate padre de ES-F0 permanece bloqueado por la QA funcional de adjunto indicada abajo. El estado de fase ES-0.1 registra la aceptación de Toni y la promoción; la evidencia técnica histórica y sus límites se detallan aparte. Ningún `PASS` técnico se hereda de reportes históricos.
 
 | Req → tarea | Comprobación | Fixture/dataset | Método | Criterio de aceptación | Evidencia mínima | Aceptación producto | Estado |
 |---|---|---|---|---|---|---|---|
 | R01–04 → ES-0.1 | CRUD owner A/B, anon, profesional sin/con grant y revocado; demo/stateless manipulado; rutas de adjuntos | Usuarios, assessments, adjuntos sintéticos; Blob mock | Tests focales e inspección de rutas/storage | 0 accesos cruzados permitidos en N casos; publicar N/población; authz antes de I/O | SHA, casos, resultado redactado, fixture hash | Toni | FASE VALIDADA Y PROMOCIONADA; cobertura exhaustiva de matriz/grants no acreditada en los informes disponibles |
 | R02–03 → ES-0.1 | GET/DELETE válido/ausente, Auth error, IDOR, demo, Blob failure, MIME/tamaño/replay/callback | Archivos falsos y storage mock | Tests focales + evidencia Preview enlazada abajo | Denegación antes de I/O no autorizado; éxito válido; fallo sin metadatos engañosos | Aserciones/estados categóricos sin URL, token ni path | Toni | PASS documentado para subida PNG + asociación, persistencia tras recarga, 401 anónimo y borrado; cobertura restante de matriz, replay y callback criptográfico sigue NOT_RUN |
-| R05 → ES-0.2 | Data-flow entrada→Blob→OCR/visión→DB→PDF/logs→retención; proveedores | Código, esquema y fixtures sintéticos | Revisión manual | 100% rutas/proveedores inventariados o brecha registrada; minimización y límites definidos | Mapa con fecha y salida sanitizada | Toni | NOT_RUN |
-| R05/R11 → ES-0.2 | Redacción de centinelas sintéticos en logs de error | JSON sintético con valores falsos | Test focal futuro | 0 centinelas sensibles en salida; publicar campos/casos evaluados | Fixture hash y salida sanitizada | Toni | NOT_RUN |
+| R05 → ES-0.2 | Data-flow entrada→Blob→OCR/visión→DB→PDF/logs→retención; proveedores | Código, esquema y fixtures sintéticos | Revisión manual | 100% rutas/proveedores inventariados o brecha registrada; minimización y límites definidos | Mapa con fecha y salida sanitizada | Toni | BLOCKED para QA funcional de adjunto: upload Blob devuelve 400 en runtime local; inventario y pruebas automáticas ejecutados en `5edfbd3`, aceptación de Toni pendiente |
+| R05/R11 → ES-0.2 | Redacción de centinelas sintéticos en logs de error | JSON sintético con valores falsos | Test focal | 0 centinelas sensibles en salida; publicar campos/casos evaluados | Fixture hash y salida sanitizada | Toni | PASS técnico en `5edfbd3` (tests de analítica/logger con fixtures sintéticos; auditoría de `console.*`), Vercel Runtime Logs no inspeccionados; aceptación de Toni pendiente |
 | R06–07 → ES-0.3 | Assessment/Evidence Matrix/CEE/budget/score/PDF con fuentes, conflictos, vacíos y baja confianza | Assessment sintético | Test focal de evidencia/scoring/report | Campos críticos muestran fuente/estado/ausencia; desconocido no es cero; EnergyScan no se presenta como CEE oficial | Aserciones/snapshot y PDF sintético si aplica | Toni | NOT_RUN |
 | R08/R10 → ES-0.3 | Claims de web/PDF/manual/SEO/locales con fuente, territorio y fecha | Matriz de copy sin PII | Inspección y comprobación automatizada disponible | Todas las superficies encontradas cubiertas; sin afirmación residencial E/2033 ni equivalencia prediagnóstico=CEE | Matriz ruta/locale y diff | Toni; revisión externa antes de lanzar claims regulados | NOT_RUN |
 | R09 → ES-0.3 | Casos sin precio, unidad incompatible, IVA/exclusiones desconocidos | Casos límite sintéticos | Test focal de budget review | Sin etiqueta universal caro/barato sin referencia comparable; faltantes visibles/abstención | Tabla de casos y salida | Toni | NOT_RUN |
 | R11 → ES-0.4 | Requisito→test→comando e inspección de CI | Tests/workflows del SHA actual | Inspección manual | Cada requisito con prueba propuesta o limitación/bloqueo concreto; ningún gate histórico presentado como actual | Matriz versionada y SHA | Toni | NOT_RUN |
 | R11 → ES-0.4 | Preparar protocolo del piloto y métricas | Plantilla vacía; sin corpus real | Revisión documental | Variables, denominadores y autorización definidos antes de ejecutar un piloto; el piloto no bloquea desarrollo | Protocolo y fecha | Toni | NOT_RUN |
-| Gate padre → ES-F0 | Revisar lote, resultados y riesgos | Fixtures sintéticos | Verificación documental/técnica | PASS si checks críticos pertinentes pasan y riesgo crítico/alto está corregido o contenido; FAIL con fallo reproducible; BLOCKED solo por dependencia técnica/seguridad concreta | SHA, comandos/salidas sanitizadas y decisión | Toni | NOT_RUN |
+| Gate padre → ES-F0 | Revisar lote, resultados y riesgos | Fixtures sintéticos | Verificación documental/técnica | PASS si checks críticos pertinentes pasan y riesgo crítico/alto está corregido o contenido; FAIL con fallo reproducible; BLOCKED solo por dependencia técnica/seguridad concreta | SHA, comandos/salidas sanitizadas y decisión | Toni | BLOCKED para validar upload/adjunto real: Blob HTTP 400 en runtime local; automatización PASS en `5edfbd3`; requiere repetir QA de adjunto y aceptación de Toni |
 
 ## Evidencia ejecutada para ES-0.1
 
@@ -34,19 +34,24 @@ Las filas de ES-0.2–ES-0.4 y el gate padre describen comprobaciones pendientes
 
 ### ES-0.2 — etapa 1 documental
 
-Inventario estático registrado en [`es-0.2-data-flow-inventory.md`](es-0.2-data-flow-inventory.md), con flujo de código, proveedores, comparativas, brecha de expiración, evidencia ES-0.1 y propuesta no seleccionada para lectura de PDF/presupuestos. La etapa no implementa minimización ni redacción; el gate R05 y el gate de centinelas permanecen `NOT_RUN` hasta completar el alcance y sus evidencias. Las decisiones firmes de Toni son finalidad única de generar valoración, retención 30 días con borrado manual anterior y regla de proveedores (solo OSS o coste cero; proveedor nuevo requiere aprobación y comparativa). Motor OCR y almacenamiento siguen sin seleccionar.
+Inventario y comparativas en [`es-0.2-data-flow-inventory.md`](es-0.2-data-flow-inventory.md). Esta etapa fue solo documental; el resultado de implementación se registra aparte. Decisiones firmes de Toni: finalidad única de generar la valoración; assessment, documentos y derivados vencen a los 30 días desde `Assessment.createdAt`, con borrado manual anterior; Neon y Vercel Blob se mantienen; OpenRouter solo admite la allowlist `:free` con `data_collection: deny`; no se incorpora proveedor nuevo. Lectura de PDF con pdf.js/Tesseract.js queda como fase posterior.
 
-Plan breve para su ejecución, sin ampliar criterios:
+### ES-0.2 — implementación (2026-10-13)
 
-1. Inventariar flujo y consumidores desde recepción hasta retención/borrado, incluidos errores y logs.
-2. Identificar proveedores, regiones, categorías de datos, finalidad, acceso y retención; marcar explícitamente cualquier tramo no verificable.
-3. Aplicar las decisiones confirmadas de finalidad y retención; obtener decisión de Toni sobre OCR, almacenamiento y modalidad de lectura antes de implementar o activar tratamiento nuevo.
-4. Crear centinelas y fixtures sintéticos; añadir pruebas focales de redacción y ausencia de centinelas en logs.
-5. Implementar minimización/redacción acordada y documentar resultados, SHA y limitaciones.
+Código y pruebas evaluados en `5edfbd36dfcc6b1d083a57de77739de07f85e3c9` (último commit de código; la documentación se añadirá en commit posterior). No se modificaron criterios de aceptación ni se hizo migración.
 
-Riesgos y dependencias: el runtime es `PRODUCTION_BACKED` y no se crearán bases de datos alternativas; no usar documentos reales ni enviar documentos a proveedores en pruebas. Una migración, si se demuestra necesaria, tiene mínimo `QA_MINIMUM_FOR_DATABASE_MIGRATION=FULL`; un cambio de autenticación tiene mínimo `QA_MINIMUM_FOR_AUTH=FULL`; cualquier promoción tiene mínimo `QA_MINIMUM_FOR_RELEASE_PROMOTION=FULL`. Sin migración, auth ni UI, aplicar QA proporcional: revisión del flujo, pruebas focales con centinelas sintéticos y `git diff --check`; QA visual queda fuera si no cambia UI.
+- Lint `npm run lint` — PASS, sin avisos ESLint.
+- Typecheck `npx tsc --noEmit` — PASS.
+- Tests `npm test -- --runInBand` — PASS, 76 suites / 491 tests. Incluye corte exacto de 30 días con reloj controlado; cutoff en lectura/borrado/pago; borrado propietario de assessment y relaciones; purga protegida por `CRON_SECRET`; allowlist/modelo `:free`, `data_collection: deny`, fallback al fallar endpoints; EXIF ausente y tamaño reducido; bandera Anthropic apagada; centinelas sintéticos en logger y analítica.
+- Build `npm run build` — PASS.
+- QA con sesión persistente QA en runtime local: creación de una valoración sin adjunto y borrado desde la interfaz — PASS; `DELETE` HTTP 200, regreso al inicio y detalle sin datos. La valoración de prueba quedó borrada por el flujo que se estaba validando.
+- QA con adjunto sintético: el wizard llegó al upload, `POST /api/blob/upload` devolvió HTTP 400; creación posterior devolvió 503 y la UI informó error sin éxito falso. No se pudo validar asociación/persistencia/borrado de un adjunto con esta configuración. La llamada fallida no creó una valoración persistida; no quedó dato de prueba por limpiar.
+- Expiración en runtime: no se envejeció un registro real. El caso se simuló con fecha controlada en Jest y la ruta de adjunto deniega antes de leer Blob al llegar al cutoff.
+- No se programó la purga. Runtime Logs de Vercel no se consultaron. La bandera Anthropic queda apagada por defecto; no se configuró ninguna clave ni secreto externo durante este trabajo.
 
-Decisiones de Toni: finalidad y retención confirmadas; quedan pendientes elección de OCR y almacenamiento, alcance de la lectura de PDF, y alcance técnico de borrado de derivados. Toda propuesta de proveedor debe compararse y recibir aprobación expresa previa; esta etapa no autoriza servicio nuevo.
+QA exigido por contrato: no se requirió migración porque `Assessment.createdAt` ya existe; si la implementación hubiera requerido cambio de esquema, se habría detenido bajo `QA_MINIMUM_FOR_DATABASE_MIGRATION=FULL`. Se usó identidad QA dedicada conforme a `QA_MINIMUM_FOR_AUTH=FULL`; el lote no se promociona y conserva el gate de release/promotion `QA_MINIMUM_FOR_RELEASE_PROMOTION=FULL`. El QA funcional de adjunto queda `BLOCKED` por el HTTP 400 de Blob; no se generaliza el PASS sin adjunto a esa ruta.
+
+Acciones de Toni: revisar inventario y resultados; configurar su propia `OPENROUTER_API_KEY` en el entorno de Preview; configurar `CRON_SECRET` en Vercel; decidir por separado la programación de la purga y repetir QA de adjunto cuando el token Blob local permita el flujo.
 
 Resultados comprobados sobre el código del commit de implementación que acompaña esta evidencia (SHA comunicado en la entrega):
 

@@ -1,72 +1,73 @@
-# Checklist de validación — ES-0.2 etapa 1 documental (2026-10-13)
+# Checklist de validación — ES-0.2 implementación (2026-10-13)
 
 > Este fichero se sobrescribe en cada entrega. El historial queda en Git.
 
 **Repositorio:** anclora-energyscan
-**Rama y commit base:** development @ `3461de65197b94d0138bad5cb5e79d37804cddf6`
-**Entorno de validación:** revisión estática del repositorio; sin uso de Preview/runtime
-**Datos:** sin datos de usuario consultados. El inventario describe rutas de código y evidencia histórica enlazada.
 
-## 1. Qué cambia
+**Rama y SHA del código validado:** `development` @ `5edfbd36dfcc6b1d083a57de77739de07f85e3c9`
 
-- Añade `specs/energyscan/000-seguridad-verdad/es-0.2-data-flow-inventory.md` con flujo, proveedores, límites conocidos, retención confirmada y comparativa de extracción PDF/OCR/almacenamiento.
-- Registra decisiones firmes de Toni: finalidad única de generar la valoración, retención de 30 días con borrado manual anterior y regla de proveedores abiertos o de coste cero con aprobación previa de servicios externos nuevos.
-- Enlaza evidencia ES-0.1 ya versionada para PNG en Blob, persistencia tras recarga, 401 sin sesión y borrado de adjunto. No amplía ese PASS al resto de la matriz.
-- Presenta como propuesta posterior la lectura de PDF/presupuestos; no selecciona herramienta ni implementa comportamiento.
+**Entorno:** runtime local cargado con variables de `development`; Neon/Blob contractual; identidad QA persistente `qa-es01`
+**Datos:** valoración QA sin adjunto creada y borrada mediante la nueva interfaz. Intento de adjunto sintético falló antes de persistir assessment. No se usaron documentos reales ni cuentas personales.
 
-## 2. Ya comprobado por el agente
+## 1. Qué cambió
 
-| Comprobación | Comando o método | Resultado | SHA |
+- Vencimiento central a los 30 días desde `Assessment.createdAt`; adjuntos y datos derivados comparten el vencimiento. Lecturas owner-only, Checkout y estado de pago aplican cutoff. No requiere migración.
+- Purga de Blob y filas relacionadas, reutilizada por `npm run qa:teardown`, y endpoint `POST /api/cron/purge-expired-assessments` protegido con Bearer `CRON_SECRET`. No se programó.
+- Borrado completo de valoración por su propietario desde la interfaz, incluidos adjuntos, análisis y derivados.
+- Logs de aplicación limitados a eventos constantes; pruebas sintéticas cubren centinelas personales, nombres, texto y conexión.
+- OpenRouter restringido a allowlist cerrada de modelos `:free`, solicitudes con `provider.data_collection = deny`, solo fotos de inmueble elegibles y procesadas sin EXIF/redimensionadas. Fallback local si no hay endpoint compatible.
+- Ruta de Anthropic requiere `ENABLE_ANTHROPIC_IMAGE_ANALYSIS=true` y clave; está apagada por defecto. La clave no está en Production según Toni.
+- La lectura de PDF/presupuestos con pdf.js y Tesseract.js sigue fuera de este cambio.
+
+## 2. Gates ejecutados sobre el SHA indicado
+
+| Gate | Comando | Resultado | SHA |
 | --- | --- | --- | --- |
-| Identidad | `whoami`; `echo $HOME` | PASS; `toni`, `/Users/toni` | base `3461de6` |
-| Estado y sincronización | `git status --short`; `git fetch origin --prune`; `git pull --ff-only origin development` | PASS; limpio antes de editar; pull sin cambios | base `3461de6` |
-| Rama y ramas remotas | `git branch --show-current`; `git rev-parse HEAD`; `git rev-parse origin/development`; `git rev-parse origin/main` | PASS; rama `development`; base coincide con `origin/development`; `origin/main` permanece en SHA distinto | base `3461de6` |
-| Evidencia ES-0.1 | `git show 9eece1a:docs/VALIDATION_CHECKLIST.md` | PASS acotado a PNG/valoración, persistencia, 401 y DELETE/404/cero filas; evidencia detallada en spec y permalink de commit | código probado `7eddfd2` |
-| Inventario | Lectura estática de rutas, SDKs, schema Prisma y scripts referenciados en el documento | Rutas identificadas; región, plan, facturación y retención real de tenants quedan expresamente sin verificar | base `3461de6` |
-| Diff documental | `git diff --check` y revisión manual de referencias/criterios | Pendiente al preparar el commit | — |
+| Lint | `npm run lint` | PASS; sin avisos ESLint | `5edfbd3` |
+| Typecheck | `npx tsc --noEmit` | PASS | `5edfbd3` |
+| Tests | `npm test -- --runInBand` | PASS; 76 suites / 491 tests | `5edfbd3` |
+| Build | `npm run build` | PASS; compilación, tipos Next y páginas estáticas completados | `5edfbd3` |
+| Diff | `git diff --check` | PASS | `5edfbd3` |
 
-## 3. Pruebas no ejecutadas (NOT_RUN)
+## 3. QA funcional realizado
 
-| Prueba | Motivo concreto |
-| --- | --- |
-| Tests, lint, typecheck y build | Solo cambia documentación; no se cambió código. |
-| QA funcional/visual o consultas live a Neon, Blob y Vercel | No se implementó ni ejercitó comportamiento; no se requiere para esta revisión documental. |
-| Prueba sintética de redacción de logs | Es una tarea de aceptación ES-0.2 pendiente; el inventario solo identifica puntos de logging. |
-| Gate completo R05 y gates ES-0.2 | Aún falta completar controles y evidencia según criterios existentes; se mantienen `NOT_RUN`. |
+| Caso | Método y resultado | Estado |
+| --- | --- | --- |
+| Identidad | `agent-browser` con la identidad persistente `qa-es01`; sesión autenticada | PASS |
+| Crear valoración | Wizard, datos sintéticos, sin adjunto; valoración guardada y página de resultados abierta | PASS |
+| Borrar valoración completa | Botón Delete, confirmación del usuario QA; `DELETE /api/assessment/{id}` respondió 200 y la UI volvió al inicio; el detalle quedó sin los datos | PASS |
+| Upload de adjunto | PNG sintético; `POST /api/blob/upload` respondió 400; la valoración no se guardó, el wizard mostró error y no mostró éxito falso | BLOCKED por runtime/configuración Blob local |
+| Expiración | Tests con reloj controlado en `createdAt + 30 días`; el cutoff deniega servicio antes de leer el adjunto y el proceso de purga selecciona `createdAt <= cutoff` | PASS automático; no se modificó fecha de datos live |
+| Vercel Runtime Logs | No se consultaron logs live. Se auditó `console.*` en código y se ejecutaron pruebas de centinelas | NOT_RUN live |
+| Móvil/escritorio visual | No se hicieron capturas ni revisión visual; sí se ejercitaron controles con el navegador QA | NOT_RUN visual |
 
-## 4. Checklist manual para Toni
+La valoración QA creada en el caso de borrado fue eliminada por el mismo flujo cuya funcionalidad se estaba verificando. El intento de upload falló antes de persistir la valoración. No quedó assessment de prueba pendiente de limpiar.
+
+## 4. Pasos manuales para Toni
 
 | # | Dónde | Pasos | Resultado esperado | Cuenta o configuración | Bloqueante |
 | --- | --- | --- | --- | --- | --- |
-| 1 | `specs/energyscan/000-seguridad-verdad/es-0.2-data-flow-inventory.md` | Revisa rutas de recepción, procesamiento, persistencia, logs y borrado. Comprueba que refleja el flujo deseado y los límites indicados. | Inventario exacto o brechas registradas; finalidad única y 30 días aparecen como decisiones firmes. | Revisión documental; no login. | Sí |
-| 2 | Inventario, tablas “proveedores” y “alternativas” | Revisa quién recibe datos, regiones, retención, licencia, coste y comparativas para PDF/OCR y almacenamiento. | No se interpreta SaaS/plan/coste desconocido como coste cero; ninguna herramienta ni proveedor aparece seleccionado. | Decisión de Toni; no se activa ningún proveedor. | Sí |
-| 3 | Inventario, “Arquitectura candidata” y “Propuesta documental” | Revisa qué transmitiría la opción texto primero/OCR en navegador y el alcance futuro de lectura de PDF/presupuestos. | Texto completo no se transmite ni persiste por defecto; cualquier expansión de fase se aprueba y especifica antes de codificar. | Revisión documental; fixtures sintéticos solamente. | Sí |
+| 1 | `specs/energyscan/000-seguridad-verdad/es-0.2-data-flow-inventory.md` y `gates.md` | Revisa el inventario, las decisiones aplicadas, límites de QA y resultados por SHA. Confirma que criterios no cambiaron. | Semántica de 30 días desde `createdAt`, finalidad única y proveedores descritos correctamente; el bloqueo de Blob queda visible. | Revisión documental | Sí |
+| 2 | Vercel Preview de `development` | Configura tu propia `OPENROUTER_API_KEY` si decides activar el análisis visual permitido; mantén los modelos dentro de allowlist. | Solo petición de imagen elegible con `data_collection: deny`; sin PDFs/texto, sin EXIF y con tamaño reducido. | Secreto gestionado por Toni; no compartir valor | Para probar OpenRouter |
+| 3 | Vercel | Configura `CRON_SECRET` para el endpoint de purga. | El POST sin secreto o con secreto incorrecto recibe 401; el secreto correcto ejecuta la purga. | Secreto gestionado por Toni | Sí para activar endpoint |
+| 4 | Programación de tareas | Decide y configura la programación de la purga después de revisar volumen, horario y observabilidad. No hay cron configurado por este cambio. | Ejecución recurrente aprobada por Toni; sin ejecución programada antes de esta decisión. | Decisión de Toni | Sí |
+| 5 | Runtime QA con Blob funcional | Repite creación con PNG de inmueble sintético, recarga/persistencia, borrado de adjunto y borrado de valoración completa; usa solo `qa-es01`. Limpia cualquier artefacto restante mediante `npm run qa:teardown -- --assessment-id "$QA_ASSESSMENT_ID"` (dry-run y luego `--apply` si recuentos coinciden). | Blob vinculado y persistente; borrado owner correcto; sin acceso vencido; teardown reporta cero filas. | Identidad QA; runtime contractual | Sí |
 
-### Casos negativos y de borde
+## 5. Casos de borde y riesgos
 
-| # | Caso | Resultado esperado |
-| --- | --- | --- |
-| 1 | El checklist histórico decía que Blob estaba bloqueado, pero evidencia posterior existe | Se enlaza el checklist `9eece1a` y se limita PASS a las afirmaciones observadas; no se marcan grants/replay/callback como PASS. |
-| 2 | Región, plan o configuración de proveedor no consultados | Quedan como “no verificado”; no se presentan como hechos del tenant. |
-| 3 | Procesamiento OCR futuro | Solo fixtures sintéticos; PDF texto, escaneado, corrupto, grande y con caracteres españoles deben tener salida/redacción comprobable. |
-
-### Estados de interfaz afectados
-
-- [ ] Vacío · [ ] Cargando · [ ] Error · [ ] Éxito · [ ] Móvil · [ ] Escritorio · [x] No aplica (documentación solamente)
-
-## 5. Riesgos y limitaciones
-
-- La conexión Preview con Neon/Blob y la declaración de que Neon es la misma base que Production son datos contractuales/declarados; las regiones y planes no se inspeccionaron.
-- El inventario de logs procede del código; no se revisaron logs live de Vercel.
-- SaaS y servicios condicionados a variables de entorno pueden no estar activos; no se inspeccionó la configuración efectiva. La tabla los señala como condicionales o por verificar.
-- La función de lectura PDF/presupuestos queda como propuesta posterior, sin decisión de herramienta ni cambio de criterios ES-0.3.
-- La implementación de vencimiento automático puede necesitar migración; si la necesita, aplica `QA_MINIMUM_FOR_DATABASE_MIGRATION=FULL`.
+- La subida con adjunto quedó bloqueada por HTTP 400 de `/api/blob/upload` en runtime local; este resultado no prueba un defecto del nuevo borrado o del cutoff. Repetir tras revisar la configuración local de Blob.
+- Drafts Blob abandonados antes de crear una valoración no tienen `Assessment.createdAt` y no entran en esta purga; su tratamiento requiere diseño separado.
+- Una falla al borrar Blob se cuenta como fallo de purga y mantiene filas para reintento. El endpoint no se programa y no se configuró `CRON_SECRET`.
+- No se consultaron logs live de Vercel. El resultado de logs cubre el logger de aplicación, eventos estáticos y tests sintéticos.
+- OCR/PDF texto primero y OCR de documentos escaneados siguen en fase posterior, sin cambio de comportamiento en esta entrega.
+- La aprobación de Toni y `PROMOTE=FULL` no constan; no se promociona.
 
 ## 6. Decisión de Toni
 
-- [ ] Revisé el inventario y las comparativas
-- [ ] Confirmo o corrijo la semántica de borrar derivados junto al binario al día 30
-- [ ] Elijo OCR: ____________________ (sigue pendiente hasta decisión expresa)
-- [ ] Elijo almacenamiento: ____________________ (sigue pendiente hasta decisión expresa)
-- [ ] Apruebo el alcance de lectura de PDF para una fase posterior: ____________________
-- [ ] No se promociona en esta entrega documental
+- [ ] Revisé el inventario y el estado de gates por SHA.
+- [ ] Apruebo o solicito cambios a ES-0.2 implementación.
+- [ ] Configuré mi propia clave OpenRouter para Preview, si procede.
+- [ ] Configuré `CRON_SECRET` en Vercel.
+- [ ] Decidí la programación de la purga.
+- [ ] Completar QA de adjunto cuando Blob local/Preview esté operativo.
+- [ ] No promocionar hasta escribir `PROMOTE=FULL` y aprobar la entrega.

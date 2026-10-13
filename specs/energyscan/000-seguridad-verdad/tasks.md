@@ -1,6 +1,6 @@
 # F0 — Tareas de desarrollo
 
-**Estado:** ES-0.1 fue validada por Toni y promocionada a `main`. La siguiente tarea es ES-0.2; ES-0.3 y ES-0.4 siguen pendientes. Las tareas se ejecutan directamente en `development`. Toni valida inicialmente producto y alcance junto con el agente. El agente implementa y aporta evidencia técnica. No hay requisito de panel de validadores ni piloto previo a la implementación. Toda prueba que aún no se haya ejecutado está `NOT_RUN`.
+**Estado:** ES-0.1 fue validada por Toni y promocionada a `main`. ES-0.2 está en implementación en `development`; ES-0.3 y ES-0.4 siguen pendientes. Toni valida inicialmente producto y alcance junto con el agente. El agente implementa y aporta evidencia técnica. No hay requisito de panel de validadores ni piloto previo a la implementación. Toda prueba que aún no se haya ejecutado está `NOT_RUN`.
 
 ## ES-0.1 — Autorización de adjuntos y upload (P0)
 
@@ -23,7 +23,7 @@
 
 **Objetivo:** entender y limitar flujo de documentos y datos. **Reuso:** `src/lib/document-parsing/`, `ocr/`, `vision/`, `ingestion/`, Blob, `AssessmentAttachment.ocrData`, `AttachmentAnalysis.detectedJson`.
 
-**Etapa 1 documental (2026-10-13):** inventario y comparativas en [`es-0.2-data-flow-inventory.md`](es-0.2-data-flow-inventory.md). Decisiones firmes de Toni: finalidad única de generar la valoración; documentos subidos por 30 días con borrado manual anterior; proveedores limitados a software abierto o coste cero, y aprobación expresa previa para servicio externo nuevo tras comparativa. No se elige aún motor OCR ni almacenamiento. Se incluye propuesta de lectura de PDF/presupuestos posterior; no altera criterios ni implementa comportamiento. Los gates de redacción/centinelas siguen pendientes.
+**Etapa 1 documental (2026-10-13):** inventario y comparativas en [`es-0.2-data-flow-inventory.md`](es-0.2-data-flow-inventory.md). Decisiones firmes: finalidad exclusiva de generar la valoración; assessment, documentos y derivados vencen desde `Assessment.createdAt + 30 días` con borrado manual anterior; se mantienen Neon y Blob; OpenRouter solo `:free` con allowlist y `data_collection: deny`; no se incorporan proveedores. Lectura PDF/presupuestos con pdf.js/Tesseract.js queda para fase posterior. El resultado de implementación y QA se registra por SHA en `gates.md`; no se alteran criterios de aceptación.
 
 | Subtarea | Ejecución | Salida | Estimación orientativa |
 |---|---|---|---:|
@@ -32,6 +32,8 @@
 | 0.2.c Implementar redacción/minimización comprobable | Agente | Diff focal y pruebas con centinelas sintéticos | 1–3 d |
 
 **Aceptar:** rutas y proveedores hallados inventariados o brechas registradas; fixtures/evidencia sin PII; centinelas sintéticos no aparecen en logs. No usar documentos reales ni transmitirlos a servicios externos durante pruebas locales. Cualquier activación de tratamiento que requiera autorización o revisión especializada se mantiene apagada hasta cerrar ese gate de publicación; no bloquea la implementación interna.
+
+**Ejecución ES-0.2 (2026-10-13, SHA `5edfbd36dfcc6b1d083a57de77739de07f85e3c9`):** lógica de expiración, borrado owner, purga protegida, minimización de logs y política de visión implementadas sin migración. Gates lint/typecheck/tests/build: PASS; QA de borrado sin adjunto: PASS; prueba de upload con adjunto: BLOCKED por HTTP 400 en `/api/blob/upload` durante runtime local. Estado detallado y límites en [`gates.md`](gates.md). La aceptación de Toni sigue pendiente. Esta nota registra resultados y no modifica el criterio de aceptación.
 
 ## ES-0.3 — Claims, CEE y estimación (P0)
 

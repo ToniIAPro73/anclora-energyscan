@@ -1,6 +1,6 @@
 # F0 — Plan de desarrollo
 
-**Estado:** activo para desarrollo en `development`. ES-0.1 fue validada por Toni y promocionada a `main`; ES-0.2 es el siguiente lote. Toni valida inicialmente cada entrega junto con el agente. Revisiones externas y piloto de usuarios quedan para gates de publicación, afirmaciones profesionales/reguladas o validación de mercado.
+**Estado:** activo para desarrollo en `development`. ES-0.1 fue validada por Toni y promocionada a `main`; ES-0.2 implementación está en curso. Toni valida inicialmente cada entrega junto con el agente. Revisiones externas y piloto de usuarios quedan para gates de publicación, afirmaciones profesionales/reguladas o validación de mercado.
 
 ## Arquitectura actual confirmada y propuesta
 
@@ -13,7 +13,7 @@
 
 ## Decisiones iniciales de producto
 
-**Decisiones firmes de Toni para ES-0.2 (2026-10-13):** finalidad única de generar la valoración del usuario; retención de documentos subidos de 30 días, con borrado manual anterior; solo proveedores de software abierto o coste cero, y ningún proveedor externo nuevo sin aprobación expresa de Toni y comparativa previa. El motor OCR y el almacenamiento concreto quedan pendientes de decisión. Ver [`es-0.2-data-flow-inventory.md`](es-0.2-data-flow-inventory.md).
+**Decisiones firmes de Toni para ES-0.2 (2026-10-13):** finalidad única de generar la valoración del usuario; documentos y derivados vencen a 30 días desde `Assessment.createdAt`, con borrado manual anterior; Neon y Vercel Blob se mantienen; OpenRouter queda limitado a modelos `:free` allowlisted y `data_collection: deny`; ningún proveedor externo nuevo sin aprobación expresa y comparativa previa. PDF.js/Tesseract.js para PDF queda para fase posterior; no se implementa aquí. Ver [`es-0.2-data-flow-inventory.md`](es-0.2-data-flow-inventory.md).
 
 | Decisión | Valor inicial | Cuándo reabrir |
 |---|---|---|
