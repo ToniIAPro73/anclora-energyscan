@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { Pool } from 'pg'
-import { logSafeError } from '@/lib/safe-logger'
+import { logSafeError } from './safe-logger'
 
 const databaseUrl = process.env.DATABASE_URL || ''
 const isPostgres = databaseUrl.startsWith('postgres') || databaseUrl.startsWith('postgresql')

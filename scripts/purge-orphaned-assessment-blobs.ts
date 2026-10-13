@@ -23,7 +23,9 @@ function parseArgs(args: string[]) {
 async function main() {
   const { apply, batchLimit } = parseArgs(process.argv.slice(2));
   if (!process.env.BLOB_READ_WRITE_TOKEN || !process.env.DATABASE_URL) {
-    throw new Error('Required storage configuration is unavailable.');
+    console.error('Required storage configuration is unavailable.');
+    process.exitCode = 1;
+    return;
   }
 
   const configuredBatchLimit = batchLimit ?? getConfiguredBlobPurgeBatchLimit();

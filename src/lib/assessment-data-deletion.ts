@@ -1,9 +1,9 @@
 import { isAbsolute, relative, resolve } from 'path';
-import { prisma } from '@/lib/prisma';
+import { prisma } from './prisma';
 import type { Prisma, PrismaClient } from '@prisma/client';
-import { deleteStoredAttachment } from '@/lib/blob-storage';
-import { getAssessmentRetentionCutoff } from '@/lib/assessment-retention';
-import type { OrphanedBlobPurgeResult } from '@/lib/orphaned-assessment-blob-purge';
+import { deleteStoredAttachment } from './blob-storage';
+import { getAssessmentRetentionCutoff } from './assessment-retention';
+import type { OrphanedBlobPurgeResult } from './orphaned-assessment-blob-purge';
 
 type AssessmentDataDeps = {
   prisma: PrismaClient;
