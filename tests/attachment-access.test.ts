@@ -64,6 +64,24 @@ describe('assessment attachment authorization', () => {
     expect(readAttachmentBytes).not.toHaveBeenCalled();
   });
 
+  it.each([
+    ['read', GET],
+    ['delete', DELETE],
+  ])('denies a professional without an explicit grant before %s storage access', async (_action, handler) => {
+    (lightAuth as jest.Mock).mockResolvedValue({ user: { id: 'professional_fixture', role: 'PROFESSIONAL' } });
+    (prisma.assessment.findFirst as jest.Mock).mockResolvedValue(null);
+
+    const response = await handler(new Request('http://localhost'), params);
+
+    expect(response.status).toBe(404);
+    expect(prisma.assessment.findFirst).toHaveBeenCalledWith({
+      where: { id: 'assessment_fixture', userId: 'professional_fixture' },
+    });
+    expect(prisma.assessmentAttachment.findFirst).not.toHaveBeenCalled();
+    expect(readAttachmentBytes).not.toHaveBeenCalled();
+    expect(deleteStoredAttachment).not.toHaveBeenCalled();
+  });
+
   it('does not delete database metadata when storage deletion fails', async () => {
     (readAttachmentBytes as jest.Mock).mockResolvedValue({ bytes: Buffer.from('fixture') });
     (deleteStoredAttachment as jest.Mock).mockRejectedValue(new Error('storage unavailable'));

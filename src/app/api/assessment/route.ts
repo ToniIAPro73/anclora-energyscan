@@ -542,14 +542,18 @@ export async function POST(req: Request) {
       } catch (premiumSourceError) {
         console.warn('Premium source persistence skipped:', premiumSourceError);
       }
-    } catch (attachmentError) {
-      await prisma.assessment.delete({ where: { id: assessment.id } });
-      await Promise.all([
-        ...storedPaths.map((attachmentPath) => deleteStoredAttachment(attachmentPath).catch(() => undefined)),
-        ...uploadedAttachments.map((attachment) => deleteStoredAttachment(`blob:${attachment.pathname}`).catch(() => undefined)),
-        ...uploadedSourceDocuments.map((attachment) => deleteStoredAttachment(`blob:${attachment.pathname}`).catch(() => undefined)),
+    } catch {
+      const rollback = await Promise.allSettled([
+        prisma.assessment.delete({ where: { id: assessment.id } }),
+        ...storedPaths.map((attachmentPath) => deleteStoredAttachment(attachmentPath)),
+        ...uploadedAttachments.map((attachment) => deleteStoredAttachment(`blob:${attachment.pathname}`)),
+        ...uploadedSourceDocuments.map((attachment) => deleteStoredAttachment(`blob:${attachment.pathname}`)),
       ]);
-      return NextResponse.json({ error: attachmentError instanceof Error ? attachmentError.message : 'Adjunto no válido' }, { status: 400 });
+      if (rollback.some((result) => result.status === 'rejected')) {
+        console.error('Assessment attachment rollback was incomplete');
+      }
+      console.error('Assessment attachment persistence failed');
+      return NextResponse.json({ error: 'No se pudo guardar la valoración con sus adjuntos' }, { status: 503 });
     }
 
     trackEvent('assessment_created', {
