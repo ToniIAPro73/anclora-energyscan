@@ -29,6 +29,9 @@ import { buildEvidenceMatrix, getEvidenceFieldLabel, getEvidenceSourceLabel, get
 import { buildConditionRiskItems } from '@/lib/condition-risk/rules';
 import { getCategoryLabel, getElementLabel, getModuleDisclaimer } from '@/lib/condition-risk/types';
 import { VisionAnalysisTrigger } from '@/components/VisionAnalysisTrigger';
+import { getAssessmentRetentionCutoff } from '@/lib/assessment-retention';
+import { logSafeError } from '@/lib/safe-logger';
+import { DeleteAssessmentButton } from '@/components/DeleteAssessmentButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,8 +43,8 @@ async function loadPremiumSourcesForAssessment(assessmentId: string) {
     ]);
 
     return { energyCertificates, rehabBudgets };
-  } catch (error) {
-    console.warn('Premium sources unavailable for assessment results:', error);
+  } catch {
+    logSafeError('assessment_sources_unavailable');
     return { energyCertificates: [], rehabBudgets: [] };
   }
 }
@@ -53,14 +56,12 @@ export default async function AssessmentResultsPage({ params }: { params: { id: 
   const currency = normalizeCurrency(cookieStore.get('enerscan-currency')?.value || defaults.currency);
   const measurementSystem = normalizeMeasurementSystem(cookieStore.get('enerscan-measurement-system')?.value || defaults.measurementSystem);
   const t = getDictionary(language);
-  trackEvent('assessment_viewed', { assessmentId: params.id });
-
   const session = await auth().catch(() => null);
   const isLoggedIn = Boolean(session?.user?.id);
 
   const statelessPayload = parseStatelessAssessmentId(params.id);
   const assessment = statelessPayload ? null : isLoggedIn ? await prisma.assessment.findFirst({
-    where: { id: params.id, userId: session!.user!.id },
+    where: { id: params.id, userId: session!.user!.id, createdAt: { gt: getAssessmentRetentionCutoff() } },
     include: { attachments: true, cadastralRecord: true }
   }) : null;
 
@@ -70,6 +71,7 @@ export default async function AssessmentResultsPage({ params }: { params: { id: 
   };
 
   if (!assessment && !statelessPayload) return <div>{t.analysisNotFound}</div>;
+  trackEvent('assessment_viewed', { assessmentId: params.id });
 
   const cadastralRecordRaw = statelessPayload?.cadastralRecord || assessment?.cadastralRecord;
   const cadastralRecord = cadastralRecordRaw ? {
@@ -269,6 +271,17 @@ export default async function AssessmentResultsPage({ params }: { params: { id: 
 
       <main className="pt-24 pb-16 px-4">
         <div className="max-w-6xl mx-auto space-y-12">
+
+          {assessment && !isDemo && (
+            <div className="flex justify-end">
+              <DeleteAssessmentButton
+                assessmentId={params.id}
+                language={language}
+                label={t.delete}
+                errorLabel={t.attachmentDeleteError}
+              />
+            </div>
+          )}
 
           {/* FREE ANALYSIS COMPLETED BANNER */}
           {!isDemo && !canViewPremium && (

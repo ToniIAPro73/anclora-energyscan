@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { getStripeClient } from '@/lib/stripe';
 import { trackEvent } from '@/lib/analytics';
 import type Stripe from 'stripe';
+import { logSafeError } from '@/lib/safe-logger';
+import { getAssessmentRetentionCutoff } from '@/lib/assessment-retention';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,16 +17,16 @@ async function reconcilePaidCheckoutSession(sessionId: string) {
   let session: Stripe.Checkout.Session;
   try {
     session = await getStripeClient().checkout.sessions.retrieve(sessionId);
-  } catch (error) {
-    console.warn('Payment status Stripe session lookup failed:', error);
+  } catch {
+    logSafeError('payment_status_failed');
     return null;
   }
 
   const metadataAssessmentId = session.metadata?.assessmentId;
   if (!metadataAssessmentId) return null;
 
-  const existing = await prisma.assessment.findUnique({
-    where: { id: metadataAssessmentId },
+  const existing = await prisma.assessment.findFirst({
+    where: { id: metadataAssessmentId, createdAt: { gt: getAssessmentRetentionCutoff() } },
     select: { id: true, paidAt: true, paymentStatus: true },
   });
   if (!existing) return null;
@@ -75,7 +77,9 @@ export async function GET(req: Request) {
   }
 
   let assessment = await prisma.assessment.findFirst({
-    where: sessionId ? { stripeSessionId: sessionId } : { id: assessmentId || '' },
+    where: sessionId
+      ? { stripeSessionId: sessionId, createdAt: { gt: getAssessmentRetentionCutoff() } }
+      : { id: assessmentId || '', createdAt: { gt: getAssessmentRetentionCutoff() } },
     select: {
       id: true,
       paidAt: true,

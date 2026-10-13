@@ -1,17 +1,22 @@
 import { lightAuth } from '@/auth.config';
 import { prisma } from '@/lib/prisma';
+import { getAssessmentRetentionCutoff } from '@/lib/assessment-retention';
 
-/** Returns the assessment only when the current server session owns it. */
-export async function getOwnedAssessment(assessmentId: string) {
-  let userId: string | undefined;
+export async function getAuthenticatedUserId() {
   try {
-    userId = (await lightAuth())?.user?.id;
+    return (await lightAuth())?.user?.id || null;
   } catch {
     return null;
   }
+}
 
+/** Returns the assessment only when the current server session owns it. */
+export async function getOwnedAssessment(assessmentId: string) {
+  const userId = await getAuthenticatedUserId();
   if (!userId) return null;
-  return prisma.assessment.findFirst({ where: { id: assessmentId, userId } });
+  return prisma.assessment.findFirst({
+    where: { id: assessmentId, userId, createdAt: { gt: getAssessmentRetentionCutoff() } },
+  });
 }
 
 export async function isOwnedAssessment(assessmentId: string) {

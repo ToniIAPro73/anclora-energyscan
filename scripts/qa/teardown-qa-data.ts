@@ -1,5 +1,6 @@
 /** Explicit, fail-closed teardown for the persistent QA identity. */
 import { isAbsolute, relative, resolve } from 'path'
+import { deleteAssessmentRowsInTransaction, validateAssessmentAttachmentPath } from '../../src/lib/assessment-data-deletion'
 
 const QA_EMAIL = 'qa.energyscan@anclora.local'
 type Deps = { prisma: any; deleteStoredAttachment: (path: string) => Promise<unknown> }
@@ -33,21 +34,6 @@ function parseArgs(args: string[]): Options {
   return result
 }
 
-function validateStoragePath(value: string, assessmentId: string, userId: string) {
-  if (value.startsWith('blob:')) {
-    const path = value.slice(5)
-    if (!path || path.startsWith('/') || path.split('/').includes('..') ||
-      !(path.startsWith(`assessments/${assessmentId}/`) || path.startsWith(`assessment-drafts/${userId}/`))) {
-      throw new Error('Unexpected attachment storage path; teardown aborted.')
-    }
-    return
-  }
-  const root = resolve(process.cwd(), 'uploads', 'assessments', assessmentId)
-  const resolved = resolve(value)
-  const rel = relative(root, resolved)
-  if (!isAbsolute(value) || rel.startsWith('..') || isAbsolute(rel)) throw new Error('Unexpected attachment storage path; teardown aborted.')
-}
-
 async function attachmentRecords(tx: any, assessmentIds: string[]) {
   return tx.assessmentAttachment.findMany({ where: { assessmentId: { in: assessmentIds } }, select: { id: true, assessmentId: true, path: true } }) as Promise<Array<{id:string; assessmentId:string; path:string}>>
 }
@@ -68,26 +54,6 @@ async function countSnapshot(tx: any, assessmentIds: string[], attachmentIds: st
   return values
 }
 
-async function deleteAssessmentRows(tx: any, assessmentIds: string[], attachmentIds: string[]) {
-  const assessmentWhere = { assessmentId: { in: assessmentIds } }
-  const runs = await tx.estimateRun.findMany({ where: assessmentWhere, select: { id: true } })
-  const runIds = runs.map((r: {id:string}) => r.id)
-  // Explicit child rows first; no cascade is relied upon for the teardown contract.
-  if (attachmentIds.length) await tx.attachmentAnalysis.deleteMany({ where: { attachmentId: { in: attachmentIds } } })
-  await tx.energyCertificate.deleteMany({ where: assessmentWhere })
-  await tx.rehabBudget.deleteMany({ where: assessmentWhere })
-  await tx.cadastralRecord.deleteMany({ where: assessmentWhere })
-  await tx.dataFieldSource.deleteMany({ where: assessmentWhere })
-  await tx.checkoutRecovery.deleteMany({ where: assessmentWhere })
-  if (runIds.length) await tx.estimateLine.deleteMany({ where: { estimateRunId: { in: runIds } } })
-  await tx.estimateRun.deleteMany({ where: assessmentWhere })
-  await tx.lead.deleteMany({ where: assessmentWhere })
-  await tx.analyticsEventLog.deleteMany({ where: assessmentWhere })
-  await tx.emailLog.deleteMany({ where: assessmentWhere })
-  await tx.assessmentAttachment.deleteMany({ where: { id: { in: attachmentIds } } })
-  await tx.assessment.deleteMany({ where: { id: { in: assessmentIds } } })
-}
-
 export async function runQaTeardown(args: string[], deps: Deps): Promise<string> {
   const options = parseArgs(args)
   const user = await deps.prisma.user.findUnique({ where: { email: QA_EMAIL }, select: { id: true } })
@@ -106,7 +72,7 @@ export async function runQaTeardown(args: string[], deps: Deps): Promise<string>
     if (foreign) throw new Error('Unexpected ownership state; teardown aborted.')
   }
   const attachments = await deps.prisma.assessmentAttachment.findMany({ where: { assessmentId: { in: assessmentIds } }, select: { id: true, assessmentId: true, path: true } })
-  for (const attachment of attachments) validateStoragePath(attachment.path, attachment.assessmentId, user.id)
+  for (const attachment of attachments) validateAssessmentAttachmentPath(attachment.path, attachment.assessmentId, user.id)
   const counts = await countSnapshot(deps.prisma, assessmentIds, attachments.map((a: {id:string}) => a.id), user.id, options.mode === 'identity')
   const format = (items: Record<string, number>) => Object.entries(items).map(([k,v]) => `${k}: ${v}`).join('\n')
   if (!options.apply) return `DRY RUN — no changes made\n${format(counts)}`
@@ -115,7 +81,7 @@ export async function runQaTeardown(args: string[], deps: Deps): Promise<string>
   try {
     await deps.prisma.$transaction(async (tx: any) => {
       const current = await attachmentRecords(tx, assessmentIds)
-      for (const item of current) validateStoragePath(item.path, item.assessmentId, user.id)
+      for (const item of current) validateAssessmentAttachmentPath(item.path, item.assessmentId, user.id)
       try { for (const item of current) await deps.deleteStoredAttachment(item.path) }
       catch { throw new Error('Blob deletion failed; database rows were not deleted.') }
       if (options.mode === 'attachments') {
@@ -124,7 +90,7 @@ export async function runQaTeardown(args: string[], deps: Deps): Promise<string>
         await tx.rehabBudget.deleteMany({ where: { assessmentId: { in: assessmentIds }, attachmentId: { in: current.map((a) => a.id) } } })
         await tx.assessmentAttachment.deleteMany({ where: { id: { in: current.map((a) => a.id) } } })
       } else {
-        await deleteAssessmentRows(tx, assessmentIds, attachments.map((a: {id:string}) => a.id))
+        await deleteAssessmentRowsInTransaction(tx, assessmentIds, attachments.map((a: {id:string}) => a.id))
         if (options.mode === 'identity') {
           for (const model of ['account','session','passwordResetToken','lead','emailLog','analyticsEventLog','providerAccount','professionalBranding','budgetReview']) await tx[model].deleteMany({ where: { userId: user.id } })
           await tx.user.deleteMany({ where: { id: user.id, email: QA_EMAIL } })

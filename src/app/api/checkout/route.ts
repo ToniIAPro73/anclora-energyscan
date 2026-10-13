@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getStripeClient, PREMIUM_CURRENCY, PREMIUM_PRICE_CENTS } from '@/lib/stripe';
 import { trackEvent } from '@/lib/analytics';
+import { logSafeError } from '@/lib/safe-logger';
+import { getAssessmentRetentionCutoff } from '@/lib/assessment-retention';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,12 +55,12 @@ export async function POST(req: Request) {
 
   let assessment;
   try {
-    assessment = await prisma.assessment.findUnique({
-      where: { id: assessmentId },
+    assessment = await prisma.assessment.findFirst({
+      where: { id: assessmentId, createdAt: { gt: getAssessmentRetentionCutoff() } },
       select: { id: true, userId: true, isDemo: true, paidAt: true, paymentStatus: true, user: { select: { email: true } } },
     });
-  } catch (error) {
-    console.error('Checkout assessment lookup failed:', error);
+  } catch {
+    logSafeError('checkout_failed');
     return NextResponse.json(
       {
         error: 'checkout_storage_unavailable',
@@ -99,8 +101,8 @@ export async function POST(req: Request) {
         userId: assessment.userId || '',
       },
     });
-  } catch (error) {
-    console.error('Stripe checkout session creation failed:', error);
+  } catch {
+    logSafeError('checkout_failed');
     return NextResponse.json(
       {
         error: 'checkout_session_failed',
@@ -140,8 +142,8 @@ export async function POST(req: Request) {
         },
       });
     }
-  } catch (error) {
-    console.error('Checkout session persistence failed:', error);
+  } catch {
+    logSafeError('checkout_failed');
     return NextResponse.json(
       {
         error: 'checkout_persistence_failed',

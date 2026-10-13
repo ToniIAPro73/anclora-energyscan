@@ -37,7 +37,9 @@ describe('assessment attachment authorization', () => {
   it('reads private attachment bytes for its owner', async () => {
     const response = await GET(new Request('http://localhost'), params);
     expect(response.status).toBe(200);
-    expect(prisma.assessment.findFirst).toHaveBeenCalledWith({ where: { id: 'assessment_fixture', userId: 'owner_fixture' } });
+    expect(prisma.assessment.findFirst).toHaveBeenCalledWith({
+      where: { id: 'assessment_fixture', userId: 'owner_fixture', createdAt: { gt: expect.any(Date) } },
+    });
     expect(readAttachmentBytes).toHaveBeenCalledWith(attachment.path);
   });
 
@@ -46,6 +48,25 @@ describe('assessment attachment authorization', () => {
     const response = await GET(new Request('http://localhost'), params);
     expect(response.status).toBe(404);
     expect(readAttachmentBytes).not.toHaveBeenCalled();
+  });
+
+  it('does not serve attachments once the parent assessment reaches its 30-day expiry', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-01-31T10:00:00.000Z'));
+    (prisma.assessment.findFirst as jest.Mock).mockResolvedValue(null);
+
+    const response = await GET(new Request('http://localhost'), params);
+
+    expect(response.status).toBe(404);
+    expect(prisma.assessment.findFirst).toHaveBeenCalledWith({
+      where: {
+        id: 'assessment_fixture',
+        userId: 'owner_fixture',
+        createdAt: { gt: new Date('2026-01-01T10:00:00.000Z') },
+      },
+    });
+    expect(prisma.assessmentAttachment.findFirst).not.toHaveBeenCalled();
+    expect(readAttachmentBytes).not.toHaveBeenCalled();
+    jest.useRealTimers();
   });
 
   it.each([
@@ -75,7 +96,7 @@ describe('assessment attachment authorization', () => {
 
     expect(response.status).toBe(404);
     expect(prisma.assessment.findFirst).toHaveBeenCalledWith({
-      where: { id: 'assessment_fixture', userId: 'professional_fixture' },
+      where: { id: 'assessment_fixture', userId: 'professional_fixture', createdAt: { gt: expect.any(Date) } },
     });
     expect(prisma.assessmentAttachment.findFirst).not.toHaveBeenCalled();
     expect(readAttachmentBytes).not.toHaveBeenCalled();
