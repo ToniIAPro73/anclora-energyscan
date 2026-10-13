@@ -1,46 +1,47 @@
-# Checklist de validación — histogramas de formas Blob
+# Checklist de validación — purga controlada de drafts legados
 
 > Este fichero se sobrescribe en cada entrega. El historial queda en Git.
 
 **Rama:** `development`
 
-**SHA del código validado:** `30c44e9fcd24893bc96321fa75c1e6ea643c3d55`
+**SHA del código validado:** `b613ffc623d474aba920baa9baf16ee115eb808d`
 
-**Datos/entorno:** pruebas focales con dobles y fixtures sintéticos. No se consultó Blob real, no se usó `--apply` y no se modificó la base de datos.
+**Datos/entorno:** pruebas con dobles y fixtures sintéticos. No se usó token real, no se ejecutó `--apply` y no se modificó la base.
 
 ## 1. Qué cambió
 
-- Las rutas bajo `assessment-drafts/` y `assessments/` que no coinciden con las formas reconocidas se cuentan como clase `d`; no abortan la purga y nunca son candidatas a borrado.
-- El reporte incluye recuentos y bytes por franja de edad y clase `a`–`d`.
-- Se añade un histograma anonimizado por forma: raíz permitida, tipo de cada segmento, cantidad de segmentos, recuento, bytes y franja de edad. Nombres, extensiones, IDs y rutas no aparecen.
-- Objetos que no pertenecen al prefijo de EnergyScan solicitado se ignoran. Solo candidatos huérfanos reconocidos con más de 30 días pueden borrarse.
+- Se reconoce para borrado solo la forma exacta `assessment-drafts/{uuid-v4}/{file}`: tres segmentos, UUID v4 válido, archivo no vacío y sin `..` ni barras.
+- Legados referenciados se muestran como clase `a-legacy`; legados huérfanos mayores de 30 días son clase `b`; los recientes siguen como `c`. Otras formas permanecen en `d` y no se borran.
+- Antes de cada borrado se repite la búsqueda de referencias con ambas variantes de ruta (`path` y `blob:path`). Si aparece una referencia, se omite el borrado y se refleja como `a-legacy`/`skipped_referenced`.
+- El informe conserva histograma anonimizado y añade recuentos de referencias/huérfanos por franja para la forma legada. El lote sigue limitado a 100 por defecto y acepta `--batch-limit 5` para la primera ejecución de Toni.
 
 ## 2. Gates finales ejecutados secuencialmente
 
 | Gate | Comando | Resultado | SHA |
 |---|---|---|---|
-| Lint | `npm run lint` | PASS | `30c44e9fcd24893bc96321fa75c1e6ea643c3d55` |
-| Typecheck | `npx tsc --noEmit` | PASS | `30c44e9fcd24893bc96321fa75c1e6ea643c3d55` |
-| Suite completa | `npm test -- --runInBand` | PASS; 79 suites / 522 tests | `30c44e9fcd24893bc96321fa75c1e6ea643c3d55` |
-| Build | `npm run build` | PASS | `30c44e9fcd24893bc96321fa75c1e6ea643c3d55` |
-| Diff documental | `git diff --check` | PASS antes del commit documental | SHA del código `30c44e9fcd24893bc96321fa75c1e6ea643c3d55` |
+| Lint | `npm run lint` | PASS | `b613ffc623d474aba920baa9baf16ee115eb808d` |
+| Typecheck | `npx tsc --noEmit` | PASS | `b613ffc623d474aba920baa9baf16ee115eb808d` |
+| Suite completa | `npm test -- --runInBand` | PASS; 79 suites / 526 tests | `b613ffc623d474aba920baa9baf16ee115eb808d` |
+| Build | `npm run build` | PASS | `b613ffc623d474aba920baa9baf16ee115eb808d` |
+| Diff | `git diff --check` | PASS antes del commit | `b613ffc623d474aba920baa9baf16ee115eb808d` |
 
-No existe script npm `typecheck`; se ejecutó `npx tsc --noEmit`. El paquete completo se ejecutó una vez y en secuencia. Tests focales previos: 2 suites / 12 tests PASS.
+No existe script npm `typecheck`; se ejecutó `npx tsc --noEmit`. El paquete completo se ejecutó una vez y en secuencia. Tests focales previos: 2 suites / 16 tests PASS.
 
 ## 3. Casos comprobados
 
 | Caso | Resultado |
 |---|---|
-| Forma antigua desconocida en `assessment-drafts/` | PASS; contada como `d`, incluida en histograma y no borrada con `--apply` |
-| Forma reconocida antigua en el mismo lote sintético | PASS; única candidata borrada en el doble |
-| Tipos de segmento UUID v4, otro UUID, CUID, numérico, texto corto/largo y archivo | PASS; salida normalizada sin valores reales |
-| Ruta devuelta fuera del prefijo solicitado | PASS; ignorada y no borrada |
-| Histograma y reporte | PASS; no incluyen rutas, identificadores, nombres de archivo ni extensiones |
-| Simulación con Blob real / `--apply` | NOT_RUN; Toni revisará primero los recuentos reales |
+| Legado referenciado | PASS; clase `a-legacy`, no se borra |
+| Legado huérfano de 31 días | PASS; clase `b`, borrado por el doble en lote 5 |
+| Legado huérfano de 29 días | PASS; clase `c`, se conserva |
+| Referencia añadida entre listado y borrado | PASS; recheck incluye rutas con y sin `blob:`, omite el borrado y actualiza contadores |
+| Formas de 2/5 segmentos, UUID inválido, nombre vacío o con `..` | PASS; clase `d`, nunca se borra |
+| Prefijo ajeno | PASS; ignorado |
+| Salida | PASS; sin rutas ni nombres de archivo |
+| Simulación real y `--apply` | NOT_RUN; Toni ejecutará primero la simulación real |
 
-## 4. Acciones manuales para Toni
+## 4. Acción manual para Toni
 
-1. Ejecutar la simulación real sin `--apply` y revisar clases, histogramas y tamaños por franja.
-2. Confirmar si las formas antiguas de clase `d` deben seguir conservándose o si propone ampliar explícitamente la regla en una tarea posterior.
+Ejecutar el dry-run con token real y `--batch-limit 5`; revisar el desglose `a-legacy`/huérfanos, tamaños y franjas antes de decidir una ejecución posterior con `--apply`. Este cambio amplía la elegibilidad solo a la forma legada exacta; no ejecuta borrados reales.
 
-No se amplió la regla de borrado para formas desconocidas ni se programó o promovió la purga.
+No se programa ni promueve la purga.

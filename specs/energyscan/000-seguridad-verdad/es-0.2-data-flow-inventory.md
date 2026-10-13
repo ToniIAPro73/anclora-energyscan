@@ -1,6 +1,6 @@
 # ES-0.2 — Inventario de flujo, proveedores y retención
 
-**Actualizado:** 2026-10-14 · **Código revisado:** `30c44e9fcd24893bc96321fa75c1e6ea643c3d55` · **Estado:** las formas de Blob desconocidas se reportan como clase `d` y nunca se borran; simulación real pendiente de Toni.
+**Actualizado:** 2026-10-14 · **Código revisado:** `b613ffc623d474aba920baa9baf16ee115eb808d` · **Estado:** se permite purga acotada solo para la forma legada exacta, con comprobación de referencias antes de borrar; dry-run real pendiente de Toni.
 
 ## Decisiones firmes de Toni
 
@@ -256,3 +256,11 @@ Código: `30c44e9fcd24893bc96321fa75c1e6ea643c3d55`; gates en [`gates.md`](gates
 El reporte añade histograma de forma sin datos de ruta: raíz permitida y categorías de segmentos (`uuid-v4`, `other-uuid`, `cuid`, `numeric`, `text-short`, `text-long`, `file`), número de segmentos, recuento, bytes y franja de edad. Los nombres y extensiones de los archivos no se conservan en el reporte. Objetos fuera del prefijo solicitado se ignoran; referenciados no se borran; solo huérfanos reconocidos con más de 30 días siguen siendo candidatos.
 
 Tests sintéticos cubren forma antigua desconocida y forma reconocida en la misma ejecución `--apply`, acceso fuera de prefijo y filtrado del histograma. No se ejecutó simulación contra Blob real ni borrado real. Toni revisará los recuentos/histogramas reales antes de decidir si amplía la regla en una fase posterior.
+
+## Forma legada exacta de assessment-drafts (2026-10-14)
+
+Código: `b613ffc623d474aba920baa9baf16ee115eb808d`; gates en [`gates.md`](gates.md). Se reconoce únicamente `assessment-drafts/{uuid-v4}/{file}` con tres segmentos exactos, UUID v4 válido, archivo no vacío y sin `..` ni barras. Cualquier forma distinta sigue en clase `d` y nunca se borra.
+
+Los legados con referencias se cuentan como `a-legacy`; huérfanos mayores de 30 días como `b`; huérfanos de 30 días o menos como `c`. Los legados se desglosan en el informe por franja, referencia/huérfano y bytes. Se mantiene la búsqueda inicial de `findReferencedPaths` con variantes sin y con prefijo `blob:`; con `--apply`, se repite para cada candidato inmediatamente antes de borrarlo. Si aparece una referencia, se omite la eliminación y se registra `skipped_referenced`.
+
+El lote predeterminado sigue en 100 y la primera ejecución real de Toni se hará con `--batch-limit 5`. Pruebas con dobles cubren referencias, 31/29 días, formas de 2/5 segmentos y UUID inválido, ruta fuera de prefijo, recheck y salida sin rutas/nombres. No se ejecutó `--apply` ni se usó el token real. Toni revisará primero el dry-run y decidirá si procede borrar.

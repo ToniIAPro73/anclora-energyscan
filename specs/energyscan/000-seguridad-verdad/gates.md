@@ -225,3 +225,19 @@ La etiqueta obsoleta `DB_CONNECT` se debía a la comprobación `instanceof BlobP
 | Blob real / `--apply` | NOT_RUN | Toni revisará antes el dry-run y el histograma |
 
 Los formatos desconocidos ya no abortan la ejecución. La salida muestra histogramas por forma anonimizada, número de segmentos, categoría de segmento, recuento, bytes y franja de edad; no incorpora rutas, IDs, nombres ni extensiones. El conjunto de borrado conserva la regla: solo forma reconocida, huérfana y con más de 30 días. Toni decidirá tras revisar la simulación real si se cambia esa regla en una fase posterior.
+
+### ES-0.2 — purga acotada de forma legada (código `b613ffc623d474aba920baa9baf16ee115eb808d`)
+
+| Gate/comprobación | Resultado | Evidencia |
+|---|---|---|
+| Lint | PASS | `npm run lint` |
+| Typecheck | PASS | `npx tsc --noEmit` |
+| Tests | PASS; 79 suites / 526 tests | `npm test -- --runInBand`; referencias, retención, formas inválidas, anonimización y recheck |
+| Build | PASS | `npm run build` |
+| Legado exacto referenciado | PASS | clase `a-legacy`, sin borrado |
+| Legado huérfano >30 días | PASS con dobles | candidato `b`; límite 5 y recheck antes de borrar |
+| Legado huérfano de 29 días | PASS | clase `c`, conservado |
+| Formas inválidas y prefijo ajeno | PASS | clase `d`/ignorado; sin borrado |
+| Blob real / `--apply` | NOT_RUN | Toni hará primero simulación con token real y `--batch-limit 5` |
+
+La forma elegible añadida se limita a `assessment-drafts/{uuid-v4}/{file}` con exactamente tres segmentos, UUID v4, nombre no vacío y sin `..` ni barras. Se vuelve a consultar `findReferencedPaths` con y sin `blob:` inmediatamente antes del borrado. Una referencia aparecida durante la ejecución cancela el borrado, actualiza la matriz a `a-legacy` y suma `skipped_referenced`. El informe incluye referencias/huérfanos legados por edad sin exponer rutas ni nombres. Ninguna otra forma `d` se hace elegible.
