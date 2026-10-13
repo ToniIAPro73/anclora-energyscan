@@ -1,57 +1,55 @@
-# Checklist de validación — corrección de arranque del purgador CLI
+# Checklist de validación — diagnóstico seguro del purgador Blob
 
 > Este fichero se sobrescribe en cada entrega. El historial queda en Git.
 
-**Repositorio:** anclora-energyscan
-
 **Rama:** `development`
 
-**SHA de código validado:** `3067c3e30584c72cf7c675003d2c059f825b48c9`
+**SHA del código validado:** `9a53e1a99ae094360db87c5e89164d59d94e1353`
 
-**Entorno:** sin credenciales reales; variables de Blob y DB ausentes o sintéticas.
+**Datos/entorno:** pruebas con dobles y centinelas sintéticos. La repetición de la simulación real la hará Toni; no se usaron credenciales reales ni se llamó a Blob/Neon.
 
 ## 1. Qué cambió
 
-- Sustituí imports `@/` por relativos en la cadena compartida `prisma.ts` / `assessment-data-deletion.ts`, que cargan el CLI de purga y el teardown QA.
-- Quité `tsconfig-paths/register` y la dependencia directa añadida para ello. El `tsconfig` de Next no se modificó.
-- El CLI informa `Required storage configuration is unavailable.` al faltar token Blob o URL DB y termina con código 1 antes de llamar a proveedores.
-- Añadí una prueba de regresión que ejecuta el CLI sin variables de almacenamiento y verifica que llega a esa guarda, además de un smoke de carga del teardown.
+- El diagnóstico del purgador identifica `DB_CONNECT`, `BLOB_LIST`, `DB_CLASSIFY` o `DELETE` (y etapas generales de configuración/purga).
+- La salida de fallo contiene únicamente etapa, clase segura, código corto/propio y estado HTTP numérico si existe. No incluye mensajes/cause, rutas, nombres, IDs, tokens ni cadenas de conexión.
+- Se mapean rechazos de credenciales, timeout, SSL y esquema ausente a códigos `ERR_*`. Fallos parciales de borrado siguen con el siguiente objeto y emiten diagnósticos sanitizados.
+- El CLI sin variables de almacenamiento conserva su guarda exacta, previa a cualquier conexión.
 
-## 2. Gates completos, ejecutados en secuencia
+## 2. Gates finales ejecutados secuencialmente
 
 | Gate | Comando | Resultado | SHA |
 |---|---|---|---|
-| Lint | `npm run lint` | PASS | `3067c3e30584c72cf7c675003d2c059f825b48c9` |
-| Typecheck | `npx tsc --noEmit` | PASS | `3067c3e30584c72cf7c675003d2c059f825b48c9` |
-| Suite completa | `npm test -- --runInBand` | PASS; 78 suites / 501 tests | `3067c3e30584c72cf7c675003d2c059f825b48c9` |
-| Build | `npm run build` | PASS; dos advertencias existentes de compresión `jose` para Edge Runtime | `3067c3e30584c72cf7c675003d2c059f825b48c9` |
-| Diff | `git diff --check` | PASS antes del commit | `3067c3e30584c72cf7c675003d2c059f825b48c9` |
+| Lint | `npm run lint` | PASS | `9a53e1a99ae094360db87c5e89164d59d94e1353` |
+| Typecheck | `npx tsc --noEmit` | PASS | `9a53e1a99ae094360db87c5e89164d59d94e1353` |
+| Suite completa | `npm test -- --runInBand` | PASS; 79 suites / 509 tests | `9a53e1a99ae094360db87c5e89164d59d94e1353` |
+| Build | `npm run build` | PASS; dos advertencias conocidas de `jose` para Edge Runtime | `9a53e1a99ae094360db87c5e89164d59d94e1353` |
+| Diff | `git diff --check` | PASS antes del commit de código | `9a53e1a99ae094360db87c5e89164d59d94e1353` |
 
-Durante los gates, un primer typecheck encontró una anotación de test demasiado estrecha; se corrigió antes de ejecutar el paquete final. La suite final pasó.
+El repositorio no define un script npm `typecheck`; se ejecutó `npx tsc --noEmit` en su lugar. No hubo fallos en el paquete final. El build ejecuta además su validación interna de lint y tipos.
 
-## 3. Pruebas focalizadas y smoke checks
+## 3. Pruebas y comprobaciones
 
 | Caso | Resultado |
 |---|---|
-| Pruebas focalizadas de purgador, borrado y arranque | PASS; 3 suites / 12 tests |
-| Regresión de CLI sin variables de Blob/DB | PASS; una segunda prueba de la suite confirma teardown carga sin `MODULE_NOT_FOUND` |
-| `env -u BLOB_READ_WRITE_TOKEN -u DATABASE_URL npm run blob:purge-assessment-orphans` | Código 1 esperado; salida `Required storage configuration is unavailable.`; no `MODULE_NOT_FOUND` |
-| Módulos compartidos de bootstrap (`prisma` y `password`) | PASS al cargarlos sin variables; no se ejecutó el bootstrap ni se modificó identidad QA |
-| Conexión a Blob/Neon y borrado real | No ejecutados; no se usaron credenciales reales |
-| QA visual | NOT_RUN; el cambio solo corrige el arranque de un CLI y no modifica interfaz |
+| Dobles por `DB_CONNECT`, `BLOB_LIST`, `DB_CLASSIFY` y `DELETE` | PASS; etapa y clase presentes |
+| Centinelas de token y ruta en errores sintéticos | PASS; ausentes de toda salida de diagnóstico |
+| Mapeo de credenciales, timeout, SSL y esquema | PASS; códigos propios seguros |
+| Fallo parcial de borrado | PASS; el lote continúa y conserva contadores |
+| CLI con variables de Blob/DB ausentes | PASS de arranque; código 1 esperado y salida `Required storage configuration is unavailable.`; sin `MODULE_NOT_FOUND` |
+| Simulación real del almacén | NOT_RUN por petición de Toni; la repetirá él y compartirá el diagnóstico seguro |
+| `--apply` / borrado real | NOT_RUN; no se ejecutó |
+| QA visual | NOT_RUN; cambio CLI/backend sin cambios de interfaz |
 
-## 4. Scripts revisados
+## 4. Hipótesis a validar en la siguiente simulación
 
-| Script | Relación con alias anterior | Resultado |
-|---|---|---|
-| `blob:purge-assessment-orphans` | `prisma` → `safe-logger` | Arranca y llega a la guarda de configuración |
-| `qa:teardown` | `assessment-data-deletion` → `prisma` / `blob-storage` | Importa los módulos; sin argumentos falla cerrado antes de consulta o borrado |
-| `qa:bootstrap-local-credentials` | `prisma` / `password` | La cadena compartida carga; no se ejecutó el bootstrap que crea o rota la identidad |
-| Migración, seed y reset | Sin imports en esa cadena aliased | Sin el mismo problema identificado |
+- `mode: 'expanded'` controla la forma de respuesta de Blob `list()`; no selecciona acceso public/private. El token debe pertenecer al almacén correcto y tener autorización de lectura/listado. La etapa `BLOB_LIST` separará esta causa.
+- No se inspeccionó el valor de `DATABASE_URL`. El contrato declara Neon compartido; destino efectivo, conectividad y esquema quedan sin verificar. `DB_CONNECT` y `DB_CLASSIFY` distinguirán conectividad de esquema.
+- Prisma se construye con `PrismaPg` y `Pool`; el runtime ahora hace `$connect()` explícito fuera de Next. No hay evidencia estática de adaptador ausente; la conexión real no se probó.
 
-## 5. Acciones manuales para Toni
+## 5. Acción manual para Toni
 
-1. Ejecutar la simulación real con el token Blob de Preview, como estaba previsto. Revisar los recuentos y tamaños antes de tomar cualquier decisión.
-2. No usar `--apply` hasta revisar la simulación; no se ha realizado ningún borrado real.
+1. Ejecutar la simulación con las variables de Preview, sin `--apply`.
+2. Compartir solo `stage`, clase, código y HTTP status que reporte el CLI. No compartir token, mensaje original, rutas ni IDs.
+3. Revisar el resultado de la simulación antes de considerar cualquier limpieza real.
 
-No se promociona este cambio.
+No se promociona.

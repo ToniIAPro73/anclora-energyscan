@@ -88,6 +88,19 @@ La corrección reemplaza los alias `@/` de la cadena CLI/Prisma por imports rela
 
 La simulación real de Blob sigue pendiente para Toni, quien ejecutará el CLI desde un entorno con el token Preview disponible. No se ejecutó `--apply` ni se promocionó.
 
+### ES-0.2 — diagnóstico seguro del purgador CLI (código `9a53e1a99ae094360db87c5e89164d59d94e1353`)
+
+| Gate/comprobación | Resultado | Evidencia |
+|---|---|---|
+| Lint | PASS | `npm run lint`, sin warnings ni errores |
+| Typecheck | PASS | `npx tsc --noEmit` |
+| Tests | PASS; 79 suites / 509 tests | `npm test -- --runInBand`; nuevos dobles por DB_CONNECT/BLOB_LIST/DB_CLASSIFY/DELETE, mapeo de errores y centinelas sin salida |
+| Build | PASS | `npm run build`; dos advertencias conocidas de `jose` en Edge Runtime |
+| CLI sin secretos | PASS de arranque; exit 1 intencional | Variables de Blob/DB ausentes; salida exacta `Required storage configuration is unavailable.`; no `MODULE_NOT_FOUND` |
+| `git diff --check` | PASS antes del commit | Sin errores de whitespace |
+
+La simulación real no se ejecutó en esta tarea. La etapa que falló en la ejecución de Toni anterior aún no es conocida; el próximo intento comunicará únicamente etapa, clase, código propio/corto y estado HTTP, sin el mensaje crudo. No se tocó el almacén y no se ejecutó `--apply`.
+
 El inventario [`es-0.2-data-flow-inventory.md`](es-0.2-data-flow-inventory.md) incluye las formas de clave, clasificación, salidas agregadas y alternativas de programación. No se modificó ni creó configuración en `.anclora/`. La simulación real queda como acción pendiente: Toni debe habilitar una forma segura para que el CLI reciba el token del entorno Preview y revisar sus recuentos antes de decidir si se ejecuta `--apply`. No se programó la purga.
 
 - Visual: `anclora-visual-qa doctor`, `anclora-visual-qa check http://127.0.0.1:3000/wizard`, navegación `agent-browser` hasta el paso de adjuntos, fixture PNG sintético, envío sin sesión y captura del estado de denegación — PASS. Captura local: `/tmp/es01-upload-unauth-final.png`. La sesión local de Auth.js devolvió `500` por `Invalid URL` con el valor redactado; se observó el modo cerrado y la UI pidió iniciar sesión. No se ejercitó una sesión autenticada real ni se conectó a Neon/Blob.

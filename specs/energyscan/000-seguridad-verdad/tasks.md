@@ -39,6 +39,8 @@
 
 **Corrección de arranque CLI (código `3067c3e30584c72cf7c675003d2c059f825b48c9`):** imports relativos en la cadena compartida de Prisma/borrado; eliminado `tsconfig-paths/register` sin `baseUrl`. Arranque sin variables probado hasta el mensaje de configuración esperado; `qa:teardown` cargó módulos y falló cerrado con argumentos ausentes. Gates completos: PASS (78 suites/501 tests). La simulación real queda para Toni.
 
+**Diagnóstico de errores CLI (código `9a53e1a99ae094360db87c5e89164d59d94e1353`):** se añadieron etapas y códigos sanitizados sin registrar mensajes, rutas ni credenciales. Gates completos: PASS (79 suites/509 tests). La hipótesis de causa y los límites de verificación están en el inventario; Toni repetirá la simulación real.
+
 ## ES-0.3 — Claims, CEE y estimación (P0)
 
 **Objetivo:** que interfaz, informes y estimaciones sean trazables y no aparenten certificación. **Reuso:** `src/lib/evidence/evidence-matrix.ts`, `scoring.ts`, `budget-review/service.ts`, `advanced-analysis.ts`, `costs/`, `pdf/`, locales. Revisar ES/EN/DE y locales CA/FR/IT/PT, PDFs, manual, SEO, emails y páginas legales dentro del alcance.

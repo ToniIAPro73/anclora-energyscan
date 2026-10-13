@@ -1,6 +1,6 @@
 # ES-0.2 — Inventario de flujo, proveedores y retención
 
-**Actualizado:** 2026-10-13 · **Código revisado:** `3067c3e30584c72cf7c675003d2c059f825b48c9` · **Estado:** arranque del CLI corregido y gates PASS; simulación contra Blob Preview sigue pendiente porque Toni la ejecutará con acceso a su entorno. Sin borrados reales en este cambio.
+**Actualizado:** 2026-10-13 · **Código revisado:** `9a53e1a99ae094360db87c5e89164d59d94e1353` · **Estado:** diagnóstico sanitizado por etapas implementado y gates PASS; Toni repetirá la simulación real. Sin acceso a producción ni borrados reales en este cambio.
 
 ## Decisiones firmes de Toni
 
@@ -208,3 +208,17 @@ El primer arranque añadió `tsconfig-paths/register`, pero el `tsconfig.json` n
 La cadena compartida afectaba tres CLIs: `blob:purge-assessment-orphans` (purge runtime → Prisma), `qa:teardown` (assessment deletion → Prisma/blob storage) y `qa:bootstrap-local-credentials` (Prisma/password). Los imports relativos corrigen la resolución en las tres. `qa:teardown` se inició con una URL sintética no enrutable y argumentos ausentes; cargó los módulos y falló de forma cerrada antes de consultar la base. El módulo compartido de Prisma/password del bootstrap se cargó con configuración vacía; no se ejecutó el bootstrap contra DB porque crea o rota la identidad QA. La inspección de `scripts/` y `prisma/` no encontró otros imports `@/` directos; los scripts de migración, seed y reset no usan la cadena afectada.
 
 Comprobación requerida del CLI: `env -u BLOB_READ_WRITE_TOKEN -u DATABASE_URL npm run blob:purge-assessment-orphans` terminó con código 1 y el mensaje exacto `Required storage configuration is unavailable.`; no mostró `MODULE_NOT_FOUND`, y no pudo contactar Blob ni Neon. Prueba automatizada en `tests/blob-purge-cli-startup.test.ts` verifica esa guarda y el arranque de la cadena de teardown con datos sintéticos.
+
+## Diagnóstico sanitizado de fallos (código `9a53e1a99ae094360db87c5e89164d59d94e1353`)
+
+El CLI y runtime distinguen `DB_CONNECT`, `BLOB_LIST`, `DB_CLASSIFY` y `DELETE` (`CONFIGURATION`/`PURGE` cubren inicialización/configuración y errores generales). Un fallo imprime solo etapa, clase de error, código propio o corto y estado HTTP numérico si existe. Nunca imprime `message`, `cause`, ruta, ID, conexión o token. Los fallos individuales de borrado continúan el lote y emiten el diagnóstico sanitizado junto con contadores.
+
+El clasificador mapea credenciales Blob a `ERR_BLOB_AUTH`, credenciales DB a `ERR_DB_AUTH`, timeout a `ERR_BLOB_TIMEOUT`/`ERR_DB_TIMEOUT`, SSL a `ERR_BLOB_SSL`/`ERR_DB_SSL` y tabla/columna ausente a `ERR_DB_SCHEMA`; si existe, se incluye también `http_status`. Pruebas con dobles cubren cada etapa y errores con centinelas sintéticos, además de esos mapeos.
+
+### Hipótesis sobre el fallo observado por Toni
+
+- **Modo de acceso Blob:** es una hipótesis menos probable. El `mode: 'expanded'` de `list()` define el formato de la respuesta (lista expandida frente a carpetas agrupadas), no el acceso public/private. El acceso lo determina el tipo de almacén y la operación usa su token read-write; token de otro almacén, scope o variable equivocada sí puede causar rechazo. [SDK Blob](https://vercel.com/docs/vercel-blob/using-blob-sdk), [seguridad de Blob privado](https://vercel.com/docs/vercel-blob/security).
+- **`DATABASE_URL` de Preview/development:** no se inspeccionó ni validó el destino por no usar credenciales reales. El contrato y la configuración declarada dicen que Neon es la base compartida con Production; el valor efectivo, accesibilidad, esquema y permisos quedan sin verificar. Un problema de conectividad aparecerá como `DB_CONNECT`; tabla/columna incompatible, como `DB_CLASSIFY` / `ERR_DB_SCHEMA`.
+- **Prisma fuera de Next:** el cliente del repo crea `PrismaPg(new Pool({ connectionString }))` y `PrismaClient({ adapter })`; el nuevo `DB_CONNECT` llama explícitamente a `$connect()` antes de listar Blob. Prisma documenta el mismo adaptador `@prisma/adapter-pg` para ejecutar scripts Node. No hay evidencia estática de adaptador ausente; la conexión real no se probó. [Prisma ORM 7 PostgreSQL](https://www.prisma.io/docs/orm/v7/core-concepts/supported-databases/postgresql).
+
+La causa concreta sigue pendiente: Toni ejecutará otra simulación y compartirá etapa/clase/código/estado, sin token ni mensaje original.
