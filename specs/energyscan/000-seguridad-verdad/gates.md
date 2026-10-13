@@ -196,3 +196,17 @@ La falla histórica de DB_CONNECT no se reprodujo en la sesión actual. Se confi
 | Blob real / borrado / migración | NOT_RUN | Sin credenciales reales, Blob I/O o mutación DB |
 
 El código ahora comparte la rutina de preflight y añade subetapas; el test confirma mismo orden de lecturas. El probe confirma que existen `AssessmentAttachment` y `path`, por lo que no se observó el desajuste de esquema propuesto. La causa raíz de que full falle en DB_CONNECT mientras check-only pasa sigue sin resolverse; `ERR_DB_PREFLIGHT` es el fallback seguro, no una explicación del fallo. No cambiar/migrar la base. Toni repetirá la simulación completa y enviará solo el diagnóstico permitido.
+
+### ES-0.2 — etapa de fallo y traza segura (código `921214ba26843fc92e14daff08c90ff2c4b622a1`)
+
+| Gate/comprobación | Resultado | Evidencia |
+|---|---|---|
+| Lint | PASS | `npm run lint` |
+| Typecheck | PASS | `npx tsc --noEmit` |
+| Tests | PASS; 79 suites / 521 tests | `npm test -- --runInBand`; traza sanitizada y rechazo Blob cubiertos |
+| Build | PASS | `npm run build` |
+| Full con token Blob sintético | FAIL esperado en `BLOB_LIST / ERR_BLOB_AUTH` | `vc env run`; consultas DB completadas; no se usó `--apply` |
+| Traza de fallo | PASS | Handler de listado en `src/lib/orphaned-assessment-blob-purge-runtime.ts:116`; mensajes, absolutos y `node_modules` excluidos |
+| Blob real / `--apply` | NOT_RUN | Sin credencial real ni mutaciones |
+
+La etiqueta obsoleta `DB_CONNECT` se debía a la comprobación `instanceof BlobPurgeStageError`: el CLI ejecutado por ts-node no reconocía de forma fiable el error envuelto y el catch exterior reutilizaba la última etapa externa. La guarda estructural conserva el diagnóstico original. El preflight actualiza expresamente `DB_CONNECT` y `DB_QUERY`; el runtime avanza a `BLOB_LIST`, `CLASSIFY` y `DELETE`. La pila filtrada localizó el handler de listado (línea 116). El SDK rechazó el token sintético como acceso denegado, ahora mapeado a `ERR_BLOB_AUTH`. No se modificó la DB ni se usó Blob real.

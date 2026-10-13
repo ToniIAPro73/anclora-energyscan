@@ -1,6 +1,6 @@
 # ES-0.2 — Inventario de flujo, proveedores y retención
 
-**Actualizado:** 2026-10-14 · **Código revisado:** `276fe20d25bdadc9dda02396e2e4d6db676057e7` · **Estado:** preflight DB compartido; check-db PASS, ejecución full sintética sigue en ERR_DB_PREFLIGHT. Sin acceso a Blob ni borrados.
+**Actualizado:** 2026-10-14 · **Código revisado:** `921214ba26843fc92e14daff08c90ff2c4b622a1` · **Estado:** ejecución full sintética supera DB y llega a BLOB_LIST; rechazo esperado del token falso como `ERR_BLOB_AUTH`. Sin Blob real ni borrados.
 
 ## Decisiones firmes de Toni
 
@@ -221,7 +221,15 @@ El clasificador mapea credenciales Blob a `ERR_BLOB_AUTH`, credenciales DB a `ER
 - **`DATABASE_URL` de Preview/development:** no se inspeccionó ni validó el destino por no usar credenciales reales. El contrato y la configuración declarada dicen que Neon es la base compartida con Production; el valor efectivo, accesibilidad, esquema y permisos quedan sin verificar. Un problema de conectividad aparecerá como `DB_CONNECT`; tabla/columna incompatible, como `DB_CLASSIFY` / `ERR_DB_SCHEMA`.
 - **Prisma fuera de Next:** el cliente del repo crea `PrismaPg(new Pool({ connectionString }))` y `PrismaClient({ adapter })`; el nuevo `DB_CONNECT` llama explícitamente a `$connect()` antes de listar Blob. Prisma documenta el mismo adaptador `@prisma/adapter-pg` para ejecutar scripts Node. No hay evidencia estática de adaptador ausente; la conexión real no se probó. [Prisma ORM 7 PostgreSQL](https://www.prisma.io/docs/orm/v7/core-concepts/supported-databases/postgresql).
 
-La causa concreta sigue pendiente: Toni ejecutará otra simulación y compartirá etapa/clase/código/estado, sin token ni mensaje original.
+La causa concreta seguía pendiente en el resultado anterior; la reproducción posterior y su corrección constan en «Reproducción y corrección de etapa stale» abajo.
+
+## Reproducción y corrección de etapa stale (2026-10-14)
+
+Código: `921214ba26843fc92e14daff08c90ff2c4b622a1`; gates en [`gates.md`](gates.md). La ejecución full con token sintético avanzó por el preflight DB y falló en `BLOB_LIST` con `ERR_BLOB_AUTH`. El marco permitido señaló el handler de listado de `src/lib/orphaned-assessment-blob-purge-runtime.ts`, línea 116. El SDK rechazó el token falso; no hubo listado válido ni borrado.
+
+La etapa anterior se conservaba mal porque la comprobación `instanceof BlobPurgeStageError` no identificaba de forma fiable el error de la ruta CLI bajo ts-node. El catch exterior envolvía el fallo otra vez con su última etapa, `DB_CONNECT`. Se sustituyó por una guarda estructural y el preflight comunica sus transiciones; las etapas ahora son `DB_CONNECT`, `DB_QUERY`, `BLOB_LIST`, `CLASSIFY` y `DELETE`. El clasificador reconoce `BlobAccessError`/acceso denegado como `ERR_BLOB_AUTH`.
+
+El diagnóstico añade como máximo tres marcos normalizados del proyecto. Solo imprime ruta relativa bajo `src/` o `scripts/`, función y línea; excluye mensajes, rutas absolutas, `node_modules` y otros marcos. Tests sintéticos comprueban el filtrado y que centinelas no llegan a salida. No se usó token real, no se ejecutó `--apply` y no se modificó la base. Toni repetirá la simulación real y revisará los recuentos antes de decidir si autoriza el borrado.
 
 
 ## Diagnóstico DB_CONNECT y comprobación solo lectura (2026-10-14)

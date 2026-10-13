@@ -1,53 +1,48 @@
-# Checklist de validación — preflight DB del purgador Blob
+# Checklist de validación — diagnóstico de purga Blob
 
 > Este fichero se sobrescribe en cada entrega. El historial queda en Git.
 
 **Rama:** `development`
 
-**SHA del código validado:** `276fe20d25bdadc9dda02396e2e4d6db676057e7`
+**SHA del código validado:** `921214ba26843fc92e14daff08c90ff2c4b622a1`
 
-**Datos/entorno:** comprobaciones DB de solo lectura con la configuración Vercel vigente. La ejecución completa usó exclusivamente un token Blob sintético forzado en el proceso hijo; no se usó token real, no se alcanzó Blob y no hubo borrados.
+**Datos/entorno:** base Neon consultada en modo lectura mediante `vc env run`; token Blob exclusivamente sintético. Sin `--apply`, sin borrados y sin cambios de esquema.
 
 ## 1. Qué cambió
 
-- `--check-db` y la ejecución completa comparten ahora el mismo runtime y preflight: validación de lote, `$connect()`, `SELECT 1` y comprobación sin filas de `AssessmentAttachment.path`.
-- El check no requiere token Blob. El preflight verifica la tabla y columna necesarias antes de intentar listar Blob.
-- Los diagnósticos aceptan solo clases/códigos permitidos, incluidos `errorCode` de Prisma, y clasifican mensajes genéricos por patrones seguros. Nunca imprimen el mensaje original.
-- La etapa DB se divide en `DB_CONNECT`, `DB_QUERY` y `DB_SCHEMA_CHECK` para localizar el subpaso que falla.
+- El diagnóstico incluye hasta tres marcos del proyecto normalizados a rutas relativas, función y línea. Descarta mensajes, rutas absolutas, `node_modules` y marcos que no correspondan a `src/` o `scripts/`.
+- La detección de errores de etapa usa una guarda estructural para conservar la etapa original en el CLI compilado por ts-node.
+- Las etiquetas avanzan por `DB_CONNECT`, `DB_QUERY`, `BLOB_LIST`, `CLASSIFY` y `DELETE`. Las consultas de preflight (SELECT trivial y comprobación de esquema) quedan bajo `DB_QUERY`.
+- Se reconoce el rechazo de credenciales de Vercel Blob (`BlobAccessError` / “access denied”) como `ERR_BLOB_AUTH` sin imprimir el mensaje.
 
 ## 2. Gates finales ejecutados secuencialmente
 
 | Gate | Comando | Resultado | SHA |
 |---|---|---|---|
-| Lint | `npm run lint` | PASS | `276fe20d25bdadc9dda02396e2e4d6db676057e7` |
-| Typecheck | `npx tsc --noEmit` | PASS | `276fe20d25bdadc9dda02396e2e4d6db676057e7` |
-| Suite completa | `npm test -- --runInBand` | PASS; 79 suites / 519 tests | `276fe20d25bdadc9dda02396e2e4d6db676057e7` |
-| Build | `npm run build` | PASS | `276fe20d25bdadc9dda02396e2e4d6db676057e7` |
-| Diff | `git diff --check` | PASS antes del commit | `276fe20d25bdadc9dda02396e2e4d6db676057e7` |
+| Lint | `npm run lint` | PASS | `921214ba26843fc92e14daff08c90ff2c4b622a1` |
+| Typecheck | `npx tsc --noEmit` | PASS | `921214ba26843fc92e14daff08c90ff2c4b622a1` |
+| Suite completa | `npm test -- --runInBand` | PASS; 79 suites / 521 tests | `921214ba26843fc92e14daff08c90ff2c4b622a1` |
+| Build | `npm run build` | PASS | `921214ba26843fc92e14daff08c90ff2c4b622a1` |
+| Diff | `git diff --check` | PASS antes del commit | `921214ba26843fc92e14daff08c90ff2c4b622a1` |
 
-No existe script npm `typecheck`; se ejecutó `npx tsc --noEmit`. Los gates se ejecutaron una sola vez y en secuencia. Los tests focales previos pasaron (20 tests).
+No existe script npm `typecheck`; se ejecutó `npx tsc --noEmit`. Gates ejecutados una vez y en secuencia. Test focal previo: 1 suite / 19 tests PASS.
 
-## 3. Reproducción y comprobaciones DB
+## 3. Reproducción sintética
 
 | Caso | Resultado |
 |---|---|
-| `vc env run` con `--check-db` y token Blob sintético | PASS; conexión, `SELECT 1` y probe de tabla/columna completados |
-| Ejecución completa en la misma sesión, token Blob sintético, sin `--apply` | FAIL reproducible en `DB_CONNECT`; salida segura `error_class=Error code=ERR_DB_PREFLIGHT`; no llegó a Blob |
-| Orden check y ejecución completa en una sesión `vc env run` | `--check-db` PASS seguido de ejecución completa FAIL en `DB_CONNECT / ERR_DB_PREFLIGHT` |
-| Probe de esquema `AssessmentAttachment.path` | PASS con la configuración vigente; no hay evidencia de desajuste de tabla/columna |
-| Queries/diagnósticos con dobles y centinelas | PASS; check y full usan connect/query/schema en el mismo orden; contenido sensible no aparece |
-| Blob real, `--apply`, migración | NOT_RUN; no se usó Blob real ni se modificó la base |
+| Ejecución completa con token sintético inválido mediante `vc env run`, sin `--apply` | FAIL esperado en `BLOB_LIST`, `ERR_BLOB_AUTH`; exit 1 |
+| Línea de proyecto en el diagnóstico | `src/lib/orphaned-assessment-blob-purge-runtime.ts`, handler de listado, línea 116 |
+| Prueba de filtrado de pila | PASS; conserva como máximo 3 marcos de proyecto y excluye centinelas, rutas absolutas, rutas privadas y `node_modules` |
+| Pruebas de doble para `CLASSIFY`, `DELETE`, preflight y acceso Blob | PASS |
+| Token Blob real, simulación real, `--apply`, migración | NOT_RUN; Toni ejecutará su propia simulación con credencial real |
 
-## 4. Causa y límites
+La causa del diagnóstico obsoleto era `instanceof BlobPurgeStageError`, que no reconocía de forma fiable el error compilado por el CLI y hacía que el catch exterior reutilizara `DB_CONNECT`. La guarda estructural mantiene la etapa original. El rechazo sintético del SDK ocurre durante `list`; el código seguro `ERR_BLOB_AUTH` se deriva de su error de acceso denegado.
 
-La diferencia de flujo entre `--check-db` y full se corrigió: ambos llaman al mismo código de preflight con el mismo límite configurado y las mismas consultas. Aun así, la ejecución completa vuelve a fallar en DB_CONNECT con un `Error` genérico sin código/cause permitido, mientras el check-db pasa. El mapeo seguro lo clasifica como `ERR_DB_PREFLIGHT`, pero la causa raíz de esa diferencia **sigue sin identificarse**.
+## 4. Acciones manuales para Toni
 
-El probe confirma que la conexión SQL vigente funciona y que existen la tabla `AssessmentAttachment` y la columna `path`. No se cambió ni migró la base. Tampoco hay evidencia para atribuir el fallo a Prisma 7, Next, SSL, URL, autenticación o timeout. La próxima ejecución de Toni con su token real debe compartir solo etapa, clase y código seguro; si sigue en DB_CONNECT, este SHA permitirá separar `DB_CONNECT`, `DB_QUERY` y `DB_SCHEMA_CHECK`.
+1. Repetir la simulación real sin `--apply` con el token Blob del entorno previsto y revisar solo recuentos/bytes.
+2. Confirmar que el diagnóstico se limita a etapa, clase/código/estado y marcos relativos permitidos.
+3. Decidir y autorizar por separado cualquier ejecución `--apply` tras revisar el dry-run.
 
-## 5. Acción manual para Toni
-
-1. Repetir la simulación completa sin `--apply` con el token real desde el entorno previsto.
-2. Si falla, compartir solo etapa, clase permitida, código seguro y estado HTTP; no el mensaje, rutas, IDs ni credenciales.
-3. No ejecutar `--apply` hasta que la causa de `ERR_DB_PREFLIGHT` esté entendida y se revisen los recuentos.
-
-No se promociona ni se programa ninguna purga.
+No se programa ni promueve la purga.
