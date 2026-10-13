@@ -5,6 +5,7 @@ import { DocumentParserService } from '@/lib/document-parsing/service';
 import { parseCeeToCertificate } from '@/lib/ocr/cee-parser';
 import { certificateToPrismaCreate, fieldsToPrismaCreateMany } from '@/lib/ingestion/persistence';
 import { Prisma } from '@prisma/client';
+import { isOwnedAssessment } from '@/lib/assessment-authorization';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -17,6 +18,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     const body = await req.json();
     const attachmentId = typeof body.attachmentId === 'string' ? body.attachmentId : undefined;
     if (!attachmentId) return NextResponse.json({ error: 'attachmentId requerido' }, { status: 400 });
+    if (!await isOwnedAssessment(params.id)) return NextResponse.json({ error: 'Assessment not found' }, { status: 404 });
 
     const attachment = await prisma.assessmentAttachment.findFirst({
       where: { id: attachmentId, assessmentId: params.id },

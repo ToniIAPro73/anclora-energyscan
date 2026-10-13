@@ -26,6 +26,7 @@ export function AttachmentList({
 }) {
   const { dictionary: t } = usePreferences();
   const [attachments, setAttachments] = useState(initialAttachments);
+  const [deleteError, setDeleteError] = useState(false);
   const labels = {
     cee: t.cee,
     exterior: t.exteriorLabel,
@@ -35,9 +36,13 @@ export function AttachmentList({
   };
 
   async function removeAttachment(id: string) {
-    const response = await fetch(`/api/assessment/${assessmentId}/attachments/${id}`, { method: 'DELETE' });
-    if (response.ok) {
+    setDeleteError(false);
+    try {
+      const response = await fetch(`/api/assessment/${assessmentId}/attachments/${id}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Attachment deletion failed');
       setAttachments((items) => items.filter((item) => item.id !== id));
+    } catch {
+      setDeleteError(true);
     }
   }
 
@@ -47,6 +52,7 @@ export function AttachmentList({
 
   return (
     <div className="space-y-3">
+      {deleteError && <p role="alert" className="text-sm text-[#EF4444]">{t.attachmentDeleteError}</p>}
       {attachments.map((attachment) => (
         <div key={attachment.id} className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3 min-w-0">

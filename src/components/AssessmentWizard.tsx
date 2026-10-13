@@ -6,6 +6,8 @@ import type { FieldErrors } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 import dynamic from 'next/dynamic';
 import { upload } from '@vercel/blob/client';
 import { Bolt, Target, ShieldCheck, Building, UploadCloud, X, FileText, CheckCircle2, Info, Menu } from 'lucide-react';
@@ -105,6 +107,7 @@ export default function AssessmentWizard() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [fileError, setFileError] = useState<string | null>(null);
+  const { data: session, status: sessionStatus } = useSession();
   const [ceeImport, setCeeImport] = useState<ImportState<EnergyCertificateCEE>>({ status: 'idle', warnings: [] });
   const [ceeDetailsOpen, setCeeDetailsOpen] = useState(false);
   const [ceeAppliedNotice, setCeeAppliedNotice] = useState(false);
@@ -1087,7 +1090,7 @@ export default function AssessmentWizard() {
       const item = uploadItems[index];
       const file = item.file;
       const prefix = item.kind === 'source' ? `source-${item.category.toLowerCase()}` : 'photo';
-      const pathname = `assessment-drafts/${batchId}/${prefix}-${item.index + 1}-${sanitizeFilename(file.name)}`;
+      const pathname = `assessment-drafts/${session?.user?.id}/${batchId}/${prefix}-${item.index + 1}-${sanitizeFilename(file.name)}`;
       const blob = await upload(pathname, file, {
         access: 'private',
         handleUploadUrl: '/api/blob/upload',
@@ -1190,6 +1193,12 @@ export default function AssessmentWizard() {
     setFileError(null);
     setFormError(null);
     const sourceDocuments = getSourceDocuments();
+    if ((files.length > 0 || sourceDocuments.length > 0) && (sessionStatus !== 'authenticated' || !session?.user?.id)) {
+      setFileError('sign-in-required');
+      setIsSubmitting(false);
+      setUploadProgress(null);
+      return;
+    }
     setUploadProgress(files.length + sourceDocuments.length > 0 ? 0 : null);
 
     try {
@@ -1201,7 +1210,7 @@ export default function AssessmentWizard() {
           const { uploadedAttachments, uploadedSourceDocuments } = await uploadAttachments();
           response = await submitAssessmentJson(data, uploadedAttachments, uploadedSourceDocuments);
         } catch (uploadError) {
-          if (!canUseDirectUploadFallback()) throw uploadError;
+          if (!session?.user?.id || !canUseDirectUploadFallback()) throw uploadError;
           setUploadProgress(null);
           response = await submitAssessmentMultipart(data);
         }
@@ -1705,7 +1714,7 @@ export default function AssessmentWizard() {
                 <span className="text-xs text-muted">{t.attachmentsLimit}</span>
               </button>
               <p className="mt-2 text-[10px] text-[#7A7A7A] leading-relaxed">{t.attachmentsDisclaimer}</p>
-              {fileError && <p className="mt-3 text-xs text-[#EF4444]">{fileError}</p>}
+              {fileError && <p className="mt-3 text-xs text-[#EF4444]">{fileError === 'sign-in-required' ? <><Link href="/auth?callbackUrl=%2Fwizard" className="underline">{t.signIn}</Link> — {t.wizardAttachmentSignInRequired}</> : fileError}</p>}
               {uploadProgress !== null && files.length > 0 && (
                 <div className="mt-3 space-y-1">
                   <div className="h-2 overflow-hidden rounded-full bg-white/10">

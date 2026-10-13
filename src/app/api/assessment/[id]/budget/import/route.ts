@@ -5,6 +5,7 @@ import { DocumentParserService } from '@/lib/document-parsing/service';
 import { parseBudgetAnalysisText } from '@/lib/ocr/budget-parser';
 import { budgetToPrismaCreate } from '@/lib/ingestion/persistence';
 import type { EnergyLetter } from '@/lib/ingestion/types';
+import { getOwnedAssessment } from '@/lib/assessment-authorization';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -18,11 +19,13 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     const attachmentId = typeof body.attachmentId === 'string' ? body.attachmentId : undefined;
     if (!attachmentId) return NextResponse.json({ error: 'attachmentId requerido' }, { status: 400 });
 
-    const assessment = await prisma.assessment.findUnique({
-      where: { id: params.id },
+    const assessment = await getOwnedAssessment(params.id);
+    if (!assessment) return NextResponse.json({ error: 'Assessment not found' }, { status: 404 });
+    const assessmentWithCertificates = await prisma.assessment.findFirst({
+      where: { id: params.id, userId: assessment.userId },
       include: { energyCertificates: { orderBy: { createdAt: 'desc' }, take: 1 } },
     });
-    if (!assessment) return NextResponse.json({ error: 'Assessment not found' }, { status: 404 });
+    if (!assessmentWithCertificates) return NextResponse.json({ error: 'Assessment not found' }, { status: 404 });
 
     const attachment = await prisma.assessmentAttachment.findFirst({
       where: { id: attachmentId, assessmentId: params.id },
@@ -32,7 +35,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       return NextResponse.json({ error: 'El adjunto debe ser un PDF' }, { status: 400 });
     }
 
-    const currentCertificate = assessment.energyCertificates[0];
+    const currentCertificate = assessmentWithCertificates.energyCertificates[0];
     const { bytes } = await readAttachmentBytes(attachment.path);
     const bodyEngine = typeof body.engine === 'string' ? body.engine : 'auto';
     const parsedDocument = await parserService.parsePdf({
@@ -42,13 +45,13 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       engine: bodyEngine,
     });
     const budget = parseBudgetAnalysisText(parsedDocument.text || parsedDocument.markdown || '', {
-      currentLetter: (currentCertificate?.globalLetter || assessment.estimatedLetter) as EnergyLetter | undefined,
-      targetLetter: (body.targetLetter || assessment.targetLetter) as EnergyLetter | undefined,
+      currentLetter: (currentCertificate?.globalLetter || assessmentWithCertificates.estimatedLetter) as EnergyLetter | undefined,
+      targetLetter: (body.targetLetter || assessmentWithCertificates.targetLetter) as EnergyLetter | undefined,
       currentNonRenewableEP: currentCertificate?.nonRenewableEPKwhM2Year || undefined,
       currentEmissions: currentCertificate?.emissionsKgCO2M2Year || undefined,
-      usefulAreaM2: currentCertificate?.usefulAreaM2 || assessment.area,
-      propertyType: assessment.propertyType || undefined,
-      climateZone: currentCertificate?.climateZone || assessment.climateZone || undefined,
+      usefulAreaM2: currentCertificate?.usefulAreaM2 || assessmentWithCertificates.area,
+      propertyType: assessmentWithCertificates.propertyType || undefined,
+      climateZone: currentCertificate?.climateZone || assessmentWithCertificates.climateZone || undefined,
     });
     const created = await prisma.rehabBudget.create({
       data: budgetToPrismaCreate({ assessmentId: params.id, attachmentId, budget }),

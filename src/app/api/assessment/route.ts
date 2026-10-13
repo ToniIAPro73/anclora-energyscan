@@ -28,6 +28,7 @@ import { EnergyCertificateCEE, RehabBudgetAnalysis } from '@/lib/ingestion/types
 import { budgetToPrismaCreate, certificateToPrismaCreate, fieldsToPrismaCreateMany } from '@/lib/ingestion/persistence';
 import { Prisma } from '@prisma/client';
 import { trackEvent } from '@/lib/analytics';
+import { isOwnedDraftPath } from '@/lib/assessment-authorization';
 
 export const dynamic = 'force-dynamic';
 
@@ -201,7 +202,7 @@ function inferAttachmentCategory(file: { name: string; type: string }) {
   return 'OTHER';
 }
 
-async function persistAttachments(assessmentId: string, files: File[]) {
+async function persistAttachments(assessmentId: string, files: File[], storedPaths: string[]) {
   if (files.length === 0) return [];
   validateAttachmentMetadata(files);
 
@@ -210,6 +211,7 @@ async function persistAttachments(assessmentId: string, files: File[]) {
   const attachmentData = [];
   for (const file of files) {
     const stored = await saveAssessmentAttachment(assessmentId, file);
+    storedPaths.push(stored.path);
 
     attachmentData.push({
       assessmentId,
@@ -259,13 +261,14 @@ function persistUploadedAttachmentMetadata(assessmentId: string, uploadedAttachm
   }));
 }
 
-async function persistSourceDocumentFiles(assessmentId: string, sourceDocuments: SourceDocumentFile[]) {
+async function persistSourceDocumentFiles(assessmentId: string, sourceDocuments: SourceDocumentFile[], storedPaths: string[]) {
   validateSourceDocumentMetadata(sourceDocuments);
   const ocrStatus = process.env.ENABLE_OCR === 'true' ? 'pending' : 'skipped';
 
   const records = [];
   for (const source of sourceDocuments) {
     const stored = await saveAssessmentAttachment(assessmentId, source.file);
+    storedPaths.push(stored.path);
     const record = await prisma.assessmentAttachment.create({
       data: {
         assessmentId,
@@ -305,7 +308,12 @@ function serializeAttachment(file: { name: string; type: string; size: number })
 
 export async function POST(req: Request) {
   try {
-    const session = await auth().catch(() => null);
+    let session;
+    try {
+      session = await auth();
+    } catch {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
     const {
       rawData,
       files,
@@ -347,12 +355,37 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: attachmentError instanceof Error ? attachmentError.message : 'Documento fuente no válido' }, { status: 400 });
     }
 
+    const hasAttachments = files.length + sourceFiles.length + uploadedAttachments.length + uploadedSourceDocuments.length > 0;
+    const userId = session?.user?.id;
+    if (hasAttachments && !userId) {
+      return NextResponse.json({ error: 'Inicia sesión para adjuntar archivos' }, { status: 401 });
+    }
+    if (userId && [...uploadedAttachments, ...uploadedSourceDocuments].some((attachment) => !isOwnedDraftPath(attachment.pathname, userId))) {
+      return NextResponse.json({ error: 'Adjunto no autorizado' }, { status: 404 });
+    }
+
     let cadastralData = null;
     if (rawCadastralData) {
       const cadParse = CadastralMatchSchema.safeParse(rawCadastralData);
       if (cadParse.success) {
         cadastralData = cadParse.data;
       }
+    }
+
+    if (!userId) {
+      const payload = createStatelessPayload(data, { cadastralRecord: cadastralData || undefined });
+      return NextResponse.json({
+        id: createStatelessAssessmentId(payload),
+        estimatedLetter: payload.scoreResult.estimatedLetter,
+        confidence: payload.scoreResult.confidence,
+        score: payload.scoreResult.score,
+        climateZone: payload.scoreResult.climateZone,
+        penalties: payload.scoreResult.penalties,
+        strengths: payload.scoreResult.strengths,
+        missingData: payload.scoreResult.missingData,
+        stateless: true,
+        attachments: [],
+      });
     }
 
     const energyCertificate = rawEnergyCertificate && typeof rawEnergyCertificate === 'object'
@@ -367,7 +400,7 @@ export async function POST(req: Request) {
       assessment = await prisma.assessment.create({
       data: {
         objective: data.objective,
-        userId: session?.user?.id,
+        userId,
         propertyType: data.propertyType,
         orientation: data.orientation,
         roofType: data.roofType,
@@ -385,7 +418,8 @@ export async function POST(req: Request) {
         budgetRange: data.budgetRange,
         timelineHorizon: data.timelineHorizon,
         targetLetter: data.targetLetter,
-        isDemo: parseResult.data.isDemo || false,
+        // Demo status is server-owned; a client payload cannot grant demo entitlement.
+        isDemo: false,
         latitude: data.latitude,
         longitude: data.longitude,
         locationSource: data.locationSource,
@@ -435,31 +469,16 @@ export async function POST(req: Request) {
       }
       });
     } catch (databaseError) {
-      console.error('Assessment database write failed, using stateless fallback:', databaseError);
+      console.error('Assessment database write failed:', databaseError);
+      if (hasAttachments) {
+        await Promise.all([
+          ...uploadedAttachments.map((attachment) => deleteStoredAttachment(`blob:${attachment.pathname}`).catch(() => undefined)),
+          ...uploadedSourceDocuments.map((attachment) => deleteStoredAttachment(`blob:${attachment.pathname}`).catch(() => undefined)),
+        ]);
+        return NextResponse.json({ error: 'No se pudo guardar la valoración con sus adjuntos' }, { status: 503 });
+      }
       const payload = createStatelessPayload(data, {
-        attachments: [...files.map((file, index) => ({
-          id: `submitted-${index + 1}`,
-          name: file.name,
-          type: file.type || 'application/octet-stream',
-          size: file.size,
-        })), ...sourceFiles.map((source, index) => ({
-          id: `source-${index + 1}`,
-          name: source.file.name,
-          type: source.file.type || 'application/pdf',
-          category: source.category,
-          size: source.file.size,
-        })), ...uploadedAttachments.map((attachment, index) => ({
-          id: `uploaded-${index + 1}`,
-          name: attachment.name,
-          type: attachment.type,
-          size: attachment.size,
-        })), ...uploadedSourceDocuments.map((attachment, index) => ({
-          id: `uploaded-source-${index + 1}`,
-          name: attachment.name,
-          type: attachment.type,
-          category: attachment.category,
-          size: attachment.size,
-        }))],
+        attachments: [],
         cadastralRecord: cadastralData || undefined,
       });
       return NextResponse.json({
@@ -476,16 +495,17 @@ export async function POST(req: Request) {
       });
     }
 
+    const storedPaths: string[] = [];
     try {
       const attachmentData = [
-        ...(await persistAttachments(assessment.id, files)),
+        ...(await persistAttachments(assessment.id, files, storedPaths)),
         ...persistUploadedAttachmentMetadata(assessment.id, uploadedAttachments),
       ];
       if (attachmentData.length > 0) {
         await prisma.assessmentAttachment.createMany({ data: attachmentData });
       }
       const sourceAttachments = [
-        ...(await persistSourceDocumentFiles(assessment.id, sourceFiles)),
+        ...(await persistSourceDocumentFiles(assessment.id, sourceFiles, storedPaths)),
         ...(await persistUploadedSourceDocuments(assessment.id, uploadedSourceDocuments)),
       ];
       const sourceAttachmentByCategory = new Map(sourceAttachments.map((attachment) => [attachment.category, attachment.id]));
@@ -525,6 +545,7 @@ export async function POST(req: Request) {
     } catch (attachmentError) {
       await prisma.assessment.delete({ where: { id: assessment.id } });
       await Promise.all([
+        ...storedPaths.map((attachmentPath) => deleteStoredAttachment(attachmentPath).catch(() => undefined)),
         ...uploadedAttachments.map((attachment) => deleteStoredAttachment(`blob:${attachment.pathname}`).catch(() => undefined)),
         ...uploadedSourceDocuments.map((attachment) => deleteStoredAttachment(`blob:${attachment.pathname}`).catch(() => undefined)),
       ]);

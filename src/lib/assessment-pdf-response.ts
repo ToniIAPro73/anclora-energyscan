@@ -26,6 +26,7 @@ import { getVisionAnalysisConfig } from '@/lib/vision/vision-config';
 import { resolveVisionEntitlement } from '@/lib/vision/vision-entitlements';
 import { curateVisionFindingsForReport } from '@/lib/agents/hermes-vision-curator';
 import type { VisionAnalysisResult } from '@/lib/vision/types';
+import { getOwnedAssessment } from '@/lib/assessment-authorization';
 
 let cachedLogoDataUri: string | undefined;
 
@@ -201,7 +202,8 @@ export async function buildAssessmentPdfResponse(
     if (statelessPayload) {
       const isAllowedExplicitDemo = options.allowDemoPremium === true && statelessPayload.isDemo === true;
       const access = canAccessPremiumContent({
-        isDemo: statelessPayload.isDemo,
+        // Only the dedicated server-generated demo PDF flow may grant demo access.
+        isDemo: isAllowedExplicitDemo,
         statelessPayload,
       });
       if (!isAllowedExplicitDemo && !assertCanDownloadPremiumPdf(access)) {
@@ -216,10 +218,12 @@ export async function buildAssessmentPdfResponse(
       }
 
       reportData = createReportDataFromPayload(assessmentId, statelessPayload, pdfLanguage, currency, measurementSystem);
-      rawAttachments = statelessPayload.attachments || [];
+      rawAttachments = statelessPayload.isDemo ? statelessPayload.attachments || [] : [];
     } else {
-      const assessment = await prisma.assessment.findUnique({
-        where: { id: assessmentId },
+      const ownedAssessment = await getOwnedAssessment(assessmentId);
+      if (!ownedAssessment) return NextResponse.json({ error: 'Assessment not found' }, { status: 404 });
+      const assessment = await prisma.assessment.findFirst({
+        where: { id: assessmentId, userId: ownedAssessment.userId },
         include: { attachments: { include: { analysis: true } }, cadastralRecord: true }
       });
 

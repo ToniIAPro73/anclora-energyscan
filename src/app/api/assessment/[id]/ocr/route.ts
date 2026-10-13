@@ -5,12 +5,14 @@ import { isBlobAttachmentPath, readAttachmentBytes } from '@/lib/blob-storage';
 import { readFile } from 'fs/promises';
 import path from 'path';
 import { Prisma } from '@prisma/client';
+import { isOwnedAssessment } from '@/lib/assessment-authorization';
 
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
   try {
+    if (!await isOwnedAssessment(params.id)) return NextResponse.json({ error: 'Assessment not found' }, { status: 404 });
     const attachments = await prisma.assessmentAttachment.findMany({
       where: { assessmentId: params.id },
       select: {
@@ -36,6 +38,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 }
 
 export async function POST(req: Request, { params }: { params: { id: string } }) {
+  if (!await isOwnedAssessment(params.id)) return NextResponse.json({ error: 'Assessment not found' }, { status: 404 });
   if (process.env.ENABLE_OCR !== 'true') {
     return NextResponse.json({ message: 'OCR is disabled', status: 'skipped' });
   }

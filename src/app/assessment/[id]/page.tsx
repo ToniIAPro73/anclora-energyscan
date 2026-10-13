@@ -59,10 +59,10 @@ export default async function AssessmentResultsPage({ params }: { params: { id: 
   const isLoggedIn = Boolean(session?.user?.id);
 
   const statelessPayload = parseStatelessAssessmentId(params.id);
-  const assessment = statelessPayload ? null : await prisma.assessment.findUnique({
-    where: { id: params.id },
+  const assessment = statelessPayload ? null : isLoggedIn ? await prisma.assessment.findFirst({
+    where: { id: params.id, userId: session!.user!.id },
     include: { attachments: true, cadastralRecord: true }
-  });
+  }) : null;
 
   const premiumSources = assessment ? await loadPremiumSourcesForAssessment(assessment.id) : {
     energyCertificates: [],
@@ -153,7 +153,7 @@ export default async function AssessmentResultsPage({ params }: { params: { id: 
     return null;
   })();
 
-  const isDemo = statelessPayload?.isDemo || assessment?.isDemo || false;
+  const isDemo = assessment?.isDemo || false;
   const premiumAccess = canAccessPremiumContent({
     paidAt: assessment?.paidAt,
     isPremium: assessment?.isPremium,
@@ -161,7 +161,7 @@ export default async function AssessmentResultsPage({ params }: { params: { id: 
     statelessPayload,
   });
   const canViewPremium = premiumAccess.isPaid;
-  const attachments: AssessmentAttachment[] = statelessPayload?.attachments || assessment?.attachments.map((attachment) => ({
+  const attachments: AssessmentAttachment[] = (statelessPayload?.isDemo ? statelessPayload.attachments : undefined) || assessment?.attachments.map((attachment) => ({
     id: attachment.id,
     name: attachment.name,
     type: attachment.type,

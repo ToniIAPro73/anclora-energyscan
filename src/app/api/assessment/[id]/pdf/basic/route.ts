@@ -8,6 +8,7 @@ import { parseStatelessAssessmentId, getPublicAssessmentRef } from '@/lib/statel
 import { toPdfLanguage } from '@/lib/preferences';
 import { BasicReport, type BasicReportData } from '@/lib/pdf/BasicReport';
 import type { EnergyLetter, PropertyType, ConfidenceLevel } from '@/lib/domain/energy-assessment';
+import { getOwnedAssessment } from '@/lib/assessment-authorization';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
@@ -67,7 +68,9 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
         logoDataUri: await loadLogoDataUri(),
       };
     } else {
-      const assessment = await prisma.assessment.findUnique({ where: { id: params.id }, include: { cadastralRecord: true } });
+      const ownedAssessment = await getOwnedAssessment(params.id);
+      if (!ownedAssessment) return NextResponse.json({ error: 'not_found' }, { status: 404 });
+      const assessment = await prisma.assessment.findFirst({ where: { id: params.id, userId: ownedAssessment.userId }, include: { cadastralRecord: true } });
       if (!assessment) {
         return NextResponse.json({ error: 'not_found' }, { status: 404 });
       }

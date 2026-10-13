@@ -6,6 +6,7 @@ import {
   sanitizeFilename,
 } from '@/lib/attachments';
 import { lightAuth as auth } from '@/auth.config';
+import { isOwnedDraftPath } from '@/lib/assessment-authorization';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,26 +20,50 @@ function parseUploadPayload(clientPayload: string | null) {
 }
 
 export async function POST(request: Request): Promise<NextResponse> {
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
-    return NextResponse.json({ error: 'Blob storage is not configured' }, { status: 503 });
+  let body: HandleUploadBody;
+  try {
+    body = (await request.json()) as HandleUploadBody;
+  } catch {
+    return NextResponse.json({ error: 'Solicitud de subida no válida' }, { status: 400 });
+  }
+  if (!body || typeof body !== 'object' || typeof body.type !== 'string') {
+    return NextResponse.json({ error: 'Solicitud de subida no válida' }, { status: 400 });
   }
 
-  const body = (await request.json()) as HandleUploadBody;
-  const session = await auth().catch(() => null);
+  if (body.type === 'blob.generate-client-token') {
+    if (!body.payload || typeof body.payload.pathname !== 'string') {
+      return NextResponse.json({ error: 'Solicitud de subida no válida' }, { status: 400 });
+    }
+    let session;
+    try {
+      session = await auth();
+    } catch {
+      return NextResponse.json({ error: 'Inicia sesión para adjuntar archivos' }, { status: 401 });
+    }
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Inicia sesión para adjuntar archivos' }, { status: 401 });
+    }
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      return NextResponse.json({ error: 'Blob storage is not configured' }, { status: 503 });
+    }
+    if (!isOwnedDraftPath(body.payload.pathname, session.user.id)) {
+      return NextResponse.json({ error: 'Ruta de adjunto no permitida' }, { status: 403 });
+    }
+  }
 
   try {
     const jsonResponse = await handleUpload({
       body,
       request,
       onBeforeGenerateToken: async (pathname, clientPayload) => {
+        const session = await auth();
+        if (!session?.user?.id || !isOwnedDraftPath(pathname, session.user.id)) {
+          throw new Error('No autorizado para subir este adjunto');
+        }
         const payload = parseUploadPayload(clientPayload);
         const safeName = sanitizeFilename(payload.name || pathname.split('/').pop() || 'attachment');
 
-        if (!pathname.startsWith('assessment-drafts/')) {
-          throw new Error('Ruta de adjunto no permitida');
-        }
-
-        if (payload.size && payload.size > MAX_ATTACHMENT_SIZE) {
+        if (payload.size !== undefined && (!Number.isSafeInteger(payload.size) || payload.size <= 0 || payload.size > MAX_ATTACHMENT_SIZE)) {
           throw new Error('El archivo supera el tamaño máximo permitido');
         }
 
@@ -52,12 +77,13 @@ export async function POST(request: Request): Promise<NextResponse> {
             name: safeName,
             type: payload.type,
             size: payload.size,
-            userId: session?.user?.id || null,
+            userId: session.user.id,
           }),
         };
       },
-      onUploadCompleted: async ({ blob }) => {
-        console.info('Assessment attachment uploaded to Blob:', blob.pathname);
+      onUploadCompleted: async () => {
+        // Vercel verifies the callback signature before invoking this hook. Avoid
+        // logging paths, which may contain user identifiers or document names.
       },
     });
 

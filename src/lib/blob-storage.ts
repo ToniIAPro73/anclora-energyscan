@@ -69,5 +69,19 @@ export async function deleteStoredAttachment(attachmentPath: string) {
     return;
   }
 
-  await unlink(attachmentPath).catch(() => undefined);
+  await unlink(attachmentPath);
+}
+
+export async function restoreStoredAttachment(attachmentPath: string, bytes: Buffer, contentType: string) {
+  if (isBlobAttachmentPath(attachmentPath)) {
+    await put(toBlobPathname(attachmentPath), bytes, {
+      access: 'private',
+      addRandomSuffix: false,
+      allowOverwrite: true,
+      contentType,
+    });
+    return;
+  }
+  await mkdir(path.dirname(attachmentPath), { recursive: true });
+  await writeFile(attachmentPath, bytes);
 }

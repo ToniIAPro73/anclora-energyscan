@@ -8,6 +8,7 @@ import { resolveVisionEntitlement } from '@/lib/vision/vision-entitlements';
 import { selectImagesForVisionAnalysis } from '@/lib/vision/select-vision-images';
 import { trackEvent } from '@/lib/analytics';
 import { Prisma } from '@prisma/client';
+import { getOwnedAssessment } from '@/lib/assessment-authorization';
 
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
@@ -18,10 +19,14 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     const lang = normalizeLanguage(body.lang ?? undefined);
     const force = body.force === true;
 
-    const assessment = await prisma.assessment.findUnique({
-      where: { id: params.id },
-      select: { id: true, paidAt: true, isPremium: true, isDemo: true, userId: true },
-    });
+    const ownedAssessment = await getOwnedAssessment(params.id);
+    const assessment = ownedAssessment && {
+      id: ownedAssessment.id,
+      paidAt: ownedAssessment.paidAt,
+      isPremium: ownedAssessment.isPremium,
+      isDemo: ownedAssessment.isDemo,
+      userId: ownedAssessment.userId,
+    };
 
     if (!assessment) {
       return NextResponse.json({ error: 'Assessment not found' }, { status: 404 });
