@@ -2,6 +2,14 @@
 
 Procedimiento verificado el 2026-10-13 para `development`, con la identidad persistente `qa-es01` de agent-browser. El runtime local carga las variables de `development` y usa la base de datos compartida descrita en `.anclora/PRODUCTION_RUNTIME.md`.
 
+## Política de verificación por hitos
+
+- Durante la implementación, ejecuta solo tests focalizados de los archivos tocados. Ejecuta typecheck al cerrar una unidad lógica.
+- Al terminar la tarea y antes del push, ejecuta una sola vez y en secuencia: lint, typecheck, suite completa de tests y build. Repítelos únicamente si cambia código después.
+- Para cambios de riesgo (autenticación, base de datos, borrado de datos o dependencias), ejecuta el paquete completo antes de cada commit que los incluya.
+- Para cambios solo de documentación (`docs/`, `specs/`, Markdown), ejecuta únicamente `git diff --check`.
+- Nunca ejecutes typecheck, tests y build en paralelo. En `docs/VALIDATION_CHECKLIST.md`, registra lo ejecutado y marca `NOT_RUN` con el motivo para cada gate omitido.
+
 ## 1. Elegir el modo
 
 ### Local con variables de development — modo recomendado

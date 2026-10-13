@@ -72,3 +72,18 @@ La primera ejecución local del CLI resolvió los alias TypeScript, pero `vc env
 - [ ] Decidí si autorizo una ejecución `--apply` después de revisar esos recuentos.
 - [ ] Decidí la opción y horario de programación; sigue sin programarse hasta esa decisión.
 - [ ] No promocionar hasta escribir `PROMOTE=FULL` y aprobar la entrega.
+
+## Registro de actualización documental de política (2026-10-13)
+
+**Cambios:** nueva política de verificación por hitos en `docs/qa/visual-qa-runbook.md`; línea de puntero actualizada en `AGENTS.md`, `CLAUDE.md` y `GEMINI.md`.
+
+| Comprobación | Resultado | Motivo |
+|---|---|---|
+| `git diff --check` | PASS | Única comprobación ejecutada para este cambio documental |
+| Lint | NOT_RUN | No hubo cambios de código |
+| Typecheck | NOT_RUN | No hubo cambios de código; gates completos ya ejecutados secuencialmente sobre el SHA de código `11505916d59137c98285d71449b20e815d99be23` |
+| Tests focalizados | NOT_RUN | No hubo cambios de código |
+| Suite completa de tests | NOT_RUN | No hubo cambios de código; no se repiten gates por cambios solo documentales |
+| Build | NOT_RUN | No hubo cambios de código; no se repiten gates por cambios solo documentales |
+
+No se realizó QA visual ni se cambió comportamiento. La simulación real de Blob continúa `BLOCKED` por falta de token Preview accesible al CLI, como se registra arriba.

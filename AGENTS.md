@@ -2,7 +2,7 @@
 > This repository is governed by the Anclora canonical contracts under `.anclora/`.
 > Agent-specific defaults, personal presets, or global agent configurations must NOT override those contracts.
 > Read `.anclora/AGENT_PROJECT_CONTEXT.md` before starting substantial work.
-Antes de cualquier prueba visual, lee `docs/qa/visual-qa-runbook.md`.
+Antes de cualquier verificación o prueba visual, lee docs/qa/visual-qa-runbook.md
 
 
 <!-- ANCLORA-ECOSYSTEM-CONTEXT-START -->

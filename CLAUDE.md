@@ -15,4 +15,4 @@ La arquitectura estable del ecosistema se define en:
 No asumir infraestructura compartida entre productos. Validar siempre hosting, backend, base de datos, auth, variables y ramas.
 <!-- ANCLORA-ECOSYSTEM-CONTEXT-END -->
 
-Antes de cualquier prueba visual, lee `docs/qa/visual-qa-runbook.md`.
+Antes de cualquier verificación o prueba visual, lee docs/qa/visual-qa-runbook.md
