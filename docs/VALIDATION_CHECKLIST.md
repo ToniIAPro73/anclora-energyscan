@@ -1,73 +1,85 @@
-# Checklist de validación — ES-0.1 autorización de adjuntos y upload (2026-10-13)
+# Checklist de validación — ES-0.1 adjuntos y upload v1 (2026-10-13)
+
+> Este fichero se sobrescribe en cada entrega. El historial queda en Git.
 
 **Repositorio:** anclora-energyscan
 
-**Rama y commit:** `development`; evidencia sobre el código incluido en el commit de entrega.
+**Rama y commit:** development @ `7eddfd2ca1191a4aa969a6af28486f38d0a51e23` (código validado; este checklist se añade en el commit siguiente)
+**Entorno de validación:** [Preview de development](https://anclora-energyscan-git-development-pmi140979-6354s-projects.vercel.app) · Vercel Preview, runtime desplegado
 
-**Entorno:** runtime local de Next.js sobre el Neon operativo configurado en el repo; URLs de Auth.js sustituidas solo en el proceso local por `http://localhost:3000`. No se modificó `.env.local`, el token de Blob ni la configuración de base de datos.
-
-**Cuenta:** `qa.energyscan@anclora.local`, identidad sintética dedicada del contrato; credenciales locales en `.env.qa.local` (modo `0600`, ignorado por Git). No se incluyen contraseñas en este checklist.
+**Datos:** ficticios. Cuenta: identidad QA persistente `qa.energyscan@anclora.local`; la valoración sintética indicada abajo queda retenida por decisión de Toni. No se incluye ninguna credencial.
 
 ## 1. Qué cambia
 
-- El servidor valida actor, evaluación, adjunto y acción antes de acceder al almacenamiento protegido.
-- El upload anónimo se deniega; un payload, ID, URL o estado de demo no concede permisos.
-- La asociación válida se guarda bajo la evaluación propietaria. Si falla la persistencia de la evaluación o sus metadatos, la API informa error e intenta compensar los objetos almacenados.
-- Profesionales sin propiedad/grant explícito quedan denegados por defecto.
-- El ejemplo `.env.example` documenta (comentadas) las variables QA sin secretos. `scripts/qa/bootstrap-local-credentials.ts` crea o rota únicamente la identidad QA contractual, guarda el secreto localmente y rechaza sobrescribir credenciales existentes.
+- El flujo v1 permite adjuntar fotos PNG/JPG/WEBP con límites de cantidad y tamaño, asociarlas a una valoración y conservarlas después de recargar.
+- El servidor exige sesión para autorizar la subida y limita la lectura y el borrado al propietario de la valoración.
+- El formulario requiere un código postal de al menos cinco caracteres; el placeholder visual no completa el campo.
 
 ## 2. Ya comprobado por el agente
 
-| Comprobación | Comando o método | Resultado | Evidencia |
+| Comprobación | Comando o método | Resultado | SHA |
 | --- | --- | --- | --- |
-| Asociación válida, fallos de persistencia y profesional sin grant | `npm test -- --runInBand tests/attachment-access.test.ts tests/blob-upload-authorization.test.ts tests/assessment-upload-association.test.ts` | PASS, 3 suites / 22 tests con mocks y fixtures sintéticos | Código del commit de entrega |
-| Regresión de tests del repositorio | `npm test -- --runInBand` | PASS, 66 suites / 453 tests | Código del commit de entrega |
-| TypeScript | `npx tsc --noEmit` | PASS | Código del commit de entrega |
-| ESLint focal | `npx eslint src/app/api/assessment/route.ts tests/assessment-upload-association.test.ts tests/attachment-access.test.ts` | PASS | Código del commit de entrega |
-| ESLint del proyecto | `npm run lint` | PASS, sin avisos | Código del commit de entrega |
-| Build | `npm run build` | PASS; dos avisos de `jose` sobre APIs de compresión no disponibles en Edge Runtime | Código del commit de entrega |
-| Integridad del diff | `git diff --check` | PASS | Código del commit de entrega |
-| Bootstrap de identidad QA | `npx ts-node --compiler-options '{"module":"commonjs"}' scripts/qa/bootstrap-local-credentials.ts` | PASS. Creó la cuenta QA contractual en Neon y `.env.qa.local` con permisos `0600`; no imprimió el secreto. La identidad se conserva. | Ejecución local; archivo ignorado por Git |
-| Protección ante reejecución del bootstrap | Mismo comando con `.env.qa.local` ya presente | PASS: abortó antes de acceder a DB y no sobrescribió el archivo | Salida categórica sin valores de credenciales |
-| Runtime visual | `anclora-visual-qa doctor` | PASS: navegador, snapshot, captura y cierre | Runtime compartido Anclora |
-| Sesión autenticada | `agent-browser auth login` usando perfil temporal | PASS. `/api/auth/session` devolvió usuario autenticado QA. Perfil temporal eliminado después. | Sesión autenticada en `localhost:3000` |
-| Visual del wizard y estado de error | `agent-browser` con fixture PNG sintético de 8×8; captura `/tmp/energyscan-es01-upload-failure.png` | El archivo se muestra como adjunto y se valida en el wizard. Blob rechazó el token local (`400`, `Vercel Blob: Invalid `token` parameter`); el envío devolvió `503` y la UI mostró “No se pudo guardar la valoración con sus adjuntos”. No se mostró éxito. El rollback no reportó fallo incompleto. | Captura local temporal; no versionada |
+| ESLint del proyecto | `npm run lint` | PASS, sin avisos | `7eddfd2ca1191a4aa969a6af28486f38d0a51e23` |
+| TypeScript | `npx tsc --noEmit` | PASS | `7eddfd2ca1191a4aa969a6af28486f38d0a51e23` |
+| Tests del repositorio | `npm test -- --runInBand` | PASS, 66 suites / 453 tests | `7eddfd2ca1191a4aa969a6af28486f38d0a51e23` |
+| Build de producción | `npm run build` | PASS | `7eddfd2ca1191a4aa969a6af28486f38d0a51e23` |
+| Subida válida y asociación | Preview de development, PNG sintético de 68 B; revisión de la valoración y sus metadatos | PASS. Valoración creada; ID retenido: `cmv6tpfhp000006ia0rptcr36`. La consulta confirmó un adjunto PNG asociado. | `7eddfd2ca1191a4aa969a6af28486f38d0a51e23` |
+| Persistencia tras recarga | Recargar `/assessment/cmv6tpfhp000006ia0rptcr36` | PASS. El resultado siguió visible y el registro conservó el adjunto. | `7eddfd2ca1191a4aa969a6af28486f38d0a51e23` |
+| Rechazo sin sesión | Solicitud anónima de token a `POST /api/blob/upload` | PASS, HTTP 401. | `7eddfd2ca1191a4aa969a6af28486f38d0a51e23` |
+| Borrado de adjunto | `DELETE /api/assessment/cmv6tpfhp000006ia0rptcr36/attachments/cmv6tpg3x000106iar411c1iw` con sesión QA | PASS, HTTP 200; GET posterior HTTP 404; verificación de base de datos: cero adjuntos asociados. | `7eddfd2ca1191a4aa969a6af28486f38d0a51e23` |
+| Rechazo de tipo y tamaño | Selección de tipo no permitido y archivo mayor de 10 MiB en el wizard | PASS, rechazo en cliente sin enviar la valoración. Capturas previas: `/tmp/energyscan-es01-error-type-desktop.png` y `/tmp/energyscan-es01-error-size-mobile.png`. | `7eddfd2ca1191a4aa969a6af28486f38d0a51e23` |
+| QA visual de estados | `agent-browser` en Preview; capturas guardadas solo en `/tmp` | PASS en los estados vacío, cargando, error y éxito. Éxito y persistencia comprobados en escritorio y móvil; capturas recientes: `/tmp/energyscan-es01-success-persisted-desktop.png`, `/tmp/energyscan-es01-persisted-mobile.png`. | `7eddfd2ca1191a4aa969a6af28486f38d0a51e23` |
+| Diagnóstico de validación del wizard | Lectura del esquema Zod en `src/components/AssessmentWizard.tsx`; repetición con código postal `28001` | La primera prueba falló por datos de prueba: `zipcode` estaba vacío y exige mínimo 5 caracteres. Con un valor sintético válido el envío pasó. La UI mostró “Invalid input” sin identificar el campo. | `7eddfd2ca1191a4aa969a6af28486f38d0a51e23` |
+| Limpieza del adjunto | DELETE y consulta posterior | PASS: el objeto/registro del adjunto fue eliminado. | `7eddfd2ca1191a4aa969a6af28486f38d0a51e23` |
 
-## 3. Comprobaciones no ejecutadas (NOT_RUN)
+La valoración sintética `cmv6tpfhp000006ia0rptcr36` se conserva sin adjunto por decisión explícita de Toni. No se intentó eliminarla ni ejecutar teardown. La identidad QA persistente y el perfil local de autenticación quedan bajo gestión de Toni.
 
-| Comprobación | Motivo concreto |
+## 3. Pruebas no ejecutadas (NOT_RUN)
+
+| Prueba | Motivo concreto |
 | --- | --- |
-| Éxito completo autenticado: objeto Blob, asociación persistida y apertura/descarga del adjunto | El token Blob configurado localmente fue rechazado. No se cambió ni sustituyó la configuración del servicio. La rama de éxito se cubre con mocks en pruebas, pero la validación real queda pendiente. |
-| Borrado real desde interfaz y comprobación posterior de ausencia | No se creó adjunto persistente: Blob rechazó el token y la ruta compensó la operación. |
-| Denegación visual sin sesión contra Blob | Cubierta por tests de ruta con mocks; no se repitió en navegador autenticado/anonimizado tras reparar el runtime visual. |
-| Acceso desde otra cuenta a un adjunto ajeno real | No hay fixture real de otro usuario/adjunto preparado para este flujo; los casos de autorización se prueban con mocks. |
-| Profesional con grant explícito o revocado | ES-0.1 no crea un modelo de grants; el caso pertinente es denegación por defecto y está cubierto por tests. |
-| Verificación contra Blob válido, replay y firma real del callback | El token de Blob local no es válido; firma y callback se probaron con mocks del SDK. |
-| Vista móvil | La comprobación visual se hizo en escritorio. |
-| Migraciones | No se requieren; no se ejecutaron. |
+| Lectura y borrado entre dos cuentas QA | No se preparó una segunda identidad sintética para esta ejecución. |
+| Acceso a la lista de adjuntos en cuenta sin Premium | La página solo representa la lista con acceso Premium; el QA visual observó esta condición y no se cambió el entitlement. |
+| Teardown de la valoración retenida | No ejecutado por decisión de Toni. EnergyScan no dispone de `QA_TEARDOWN_TOOL`; queda pendiente incorporar esa herramienta para futuras limpiezas autorizadas. |
+| Repetición de lint, typecheck, test y build después de editar este documento | El cambio de esta entrega es solo documentación; las cuatro gates pasaron sobre el mismo SHA de código indicado arriba. |
 
-## 4. Checklist para Toni
+## 4. Checklist para validar en la aplicación
 
-Los pasos **[BLOQUEANTE]** deben pasar antes de promocionar ES-0.1. Las credenciales se leen localmente desde `.env.qa.local`; el secreto no está en Git ni en este documento.
+Realizar en el Preview de development con la cuenta de Toni. Usar solo datos sintéticos. No asumir que el placeholder del código postal sea un valor.
 
-| # | Dónde | Pasos | Resultado esperado | Estado |
-| --- | --- | --- | --- | --- |
-| 1 | Entorno de desarrollo y `/auth` | Confirma que el entorno de desarrollo autorizado tiene un token Blob válido. Inicia sesión con la cuenta QA de `.env.qa.local`. | Login correcto; no se usa cuenta personal. | **[BLOQUEANTE]** pendiente |
-| 2 | `/wizard` | Añade un PNG sintético pequeño, completa los campos con datos ficticios y envía. Comprueba el estado de carga y el resultado. | La evaluación se crea y el adjunto queda asociado a ella; el éxito solo aparece después de persistir. | **[BLOQUEANTE]** pendiente |
-| 3 | Evaluación y adjuntos | Abre/descarga el adjunto y luego bórralo desde la interfaz; recarga la evaluación. | El propietario puede leerlo; tras borrar, no aparece ni se sirve. Los errores no se presentan como éxito. | **[BLOQUEANTE]** pendiente |
-| 4 | Sesión anónima | Cierra sesión e intenta obtener credenciales de upload por el flujo normal. | Upload denegado antes de crear un objeto. | **[BLOQUEANTE]** pendiente |
-| 5 | Adjunto de otra cuenta QA | Con dos identidades sintéticas dedicadas, cambia el ID de evaluación/adjunto de una por el de la otra y prueba lectura y borrado. | Respuesta no enumerable (404); metadatos y archivo permanecen intactos. | **[BLOQUEANTE]** pendiente |
-| 6 | Escritorio y móvil | Repite pasos 2–4 en ambos tamaños; revisa vacío, carga, error y éxito. | Estados comprensibles y controles utilizables; nunca se filtra un adjunto ajeno. | **[BLOQUEANTE]** pendiente |
+| # | Dónde | Pasos | Resultado esperado | Cuenta o configuración | Bloqueante |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Preview `/auth` | Iniciar sesión con la cuenta propia de Toni. | La sesión se inicia y `/api/auth/session` devuelve HTTP 200 con usuario autenticado. | Cuenta de Toni | Sí |
+| 2 | `/wizard`, pasos 1–5 | Elegir “Conocer situación actual”; completar año 1990, superficie 80, código postal sintético de 5 dígitos (por ejemplo `28001`), avanzar con valores predeterminados válidos, adjuntar PNG sintético menor de 10 MiB, aceptar el aviso y enviar. | El formulario no muestra “Invalid input”; aparece el resultado con un ID de valoración y el PNG se indica como adjunto durante el envío. | Cuenta de Toni; datos ficticios | Sí |
+| 3 | Resultado de la valoración | Recargar la ruta del ID creado en el paso 2. | La valoración y su estado de éxito siguen visibles tras recargar. | Sesión de Toni | Sí |
+| 4 | Resultado, sección Adjuntos | Abrir/ver el PNG y borrarlo con el control de papelera; recargar la valoración. | La lista muestra el adjunto antes de borrarlo y deja de servirlo después (404); ya no aparece en la lista. La sección solo es visible con acceso Premium. | Cuenta con acceso Premium | Sí |
+| 5 | `/api/blob/upload`, sesión cerrada | Cerrar sesión y solicitar una subida por la API protegida, sin credenciales de sesión. | HTTP 401 y no se crea ningún objeto. | Navegador sin sesión | Sí |
+| 6 | `/wizard`, archivo adjunto | Probar un archivo de tipo no permitido y luego uno mayor de 10 MiB. | Cada archivo se rechaza antes de enviar la valoración y se presenta un error visible. | Sesión de Toni; fixtures sintéticos | Sí |
+| 7 | `/wizard` y valoración | Repetir la selección y el envío en escritorio y viewport móvil; observar vacío, carga, error y éxito. | Los estados se entienden en ambos tamaños y los controles permanecen utilizables; la persistencia se conserva al recargar. | Sesión de Toni | Sí |
 
-## 5. Limitación actual y decisión
+### Casos negativos y de borde
 
-- La prueba visual autenticada sí se ejecutó, pero solo alcanzó el estado de error porque el token Blob local no es válido. No se modificó configuración. La revisión funcional del éxito queda bloqueante hasta probar con el token Blob de desarrollo correcto.
-- Las pruebas automatizadas focales y las puertas de código pasan. No se declara ES-0.1 aceptada por Toni.
-- Los registros/objetos creados por esta comprobación fueron sintéticos. El intento fallido no dejó una asociación conocida; el log de aplicación no informó rollback incompleto.
+| # | Caso | Resultado esperado |
+| --- | --- | --- |
+| 1 | Dejar vacío `zipcode` aunque el placeholder muestre `28001` y enviar | El cliente señala el campo como inválido. Hoy el resumen genérico “Invalid input” no explica qué campo falta; rellenar 5 caracteres permite continuar. |
+| 2 | Subir un tipo no permitido | Rechazo en cliente; no se envía la valoración. |
+| 3 | Subir un archivo mayor de 10 MiB | Rechazo en cliente y por la validación del servidor si se fuerza la solicitud. |
+| 4 | Solicitar token Blob sin sesión | HTTP 401. |
+| 5 | Leer el adjunto después de borrarlo | HTTP 404; no hay bytes ni metadatos del adjunto. |
+
+### Estados de interfaz afectados
+
+- [x] Vacío · [x] Cargando · [x] Error · [x] Éxito · [x] Móvil · [x] Escritorio · [x] Modo oscuro
+
+## 5. Riesgos y limitaciones
+
+- El placeholder `28001` parece un valor, pero el campo `zipcode` comienza vacío y exige al menos 5 caracteres. Si se envía vacío, el cliente muestra “Invalid input” sin una explicación clara. En la prueba se confirmó que era un dato de prueba incompleto, no un fallo de infraestructura; la falta de detalle de la UI sigue siendo una limitación.
+- La lista de adjuntos solo es visible con acceso Premium. La creación y persistencia se verificaron con la cuenta QA; el borrado se validó por su API autorizada y la asociación por sus metadatos. El listado visual requiere Premium.
+- Falta `QA_TEARDOWN_TOOL` en EnergyScan; queda pendiente. Por decisión de Toni, la valoración sintética `cmv6tpfhp000006ia0rptcr36` permanece retenida bajo la cuenta QA, sin adjunto. No se ejecutó teardown ni se eliminó el perfil local de autenticación.
+- El Preview depende de la conexión Neon y del almacenamiento Vercel Blob configurados para `development`.
 
 ## 6. Decisión de Toni
 
-- [ ] Acepto la validación funcional y visual de ES-0.1
-- [ ] Solicito correcciones. Detalle: ______________________________
-- [ ] No promocionar. Motivo: ______________________________
-- [ ] Tras aceptar los gates, escribo `PROMOTE=FULL` para iniciar el flujo gobernado
+- [ ] Todos los puntos bloqueantes pasan
+- [ ] Se promociona: escribir `PROMOTE=FULL` (staging → production → main)
+- [ ] No se promociona. Motivo: ______________________
