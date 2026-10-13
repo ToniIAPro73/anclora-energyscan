@@ -1,6 +1,6 @@
 # ES-0.2 — Inventario de flujo, proveedores y retención
 
-**Actualizado:** 2026-10-14 · **Código revisado:** `9bb3e689a32aac98010d56050b6a5863a687eb22` · **Estado:** check DB de solo lectura PASS; simulación completa Blob pendiente de Toni. Sin listados ni borrados en este cambio.
+**Actualizado:** 2026-10-14 · **Código revisado:** `276fe20d25bdadc9dda02396e2e4d6db676057e7` · **Estado:** preflight DB compartido; check-db PASS, ejecución full sintética sigue en ERR_DB_PREFLIGHT. Sin acceso a Blob ni borrados.
 
 ## Decisiones firmes de Toni
 
@@ -231,3 +231,12 @@ Código validado: `9bb3e689a32aac98010d56050b6a5863a687eb22`; resultados complet
 La ejecución DB_CONNECT que Toni comunicó no se reprodujo: la verificación actual conectó y ejecutó la consulta trivial. Sí se confirmó un defecto de etiquetado: el runtime mantenía `DB_CONNECT` después de conectar hasta llegar a la primera operación list. Errores de preflight podían quedar clasificados incorrectamente. Se cambia a `PURGE` después de la conexión y se añade un test que reproduce el caso con batch limit no válido. No hay evidencia de que ese fuera el argumento/configuración en la ejecución de Toni, por lo que no se afirma como causa histórica.
 
 El diagnóstico preserva `cause` y permite imprimir clase/código original solo si están en allowlist; no emite mensaje, URL ni credenciales. La prueba `SELECT 1` confirma que `$connect()` y una consulta SQL funcionan con la configuración Vercel vigente; descarta en ese entorno un fallo sistemático del adaptador Prisma 7, dependencia de Next o incompatibilidad actual de SSL/URL. No verifica el esquema de tablas/columnas EnergyScan ni demuestra cuáles eran los parámetros efectivos durante el fallo anterior; eso queda pendiente de la fase DB_CLASSIFY en la próxima simulación completa. No se inspeccionaron valores de `DATABASE_URL`.
+
+
+## Reproducción completa y preflight compartido (código `276fe20d25bdadc9dda02396e2e4d6db676057e7`)
+
+`--check-db` y el flujo completo usan el mismo runtime de preflight: límite configurado, `$connect()`, `SELECT 1` y probe de esquema `SELECT "path" FROM "AssessmentAttachment" LIMIT 0`. La consulta no devuelve datos de usuario y detecta tabla/columna ausente. La verificación de `AssessmentAttachment.path` pasó contra la DB configurada; no se requiere ni se hizo migración.
+
+Reproducción controlada con token Blob sintético: `--check-db` pasa; la ejecución full falla antes de Blob con `stage=DB_CONNECT error_class=Error code=ERR_DB_PREFLIGHT`. La secuencia check→full dentro de una sesión `vc env run` reproduce el contraste. La clase/código de error no incluyen causa permitida; patrones conocidos mapean a `ERR_DB_SCHEMA`, `ERR_DB_TIMEOUT`, `ERR_DB_AUTH`, `ERR_DB_SSL`, `ERR_DB_CONNREFUSED`, `ERR_DB_CONNRESET`, `ERR_DB_DATABASE` o `ERR_DB_URL`; sin coincidencia queda `ERR_DB_PREFLIGHT`.
+
+La diferencia de código entre ambos modos se eliminó y está cubierta por pruebas que comparan orden de llamadas y bloquean las operaciones Blob en check-only. Sin embargo, el fallo persiste solo en full aunque el preflight compartido pase en check-only. No hay evidencia para atribuirlo a modelo/columna, `$connect`, ejecución fuera de Next, SSL ni URL; la causa raíz sigue abierta. La siguiente prueba de Toni debe informar solamente etapa/código/clase safe.

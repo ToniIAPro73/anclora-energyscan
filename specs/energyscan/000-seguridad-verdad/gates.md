@@ -180,3 +180,19 @@ El resultado de upload/persistencia y borrado completo queda PASS en Preview, pe
 | Simulación Blob / borrado real | NOT_RUN | Toni repetirá el dry-run completo; esta tarea no usó Blob ni `--apply` |
 
 La falla histórica de DB_CONNECT no se reprodujo en la sesión actual. Se confirmó y corrigió que errores posteriores al connect podían heredar erróneamente esa etapa; el test con límite inválido valida la corrección. No se atribuye la ejecución anterior a Neon, pooler, SSL, cliente Prisma ni esquema. `SELECT 1` no valida las tablas EnergyScan: una incompatibilidad aparecería como `DB_CLASSIFY` en la siguiente simulación.
+
+
+### ES-0.2 — reproducción full y preflight DB compartido (código `276fe20d25bdadc9dda02396e2e4d6db676057e7`)
+
+| Gate/comprobación | Resultado | Evidencia |
+|---|---|---|
+| Lint | PASS | `npm run lint` |
+| Typecheck | PASS | `npx tsc --noEmit`; no existe script npm `typecheck` |
+| Tests | PASS; 79 suites / 519 tests | `npm test -- --runInBand`; igualdad del preflight check/full, patrones de mensajes y centinelas |
+| Build | PASS | `npm run build` |
+| `--check-db` con token Blob sintético | PASS | `vc env run`; `$connect()`, `SELECT 1` y probe `AssessmentAttachment.path` |
+| Full con token Blob sintético, sin `--apply` | FAIL reproducible, `DB_CONNECT / Error / ERR_DB_PREFLIGHT` | No llegó a Blob. Mensaje original nunca se mostró |
+| Check seguido de full en la misma sesión | PASS → FAIL | Check pasa; full falla en DB_CONNECT con el mismo código seguro |
+| Blob real / borrado / migración | NOT_RUN | Sin credenciales reales, Blob I/O o mutación DB |
+
+El código ahora comparte la rutina de preflight y añade subetapas; el test confirma mismo orden de lecturas. El probe confirma que existen `AssessmentAttachment` y `path`, por lo que no se observó el desajuste de esquema propuesto. La causa raíz de que full falle en DB_CONNECT mientras check-only pasa sigue sin resolverse; `ERR_DB_PREFLIGHT` es el fallback seguro, no una explicación del fallo. No cambiar/migrar la base. Toni repetirá la simulación completa y enviará solo el diagnóstico permitido.

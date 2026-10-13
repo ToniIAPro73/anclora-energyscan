@@ -1,54 +1,53 @@
-# Checklist de validación — diagnóstico DB del purgador Blob
+# Checklist de validación — preflight DB del purgador Blob
 
 > Este fichero se sobrescribe en cada entrega. El historial queda en Git.
 
 **Rama:** `development`
 
-**SHA del código validado:** `9bb3e689a32aac98010d56050b6a5863a687eb22`
+**SHA del código validado:** `276fe20d25bdadc9dda02396e2e4d6db676057e7`
 
-**Datos/entorno:** CLI `--check-db` con configuración Vercel actual. Se eliminó `BLOB_READ_WRITE_TOKEN` del proceso hijo. El modo solo conecta a Neon y ejecuta `SELECT 1`; no lista Blob, lee tablas de negocio, ni borra datos. La salida del wrapper solo permite pasar mensajes diagnósticos seguros.
+**Datos/entorno:** comprobaciones DB de solo lectura con la configuración Vercel vigente. La ejecución completa usó exclusivamente un token Blob sintético forzado en el proceso hijo; no se usó token real, no se alcanzó Blob y no hubo borrados.
 
 ## 1. Qué cambió
 
-- Se añadió `--check-db`, que requiere únicamente `DATABASE_URL`, conecta con el cliente Prisma normal y ejecuta `SELECT 1`. No llama a Blob.
-- `BlobPurgeStageError` conserva la causa original. El diagnóstico permite mostrar solo clases conocidas y códigos aprobados de esa causa, sin mensajes, URLs ni credenciales.
-- Tras conectar, la etapa general pasa a `PURGE`; las llamadas posteriores asignan `BLOB_LIST`, `DB_CLASSIFY` y `DELETE`. Así los errores de preflight posteriores a la conexión no se atribuyen a `DB_CONNECT`.
-- La comprobación real pasó. La falla DB_CONNECT comunicada anteriormente no se reprodujo en la ejecución actual; su causa histórica exacta queda pendiente de la próxima simulación completa.
+- `--check-db` y la ejecución completa comparten ahora el mismo runtime y preflight: validación de lote, `$connect()`, `SELECT 1` y comprobación sin filas de `AssessmentAttachment.path`.
+- El check no requiere token Blob. El preflight verifica la tabla y columna necesarias antes de intentar listar Blob.
+- Los diagnósticos aceptan solo clases/códigos permitidos, incluidos `errorCode` de Prisma, y clasifican mensajes genéricos por patrones seguros. Nunca imprimen el mensaje original.
+- La etapa DB se divide en `DB_CONNECT`, `DB_QUERY` y `DB_SCHEMA_CHECK` para localizar el subpaso que falla.
 
 ## 2. Gates finales ejecutados secuencialmente
 
 | Gate | Comando | Resultado | SHA |
 |---|---|---|---|
-| Lint | `npm run lint` | PASS | `9bb3e689a32aac98010d56050b6a5863a687eb22` |
-| Typecheck | `npx tsc --noEmit` | PASS | `9bb3e689a32aac98010d56050b6a5863a687eb22` |
-| Suite completa | `npm test -- --runInBand` | PASS; 79 suites / 514 tests | `9bb3e689a32aac98010d56050b6a5863a687eb22` |
-| Build | `npm run build` | PASS | `9bb3e689a32aac98010d56050b6a5863a687eb22` |
-| Diff | `git diff --check` | PASS antes del commit | `9bb3e689a32aac98010d56050b6a5863a687eb22` |
+| Lint | `npm run lint` | PASS | `276fe20d25bdadc9dda02396e2e4d6db676057e7` |
+| Typecheck | `npx tsc --noEmit` | PASS | `276fe20d25bdadc9dda02396e2e4d6db676057e7` |
+| Suite completa | `npm test -- --runInBand` | PASS; 79 suites / 519 tests | `276fe20d25bdadc9dda02396e2e4d6db676057e7` |
+| Build | `npm run build` | PASS | `276fe20d25bdadc9dda02396e2e4d6db676057e7` |
+| Diff | `git diff --check` | PASS antes del commit | `276fe20d25bdadc9dda02396e2e4d6db676057e7` |
 
-El repo no define el script npm `typecheck`; se ejecutó `npx tsc --noEmit`. La suite se ejecutó secuencialmente después de typecheck y antes del build.
+No existe script npm `typecheck`; se ejecutó `npx tsc --noEmit`. Los gates se ejecutaron una sola vez y en secuencia. Los tests focales previos pasaron (20 tests).
 
-## 3. Pruebas y comprobaciones
+## 3. Reproducción y comprobaciones DB
 
 | Caso | Resultado |
 |---|---|
-| Dobles que conservan clase/código Prisma anidado | PASS; `PrismaClientInitializationError` y `P1001` permitidos, centinelas de token/ruta ausentes |
-| Modo check con dobles | PASS; conecta y consulta una vez, sin invocar list/delete |
-| Error posterior a conexión | PASS; preflight con límite fuera de rango se informa como `PURGE`, no `DB_CONNECT` |
-| `vc env run -- env -u BLOB_READ_WRITE_TOKEN npm run blob:purge-assessment-orphans -- --check-db` | PASS; `Database check passed (DB_CONNECT).`, exit 0; solo `SELECT 1` |
-| `--check-db` sin DB ni Blob | PASS cerrado; `Required database configuration is unavailable.`, exit 1 |
-| `--check-db` / purga completa contra Blob, `--apply` | NOT_RUN; Toni repetirá la simulación completa con su token. No se usó credencial Blob |
-| QA visual | NOT_RUN; no hubo cambios de interfaz |
+| `vc env run` con `--check-db` y token Blob sintético | PASS; conexión, `SELECT 1` y probe de tabla/columna completados |
+| Ejecución completa en la misma sesión, token Blob sintético, sin `--apply` | FAIL reproducible en `DB_CONNECT`; salida segura `error_class=Error code=ERR_DB_PREFLIGHT`; no llegó a Blob |
+| Orden check y ejecución completa en una sesión `vc env run` | `--check-db` PASS seguido de ejecución completa FAIL en `DB_CONNECT / ERR_DB_PREFLIGHT` |
+| Probe de esquema `AssessmentAttachment.path` | PASS con la configuración vigente; no hay evidencia de desajuste de tabla/columna |
+| Queries/diagnósticos con dobles y centinelas | PASS; check y full usan connect/query/schema en el mismo orden; contenido sensible no aparece |
+| Blob real, `--apply`, migración | NOT_RUN; no se usó Blob real ni se modificó la base |
 
 ## 4. Causa y límites
 
-- **Defecto confirmado en el diagnóstico anterior:** después de `connect()` el runtime dejaba la etiqueta `DB_CONNECT` activa hasta comenzar `list()`. Cualquier error de validación/preflight en ese intervalo se mostraba como fallo de conexión. Ahora ese tramo se etiqueta `PURGE`; hay prueba reproducible con batch limit inválido.
-- **Fallo DB_CONNECT histórico:** no reproducible ahora. La misma invocación Vercel pudo conectar y ejecutar `SELECT 1` sin Blob. Por ello no se atribuye la falla anterior al pooler, SSL, parámetros de Neon, adaptador o conexión fuera de Next.
-- Esta consulta prueba conectividad SQL, pero no consulta filas/tablas EnergyScan; la compatibilidad del modelo/columnas se verificará en el siguiente dry-run, y se expondrá como `DB_CLASSIFY` si falla.
+La diferencia de flujo entre `--check-db` y full se corrigió: ambos llaman al mismo código de preflight con el mismo límite configurado y las mismas consultas. Aun así, la ejecución completa vuelve a fallar en DB_CONNECT con un `Error` genérico sin código/cause permitido, mientras el check-db pasa. El mapeo seguro lo clasifica como `ERR_DB_PREFLIGHT`, pero la causa raíz de esa diferencia **sigue sin identificarse**.
+
+El probe confirma que la conexión SQL vigente funciona y que existen la tabla `AssessmentAttachment` y la columna `path`. No se cambió ni migró la base. Tampoco hay evidencia para atribuir el fallo a Prisma 7, Next, SSL, URL, autenticación o timeout. La próxima ejecución de Toni con su token real debe compartir solo etapa, clase y código seguro; si sigue en DB_CONNECT, este SHA permitirá separar `DB_CONNECT`, `DB_QUERY` y `DB_SCHEMA_CHECK`.
 
 ## 5. Acción manual para Toni
 
-1. Repetir `npm run blob:purge-assessment-orphans` en el entorno previsto, primero sin `--apply`.
-2. Si falla, compartir únicamente etapa, clase permitida, código seguro y estado HTTP; no el mensaje original ni credenciales.
-3. Revisar los recuentos antes de decidir si se usa `--apply`.
+1. Repetir la simulación completa sin `--apply` con el token real desde el entorno previsto.
+2. Si falla, compartir solo etapa, clase permitida, código seguro y estado HTTP; no el mensaje, rutas, IDs ni credenciales.
+3. No ejecutar `--apply` hasta que la causa de `ERR_DB_PREFLIGHT` esté entendida y se revisen los recuentos.
 
 No se promociona ni se programa ninguna purga.

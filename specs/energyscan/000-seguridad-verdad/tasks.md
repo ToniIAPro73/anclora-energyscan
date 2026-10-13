@@ -80,3 +80,6 @@ La revisión externa de usuarios sirve para validar usabilidad y encaje de merca
 
 
 **ES-0.2 diagnóstico de DB (código `9bb3e689a32aac98010d56050b6a5863a687eb22`):** CLI `--check-db` de solo lectura conectado a la DB configurada por `vc env run` y ejecutó `SELECT 1` con token Blob retirado del proceso hijo. Falla DB_CONNECT anterior no reproducida. Corregido etiquetado obsoleto de errores post-connect y preservada causa original permitida. Gates: 79 suites/514 tests, lint/typecheck/build PASS. La simulación completa y la identificación de cualquier fallo de DB_CLASSIFY quedan para Toni; no hubo acceso a Blob ni `--apply`.
+
+
+**ES-0.2 contraste DB check/full (código `276fe20d25bdadc9dda02396e2e4d6db676057e7`):** reproducido con Blob token sintético, sin `--apply`. `--check-db` pasa conexión, `SELECT 1` y probe `AssessmentAttachment.path`; el flujo completo falla antes de Blob como `DB_CONNECT / Error / ERR_DB_PREFLIGHT`, incluso tras check PASS en la misma sesión. Ambos modos comparten ahora el mismo preflight; pruebas verifican el orden y la sanitización. Gates completos: 79 suites/519 tests, lint/typecheck/build PASS. La causa raíz de la diferencia permanece sin identificar; no se alteró la base.
