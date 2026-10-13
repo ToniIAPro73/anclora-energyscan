@@ -107,24 +107,63 @@ describe('purgeOrphanedAssessmentBlobs', () => {
     expect(result.deferred).toBe(1);
   });
 
-  it('rejects a foreign prefix and malformed keys before deleting anything', async () => {
+  it('ignores objects outside the requested EnergyScan prefix', async () => {
     const deps = defaultDeps([blob('other-project/private/file.png', 200, 99)]);
     deps.list.mockImplementation(async ({ prefix }) => ({
       blobs: prefix === 'assessment-drafts/' ? [blob('other-project/private/file.png', 200, 99)] : [],
       hasMore: false,
     }));
 
-    await expect(purgeOrphanedAssessmentBlobs({ now: NOW, apply: true }, deps)).rejects.toThrow('Blob namespace validation failed.');
+    const result = await purgeOrphanedAssessmentBlobs({ now: NOW, apply: true }, deps);
 
     expect(deps.delete).not.toHaveBeenCalled();
-    expect(deps.list.mock.calls.map(([options]) => options.prefix)).toEqual(['assessment-drafts/']);
+    expect(deps.list.mock.calls.map(([options]) => options.prefix)).toEqual([...ENERGYSCAN_ASSESSMENT_BLOB_PREFIXES]);
+    expect(result.scanned).toBe(0);
   });
 
-  it('rejects a draft key that does not match the EnergyScan upload layout', async () => {
-    const deps = defaultDeps([blob('assessment-drafts/other-app/not-a-batch/file.png', 200, 99)]);
+  it('reports unknown EnergyScan shapes as class d and never deletes them', async () => {
+    const unknown = 'assessment-drafts/synthetic-legacy-owner/old-private-fixture.pdf';
+    const recognized = `assessment-drafts/${OWNER}/${BATCH}/recognized-old.png`;
+    const deps = defaultDeps([blob(unknown, 120, 99), blob(recognized, 31, 17)]);
 
-    await expect(purgeOrphanedAssessmentBlobs({ now: NOW, apply: true }, deps)).rejects.toThrow('Blob namespace validation failed.');
-    expect(deps.delete).not.toHaveBeenCalled();
+    const result = await purgeOrphanedAssessmentBlobs({ now: NOW, apply: true }, deps);
+    const report = formatOrphanedBlobPurgeReport(result, true);
+
+    expect(result.matrix['over-90'].d).toEqual({ count: 1, sizeBytes: 99 });
+    expect(result.shapes).toContainEqual({
+      shape: 'assessment-drafts/{text-short}/{file}',
+      segmentCount: 3,
+      ageBand: 'over-90',
+      count: 1,
+      sizeBytes: 99,
+    });
+    expect(deps.delete).toHaveBeenCalledTimes(1);
+    expect(deps.delete).toHaveBeenCalledWith(recognized);
+    expect(report).toContain('shape=assessment-drafts/{text-short}/{file} segments=3 count=1 size_bytes=99 age=over-90');
+    expect(report).not.toContain('synthetic-legacy-owner');
+    expect(report).not.toContain('old-private-fixture.pdf');
+    expect(report).not.toContain(unknown);
+  });
+
+  it('labels each path segment with a bounded, identifier-free shape category', async () => {
+    const otherUuid = '123e4567-e89b-11d3-a456-426614174000';
+    const longSegment = 'x'.repeat(40);
+    const paths = [
+      `assessment-drafts/${OWNER}/${otherUuid}/private-a.png`,
+      `assessments/123/private-b.pdf`,
+      `assessment-drafts/${longSegment}/${BATCH}/private-c.pdf`,
+    ];
+    const deps = defaultDeps(paths.map((path, index) => blob(path, 40 + index, 10 + index)));
+    const result = await purgeOrphanedAssessmentBlobs({ now: NOW }, deps);
+    const report = formatOrphanedBlobPurgeReport(result, false);
+
+    expect(report).toContain('shape=assessment-drafts/{cuid}/{other-uuid}/{file} segments=4 count=1 size_bytes=10 age=31-90');
+    expect(report).toContain('shape=assessments/{numeric}/{file} segments=3 count=1 size_bytes=11 age=31-90');
+    expect(report).toContain('shape=assessment-drafts/{text-long}/{uuid-v4}/{file} segments=4 count=1 size_bytes=12 age=31-90');
+    for (const path of paths) expect(report).not.toContain(path);
+    expect(report).not.toContain('private-a.png');
+    expect(report).not.toContain(otherUuid);
+    expect(report).not.toContain(longSegment);
   });
 
   it('formats aggregate counts without paths, filenames, cursors or user IDs', async () => {

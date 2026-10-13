@@ -11,10 +11,11 @@ const UUID_V4_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}
 const ASSESSMENT_ID_PATTERN = /^c[a-z0-9]{24}$/i;
 
 export type BlobPurgeAgeBand = '0-30' | '31-90' | 'over-90';
-export type BlobPurgeObjectType = 'a' | 'b' | 'c';
+export type BlobPurgeObjectType = 'a' | 'b' | 'c' | 'd';
 
 export type BlobPurgeCell = { count: number; sizeBytes: number };
 export type BlobPurgeMatrix = Record<BlobPurgeAgeBand, Record<BlobPurgeObjectType, BlobPurgeCell>>;
+export type BlobPurgeShapeCell = BlobPurgeCell & { shape: string; segmentCount: number; ageBand: BlobPurgeAgeBand };
 
 export type ListedAssessmentBlob = {
   pathname: string;
@@ -31,6 +32,7 @@ export type BlobListPage = {
 export type OrphanedBlobPurgeResult = {
   scanned: number;
   matrix: BlobPurgeMatrix;
+  shapes: BlobPurgeShapeCell[];
   candidateCount: number;
   batchLimit: number;
   attempted: number;
@@ -55,10 +57,32 @@ export type OrphanedBlobPurgeDeps = {
 function emptyMatrix(): BlobPurgeMatrix {
   const cell = (): BlobPurgeCell => ({ count: 0, sizeBytes: 0 });
   return {
-    '0-30': { a: cell(), b: cell(), c: cell() },
-    '31-90': { a: cell(), b: cell(), c: cell() },
-    'over-90': { a: cell(), b: cell(), c: cell() },
+    '0-30': { a: cell(), b: cell(), c: cell(), d: cell() },
+    '31-90': { a: cell(), b: cell(), c: cell(), d: cell() },
+    'over-90': { a: cell(), b: cell(), c: cell(), d: cell() },
   };
+}
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UUID_V4_SHAPE_PATTERN = UUID_V4_PATTERN;
+const CUID_PATTERN = /^c[a-z0-9]{24}$/i;
+
+function getSafeSegmentShape(segment: string): string {
+  if (UUID_V4_SHAPE_PATTERN.test(segment)) return '{uuid-v4}';
+  if (UUID_PATTERN.test(segment)) return '{other-uuid}';
+  if (CUID_PATTERN.test(segment)) return '{cuid}';
+  if (/^\d+$/.test(segment)) return '{numeric}';
+  return segment.length <= 32 ? '{text-short}' : '{text-long}';
+}
+
+function getSafeBlobShape(pathname: string): { shape: string; segmentCount: number } {
+  const segments = pathname.split('/');
+  const safeSegments = segments.map((segment, index) => {
+    if (index === 0 && (segment === 'assessment-drafts' || segment === 'assessments')) return segment;
+    if (index === segments.length - 1 && segment.length > 0) return '{file}';
+    return getSafeSegmentShape(segment);
+  });
+  return { shape: safeSegments.join('/'), segmentCount: segments.length };
 }
 
 function normalizeStoredPath(path: string): string {
@@ -127,6 +151,7 @@ export async function purgeOrphanedAssessmentBlobs(
   if (!Number.isFinite(nowMs)) throw new Error('Blob purge date is invalid.');
   const batchLimit = checkedBatchLimit(options.batchLimit);
   const matrix = emptyMatrix();
+  const shapeCells = new Map<string, BlobPurgeShapeCell>();
   const candidates: ListedAssessmentBlob[] = [];
   let scanned = 0;
   let candidateCount = 0;
@@ -137,9 +162,7 @@ export async function purgeOrphanedAssessmentBlobs(
     while (hasMore) {
       const page = await deps.list({ prefix, cursor, limit: BLOB_PURGE_PAGE_SIZE });
       const validBlobs = page.blobs.filter((blob) => {
-        if (!blob.pathname.startsWith(prefix) || !isEnergyScanAssessmentBlobPath(blob.pathname)) {
-          throw new Error('Blob namespace validation failed.');
-        }
+        if (!blob.pathname.startsWith(prefix)) return false;
         if (!(blob.uploadedAt instanceof Date) || !Number.isFinite(blob.uploadedAt.getTime()) || !Number.isSafeInteger(blob.size) || blob.size < 0) {
           throw new Error('Blob metadata validation failed.');
         }
@@ -153,14 +176,22 @@ export async function purgeOrphanedAssessmentBlobs(
         scanned += 1;
         const ageMs = nowMs - blob.uploadedAt.getTime();
         const ageBand = getAgeBand(ageMs);
+        const recognizedShape = isEnergyScanAssessmentBlobPath(blob.pathname);
         const referenced = referencedPaths.has(blob.pathname);
         const expiredOrphan = !referenced && ageMs > ASSESSMENT_RETENTION_MS;
-        const type: BlobPurgeObjectType = referenced ? 'a' : expiredOrphan ? 'b' : 'c';
+        const type: BlobPurgeObjectType = !recognizedShape ? 'd' : referenced ? 'a' : expiredOrphan ? 'b' : 'c';
         const cell = matrix[ageBand][type];
         cell.count += 1;
         cell.sizeBytes += blob.size;
 
-        if (expiredOrphan) {
+        const { shape, segmentCount } = getSafeBlobShape(blob.pathname);
+        const shapeKey = `${ageBand}:${shape}`;
+        const shapeCell = shapeCells.get(shapeKey) ?? { shape, segmentCount, ageBand, count: 0, sizeBytes: 0 };
+        shapeCell.count += 1;
+        shapeCell.sizeBytes += blob.size;
+        shapeCells.set(shapeKey, shapeCell);
+
+        if (recognizedShape && expiredOrphan) {
           candidateCount += 1;
           if (options.apply) addOldestCandidate(candidates, blob, batchLimit);
         }
@@ -190,6 +221,8 @@ export async function purgeOrphanedAssessmentBlobs(
   return {
     scanned,
     matrix,
+    shapes: Array.from(shapeCells.values()).sort((left, right) =>
+      left.shape.localeCompare(right.shape) || left.ageBand.localeCompare(right.ageBand)),
     candidateCount,
     batchLimit,
     attempted,
@@ -204,13 +237,16 @@ export function formatOrphanedBlobPurgeReport(
   apply: boolean,
 ): string {
   const ageBands: BlobPurgeAgeBand[] = ['0-30', '31-90', 'over-90'];
-  const types: BlobPurgeObjectType[] = ['a', 'b', 'c'];
+  const types: BlobPurgeObjectType[] = ['a', 'b', 'c', 'd'];
   const lines = [`mode=${apply ? 'APPLY' : 'SIMULATION'}`, `batch_limit=${result.batchLimit}`];
   for (const ageBand of ageBands) {
     for (const type of types) {
       const { count, sizeBytes } = result.matrix[ageBand][type];
       lines.push(`age=${ageBand} type=${type} count=${count} size_bytes=${sizeBytes}`);
     }
+  }
+  for (const shape of result.shapes) {
+    lines.push(`shape=${shape.shape} segments=${shape.segmentCount} count=${shape.count} size_bytes=${shape.sizeBytes} age=${shape.ageBand}`);
   }
   lines.push(`candidates=${result.candidateCount} attempted=${result.attempted} deleted=${result.deleted} failed=${result.failed} deferred=${result.deferred}`);
   return lines.join('\n');

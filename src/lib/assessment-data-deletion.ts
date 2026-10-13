@@ -109,10 +109,11 @@ export async function purgeExpiredAssessmentData(now: Date | number = Date.now()
     : {
       scanned: 0,
       matrix: {
-        '0-30': { a: { count: 0, sizeBytes: 0 }, b: { count: 0, sizeBytes: 0 }, c: { count: 0, sizeBytes: 0 } },
-        '31-90': { a: { count: 0, sizeBytes: 0 }, b: { count: 0, sizeBytes: 0 }, c: { count: 0, sizeBytes: 0 } },
-        'over-90': { a: { count: 0, sizeBytes: 0 }, b: { count: 0, sizeBytes: 0 }, c: { count: 0, sizeBytes: 0 } },
+        '0-30': { a: { count: 0, sizeBytes: 0 }, b: { count: 0, sizeBytes: 0 }, c: { count: 0, sizeBytes: 0 }, d: { count: 0, sizeBytes: 0 } },
+        '31-90': { a: { count: 0, sizeBytes: 0 }, b: { count: 0, sizeBytes: 0 }, c: { count: 0, sizeBytes: 0 }, d: { count: 0, sizeBytes: 0 } },
+        'over-90': { a: { count: 0, sizeBytes: 0 }, b: { count: 0, sizeBytes: 0 }, c: { count: 0, sizeBytes: 0 }, d: { count: 0, sizeBytes: 0 } },
       },
+      shapes: [],
       candidateCount: 0,
       batchLimit: 0,
       attempted: 0,
