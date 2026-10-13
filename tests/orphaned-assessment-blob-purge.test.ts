@@ -180,4 +180,76 @@ describe('purgeOrphanedAssessmentBlobs', () => {
     expect(output).not.toContain('private-fixture-filename');
     expect(output).not.toContain(path);
   });
+
+  it('keeps referenced legacy drafts in class a-legacy and never deletes them', async () => {
+    const legacy = `assessment-drafts/${BATCH}/private-legacy-reference.pdf`;
+    const deps = defaultDeps([blob(legacy, 120, 64)]);
+    deps.findReferencedPaths.mockResolvedValue([`blob:${legacy}`]);
+
+    const result = await purgeOrphanedAssessmentBlobs({ now: NOW, apply: true }, deps);
+    const report = formatOrphanedBlobPurgeReport(result, true);
+
+    expect(deps.delete).not.toHaveBeenCalled();
+    expect(result.matrix['over-90']['a-legacy']).toEqual({ count: 1, sizeBytes: 64 });
+    expect(result.legacyShape.find(({ ageBand }) => ageBand === 'over-90')?.referenced).toEqual({ count: 1, sizeBytes: 64 });
+    expect(report).toContain('age=over-90 type=a-legacy count=1 size_bytes=64');
+    expect(report).toContain('legacy_shape=assessment-drafts/{uuid-v4}/{file} age=over-90 referenced_count=1 referenced_size_bytes=64 orphaned_count=0 orphaned_size_bytes=0');
+    expect(report).not.toContain('private-legacy-reference.pdf');
+  });
+
+  it('deletes an unreferenced legacy draft older than 30 days and preserves one at 29 days', async () => {
+    const expired = `assessment-drafts/123e4567-e89b-42d3-a456-426614174000/expired-private.pdf`;
+    const recent = `assessment-drafts/123e4567-e89b-42d3-a456-426614174001/recent-private.pdf`;
+    const deps = defaultDeps([blob(expired, 31, 51), blob(recent, 29, 24)]);
+
+    const result = await purgeOrphanedAssessmentBlobs({ now: NOW, apply: true, batchLimit: 5 }, deps);
+    const report = formatOrphanedBlobPurgeReport(result, true);
+
+    expect(deps.delete).toHaveBeenCalledTimes(1);
+    expect(deps.delete).toHaveBeenCalledWith(expired);
+    expect(result.matrix['31-90'].b).toEqual({ count: 1, sizeBytes: 51 });
+    expect(result.matrix['0-30'].c).toEqual({ count: 1, sizeBytes: 24 });
+    expect(result.deleted).toBe(1);
+    expect(result.deferred).toBe(0);
+    expect(report).toContain('legacy_shape=assessment-drafts/{uuid-v4}/{file} age=0-30 referenced_count=0 referenced_size_bytes=0 orphaned_count=1 orphaned_size_bytes=24');
+    expect(report).toContain('legacy_shape=assessment-drafts/{uuid-v4}/{file} age=31-90 referenced_count=0 referenced_size_bytes=0 orphaned_count=1 orphaned_size_bytes=51');
+    expect(report).not.toContain('expired-private.pdf');
+    expect(report).not.toContain('recent-private.pdf');
+  });
+
+  it('rechecks both stored path forms immediately before deleting a legacy draft', async () => {
+    const legacy = `assessment-drafts/${BATCH}/becomes-referenced.pdf`;
+    const deps = defaultDeps([blob(legacy, 31, 73)]);
+    deps.findReferencedPaths
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([`blob:${legacy}`]);
+
+    const result = await purgeOrphanedAssessmentBlobs({ now: NOW, apply: true }, deps);
+
+    expect(deps.findReferencedPaths).toHaveBeenCalledTimes(2);
+    expect(deps.findReferencedPaths).toHaveBeenNthCalledWith(2, [legacy, `blob:${legacy}`]);
+    expect(deps.delete).not.toHaveBeenCalled();
+    expect(result.skippedReferenced).toBe(1);
+    expect(result.matrix['31-90'].b).toEqual({ count: 0, sizeBytes: 0 });
+    expect(result.matrix['31-90']['a-legacy']).toEqual({ count: 1, sizeBytes: 73 });
+  });
+
+  it('keeps two-segment, five-segment, and invalid-UUID forms in class d', async () => {
+    const paths = [
+      'assessment-drafts/123e4567-e89b-42d3-a456-426614174000',
+      'assessment-drafts/123e4567-e89b-42d3-a456-426614174000/extra/segment/file.pdf',
+      'assessment-drafts/not-a-uuid/file.pdf',
+      'assessment-drafts/123e4567-e89b-42d3-a456-426614174000/file..pdf',
+      'assessment-drafts/123e4567-e89b-42d3-a456-426614174000/',
+    ];
+    const deps = defaultDeps(paths.map((path) => blob(path, 120, 9)));
+
+    const result = await purgeOrphanedAssessmentBlobs({ now: NOW, apply: true }, deps);
+    const report = formatOrphanedBlobPurgeReport(result, true);
+
+    expect(result.matrix['over-90'].d).toEqual({ count: 5, sizeBytes: 45 });
+    expect(result.candidateCount).toBe(0);
+    expect(deps.delete).not.toHaveBeenCalled();
+    for (const path of paths) expect(report).not.toContain(path);
+  });
 });

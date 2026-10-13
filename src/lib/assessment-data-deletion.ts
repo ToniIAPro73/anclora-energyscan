@@ -109,16 +109,22 @@ export async function purgeExpiredAssessmentData(now: Date | number = Date.now()
     : {
       scanned: 0,
       matrix: {
-        '0-30': { a: { count: 0, sizeBytes: 0 }, b: { count: 0, sizeBytes: 0 }, c: { count: 0, sizeBytes: 0 }, d: { count: 0, sizeBytes: 0 } },
-        '31-90': { a: { count: 0, sizeBytes: 0 }, b: { count: 0, sizeBytes: 0 }, c: { count: 0, sizeBytes: 0 }, d: { count: 0, sizeBytes: 0 } },
-        'over-90': { a: { count: 0, sizeBytes: 0 }, b: { count: 0, sizeBytes: 0 }, c: { count: 0, sizeBytes: 0 }, d: { count: 0, sizeBytes: 0 } },
+        '0-30': { a: { count: 0, sizeBytes: 0 }, 'a-legacy': { count: 0, sizeBytes: 0 }, b: { count: 0, sizeBytes: 0 }, c: { count: 0, sizeBytes: 0 }, d: { count: 0, sizeBytes: 0 } },
+        '31-90': { a: { count: 0, sizeBytes: 0 }, 'a-legacy': { count: 0, sizeBytes: 0 }, b: { count: 0, sizeBytes: 0 }, c: { count: 0, sizeBytes: 0 }, d: { count: 0, sizeBytes: 0 } },
+        'over-90': { a: { count: 0, sizeBytes: 0 }, 'a-legacy': { count: 0, sizeBytes: 0 }, b: { count: 0, sizeBytes: 0 }, c: { count: 0, sizeBytes: 0 }, d: { count: 0, sizeBytes: 0 } },
       },
       shapes: [],
+      legacyShape: [
+        { ageBand: '0-30', referenced: { count: 0, sizeBytes: 0 }, orphaned: { count: 0, sizeBytes: 0 } },
+        { ageBand: '31-90', referenced: { count: 0, sizeBytes: 0 }, orphaned: { count: 0, sizeBytes: 0 } },
+        { ageBand: 'over-90', referenced: { count: 0, sizeBytes: 0 }, orphaned: { count: 0, sizeBytes: 0 } },
+      ],
       candidateCount: 0,
       batchLimit: 0,
       attempted: 0,
       deleted: 0,
       failed: 0,
+      skippedReferenced: 0,
       deferred: 0,
     } satisfies OrphanedBlobPurgeResult;
   return { considered: expired.length, deleted, failed, orphanedBlobs };

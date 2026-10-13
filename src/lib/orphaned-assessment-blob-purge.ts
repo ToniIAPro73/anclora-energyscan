@@ -11,11 +11,16 @@ const UUID_V4_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}
 const ASSESSMENT_ID_PATTERN = /^c[a-z0-9]{24}$/i;
 
 export type BlobPurgeAgeBand = '0-30' | '31-90' | 'over-90';
-export type BlobPurgeObjectType = 'a' | 'b' | 'c' | 'd';
+export type BlobPurgeObjectType = 'a' | 'a-legacy' | 'b' | 'c' | 'd';
 
 export type BlobPurgeCell = { count: number; sizeBytes: number };
 export type BlobPurgeMatrix = Record<BlobPurgeAgeBand, Record<BlobPurgeObjectType, BlobPurgeCell>>;
 export type BlobPurgeShapeCell = BlobPurgeCell & { shape: string; segmentCount: number; ageBand: BlobPurgeAgeBand };
+export type BlobPurgeLegacyShapeCell = {
+  ageBand: BlobPurgeAgeBand;
+  referenced: BlobPurgeCell;
+  orphaned: BlobPurgeCell;
+};
 
 export type ListedAssessmentBlob = {
   pathname: string;
@@ -33,11 +38,13 @@ export type OrphanedBlobPurgeResult = {
   scanned: number;
   matrix: BlobPurgeMatrix;
   shapes: BlobPurgeShapeCell[];
+  legacyShape: BlobPurgeLegacyShapeCell[];
   candidateCount: number;
   batchLimit: number;
   attempted: number;
   deleted: number;
   failed: number;
+  skippedReferenced: number;
   deferred: number;
 };
 
@@ -57,10 +64,19 @@ export type OrphanedBlobPurgeDeps = {
 function emptyMatrix(): BlobPurgeMatrix {
   const cell = (): BlobPurgeCell => ({ count: 0, sizeBytes: 0 });
   return {
-    '0-30': { a: cell(), b: cell(), c: cell(), d: cell() },
-    '31-90': { a: cell(), b: cell(), c: cell(), d: cell() },
-    'over-90': { a: cell(), b: cell(), c: cell(), d: cell() },
+    '0-30': { a: cell(), 'a-legacy': cell(), b: cell(), c: cell(), d: cell() },
+    '31-90': { a: cell(), 'a-legacy': cell(), b: cell(), c: cell(), d: cell() },
+    'over-90': { a: cell(), 'a-legacy': cell(), b: cell(), c: cell(), d: cell() },
   };
+}
+
+function emptyLegacyShape(): BlobPurgeLegacyShapeCell[] {
+  const cell = (): BlobPurgeCell => ({ count: 0, sizeBytes: 0 });
+  return [
+    { ageBand: '0-30', referenced: cell(), orphaned: cell() },
+    { ageBand: '31-90', referenced: cell(), orphaned: cell() },
+    { ageBand: 'over-90', referenced: cell(), orphaned: cell() },
+  ];
 }
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -113,6 +129,14 @@ export function isEnergyScanAssessmentBlobPath(pathname: string): boolean {
   return false;
 }
 
+export function isLegacyEnergyScanDraftBlobPath(pathname: string): boolean {
+  if (!pathname || pathname.startsWith('/') || pathname.includes('\\')) return false;
+  const segments = pathname.split('/');
+  if (segments.length !== 3 || segments[0] !== 'assessment-drafts') return false;
+  const [, id, filename] = segments;
+  return UUID_V4_PATTERN.test(id) && filename.length > 0 && filename !== '.' && filename !== '..' && !filename.includes('..');
+}
+
 function getAgeBand(ageMs: number): BlobPurgeAgeBand {
   const ageDays = Math.ceil(Math.max(0, ageMs) / DAY_MS);
   if (ageDays <= 30) return '0-30';
@@ -151,6 +175,7 @@ export async function purgeOrphanedAssessmentBlobs(
   if (!Number.isFinite(nowMs)) throw new Error('Blob purge date is invalid.');
   const batchLimit = checkedBatchLimit(options.batchLimit);
   const matrix = emptyMatrix();
+  const legacyShape = emptyLegacyShape();
   const shapeCells = new Map<string, BlobPurgeShapeCell>();
   const candidates: ListedAssessmentBlob[] = [];
   let scanned = 0;
@@ -176,13 +201,23 @@ export async function purgeOrphanedAssessmentBlobs(
         scanned += 1;
         const ageMs = nowMs - blob.uploadedAt.getTime();
         const ageBand = getAgeBand(ageMs);
-        const recognizedShape = isEnergyScanAssessmentBlobPath(blob.pathname);
+        const legacyShapePath = isLegacyEnergyScanDraftBlobPath(blob.pathname);
+        const recognizedShape = legacyShapePath || isEnergyScanAssessmentBlobPath(blob.pathname);
         const referenced = referencedPaths.has(blob.pathname);
         const expiredOrphan = !referenced && ageMs > ASSESSMENT_RETENTION_MS;
-        const type: BlobPurgeObjectType = !recognizedShape ? 'd' : referenced ? 'a' : expiredOrphan ? 'b' : 'c';
+        const type: BlobPurgeObjectType = !recognizedShape ? 'd' : referenced ? legacyShapePath ? 'a-legacy' : 'a' : expiredOrphan ? 'b' : 'c';
         const cell = matrix[ageBand][type];
         cell.count += 1;
         cell.sizeBytes += blob.size;
+
+        if (legacyShapePath) {
+          const stats = legacyShape.find((entry) => entry.ageBand === ageBand);
+          const target = referenced ? stats?.referenced : stats?.orphaned;
+          if (target) {
+            target.count += 1;
+            target.sizeBytes += blob.size;
+          }
+        }
 
         const { shape, segmentCount } = getSafeBlobShape(blob.pathname);
         const shapeKey = `${ageBand}:${shape}`;
@@ -205,9 +240,41 @@ export async function purgeOrphanedAssessmentBlobs(
 
   let deleted = 0;
   let failed = 0;
+  let skippedReferenced = 0;
+  let attempted = 0;
   if (options.apply) {
     for (const candidate of candidates) {
+      const candidateAgeBand = getAgeBand(nowMs - candidate.uploadedAt.getTime());
+      let references: string[];
       try {
+        references = await deps.findReferencedPaths([candidate.pathname, `blob:${candidate.pathname}`]);
+      } catch (error) {
+        failed += 1;
+        deps.onDeleteFailure?.(toBlobPurgeDiagnostic('CLASSIFY', error));
+        continue;
+      }
+      if (new Set(references.map(normalizeStoredPath)).has(candidate.pathname)) {
+        skippedReferenced += 1;
+        const legacyShapePath = isLegacyEnergyScanDraftBlobPath(candidate.pathname);
+        const oldCell = matrix[candidateAgeBand].b;
+        oldCell.count -= 1;
+        oldCell.sizeBytes -= candidate.size;
+        const newCell = matrix[candidateAgeBand][legacyShapePath ? 'a-legacy' : 'a'];
+        newCell.count += 1;
+        newCell.sizeBytes += candidate.size;
+        if (legacyShapePath) {
+          const stats = legacyShape.find((entry) => entry.ageBand === candidateAgeBand);
+          if (stats) {
+            stats.orphaned.count -= 1;
+            stats.orphaned.sizeBytes -= candidate.size;
+            stats.referenced.count += 1;
+            stats.referenced.sizeBytes += candidate.size;
+          }
+        }
+        continue;
+      }
+      try {
+        attempted += 1;
         await deps.delete(candidate.pathname);
         deleted += 1;
       } catch (error) {
@@ -217,18 +284,19 @@ export async function purgeOrphanedAssessmentBlobs(
     }
   }
 
-  const attempted = candidates.length;
   return {
     scanned,
     matrix,
     shapes: Array.from(shapeCells.values()).sort((left, right) =>
       left.shape.localeCompare(right.shape) || left.ageBand.localeCompare(right.ageBand)),
+    legacyShape,
     candidateCount,
     batchLimit,
     attempted,
     deleted,
     failed,
-    deferred: Math.max(0, candidateCount - attempted),
+    skippedReferenced,
+    deferred: Math.max(0, candidateCount - candidates.length),
   };
 }
 
@@ -237,7 +305,7 @@ export function formatOrphanedBlobPurgeReport(
   apply: boolean,
 ): string {
   const ageBands: BlobPurgeAgeBand[] = ['0-30', '31-90', 'over-90'];
-  const types: BlobPurgeObjectType[] = ['a', 'b', 'c', 'd'];
+  const types: BlobPurgeObjectType[] = ['a', 'a-legacy', 'b', 'c', 'd'];
   const lines = [`mode=${apply ? 'APPLY' : 'SIMULATION'}`, `batch_limit=${result.batchLimit}`];
   for (const ageBand of ageBands) {
     for (const type of types) {
@@ -248,6 +316,9 @@ export function formatOrphanedBlobPurgeReport(
   for (const shape of result.shapes) {
     lines.push(`shape=${shape.shape} segments=${shape.segmentCount} count=${shape.count} size_bytes=${shape.sizeBytes} age=${shape.ageBand}`);
   }
-  lines.push(`candidates=${result.candidateCount} attempted=${result.attempted} deleted=${result.deleted} failed=${result.failed} deferred=${result.deferred}`);
+  for (const legacy of result.legacyShape) {
+    lines.push(`legacy_shape=assessment-drafts/{uuid-v4}/{file} age=${legacy.ageBand} referenced_count=${legacy.referenced.count} referenced_size_bytes=${legacy.referenced.sizeBytes} orphaned_count=${legacy.orphaned.count} orphaned_size_bytes=${legacy.orphaned.sizeBytes}`);
+  }
+  lines.push(`candidates=${result.candidateCount} attempted=${result.attempted} deleted=${result.deleted} failed=${result.failed} skipped_referenced=${result.skippedReferenced} deferred=${result.deferred}`);
   return lines.join('\n');
 }
