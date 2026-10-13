@@ -1,6 +1,6 @@
 import { del, list } from '@vercel/blob';
 import { prisma } from './prisma';
-import { BlobPurgeStageError, type BlobPurgeDiagnostic, type BlobPurgeStage } from './blob-purge-diagnostics';
+import { BlobPurgeStageError, isBlobPurgeStageError, type BlobPurgeDiagnostic, type BlobPurgeStage } from './blob-purge-diagnostics';
 import {
   DEFAULT_BLOB_PURGE_BATCH_LIMIT,
   MAX_BLOB_PURGE_BATCH_LIMIT,
@@ -41,13 +41,17 @@ export async function checkOrphanedBlobPurgeDatabase(
   await runOrphanedAssessmentBlobPurge({ checkOnly: true }, deps);
 }
 
-async function runDatabasePreflight(deps: OrphanedBlobPurgeRuntimeDeps): Promise<void> {
+async function runDatabasePreflight(
+  deps: OrphanedBlobPurgeRuntimeDeps,
+  onStage: (stage: BlobPurgeStage) => void,
+): Promise<void> {
   let stage: BlobPurgeStage = 'DB_CONNECT';
   try {
+    onStage(stage);
     await deps.connect();
     stage = 'DB_QUERY';
+    onStage(stage);
     await deps.query();
-    stage = 'DB_SCHEMA_CHECK';
     await deps.verifyAttachmentReadSchema();
   } catch (error) {
     throw new BlobPurgeStageError(stage, error);
@@ -93,14 +97,13 @@ async function runWithDiagnostics(
     const normalizedOptions = checkOnly
       ? purgeOptions
       : { ...purgeOptions, batchLimit: purgeOptions.batchLimit ?? getConfiguredBlobPurgeBatchLimit() };
-    stage = 'DB_CONNECT';
-    await runDatabasePreflight(deps);
+    await runDatabasePreflight(deps, (nextStage) => { stage = nextStage; });
     stage = 'PURGE';
     if (checkOnly) return;
     return await purgeOrphanedAssessmentBlobs(
       normalizedOptions,
       {
-        list: async ({ prefix, cursor, limit }) => {
+        list: async function listAssessmentBlobs({ prefix, cursor, limit }) {
           stage = 'BLOB_LIST';
           try {
             const page = await deps.list({ prefix, cursor, limit, mode: 'expanded' });
@@ -113,15 +116,15 @@ async function runWithDiagnostics(
             throw new BlobPurgeStageError('BLOB_LIST', error);
           }
         },
-        findReferencedPaths: async (pathnames) => {
-          stage = 'DB_CLASSIFY';
+        findReferencedPaths: async function classifyAssessmentAttachments(pathnames) {
+          stage = 'CLASSIFY';
           try {
             return await deps.findReferencedPaths(pathnames);
           } catch (error) {
-            throw new BlobPurgeStageError('DB_CLASSIFY', error);
+            throw new BlobPurgeStageError('CLASSIFY', error);
           }
         },
-        delete: async (pathname) => {
+        delete: async function deleteAssessmentBlob(pathname) {
           stage = 'DELETE';
           try {
             return await deps.delete(pathname);
@@ -133,7 +136,7 @@ async function runWithDiagnostics(
       },
     );
   } catch (error) {
-    if (error instanceof BlobPurgeStageError) throw error;
+    if (isBlobPurgeStageError(error)) throw error;
     throw new BlobPurgeStageError(stage, error);
   }
 }

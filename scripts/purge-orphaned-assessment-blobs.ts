@@ -1,6 +1,6 @@
 import { formatOrphanedBlobPurgeReport } from '../src/lib/orphaned-assessment-blob-purge';
 import { getConfiguredBlobPurgeBatchLimit, runOrphanedAssessmentBlobPurge } from '../src/lib/orphaned-assessment-blob-purge-runtime';
-import { BlobPurgeStageError, formatBlobPurgeDiagnostic, toBlobPurgeDiagnostic, type BlobPurgeStage } from '../src/lib/blob-purge-diagnostics';
+import { formatBlobPurgeDiagnostic, isBlobPurgeStageError, toBlobPurgeDiagnostic, type BlobPurgeStage } from '../src/lib/blob-purge-diagnostics';
 
 function parseArgs(args: string[]) {
   let apply = false;
@@ -57,7 +57,7 @@ async function main() {
     console.log(formatOrphanedBlobPurgeReport(result, apply));
     if (result.failed > 0) process.exitCode = 1;
   } catch (error) {
-    const diagnostic = error instanceof BlobPurgeStageError
+    const diagnostic = isBlobPurgeStageError(error)
       ? error.diagnostic
       : toBlobPurgeDiagnostic(stage, error);
     console.error(formatBlobPurgeDiagnostic(diagnostic));

@@ -1,4 +1,4 @@
-export type BlobPurgeStage = 'CONFIGURATION' | 'DB_CONNECT' | 'DB_QUERY' | 'DB_SCHEMA_CHECK' | 'BLOB_LIST' | 'DB_CLASSIFY' | 'DELETE' | 'PURGE';
+export type BlobPurgeStage = 'CONFIGURATION' | 'DB_CONNECT' | 'DB_QUERY' | 'BLOB_LIST' | 'CLASSIFY' | 'DELETE' | 'PURGE';
 
 export type BlobPurgeDiagnostic = {
   stage: BlobPurgeStage;
@@ -7,11 +7,12 @@ export type BlobPurgeDiagnostic = {
   causeCode?: string;
   code?: string;
   httpStatus?: number;
+  frames?: string[];
 };
 
 const SAFE_ERROR_CLASSES = new Set([
   'Error', 'TypeError', 'RangeError', 'AggregateError', 'AbortError', 'FetchError', 'SocketError',
-  'BlobError', 'PrismaClientInitializationError', 'PrismaClientKnownRequestError',
+  'BlobError', 'BlobAccessError', 'BlobClientTokenExpiredError', 'PrismaClientInitializationError', 'PrismaClientKnownRequestError',
   'PrismaClientUnknownRequestError', 'PrismaClientRustPanicError', 'PrismaClientValidationError',
   'DatabaseError', 'PostgresError',
 ]);
@@ -37,6 +38,30 @@ function getErrorChain(error: unknown): Array<Record<string, unknown>> {
     current = item.cause;
   }
   return chain;
+}
+
+function getProjectFrames(chain: Array<Record<string, unknown>>): string[] {
+  const frames: string[] = [];
+  for (const item of [...chain].reverse()) {
+    if (typeof item.stack !== 'string') continue;
+    for (const line of item.stack.split('\n')) {
+      const match = line.match(/^\s*at (?:(.*?) \()?(.+?):(\d+):\d+\)?\s*$/);
+      if (!match) continue;
+      const rawPath = match[2];
+      if (rawPath.includes('/node_modules/')) continue;
+      const projectPathMatch = rawPath.match(/(?:^|\/)(src|scripts)\/(.+)$/);
+      if (!projectPathMatch) continue;
+      const path = `${projectPathMatch[1]}/${projectPathMatch[2]}`;
+      if (path.includes('..') || path.includes('\\') || path.split('/').some((part) => !/^[A-Za-z0-9_.-]+$/.test(part))) continue;
+      const fn = match[1] || '<anonymous>';
+      if (['step', 'rejected', 'fulfilled', 'Object.throw', 'Object.new'].includes(fn)) continue;
+      if (!/^[A-Za-z0-9_$<>.]+$/.test(fn)) continue;
+      const frame = `${path}::${fn}:line=${Number(match[3])}`;
+      if (!frames.includes(frame)) frames.push(frame);
+      if (frames.length === 3) return frames;
+    }
+  }
+  return frames;
 }
 
 function getClassName(chain: Array<Record<string, unknown>>): string {
@@ -66,7 +91,7 @@ function getSafeCode(chain: Array<Record<string, unknown>>): string | undefined 
 }
 
 function classifyCode(stage: BlobPurgeStage, chain: Array<Record<string, unknown>>, status?: number): string {
-  const isDatabase = stage === 'DB_CONNECT' || stage === 'DB_QUERY' || stage === 'DB_SCHEMA_CHECK' || stage === 'DB_CLASSIFY';
+  const isDatabase = stage === 'DB_CONNECT' || stage === 'DB_QUERY' || stage === 'CLASSIFY';
   const codes = chain.flatMap((item) => [item.code, item.errorCode]).filter(isSafeErrorCode);
   const messages = chain.map((item) => typeof item.message === 'string' ? item.message : '').join(' ').toLowerCase();
 
@@ -78,7 +103,7 @@ function classifyCode(stage: BlobPurgeStage, chain: Array<Record<string, unknown
   if (isDatabase && ((status === 401 || status === 403) || codes.some((code) => ['P1000', '28P01'].includes(code)) || /password authentication failed|authentication failed|invalid database credentials|credentials? rejected|sasl/i.test(messages))) {
     return 'ERR_DB_AUTH';
   }
-  if (!isDatabase && ((status === 401 || status === 403) || /invalid token|token rejected|unauthorized|forbidden|credentials? rejected|authentication failed/i.test(messages))) {
+  if (!isDatabase && ((status === 401 || status === 403) || /invalid token|token rejected|unauthorized|forbidden|access denied|credentials? rejected|authentication failed/i.test(messages))) {
     return 'ERR_BLOB_AUTH';
   }
   if (codes.some((code) => ['ETIMEDOUT', 'P1002', 'P1008', 'P2024', '57014'].includes(code)) || /timed? ?out|timeout/i.test(messages)) {
@@ -96,17 +121,18 @@ function classifyCode(stage: BlobPurgeStage, chain: Array<Record<string, unknown
     return isDatabase ? 'ERR_DB_SSL' : 'ERR_BLOB_SSL';
   }
   if (status !== undefined) return `ERR_HTTP_${status}`;
-  if (stage === 'DB_CONNECT' || stage === 'DB_QUERY' || stage === 'DB_SCHEMA_CHECK') return 'ERR_DB_PREFLIGHT';
+  if (stage === 'DB_CONNECT' || stage === 'DB_QUERY') return 'ERR_DB_PREFLIGHT';
   return getSafeCode(chain) ?? 'ERR_PURGE_STAGE';
 }
 
 export function toBlobPurgeDiagnostic(stage: BlobPurgeStage, error: unknown): BlobPurgeDiagnostic {
-  if (error instanceof BlobPurgeStageError) return error.diagnostic;
+  if (isBlobPurgeStageError(error)) return error.diagnostic;
   const chain = getErrorChain(error);
   const httpStatus = getHttpStatus(chain);
   const cause = chain.length > 1 ? chain[1] : undefined;
   const causeClass = cause ? getClassName(chain.slice(1)) : undefined;
   const causeCode = cause ? getSafeCode([cause]) : undefined;
+  const frames = getProjectFrames(chain);
   return {
     stage,
     errorClass: getClassName(chain),
@@ -114,6 +140,7 @@ export function toBlobPurgeDiagnostic(stage: BlobPurgeStage, error: unknown): Bl
     ...(causeCode ? { causeCode } : {}),
     code: classifyCode(stage, chain, httpStatus),
     ...(httpStatus === undefined ? {} : { httpStatus }),
+    ...(frames.length ? { frames } : {}),
   };
 }
 
@@ -125,8 +152,23 @@ export class BlobPurgeStageError extends Error {
     super('Blob purge stage failed.', { cause: error });
     this.name = 'BlobPurgeStageError';
     this.cause = error;
-    this.diagnostic = toBlobPurgeDiagnostic(stage, error);
+    const diagnostic = toBlobPurgeDiagnostic(stage, error);
+    const wrapperFrames = getProjectFrames([{ stack: new Error().stack ?? '' }]);
+    this.diagnostic = {
+      ...diagnostic,
+      ...(diagnostic.frames || wrapperFrames.length
+        ? { frames: Array.from(new Set([...(diagnostic.frames ?? []), ...wrapperFrames])).slice(0, 3) }
+        : {}),
+    };
   }
+}
+
+export function isBlobPurgeStageError(error: unknown): error is BlobPurgeStageError {
+  if (!error || typeof error !== 'object') return false;
+  const candidate = error as { name?: unknown; diagnostic?: unknown };
+  if (candidate.name !== 'BlobPurgeStageError' || !candidate.diagnostic || typeof candidate.diagnostic !== 'object') return false;
+  const diagnostic = candidate.diagnostic as Partial<BlobPurgeDiagnostic>;
+  return typeof diagnostic.stage === 'string' && typeof diagnostic.errorClass === 'string';
 }
 
 export function formatBlobPurgeDiagnostic(diagnostic: BlobPurgeDiagnostic): string {
@@ -138,5 +180,6 @@ export function formatBlobPurgeDiagnostic(diagnostic: BlobPurgeDiagnostic): stri
   if (diagnostic.causeClass) fields.push(`cause_class=${diagnostic.causeClass}`);
   if (diagnostic.causeCode) fields.push(`cause_code=${diagnostic.causeCode}`);
   if (diagnostic.httpStatus !== undefined) fields.push(`http_status=${diagnostic.httpStatus}`);
+  if (diagnostic.frames) fields.push(...diagnostic.frames.map((frame) => `frame=${frame}`));
   return `Blob purge failed. ${fields.join(' ')}`;
 }

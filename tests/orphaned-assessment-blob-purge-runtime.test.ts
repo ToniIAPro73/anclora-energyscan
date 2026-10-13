@@ -81,6 +81,29 @@ describe('orphaned assessment Blob purge diagnostics', () => {
     expect(output).not.toContain(SENTINEL_PATH);
   });
 
+  it('includes only three sanitized project stack frames and never error text', () => {
+    const error = new Error(`leak ${SENTINEL_SECRET} ${SENTINEL_PATH}`);
+    error.stack = [
+      `Error: leak ${SENTINEL_SECRET} ${SENTINEL_PATH}`,
+      '    at runDatabasePreflight (/Users/toni/Developer/anclora/anclora-energyscan/src/lib/orphaned-assessment-blob-purge-runtime.ts:74:11)',
+      '    at PrismaClient.$queryRaw (/repo/node_modules/@prisma/client/index.js:99:3)',
+      '    at runWithDiagnostics (/Users/toni/Developer/anclora/anclora-energyscan/src/lib/orphaned-assessment-blob-purge-runtime.ts:120:9)',
+      '    at main (/Users/toni/Developer/anclora/anclora-energyscan/scripts/purge-orphaned-assessment-blobs.ts:55:5)',
+      '    at leakedFunction (/Users/toni/private/path.ts:1:1)',
+    ].join('\n');
+    const output = formatBlobPurgeDiagnostic(toBlobPurgeDiagnostic('DB_QUERY', error));
+
+    expect(output).toContain('frame=src/lib/orphaned-assessment-blob-purge-runtime.ts::runDatabasePreflight:line=74');
+    expect(output).toContain('frame=src/lib/orphaned-assessment-blob-purge-runtime.ts::runWithDiagnostics:line=120');
+    expect(output).toContain('frame=scripts/purge-orphaned-assessment-blobs.ts::main:line=55');
+    expect(output.match(/frame=/g)).toHaveLength(3);
+    expect(output).not.toContain(SENTINEL_SECRET);
+    expect(output).not.toContain(SENTINEL_PATH);
+    expect(output).not.toContain('/Users/toni');
+    expect(output).not.toContain('node_modules');
+    expect(output).not.toContain('private/path');
+  });
+
   it('checks DB connection and executes a trivial query without invoking Blob operations', async () => {
     const deps = createDeps();
 
@@ -153,10 +176,10 @@ describe('orphaned assessment Blob purge diagnostics', () => {
 
   it.each([
     ['DB_QUERY', 'query', 'ERR_DB_PREFLIGHT'],
-    ['DB_SCHEMA_CHECK', 'verifyAttachmentReadSchema', 'ERR_DB_SCHEMA'],
+    ['DB_QUERY', 'verifyAttachmentReadSchema', 'ERR_DB_SCHEMA'],
   ] as const)('identifies a failed read-only preflight step: %s', async (stage, method, expectedCode) => {
     const deps = createDeps();
-    const error = new Error(stage === 'DB_SCHEMA_CHECK' ? 'column path does not exist' : 'synthetic query failure');
+    const error = new Error(method === 'verifyAttachmentReadSchema' ? 'column path does not exist' : 'synthetic query failure');
     deps[method].mockRejectedValue(error);
 
     const output = await checkOrphanedBlobPurgeDatabase(deps).catch(rejectionOutput);
@@ -194,7 +217,19 @@ describe('orphaned assessment Blob purge diagnostics', () => {
     expect(output).not.toContain(SENTINEL_PATH);
   });
 
-  it('reports DB_CLASSIFY schema errors without table, token, or path details', async () => {
+  it('maps Vercel Blob access denial to a safe auth code', () => {
+    const error = Object.assign(new Error(`${SENTINEL_SECRET} Access denied, provide a valid token at ${SENTINEL_PATH}`), {
+      name: 'BlobAccessError',
+    });
+    const output = formatBlobPurgeDiagnostic(toBlobPurgeDiagnostic('BLOB_LIST', error));
+
+    expect(output).toContain('error_class=BlobAccessError');
+    expect(output).toContain('code=ERR_BLOB_AUTH');
+    expect(output).not.toContain(SENTINEL_SECRET);
+    expect(output).not.toContain(SENTINEL_PATH);
+  });
+
+  it('reports CLASSIFY schema errors without table, token, or path details', async () => {
     const deps = createDeps();
     const error = Object.assign(new Error(`${SENTINEL_SECRET}: column missing on ${SENTINEL_PATH}`), {
       name: 'PrismaClientKnownRequestError',
@@ -204,7 +239,7 @@ describe('orphaned assessment Blob purge diagnostics', () => {
 
     const output = await runOrphanedAssessmentBlobPurge({ batchLimit: 1 }, deps).catch(rejectionOutput);
 
-    expect(output).toContain('stage=DB_CLASSIFY');
+    expect(output).toContain('stage=CLASSIFY');
     expect(output).toContain('error_class=PrismaClientKnownRequestError');
     expect(output).toContain('code=ERR_DB_SCHEMA');
     expect(output).not.toContain(SENTINEL_SECRET);
@@ -242,8 +277,8 @@ describe('orphaned assessment Blob purge diagnostics', () => {
   it.each([
     ['DB_CONNECT', 'connection timed out', 'ETIMEDOUT', 'ERR_DB_TIMEOUT'],
     ['BLOB_LIST', 'request timeout', undefined, 'ERR_BLOB_TIMEOUT'],
-    ['DB_CLASSIFY', 'SSL certificate failure', 'ERR_SSL_CERTIFICATE', 'ERR_DB_SSL'],
-    ['DB_CLASSIFY', 'database operation failed', '42P01', 'ERR_DB_SCHEMA'],
+    ['CLASSIFY', 'SSL certificate failure', 'ERR_SSL_CERTIFICATE', 'ERR_DB_SSL'],
+    ['CLASSIFY', 'database operation failed', '42P01', 'ERR_DB_SCHEMA'],
   ] as const)('maps known %s failures to a safe code', (stage, message, code, expected) => {
     const error = Object.assign(new Error(`${message}: ${SENTINEL_SECRET} ${SENTINEL_PATH}`), code ? { code } : {});
     const diagnostic = toBlobPurgeDiagnostic(stage, error);
