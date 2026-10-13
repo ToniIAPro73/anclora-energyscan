@@ -3,7 +3,7 @@ import { prisma } from './prisma';
 import type { Prisma, PrismaClient } from '@prisma/client';
 import { deleteStoredAttachment } from './blob-storage';
 import { getAssessmentRetentionCutoff } from './assessment-retention';
-import type { OrphanedBlobPurgeResult } from './orphaned-assessment-blob-purge';
+import { isLegacyEnergyScanDraftBlobPath, type OrphanedBlobPurgeResult } from './orphaned-assessment-blob-purge';
 
 type AssessmentDataDeps = {
   prisma: PrismaClient;
@@ -25,7 +25,8 @@ export function validateAssessmentAttachmentPath(pathValue: string, assessmentId
   if (pathValue.startsWith('blob:')) {
     const path = pathValue.slice(5);
     const allowed = path.startsWith(`assessments/${assessmentId}/`) ||
-      Boolean(userId && path.startsWith(`assessment-drafts/${userId}/`));
+      Boolean(userId && path.startsWith(`assessment-drafts/${userId}/`)) ||
+      isLegacyEnergyScanDraftBlobPath(path);
     if (!path || path.startsWith('/') || path.split('/').includes('..') || !allowed) {
       throw new Error('Unexpected attachment storage path.');
     }

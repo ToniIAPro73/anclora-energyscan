@@ -79,6 +79,14 @@ describe('assessment data deletion and retention purge', () => {
     expect(() => validateAssessmentAttachmentPath('blob:assessment-drafts/owner_fixture/../other/file.png', 'assessment_fixture', 'owner_fixture')).toThrow();
   });
 
+  it('accepts a strict legacy draft path and rejects malformed legacy-like paths', () => {
+    const legacyId = '3f2b8c1e-5a4d-4e6f-9b7a-1c2d3e4f5a6b';
+    expect(() => validateAssessmentAttachmentPath(`blob:assessment-drafts/${legacyId}/file.png`, 'assessment_fixture', 'owner_fixture')).not.toThrow();
+    expect(() => validateAssessmentAttachmentPath(`blob:assessment-drafts/${legacyId}/../x.png`, 'assessment_fixture', 'owner_fixture')).toThrow();
+    expect(() => validateAssessmentAttachmentPath(`blob:assessment-drafts/${legacyId}/a/b.png`, 'assessment_fixture', 'owner_fixture')).toThrow();
+    expect(() => validateAssessmentAttachmentPath('blob:assessment-drafts/not-a-uuid/file.png', 'assessment_fixture', 'owner_fixture')).toThrow();
+  });
+
   it('purges only records whose parent creation date is at or before the 30-day cutoff', async () => {
     const { deps, prisma } = createDeps();
     prisma.assessment.findMany.mockResolvedValue([{ id: 'assessment_fixture', userId: 'owner_fixture' }]);
