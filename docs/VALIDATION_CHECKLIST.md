@@ -1,10 +1,10 @@
-# Checklist de validación — runbook de QA visual (2026-10-13)
+# Checklist de validación — runbook de QA visual y referencias de agentes (2026-10-13)
 
 > Este fichero se sobrescribe en cada entrega. El historial queda en Git.
 
 **Repositorio:** anclora-energyscan
 
-**Rama y commit:** development @ `40ac3d4` (base de esta entrega; SHA de documentación en Git)
+**Rama y commit:** development @ `bb1e9f4` (base de esta ampliación; SHA final en Git)
 
 **Entorno de validación:** localhost con variables `development` de Vercel y Preview protegido de `development`
 
@@ -14,6 +14,7 @@
 
 - Añade un runbook reproducible para QA visual en local y en el Preview protegido, con sesión QA, capturas y limpieza.
 - Añade una referencia al runbook en `AGENTS.md`.
+- Añade el mismo puntero fuera del bloque de ecosistema en `CLAUDE.md` y `GEMINI.md`.
 
 ## 2. Ya comprobado por el agente
 
@@ -29,6 +30,7 @@
 | Login y sesión Preview | Perfil `qa-es01`; `fetch('/api/auth/session')` con manejo de cuerpo vacío | PASS; HTTP 200, sesión autenticada; sin imprimir datos | `40ac3d4` |
 | Cierre y limpieza | `agent-browser --session ... close`; `Ctrl-C`; `unlink` de capturas y temporal OIDC | PASS; navegadores y servidor cerrados; temporales borrados | `40ac3d4` |
 | Datos de aplicación | Ninguna valoración ni adjunto creado durante esta validación visual | PASS; no hacía falta ejecutar teardown en esta sesión | `40ac3d4` |
+| Referencias de agentes | `rg -n 'Antes de cualquier prueba visual' AGENTS.md CLAUDE.md GEMINI.md` | PASS; cada archivo remite al runbook; los dos punteros añadidos están fuera del bloque de ecosistema | `bb1e9f4` |
 | Lint | `npm run lint` | PASS; `next lint` sin warnings ni errores | `40ac3d4` |
 | Typecheck | `npx tsc --noEmit` | PASS; sin errores | `40ac3d4` |
 
@@ -51,7 +53,7 @@ Marca cada punto. Un fallo en un punto marcado **[BLOQUEANTE]** impide promocion
 
 | # | Dónde | Pasos | Resultado esperado | Cuenta o configuración | Bloqueante |
 | --- | --- | --- | --- | --- | --- |
-| 1 | `docs/qa/visual-qa-runbook.md` | Lee el runbook completo y confirma que los comandos y resultados reflejan el flujo QA actual. | Comandos claros para local y Preview, con token OIDC oculto, sesión, capturas y limpieza. | Sin abrir ni imprimir archivos `.env*`. | Sí |
+| 1 | `AGENTS.md`, `CLAUDE.md`, `GEMINI.md` y `docs/qa/visual-qa-runbook.md` | Lee el runbook y confirma que los tres ficheros de instrucciones apuntan a él; verifica que los dos nuevos punteros están fuera del bloque `ANCLORA-ECOSYSTEM-CONTEXT`. | Claude Code, agy y los demás agentes reciben el mismo enlace al procedimiento. | Sin abrir ni imprimir archivos `.env*`. | Sí |
 | 2 | Local, `/auth` | Arranca con `vc env run -- sh -c 'AUTH_URL=http://localhost:3000 npm run dev'`; abre con agent-browser, rechaza opcionales y autentica con `qa-es01`. | Login correcto; `/api/auth/session` responde 200 y sesión autenticada. | Variables `development`; cuenta persistente QA. | Sí |
 | 3 | Preview de `development` | Sigue la renovación OIDC temporal del runbook, accede a `/auth`, rechaza cookies y entra con `qa-es01`. | No aparece Vercel Login; sesión autenticada y el fichero temporal se elimina. | Token fresco; no compartir su valor. | Sí |
 | 4 | Escritorio y móvil | Sigue los pasos de captura del runbook y revisa las imágenes guardadas temporalmente. | Capturas legibles a 1440×900 y 390×844, fuera del repositorio; temporales eliminados después. | Sesión QA. | No |
