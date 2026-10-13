@@ -174,3 +174,5 @@ VALIDATION_CHECKLIST_FILE=docs/VALIDATION_CHECKLIST.md
 ```
 
 Las credenciales de QA siguen el estándar de `ANCLORA_FLUJO_UNICO_V1.md` §5: cuenta persistente, credenciales en `.env.qa.local`, que se cargan sin imprimirlas.
+
+QA_TEARDOWN_TOOL=scripts/qa/teardown-qa-data.ts
