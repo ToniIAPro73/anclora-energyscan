@@ -1,0 +1,40 @@
+name: Purge expired assessments
+
+on:
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: purge-expired-assessments
+  cancel-in-progress: false
+
+jobs:
+  purge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Call purge endpoint
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          PRODUCTION_URL: ${{ vars.ENERGYSCAN_PRODUCTION_URL }}
+        run: |
+          if [ -z "$CRON_SECRET" ] || [ -z "$PRODUCTION_URL" ]; then
+            echo "Missing secret CRON_SECRET or variable ENERGYSCAN_PRODUCTION_URL" >&2
+            exit 1
+          fi
+          case "$PRODUCTION_URL" in
+            https://*) ;;
+            *) echo "ENERGYSCAN_PRODUCTION_URL must start with https://" >&2; exit 1 ;;
+          esac
+          status=$(curl --silent --show-error --max-time 120 \
+            --output response.json --write-out '%{http_code}' \
+            --request POST \
+            --header "Authorization: Bearer ${CRON_SECRET}" \
+            "${PRODUCTION_URL%/}/api/cron/purge-expired-assessments")
+          echo "http_status=${status}"
+          cat response.json
+          echo
+          [ "$status" = "200" ]
