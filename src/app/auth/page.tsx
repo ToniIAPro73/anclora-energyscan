@@ -4,8 +4,13 @@ import { getOAuthEnv } from '@/lib/auth-env';
 
 export const dynamic = 'force-dynamic';
 
-export default function AuthPage() {
+type AuthPageProps = {
+  searchParams?: { error?: string | string[] };
+};
+
+export default function AuthPage({ searchParams }: AuthPageProps) {
   const oauth = getOAuthEnv();
+  const authErrorCode = Array.isArray(searchParams?.error) ? searchParams.error[0] : searchParams?.error;
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-y-auto bg-[radial-gradient(circle_at_top,_rgba(0,220,130,0.12),_transparent_40%),linear-gradient(135deg,_rgba(2,6,23,1)_0%,_rgba(10,20,15,0.98)_50%,_rgba(5,15,10,0.96)_100%)] p-4 sm:p-6">
@@ -36,6 +41,7 @@ export default function AuthPage() {
             <AuthForm
               googleEnabled={oauth.google.enabled}
               githubEnabled={oauth.github.enabled}
+              authErrorCode={authErrorCode}
             />
           </div>
         </div>

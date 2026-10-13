@@ -7,17 +7,23 @@ import Link from 'next/link';
 import { Eye, EyeOff, GitBranch, Mail } from 'lucide-react';
 import { requestPasswordReset, signInWithEmail, signInWithProvider, signUpWithEmail } from './actions';
 import { usePreferences } from '@/components/AppPreferencesProvider';
+import { AuthErrorAlert } from './AuthErrorAlert';
+import { getAuthErrorMessageKey } from '@/lib/auth-errors';
+import { dictionaries } from '@/lib/i18n';
 
 type AuthFormProps = {
   googleEnabled: boolean;
   githubEnabled: boolean;
+  authErrorCode?: string;
 };
 
-export function AuthForm({ googleEnabled, githubEnabled }: AuthFormProps) {
+export function AuthForm({ googleEnabled, githubEnabled, authErrorCode }: AuthFormProps) {
   const [mode, setMode] = useState<'signin' | 'signup' | 'forgot'>('signin');
   const [showPassword, setShowPassword] = useState(false);
   const [providerStatus, setProviderStatus] = useState({ googleEnabled, githubEnabled });
   const { dictionary: t } = usePreferences();
+  const authErrorKey = authErrorCode ? getAuthErrorMessageKey(authErrorCode) : null;
+  const authErrorMessage = authErrorKey ? t[authErrorKey] || dictionaries.en[authErrorKey] : null;
   const [signInState, signInAction] = useFormState(signInWithEmail, {});
   const [signUpState, signUpAction] = useFormState(signUpWithEmail, {});
   const [resetState, resetAction] = useFormState(requestPasswordReset, {});
@@ -43,6 +49,7 @@ export function AuthForm({ googleEnabled, githubEnabled }: AuthFormProps) {
 
   return (
     <div className="px-6 pb-6 sm:px-8 sm:pb-8">
+      {authErrorMessage && <AuthErrorAlert message={authErrorMessage} />}
       <form action={mode === 'forgot' ? resetAction : mode === 'signin' ? signInAction : signUpAction} className="space-y-2.5">
         {mode === 'forgot' && (
           <p className="text-xs text-muted text-center mb-3">
