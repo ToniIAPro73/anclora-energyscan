@@ -1,48 +1,46 @@
-# Checklist de validación — diagnóstico de purga Blob
+# Checklist de validación — histogramas de formas Blob
 
 > Este fichero se sobrescribe en cada entrega. El historial queda en Git.
 
 **Rama:** `development`
 
-**SHA del código validado:** `921214ba26843fc92e14daff08c90ff2c4b622a1`
+**SHA del código validado:** `30c44e9fcd24893bc96321fa75c1e6ea643c3d55`
 
-**Datos/entorno:** base Neon consultada en modo lectura mediante `vc env run`; token Blob exclusivamente sintético. Sin `--apply`, sin borrados y sin cambios de esquema.
+**Datos/entorno:** pruebas focales con dobles y fixtures sintéticos. No se consultó Blob real, no se usó `--apply` y no se modificó la base de datos.
 
 ## 1. Qué cambió
 
-- El diagnóstico incluye hasta tres marcos del proyecto normalizados a rutas relativas, función y línea. Descarta mensajes, rutas absolutas, `node_modules` y marcos que no correspondan a `src/` o `scripts/`.
-- La detección de errores de etapa usa una guarda estructural para conservar la etapa original en el CLI compilado por ts-node.
-- Las etiquetas avanzan por `DB_CONNECT`, `DB_QUERY`, `BLOB_LIST`, `CLASSIFY` y `DELETE`. Las consultas de preflight (SELECT trivial y comprobación de esquema) quedan bajo `DB_QUERY`.
-- Se reconoce el rechazo de credenciales de Vercel Blob (`BlobAccessError` / “access denied”) como `ERR_BLOB_AUTH` sin imprimir el mensaje.
+- Las rutas bajo `assessment-drafts/` y `assessments/` que no coinciden con las formas reconocidas se cuentan como clase `d`; no abortan la purga y nunca son candidatas a borrado.
+- El reporte incluye recuentos y bytes por franja de edad y clase `a`–`d`.
+- Se añade un histograma anonimizado por forma: raíz permitida, tipo de cada segmento, cantidad de segmentos, recuento, bytes y franja de edad. Nombres, extensiones, IDs y rutas no aparecen.
+- Objetos que no pertenecen al prefijo de EnergyScan solicitado se ignoran. Solo candidatos huérfanos reconocidos con más de 30 días pueden borrarse.
 
 ## 2. Gates finales ejecutados secuencialmente
 
 | Gate | Comando | Resultado | SHA |
 |---|---|---|---|
-| Lint | `npm run lint` | PASS | `921214ba26843fc92e14daff08c90ff2c4b622a1` |
-| Typecheck | `npx tsc --noEmit` | PASS | `921214ba26843fc92e14daff08c90ff2c4b622a1` |
-| Suite completa | `npm test -- --runInBand` | PASS; 79 suites / 521 tests | `921214ba26843fc92e14daff08c90ff2c4b622a1` |
-| Build | `npm run build` | PASS | `921214ba26843fc92e14daff08c90ff2c4b622a1` |
-| Diff | `git diff --check` | PASS antes del commit | `921214ba26843fc92e14daff08c90ff2c4b622a1` |
+| Lint | `npm run lint` | PASS | `30c44e9fcd24893bc96321fa75c1e6ea643c3d55` |
+| Typecheck | `npx tsc --noEmit` | PASS | `30c44e9fcd24893bc96321fa75c1e6ea643c3d55` |
+| Suite completa | `npm test -- --runInBand` | PASS; 79 suites / 522 tests | `30c44e9fcd24893bc96321fa75c1e6ea643c3d55` |
+| Build | `npm run build` | PASS | `30c44e9fcd24893bc96321fa75c1e6ea643c3d55` |
+| Diff documental | `git diff --check` | PASS antes del commit documental | SHA del código `30c44e9fcd24893bc96321fa75c1e6ea643c3d55` |
 
-No existe script npm `typecheck`; se ejecutó `npx tsc --noEmit`. Gates ejecutados una vez y en secuencia. Test focal previo: 1 suite / 19 tests PASS.
+No existe script npm `typecheck`; se ejecutó `npx tsc --noEmit`. El paquete completo se ejecutó una vez y en secuencia. Tests focales previos: 2 suites / 12 tests PASS.
 
-## 3. Reproducción sintética
+## 3. Casos comprobados
 
 | Caso | Resultado |
 |---|---|
-| Ejecución completa con token sintético inválido mediante `vc env run`, sin `--apply` | FAIL esperado en `BLOB_LIST`, `ERR_BLOB_AUTH`; exit 1 |
-| Línea de proyecto en el diagnóstico | `src/lib/orphaned-assessment-blob-purge-runtime.ts`, handler de listado, línea 116 |
-| Prueba de filtrado de pila | PASS; conserva como máximo 3 marcos de proyecto y excluye centinelas, rutas absolutas, rutas privadas y `node_modules` |
-| Pruebas de doble para `CLASSIFY`, `DELETE`, preflight y acceso Blob | PASS |
-| Token Blob real, simulación real, `--apply`, migración | NOT_RUN; Toni ejecutará su propia simulación con credencial real |
-
-La causa del diagnóstico obsoleto era `instanceof BlobPurgeStageError`, que no reconocía de forma fiable el error compilado por el CLI y hacía que el catch exterior reutilizara `DB_CONNECT`. La guarda estructural mantiene la etapa original. El rechazo sintético del SDK ocurre durante `list`; el código seguro `ERR_BLOB_AUTH` se deriva de su error de acceso denegado.
+| Forma antigua desconocida en `assessment-drafts/` | PASS; contada como `d`, incluida en histograma y no borrada con `--apply` |
+| Forma reconocida antigua en el mismo lote sintético | PASS; única candidata borrada en el doble |
+| Tipos de segmento UUID v4, otro UUID, CUID, numérico, texto corto/largo y archivo | PASS; salida normalizada sin valores reales |
+| Ruta devuelta fuera del prefijo solicitado | PASS; ignorada y no borrada |
+| Histograma y reporte | PASS; no incluyen rutas, identificadores, nombres de archivo ni extensiones |
+| Simulación con Blob real / `--apply` | NOT_RUN; Toni revisará primero los recuentos reales |
 
 ## 4. Acciones manuales para Toni
 
-1. Repetir la simulación real sin `--apply` con el token Blob del entorno previsto y revisar solo recuentos/bytes.
-2. Confirmar que el diagnóstico se limita a etapa, clase/código/estado y marcos relativos permitidos.
-3. Decidir y autorizar por separado cualquier ejecución `--apply` tras revisar el dry-run.
+1. Ejecutar la simulación real sin `--apply` y revisar clases, histogramas y tamaños por franja.
+2. Confirmar si las formas antiguas de clase `d` deben seguir conservándose o si propone ampliar explícitamente la regla en una tarea posterior.
 
-No se programa ni promueve la purga.
+No se amplió la regla de borrado para formas desconocidas ni se programó o promovió la purga.

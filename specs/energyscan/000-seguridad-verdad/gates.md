@@ -210,3 +210,18 @@ El código ahora comparte la rutina de preflight y añade subetapas; el test con
 | Blob real / `--apply` | NOT_RUN | Sin credencial real ni mutaciones |
 
 La etiqueta obsoleta `DB_CONNECT` se debía a la comprobación `instanceof BlobPurgeStageError`: el CLI ejecutado por ts-node no reconocía de forma fiable el error envuelto y el catch exterior reutilizaba la última etapa externa. La guarda estructural conserva el diagnóstico original. El preflight actualiza expresamente `DB_CONNECT` y `DB_QUERY`; el runtime avanza a `BLOB_LIST`, `CLASSIFY` y `DELETE`. La pila filtrada localizó el handler de listado (línea 116). El SDK rechazó el token sintético como acceso denegado, ahora mapeado a `ERR_BLOB_AUTH`. No se modificó la DB ni se usó Blob real.
+
+### ES-0.2 — formas Blob desconocidas e histograma (código `30c44e9fcd24893bc96321fa75c1e6ea643c3d55`)
+
+| Gate/comprobación | Resultado | Evidencia |
+|---|---|---|
+| Lint | PASS | `npm run lint` |
+| Typecheck | PASS | `npx tsc --noEmit` |
+| Tests | PASS; 79 suites / 522 tests | `npm test -- --runInBand`; forma desconocida, no borrado y anonimización cubiertos |
+| Build | PASS | `npm run build` |
+| Forma desconocida bajo prefijo EnergyScan | PASS | Clase `d`, contabilizada por edad y tamaño; nunca se añade a candidatos |
+| Forma reconocida antigua del fixture | PASS | Única borrada por el doble bajo `--apply` |
+| Ruta fuera del prefijo listado | PASS | Ignorada, sin borrado |
+| Blob real / `--apply` | NOT_RUN | Toni revisará antes el dry-run y el histograma |
+
+Los formatos desconocidos ya no abortan la ejecución. La salida muestra histogramas por forma anonimizada, número de segmentos, categoría de segmento, recuento, bytes y franja de edad; no incorpora rutas, IDs, nombres ni extensiones. El conjunto de borrado conserva la regla: solo forma reconocida, huérfana y con más de 30 días. Toni decidirá tras revisar la simulación real si se cambia esa regla en una fase posterior.
