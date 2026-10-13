@@ -1,6 +1,6 @@
 # ES-0.2 — Inventario de flujo, proveedores y retención
 
-**Actualizado:** 2026-10-13 · **Código revisado:** `9a53e1a99ae094360db87c5e89164d59d94e1353` · **Estado:** diagnóstico sanitizado por etapas implementado y gates PASS; Toni repetirá la simulación real. Sin acceso a producción ni borrados reales en este cambio.
+**Actualizado:** 2026-10-14 · **Código revisado:** `9bb3e689a32aac98010d56050b6a5863a687eb22` · **Estado:** check DB de solo lectura PASS; simulación completa Blob pendiente de Toni. Sin listados ni borrados en este cambio.
 
 ## Decisiones firmes de Toni
 
@@ -222,3 +222,12 @@ El clasificador mapea credenciales Blob a `ERR_BLOB_AUTH`, credenciales DB a `ER
 - **Prisma fuera de Next:** el cliente del repo crea `PrismaPg(new Pool({ connectionString }))` y `PrismaClient({ adapter })`; el nuevo `DB_CONNECT` llama explícitamente a `$connect()` antes de listar Blob. Prisma documenta el mismo adaptador `@prisma/adapter-pg` para ejecutar scripts Node. No hay evidencia estática de adaptador ausente; la conexión real no se probó. [Prisma ORM 7 PostgreSQL](https://www.prisma.io/docs/orm/v7/core-concepts/supported-databases/postgresql).
 
 La causa concreta sigue pendiente: Toni ejecutará otra simulación y compartirá etapa/clase/código/estado, sin token ni mensaje original.
+
+
+## Diagnóstico DB_CONNECT y comprobación solo lectura (2026-10-14)
+
+Código validado: `9bb3e689a32aac98010d56050b6a5863a687eb22`; resultados completos en [`gates.md`](gates.md). Se añadió `--check-db`: requiere `DATABASE_URL`, ejecuta `$connect()` y `SELECT 1`, y no exige ni usa Blob. En `vc env run` se quitó `BLOB_READ_WRITE_TOKEN` del proceso hijo; el comando terminó PASS sin mostrar valores de entorno.
+
+La ejecución DB_CONNECT que Toni comunicó no se reprodujo: la verificación actual conectó y ejecutó la consulta trivial. Sí se confirmó un defecto de etiquetado: el runtime mantenía `DB_CONNECT` después de conectar hasta llegar a la primera operación list. Errores de preflight podían quedar clasificados incorrectamente. Se cambia a `PURGE` después de la conexión y se añade un test que reproduce el caso con batch limit no válido. No hay evidencia de que ese fuera el argumento/configuración en la ejecución de Toni, por lo que no se afirma como causa histórica.
+
+El diagnóstico preserva `cause` y permite imprimir clase/código original solo si están en allowlist; no emite mensaje, URL ni credenciales. La prueba `SELECT 1` confirma que `$connect()` y una consulta SQL funcionan con la configuración Vercel vigente; descarta en ese entorno un fallo sistemático del adaptador Prisma 7, dependencia de Next o incompatibilidad actual de SSL/URL. No verifica el esquema de tablas/columnas EnergyScan ni demuestra cuáles eran los parámetros efectivos durante el fallo anterior; eso queda pendiente de la fase DB_CLASSIFY en la próxima simulación completa. No se inspeccionaron valores de `DATABASE_URL`.

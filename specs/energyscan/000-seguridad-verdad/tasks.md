@@ -77,3 +77,6 @@
 6. Las promociones de una fase ya comprobada se hacen solo con autorización y gates de release, paso a paso `development → staging → production → main`.
 
 La revisión externa de usuarios sirve para validar usabilidad y encaje de mercado una vez que exista un prototipo utilizable. La revisión técnica/legal/privacy se incorpora antes de usos públicos que dependan de ella. Ninguna sustituye las comprobaciones automáticas de seguridad, privacidad y corrección que correspondan al desarrollo.
+
+
+**ES-0.2 diagnóstico de DB (código `9bb3e689a32aac98010d56050b6a5863a687eb22`):** CLI `--check-db` de solo lectura conectado a la DB configurada por `vc env run` y ejecutó `SELECT 1` con token Blob retirado del proceso hijo. Falla DB_CONNECT anterior no reproducida. Corregido etiquetado obsoleto de errores post-connect y preservada causa original permitida. Gates: 79 suites/514 tests, lint/typecheck/build PASS. La simulación completa y la identificación de cualquier fallo de DB_CLASSIFY quedan para Toni; no hubo acceso a Blob ni `--apply`.

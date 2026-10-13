@@ -165,3 +165,18 @@ Despliegue protegido `dpl_DaKaD7g91bkb3B9LqBxcXCQqkrPn`, `READY`, para el commit
 - El dry-run contractual `npm run qa:teardown -- --assessment-id …` se intentó después del borrado funcional y terminó con el mensaje genérico de fallo seguro. No se aplicó ninguna mutación; no se usó SQL ni Prisma para limpieza. La cuenta QA persistente no se eliminó.
 
 El resultado de upload/persistencia y borrado completo queda PASS en Preview, pero el gate padre no cierra hasta aportar evidencia del borrado individual y de ausencia de filas/objetos adjuntos. QA visual de diseño y revisión de logs live: NOT_RUN/NOT_REQUIRED respectivamente; esta ejecución comprueba el flujo funcional solicitado, no revisa diseño visual.
+
+
+### ES-0.2 — check DB del purgador y preservación de causa (código `9bb3e689a32aac98010d56050b6a5863a687eb22`)
+
+| Gate/comprobación | Resultado | Evidencia |
+|---|---|---|
+| Lint | PASS | `npm run lint` |
+| Typecheck | PASS | `npx tsc --noEmit`; no existe script npm `typecheck` |
+| Tests | PASS; 79 suites / 514 tests | `npm test -- --runInBand`; incluye causa Prisma anidada, modo check sin Blob, y etapa PURGE después de connect |
+| Build | PASS | `npm run build` |
+| DB real de solo lectura | PASS | `vc env run` con proceso hijo sin `BLOB_READ_WRITE_TOKEN`; `$connect()` + `SELECT 1`; salida sanitizada `Database check passed (DB_CONNECT).` |
+| Check sin DATABASE_URL | PASS cerrado | Sin DB ni Blob: `Required database configuration is unavailable.` |
+| Simulación Blob / borrado real | NOT_RUN | Toni repetirá el dry-run completo; esta tarea no usó Blob ni `--apply` |
+
+La falla histórica de DB_CONNECT no se reprodujo en la sesión actual. Se confirmó y corrigió que errores posteriores al connect podían heredar erróneamente esa etapa; el test con límite inválido valida la corrección. No se atribuye la ejecución anterior a Neon, pooler, SSL, cliente Prisma ni esquema. `SELECT 1` no valida las tablas EnergyScan: una incompatibilidad aparecería como `DB_CLASSIFY` en la siguiente simulación.
