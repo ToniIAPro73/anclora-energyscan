@@ -1,6 +1,6 @@
 # F0 — Tareas de desarrollo
 
-**Estado:** ES-0.1 fue validada por Toni y promocionada a `main`. ES-0.2 está en implementación en `development`; ES-0.3 y ES-0.4 siguen pendientes. Toni valida inicialmente producto y alcance junto con el agente. El agente implementa y aporta evidencia técnica. No hay requisito de panel de validadores ni piloto previo a la implementación. Toda prueba que aún no se haya ejecutado está `NOT_RUN`.
+**Estado:** ES-0.1 fue validada por Toni y promocionada a `main`. ES-0.2 tiene implementación en `development`; la simulación histórica de Blob Preview está bloqueada por falta de token Preview accesible al CLI y la aceptación de Toni sigue pendiente. ES-0.3 y ES-0.4 siguen pendientes. Toni valida inicialmente producto y alcance junto con el agente. El agente implementa y aporta evidencia técnica. No hay requisito de panel de validadores ni piloto previo a la implementación. Toda prueba que aún no se haya ejecutado está `NOT_RUN`.
 
 ## ES-0.1 — Autorización de adjuntos y upload (P0)
 
@@ -34,6 +34,8 @@
 **Aceptar:** rutas y proveedores hallados inventariados o brechas registradas; fixtures/evidencia sin PII; centinelas sintéticos no aparecen en logs. No usar documentos reales ni transmitirlos a servicios externos durante pruebas locales. Cualquier activación de tratamiento que requiera autorización o revisión especializada se mantiene apagada hasta cerrar ese gate de publicación; no bloquea la implementación interna.
 
 **Ejecución ES-0.2 (2026-10-13, SHA `5edfbd36dfcc6b1d083a57de77739de07f85e3c9`):** lógica de expiración, borrado owner, purga protegida, minimización de logs y política de visión implementadas sin migración. Gates lint/typecheck/tests/build: PASS; QA de borrado sin adjunto: PASS; prueba de upload con adjunto: BLOCKED por HTTP 400 en `/api/blob/upload` durante runtime local. Estado detallado y límites en [`gates.md`](gates.md). La aceptación de Toni sigue pendiente. Esta nota registra resultados y no modifica el criterio de aceptación.
+
+**Cierre técnico de borradores huérfanos (código `11505916d59137c98285d71449b20e815d99be23`):** purga estricta de `assessment-drafts/` y `assessments/` integrada al endpoint existente y al CLI; simulación por defecto y borrado solo con `--apply`. Gates lint/typecheck/tests/build: PASS (77 suites/499 tests). Simulación del almacén Preview: BLOCKED porque Vercel CLI no entrega `BLOB_READ_WRITE_TOKEN`; no se consultó ningún almacén ni se borró objeto real. Revisar la evidencia y los límites en [`gates.md`](gates.md) y el inventario. Criterios de aceptación intactos.
 
 ## ES-0.3 — Claims, CEE y estimación (P0)
 

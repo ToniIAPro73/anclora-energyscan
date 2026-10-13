@@ -1,6 +1,6 @@
 # F0 — Plan de desarrollo
 
-**Estado:** activo para desarrollo en `development`. ES-0.1 fue validada por Toni y promocionada a `main`; ES-0.2 implementación está en curso. Toni valida inicialmente cada entrega junto con el agente. Revisiones externas y piloto de usuarios quedan para gates de publicación, afirmaciones profesionales/reguladas o validación de mercado.
+**Estado:** activo para desarrollo en `development`. ES-0.1 fue validada por Toni y promocionada a `main`; ES-0.2 tiene implementación en `development`, con simulación histórica del Blob Preview pendiente por falta de token Preview accesible al CLI y aceptación de Toni pendiente. ES-0.3 y ES-0.4 siguen pendientes. Toni valida inicialmente cada entrega junto con el agente. Revisiones externas y piloto de usuarios quedan para gates de publicación, afirmaciones profesionales/reguladas o validación de mercado.
 
 ## Arquitectura actual confirmada y propuesta
 

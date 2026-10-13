@@ -59,6 +59,21 @@ Resultados comprobados sobre el código del commit de implementación que acompa
 - `npx tsc --noEmit` — PASS.
 - `git diff --check` — PASS antes del commit de implementación.
 
+### ES-0.2 — purga de borradores huérfanos (código `11505916d59137c98285d71449b20e815d99be23`)
+
+Sin cambios a criterios de aceptación ni migración. Alcance estricto: prefijos EnergyScan `assessment-drafts/` y `assessments/`; `avatars/` y cualquier otra raíz quedan fuera. La lógica valida formas de clave conocidas, pagina por cursor usando `uploadedAt`, compara las rutas de cada página con filas de adjuntos de cualquier valoración, conserva objetos referenciados y huérfanos de hasta 30 días, y limita las eliminaciones a un lote. Simulación CLI por defecto; `--apply` explícito para borrar; errores individuales se cuentan y no detienen el lote. La ruta cron existente mantiene `POST` y autorización Bearer `CRON_SECRET`; no se configuró horario.
+
+| Gate | Comando/medio | Resultado sobre código | Evidencia/limitación |
+|---|---|---|---|
+| Lint | `npm run lint` | PASS | Sin warnings ni errores ESLint |
+| Typecheck | `npx tsc --noEmit` | PASS | Sin errores TypeScript |
+| Tests | `npm test -- --runInBand` | PASS; 77 suites / 499 tests | Incluye 7 pruebas nuevas del purgador: cursor/prefijos, referencia, 31/29 días, fallo parcial, lote, simulación y salida sin rutas/IDs |
+| Build | `npm run build` | PASS | Dos advertencias existentes de APIs `CompressionStream`/`DecompressionStream` de `jose` para Edge Runtime; build completado |
+| Simulación real Blob Preview | `vc env run -e preview --git-branch development` + CLI sin `--apply` | BLOCKED | `BLOB_READ_WRITE_TOKEN` no lo entrega el entorno Preview al CLI. Se comprobó presencia booleana, no su valor. Para evitar fallback inadvertido a credenciales locales se quitó la carga automática local del CLI. No hubo llamada a Blob, no hay matriz de recuentos y no se borraron objetos |
+| `git diff --check` | Validación previa al commit documental | PASS | Sin errores de whitespace |
+
+El inventario [`es-0.2-data-flow-inventory.md`](es-0.2-data-flow-inventory.md) incluye las formas de clave, clasificación, salidas agregadas y alternativas de programación. No se modificó ni creó configuración en `.anclora/`. La simulación real queda como acción pendiente: Toni debe habilitar una forma segura para que el CLI reciba el token del entorno Preview y revisar sus recuentos antes de decidir si se ejecuta `--apply`. No se programó la purga.
+
 - Visual: `anclora-visual-qa doctor`, `anclora-visual-qa check http://127.0.0.1:3000/wizard`, navegación `agent-browser` hasta el paso de adjuntos, fixture PNG sintético, envío sin sesión y captura del estado de denegación — PASS. Captura local: `/tmp/es01-upload-unauth-final.png`. La sesión local de Auth.js devolvió `500` por `Invalid URL` con el valor redactado; se observó el modo cerrado y la UI pidió iniciar sesión. No se ejercitó una sesión autenticada real ni se conectó a Neon/Blob.
 - Sin ejecución: suite Jest completa, build, migraciones, pruebas contra Neon/Blob reales, profesional con grant explícito/revocación, replay y firma criptográfica real del callback, asociación válida completa y rollback ante fallo real de persistencia — `NOT_RUN`.
 

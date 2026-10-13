@@ -1,6 +1,6 @@
 # ES-0.2 — Inventario de flujo, proveedores y retención
 
-**Actualizado:** 2026-10-13 · **Código revisado:** `10a04fa7dbb6f94877da250942a79b711c1f72d0` · **Estado:** implementación ES-0.2; subida y persistencia de adjunto pasan en Preview; borrado individual del adjunto queda sin verificar.
+**Actualizado:** 2026-10-13 · **Código revisado:** `11505916d59137c98285d71449b20e815d99be23` · **Estado:** purga de borradores huérfanos implementada y gates locales PASS; simulación contra Blob Preview BLOCKED porque Vercel CLI no entrega el token Blob de Preview. Sin resultados inventados ni borrados reales.
 
 ## Decisiones firmes de Toni
 
@@ -138,7 +138,7 @@ Estas son comparativas preliminares de arquitectura, no autorización. Para prov
 - No se requiere migración: el schema ya contiene `Assessment.createdAt`; el cálculo deriva el cutoff y no añade columnas/tablas.
 - `getOwnedAssessment` y la página de resultados excluyen registros vencidos. Las rutas de attachment, OCR, importación, visión y PDF que usan esta autorización dejan de servirlos. Checkout y estado de pago también filtran por el cutoff.
 - `deleteAssessmentData` borra Blob y, dentro de transacción Neon, assessment, adjuntos y relacionados. `purgeExpiredAssessmentData` recorre assessments vencidos y continúa ante fallos por assessment, devolviendo contadores sin exponer identificadores. El endpoint `POST /api/cron/purge-expired-assessments` exige `Authorization: Bearer <CRON_SECRET>`. No se programa cron; la programación queda a decisión de Toni.
-- Los objetos de draft abandonados antes de crear `Assessment` no tienen padre/`createdAt` y quedan fuera de este contrato de vencimiento. Requieren un diseño separado antes de prometer su purga automática.
+- Los objetos de draft abandonados antes de crear `Assessment` no tienen padre/`createdAt`; la nueva purga los clasifica por `uploadedAt` y solo elimina huérfanos con más de 30 días. La simulación real de Preview sigue pendiente hasta que el token de ese entorno esté disponible para el CLI.
 - Riesgos: fallo Blob puede dejar filas para reintento; el endpoint informa fallos por cuenta, sin paths ni nombres. El tamaño de lote/timeout deberá revisarse si el volumen crece.
 
 ## Propuesta documental para función posterior de lectura
@@ -169,3 +169,34 @@ El borrado individual no se pudo probar con esta cuenta: la sección/control de 
 - [Tesseract.js](https://github.com/naptha/tesseract.js), [pdf.js](https://github.com/mozilla/pdf.js), [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR), [docTR](https://github.com/mindee/doctr), [OCRmyPDF](https://github.com/ocrmypdf/OCRmyPDF)
 - [OpenRouter privacy](https://openrouter.ai/privacy), [Anthropic pricing](https://docs.anthropic.com/en/docs/about-claude/pricing), [SeaweedFS](https://github.com/seaweedfs/seaweedfs)
 - [PostHog self-host](https://posthog.com/docs/self-host), [Resend pricing](https://resend.com/pricing), [Stripe España pricing](https://stripe.com/es/pricing), [Nominatim policy](https://operations.osmfoundation.org/policies/nominatim/)
+
+## Purga de borradores huérfanos y namespaces Blob (código `11505916d59137c98285d71449b20e815d99be23`)
+
+### Prefijos que escribe EnergyScan y alcance de purga
+
+| Prefijo | Escritor/ruta | Forma de clave | Incluido en la purga de adjuntos |
+|---|---|---|---|
+| `assessment-drafts/` | `src/components/AssessmentWizard.tsx` → `/api/blob/upload` (`src/app/api/blob/upload/route.ts`) | `assessment-drafts/{owner}/{uuid-v4}/{filename}` | Sí; exclusivamente la forma validada por `isEnergyScanAssessmentBlobPath` |
+| `assessments/` | `/api/assessment` y `src/lib/blob-storage.ts`; migración puntual `scripts/migrate-sqlite-to-neon.ts` | `assessments/{assessmentId}/{filename}`; legado `assessments/unassigned/{filename}` | Sí; exclusivamente la forma validada por la función anterior |
+| `avatars/` | `src/app/api/user/avatar/route.ts` | `avatars/{owner}.{extension}` | **No**; fuera de esta purga y de retención de adjuntos de assessment |
+
+La lista de prefijos está cerrada a `assessment-drafts/` y `assessments/`. Cada clave además debe ajustarse a la forma exacta que escribe EnergyScan; una forma desconocida provoca fallo cerrado antes de cualquier borrado. No se listan ni tocan otras raíces del almacén compartido con `anclora-content-generator-ai`.
+
+### Clasificación y ejecución
+
+`src/lib/orphaned-assessment-blob-purge.ts` pagina `list()` con cursor y `uploadedAt`, compara cada página con filas `AssessmentAttachment` (admite las formas almacenadas con y sin `blob:`), y clasifica por edad y referencia: **a** referenciado (no se borra), **b** huérfano de más de 30 días (candidato), **c** huérfano de 30 días o menos (se conserva). El corte es estricto: 30 días exactos se conservan; 31 días son elegibles. El tamaño se suma por franja `0-30`, `31-90`, `>90` y clase. El modo predeterminado del CLI es simulación; el borrado real requiere `--apply`. La ejecución limita los intentos al lote configurado (`BLOB_ORPHAN_PURGE_BATCH_LIMIT`, default 100, máximo 1000), continúa tras fallos individuales y devuelve contadores agregados. La salida solo contiene modo, límite, recuento y bytes; nunca rutas, nombres o IDs.
+
+El mismo purgador se integra a `POST /api/cron/purge-expired-assessments`, que conserva Bearer `CRON_SECRET`. El CLI es `npm run blob:purge-assessment-orphans`; no se ha programado ni ejecutado `--apply`. Tests con dobles cubren paginación, referencias, corte 31/29 días, raíz ajena, fallo parcial, simulación y ausencia de rutas/IDs en salida. Resultado: 77 suites/499 tests en el SHA de código indicado.
+
+### Simulación del almacén real
+
+**BLOCKED, sin consulta ni borrado de objetos.** `vc env run -e preview --git-branch development` no inyecta `BLOB_READ_WRITE_TOKEN`; el listado de variables Preview tampoco contiene ese token. El primer CLI había recurrido a variables locales, por lo que se eliminó la carga automática de entorno local para impedir que una orden dirigida a Preview use accidentalmente credenciales de otro entorno. Repetir cuando Toni habilite una forma autorizada de entregar el token Preview al proceso; el reporte por edad/clase y tamaño queda entonces pendiente. No existe recuento de simulación que reportar en este SHA.
+
+### Alternativas de programación (decisión de Toni; ninguna configurada)
+
+| Opción | Encaje con la ruta actual | Cambio/configuración que requeriría | Nota operativa |
+|---|---|---|---|
+| Vercel Cron | Los Cron Jobs invocan por `GET`; la ruta existente solo admite `POST` | Añadir un `GET` protegido por el mismo `CRON_SECRET` (o adaptar la interfaz HTTP sin debilitar autorización), luego declarar el horario en `vercel.json` | La disponibilidad/frecuencia depende del plan; revisar uso y coste vigentes antes de decidir. [Docs Cron](https://vercel.com/docs/cron-jobs), [uso y precios](https://vercel.com/docs/cron-jobs/usage-and-pricing) |
+| GitHub Actions schedule | Puede invocar por HTTP `POST` al endpoint actual | Workflow programado en la rama por defecto que envíe `Authorization: Bearer $CRON_SECRET`; guardar el secreto en Repository Secrets; workflow solo se ejecuta desde la rama por defecto | GitHub Free incluye una cuota de minutos para repos privados, sujeta a límites/uso; horarios pueden retrasarse o perderse bajo carga. [Eventos schedule](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows), [límites de minutos](https://docs.github.com/en/actions/reference/limits), [secrets](https://docs.github.com/en/actions/reference/security/secrets) |
+
+Toni decide opción, horario, entorno y manejo operativo de errores. No se creó workflow, horario, GET ni secreto.
