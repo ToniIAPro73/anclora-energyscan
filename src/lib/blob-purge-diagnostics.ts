@@ -12,7 +12,7 @@ function isSafeIdentifier(value: unknown): value is string {
 }
 
 function isSafeErrorCode(value: unknown): value is string {
-  return typeof value === 'string' && /^[A-Z][A-Z0-9_]{1,39}$/.test(value);
+  return typeof value === 'string' && /^(?:[A-Z][A-Z0-9_]{1,39}|[0-9A-Z]{5})$/.test(value);
 }
 
 function getErrorChain(error: unknown): Array<Record<string, unknown>> {
@@ -58,10 +58,10 @@ function classifyCode(stage: BlobPurgeStage, chain: Array<Record<string, unknown
       /(?:table|relation|column).{0,100}(?:does not exist|not found|missing)/i.test(messages)) {
     return 'ERR_DB_SCHEMA';
   }
-  if (isDatabase && (codes.some((code) => ['P1000', '28P01'].includes(code)) || /password authentication failed|authentication failed|invalid database credentials/i.test(messages))) {
+  if (isDatabase && ((status === 401 || status === 403) || codes.some((code) => ['P1000', '28P01'].includes(code)) || /password authentication failed|authentication failed|invalid database credentials|credentials? rejected/i.test(messages))) {
     return 'ERR_DB_AUTH';
   }
-  if (!isDatabase && ((status === 401 || status === 403) || /invalid token|token rejected|unauthorized|forbidden/i.test(messages))) {
+  if (!isDatabase && ((status === 401 || status === 403) || /invalid token|token rejected|unauthorized|forbidden|credentials? rejected|authentication failed/i.test(messages))) {
     return 'ERR_BLOB_AUTH';
   }
   if (codes.some((code) => ['ETIMEDOUT', 'P2024', '57014'].includes(code)) || /timed? ?out|timeout/i.test(messages)) {

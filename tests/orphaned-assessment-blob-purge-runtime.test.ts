@@ -116,7 +116,7 @@ describe('orphaned assessment Blob purge diagnostics', () => {
     ['DB_CONNECT', 'connection timed out', 'ETIMEDOUT', 'ERR_DB_TIMEOUT'],
     ['BLOB_LIST', 'request timeout', undefined, 'ERR_BLOB_TIMEOUT'],
     ['DB_CLASSIFY', 'SSL certificate failure', 'ERR_SSL_CERTIFICATE', 'ERR_DB_SSL'],
-    ['DB_CLASSIFY', 'relation table does not exist', '42P01', 'ERR_DB_SCHEMA'],
+    ['DB_CLASSIFY', 'database operation failed', '42P01', 'ERR_DB_SCHEMA'],
   ] as const)('maps known %s failures to a safe code', (stage, message, code, expected) => {
     const error = Object.assign(new Error(`${message}: ${SENTINEL_SECRET} ${SENTINEL_PATH}`), code ? { code } : {});
     const diagnostic = toBlobPurgeDiagnostic(stage, error);
