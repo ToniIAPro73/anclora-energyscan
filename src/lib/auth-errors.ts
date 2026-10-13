@@ -11,6 +11,7 @@ export const AUTH_ERROR_MESSAGE_KEYS = {
 export type AuthErrorMessageKey = typeof AUTH_ERROR_MESSAGE_KEYS[keyof typeof AUTH_ERROR_MESSAGE_KEYS] | 'authErrorGeneric';
 
 export function getAuthErrorMessageKey(errorCode: string | null | undefined): AuthErrorMessageKey {
-  if (!errorCode) return 'authErrorGeneric';
-  return AUTH_ERROR_MESSAGE_KEYS[errorCode as keyof typeof AUTH_ERROR_MESSAGE_KEYS] ?? 'authErrorGeneric';
+  if (typeof errorCode !== 'string') return 'authErrorGeneric';
+  if (!Object.prototype.hasOwnProperty.call(AUTH_ERROR_MESSAGE_KEYS, errorCode)) return 'authErrorGeneric';
+  return AUTH_ERROR_MESSAGE_KEYS[errorCode as keyof typeof AUTH_ERROR_MESSAGE_KEYS];
 }

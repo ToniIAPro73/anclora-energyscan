@@ -21,6 +21,9 @@ describe('Auth error messages', () => {
 
   it('uses a generic message for unknown error codes', () => {
     expect(getAuthErrorMessageKey('Foo')).toBe('authErrorGeneric');
+    expect(getAuthErrorMessageKey('toString')).toBe('authErrorGeneric');
+    expect(getAuthErrorMessageKey('constructor')).toBe('authErrorGeneric');
+    expect(getAuthErrorMessageKey('')).toBe('authErrorGeneric');
     expect(dictionaries.es.authErrorGeneric).toBeTruthy();
     expect(dictionaries.en.authErrorGeneric).toBeTruthy();
   });

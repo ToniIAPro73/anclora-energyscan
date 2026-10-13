@@ -22,7 +22,7 @@ export function AuthForm({ googleEnabled, githubEnabled, authErrorCode }: AuthFo
   const [showPassword, setShowPassword] = useState(false);
   const [providerStatus, setProviderStatus] = useState({ googleEnabled, githubEnabled });
   const { dictionary: t } = usePreferences();
-  const authErrorKey = authErrorCode ? getAuthErrorMessageKey(authErrorCode) : null;
+  const authErrorKey = authErrorCode !== undefined ? getAuthErrorMessageKey(authErrorCode) : null;
   const authErrorMessage = authErrorKey ? t[authErrorKey] || dictionaries.en[authErrorKey] : null;
   const [signInState, signInAction] = useFormState(signInWithEmail, {});
   const [signUpState, signUpAction] = useFormState(signUpWithEmail, {});
