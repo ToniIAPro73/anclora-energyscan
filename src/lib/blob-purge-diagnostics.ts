@@ -7,12 +7,23 @@ export type BlobPurgeDiagnostic = {
   httpStatus?: number;
 };
 
-function isSafeIdentifier(value: unknown): value is string {
-  return typeof value === 'string' && /^[A-Za-z][A-Za-z0-9_]{0,63}$/.test(value);
-}
+const SAFE_ERROR_CLASSES = new Set([
+  'Error', 'TypeError', 'RangeError', 'AggregateError', 'AbortError', 'FetchError', 'SocketError',
+  'BlobError', 'PrismaClientInitializationError', 'PrismaClientKnownRequestError',
+  'PrismaClientUnknownRequestError', 'PrismaClientRustPanicError', 'PrismaClientValidationError',
+  'DatabaseError', 'PostgresError',
+]);
+
+const SAFE_ERROR_CODES = new Set([
+  'ETIMEDOUT', 'ECONNRESET', 'ECONNREFUSED', 'ENOTFOUND', 'EAI_AGAIN', 'EPROTO', 'EPIPE',
+  'ERR_SSL_CERTIFICATE', 'ERR_TLS_CERT_ALTNAME_INVALID', 'CERT_HAS_EXPIRED',
+  'DEPTH_ZERO_SELF_SIGNED_CERT', 'UNABLE_TO_VERIFY_LEAF_SIGNATURE',
+]);
 
 function isSafeErrorCode(value: unknown): value is string {
-  return typeof value === 'string' && /^(?:[A-Z][A-Z0-9_]{1,39}|[0-9A-Z]{5})$/.test(value);
+  return typeof value === 'string' && (
+    SAFE_ERROR_CODES.has(value) || /^P\d{4}$/.test(value) || /^[0-9A-Z]{5}$/.test(value)
+  );
 }
 
 function getErrorChain(error: unknown): Array<Record<string, unknown>> {
@@ -29,8 +40,8 @@ function getErrorChain(error: unknown): Array<Record<string, unknown>> {
 function getClassName(error: unknown): string {
   if (!error || typeof error !== 'object') return 'Error';
   const item = error as { name?: unknown; constructor?: { name?: unknown } };
-  const candidate = isSafeIdentifier(item.name) ? item.name : item.constructor?.name;
-  return isSafeIdentifier(candidate) ? candidate : 'Error';
+  const candidate = typeof item.name === 'string' ? item.name : item.constructor?.name;
+  return typeof candidate === 'string' && SAFE_ERROR_CLASSES.has(candidate) ? candidate : 'Error';
 }
 
 function getHttpStatus(chain: Array<Record<string, unknown>>): number | undefined {
