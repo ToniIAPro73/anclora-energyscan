@@ -19,6 +19,7 @@
     "manual:pdf": "npm run manual:pdf:es && npm run manual:pdf:en && npm run manual:pdf:de",
     "budget-review:demo": "node scripts/generate-budget-review-demo.mjs",
     "seed:admin-demo": "ts-node --compiler-options '{\"module\":\"commonjs\"}' scripts/reset-admin-demo-data.ts",
+    "qa:teardown": "ts-node --compiler-options '{\"module\":\"commonjs\"}' scripts/qa/teardown-qa-data.ts",
     "anclora:locale-copy-check": "node scripts/check-locale-copy-quality.mjs"
   },
   "dependencies": {
