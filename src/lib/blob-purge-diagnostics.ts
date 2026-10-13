@@ -3,6 +3,8 @@ export type BlobPurgeStage = 'CONFIGURATION' | 'DB_CONNECT' | 'BLOB_LIST' | 'DB_
 export type BlobPurgeDiagnostic = {
   stage: BlobPurgeStage;
   errorClass: string;
+  causeClass?: string;
+  causeCode?: string;
   code?: string;
   httpStatus?: number;
 };
@@ -37,11 +39,14 @@ function getErrorChain(error: unknown): Array<Record<string, unknown>> {
   return chain;
 }
 
-function getClassName(error: unknown): string {
-  if (!error || typeof error !== 'object') return 'Error';
-  const item = error as { name?: unknown; constructor?: { name?: unknown } };
-  const candidate = typeof item.name === 'string' ? item.name : item.constructor?.name;
-  return typeof candidate === 'string' && SAFE_ERROR_CLASSES.has(candidate) ? candidate : 'Error';
+function getClassName(chain: Array<Record<string, unknown>>): string {
+  for (const item of chain) {
+    const candidate = typeof item.name === 'string'
+      ? item.name
+      : (item.constructor as { name?: unknown } | undefined)?.name;
+    if (typeof candidate === 'string' && SAFE_ERROR_CLASSES.has(candidate)) return candidate;
+  }
+  return 'Error';
 }
 
 function getHttpStatus(chain: Array<Record<string, unknown>>): number | undefined {
@@ -89,9 +94,14 @@ export function toBlobPurgeDiagnostic(stage: BlobPurgeStage, error: unknown): Bl
   if (error instanceof BlobPurgeStageError) return error.diagnostic;
   const chain = getErrorChain(error);
   const httpStatus = getHttpStatus(chain);
+  const cause = chain.length > 1 ? chain[1] : undefined;
+  const causeClass = cause ? getClassName(chain.slice(1)) : undefined;
+  const causeCode = cause ? getSafeCode([cause]) : undefined;
   return {
     stage,
-    errorClass: getClassName(error),
+    errorClass: getClassName(chain),
+    ...(causeClass && causeClass !== 'Error' ? { causeClass } : {}),
+    ...(causeCode ? { causeCode } : {}),
     code: classifyCode(stage, chain, httpStatus),
     ...(httpStatus === undefined ? {} : { httpStatus }),
   };
@@ -99,10 +109,12 @@ export function toBlobPurgeDiagnostic(stage: BlobPurgeStage, error: unknown): Bl
 
 export class BlobPurgeStageError extends Error {
   readonly diagnostic: BlobPurgeDiagnostic;
+  readonly cause: unknown;
 
   constructor(stage: BlobPurgeStage, error: unknown) {
-    super('Blob purge stage failed.');
+    super('Blob purge stage failed.', { cause: error });
     this.name = 'BlobPurgeStageError';
+    this.cause = error;
     this.diagnostic = toBlobPurgeDiagnostic(stage, error);
   }
 }
@@ -113,6 +125,8 @@ export function formatBlobPurgeDiagnostic(diagnostic: BlobPurgeDiagnostic): stri
     `error_class=${diagnostic.errorClass}`,
     `code=${diagnostic.code ?? 'ERR_PURGE_STAGE'}`,
   ];
+  if (diagnostic.causeClass) fields.push(`cause_class=${diagnostic.causeClass}`);
+  if (diagnostic.causeCode) fields.push(`cause_code=${diagnostic.causeCode}`);
   if (diagnostic.httpStatus !== undefined) fields.push(`http_status=${diagnostic.httpStatus}`);
   return `Blob purge failed. ${fields.join(' ')}`;
 }

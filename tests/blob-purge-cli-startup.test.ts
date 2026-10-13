@@ -18,6 +18,24 @@ describe('orphaned assessment Blob purge CLI startup', () => {
     expect(output).not.toMatch(/Cannot find module|MODULE_NOT_FOUND/);
   });
 
+  it('accepts --check-db without requiring Blob credentials and fails closed without DB configuration', () => {
+    const env = { ...process.env };
+    delete env.BLOB_READ_WRITE_TOKEN;
+    delete env.DATABASE_URL;
+
+    const result = spawnSync('npm', ['run', 'blob:purge-assessment-orphans', '--', '--check-db'], {
+      cwd: process.cwd(),
+      env,
+      encoding: 'utf8',
+    });
+    const output = `${result.stdout ?? ''}\n${result.stderr ?? ''}`;
+
+    expect(result.status).toBe(1);
+    expect(output).toContain('Required database configuration is unavailable.');
+    expect(output).not.toContain('Required storage configuration is unavailable.');
+    expect(output).not.toMatch(/Cannot find module|MODULE_NOT_FOUND/);
+  });
+
   it('loads the shared deletion modules in the QA teardown CLI before validating its arguments', () => {
     const env: NodeJS.ProcessEnv = {
       ...process.env,

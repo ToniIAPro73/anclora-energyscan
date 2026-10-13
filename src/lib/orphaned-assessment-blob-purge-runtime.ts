@@ -11,6 +11,7 @@ import {
 
 export type OrphanedBlobPurgeRuntimeDeps = {
   connect: () => Promise<void>;
+  query: () => Promise<unknown>;
   list: (options: { prefix: string; cursor?: string; limit: number; mode: 'expanded' }) => Promise<BlobListPage>;
   findReferencedPaths: (pathnames: string[]) => Promise<string[]>;
   delete: (pathname: string) => Promise<unknown>;
@@ -18,6 +19,7 @@ export type OrphanedBlobPurgeRuntimeDeps = {
 
 const defaultRuntimeDeps: OrphanedBlobPurgeRuntimeDeps = {
   connect: () => prisma.$connect(),
+  query: () => prisma.$queryRaw`SELECT 1`,
   list: ({ prefix, cursor, limit, mode }) => list({ prefix, cursor, limit, mode }),
   findReferencedPaths: async (pathnames) => {
     const records = await prisma.assessmentAttachment.findMany({
@@ -28,6 +30,17 @@ const defaultRuntimeDeps: OrphanedBlobPurgeRuntimeDeps = {
   },
   delete: (pathname) => del(pathname),
 };
+
+export async function checkOrphanedBlobPurgeDatabase(
+  deps: Pick<OrphanedBlobPurgeRuntimeDeps, 'connect' | 'query'> = defaultRuntimeDeps,
+): Promise<void> {
+  try {
+    await deps.connect();
+    await deps.query();
+  } catch (error) {
+    throw new BlobPurgeStageError('DB_CONNECT', error);
+  }
+}
 
 export function getConfiguredBlobPurgeBatchLimit(): number {
   const raw = process.env.BLOB_ORPHAN_PURGE_BATCH_LIMIT;
@@ -60,6 +73,7 @@ async function runWithDiagnostics(
     };
     stage = 'DB_CONNECT';
     await deps.connect();
+    stage = 'PURGE';
     return await purgeOrphanedAssessmentBlobs(
       normalizedOptions,
       {

@@ -1,12 +1,15 @@
 import { formatOrphanedBlobPurgeReport } from '../src/lib/orphaned-assessment-blob-purge';
-import { getConfiguredBlobPurgeBatchLimit, runOrphanedAssessmentBlobPurge } from '../src/lib/orphaned-assessment-blob-purge-runtime';
+import { checkOrphanedBlobPurgeDatabase, getConfiguredBlobPurgeBatchLimit, runOrphanedAssessmentBlobPurge } from '../src/lib/orphaned-assessment-blob-purge-runtime';
 import { BlobPurgeStageError, formatBlobPurgeDiagnostic, toBlobPurgeDiagnostic, type BlobPurgeStage } from '../src/lib/blob-purge-diagnostics';
 
 function parseArgs(args: string[]) {
   let apply = false;
+  let checkDb = false;
   let batchLimit: number | undefined;
   for (let index = 0; index < args.length; index += 1) {
-    if (args[index] === '--apply') {
+    if (args[index] === '--check-db') {
+      checkDb = true;
+    } else if (args[index] === '--apply') {
       apply = true;
     } else if (args[index] === '--batch-limit') {
       const raw = args[index + 1];
@@ -18,13 +21,25 @@ function parseArgs(args: string[]) {
       throw new Error('Unsupported purge option.');
     }
   }
-  return { apply, batchLimit };
+  if (checkDb && (apply || batchLimit !== undefined)) throw new Error('Database check cannot be combined with purge options.');
+  return { apply, batchLimit, checkDb };
 }
 
 async function main() {
   let stage: BlobPurgeStage = 'CONFIGURATION';
   try {
-    const { apply, batchLimit } = parseArgs(process.argv.slice(2));
+    const { apply, batchLimit, checkDb } = parseArgs(process.argv.slice(2));
+    if (checkDb) {
+      if (!process.env.DATABASE_URL) {
+        console.error('Required database configuration is unavailable.');
+        process.exitCode = 1;
+        return;
+      }
+      stage = 'DB_CONNECT';
+      await checkOrphanedBlobPurgeDatabase();
+      console.log('Database check passed (DB_CONNECT).');
+      return;
+    }
     if (!process.env.BLOB_READ_WRITE_TOKEN || !process.env.DATABASE_URL) {
       console.error('Required storage configuration is unavailable.');
       process.exitCode = 1;

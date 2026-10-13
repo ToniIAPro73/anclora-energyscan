@@ -4,6 +4,7 @@ import {
   toBlobPurgeDiagnostic,
 } from '@/lib/blob-purge-diagnostics';
 import {
+  checkOrphanedBlobPurgeDatabase,
   runOrphanedAssessmentBlobPurge,
   type OrphanedBlobPurgeRuntimeDeps,
 } from '@/lib/orphaned-assessment-blob-purge-runtime';
@@ -16,6 +17,7 @@ const ASSESSMENT_DRAFT = 'assessment-drafts/synthetic-owner/123e4567-e89b-42d3-a
 function createDeps(): jest.Mocked<OrphanedBlobPurgeRuntimeDeps> {
   return {
     connect: jest.fn(async () => undefined),
+    query: jest.fn(async () => [{ '?column?': 1 }]),
     list: jest.fn(async ({ prefix }: Parameters<OrphanedBlobPurgeRuntimeDeps['list']>[0]) => ({
       blobs: [{ pathname: ASSESSMENT_DRAFT, uploadedAt: new Date(NOW.getTime() - 31 * 24 * 60 * 60 * 1000), size: 12 }]
         .filter(({ pathname }) => pathname.startsWith(prefix)),
@@ -47,6 +49,61 @@ describe('orphaned assessment Blob purge diagnostics', () => {
     expect(output).toContain('code=ERR_DB_AUTH');
     expect(output).not.toContain(SENTINEL_SECRET);
     expect(output).not.toContain(SENTINEL_PATH);
+  });
+
+  it('preserves an allowlisted original cause class and Prisma code through a wrapper', async () => {
+    const rootCause = Object.assign(new Error(`${SENTINEL_SECRET} ${SENTINEL_PATH}`), {
+      name: 'PrismaClientInitializationError',
+      code: 'P1001',
+    });
+    const wrapped = new Error('generic adapter failure', { cause: rootCause });
+    const output = formatBlobPurgeDiagnostic(toBlobPurgeDiagnostic('DB_CONNECT', wrapped));
+
+    expect(output).toContain('error_class=Error');
+    expect(output).toContain('cause_class=PrismaClientInitializationError');
+    expect(output).toContain('cause_code=P1001');
+    expect(output).not.toContain(SENTINEL_SECRET);
+    expect(output).not.toContain(SENTINEL_PATH);
+  });
+
+  it('checks DB connection and executes a trivial query without invoking Blob operations', async () => {
+    const deps = createDeps();
+
+    await expect(checkOrphanedBlobPurgeDatabase(deps)).resolves.toBeUndefined();
+
+    expect(deps.connect).toHaveBeenCalledTimes(1);
+    expect(deps.query).toHaveBeenCalledTimes(1);
+    expect(deps.list).not.toHaveBeenCalled();
+    expect(deps.delete).not.toHaveBeenCalled();
+  });
+
+  it('reports original Prisma cause when the DB check fails', async () => {
+    const deps = createDeps();
+    const rootCause = Object.assign(new Error(`${SENTINEL_SECRET} ${SENTINEL_PATH}`), {
+      name: 'PrismaClientInitializationError',
+      code: 'P1001',
+    });
+    deps.connect.mockRejectedValue(new Error('adapter initialization failed', { cause: rootCause }));
+
+    const output = await checkOrphanedBlobPurgeDatabase(deps).catch(rejectionOutput);
+
+    expect(output).toContain('stage=DB_CONNECT');
+    expect(output).toContain('cause_class=PrismaClientInitializationError');
+    expect(output).toContain('cause_code=P1001');
+    expect(output).not.toContain(SENTINEL_SECRET);
+    expect(output).not.toContain(SENTINEL_PATH);
+    expect(deps.query).not.toHaveBeenCalled();
+  });
+
+  it('does not mislabel post-connect purge validation failures as DB_CONNECT', async () => {
+    const deps = createDeps();
+
+    const output = await runOrphanedAssessmentBlobPurge({ batchLimit: 1001 }, deps).catch(rejectionOutput);
+
+    expect(output).toContain('stage=PURGE');
+    expect(output).not.toContain('stage=DB_CONNECT');
+    expect(deps.connect).toHaveBeenCalledTimes(1);
+    expect(deps.list).not.toHaveBeenCalled();
   });
 
   it('reports BLOB_LIST class and HTTP status without the error message', async () => {
