@@ -23,6 +23,8 @@
 
 **Objetivo:** entender y limitar flujo de documentos y datos. **Reuso:** `src/lib/document-parsing/`, `ocr/`, `vision/`, `ingestion/`, Blob, `AssessmentAttachment.ocrData`, `AttachmentAnalysis.detectedJson`.
 
+**Etapa 1 documental (2026-10-13):** inventario y comparativas en [`es-0.2-data-flow-inventory.md`](es-0.2-data-flow-inventory.md). Decisiones firmes de Toni: finalidad única de generar la valoración; documentos subidos por 30 días con borrado manual anterior; proveedores limitados a software abierto o coste cero, y aprobación expresa previa para servicio externo nuevo tras comparativa. No se elige aún motor OCR ni almacenamiento. Se incluye propuesta de lectura de PDF/presupuestos posterior; no altera criterios ni implementa comportamiento. Los gates de redacción/centinelas siguen pendientes.
+
 | Subtarea | Ejecución | Salida | Estimación orientativa |
 |---|---|---|---:|
 | 0.2.a Trazar entrada→Blob→parser/OCR/visión→DB→PDF/logs→retención/borrado | Agente | Diagrama y proveedores identificados | 1–2 d |

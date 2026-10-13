@@ -13,6 +13,8 @@
 
 ## Decisiones iniciales de producto
 
+**Decisiones firmes de Toni para ES-0.2 (2026-10-13):** finalidad única de generar la valoración del usuario; retención de documentos subidos de 30 días, con borrado manual anterior; solo proveedores de software abierto o coste cero, y ningún proveedor externo nuevo sin aprobación expresa de Toni y comparativa previa. El motor OCR y el almacenamiento concreto quedan pendientes de decisión. Ver [`es-0.2-data-flow-inventory.md`](es-0.2-data-flow-inventory.md).
+
 | Decisión | Valor inicial | Cuándo reabrir |
 |---|---|---|
 | Upload anónimo | Denegar hasta que haya necesidad y control seguro demostrable | Si un flujo real lo requiere |

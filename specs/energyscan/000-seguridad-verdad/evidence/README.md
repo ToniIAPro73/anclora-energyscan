@@ -1,6 +1,6 @@
 # Evidencia futura F0
 
-ES-0.1 fue validada por Toni y promocionada a `main`. Los informes históricos de ejecución y sus límites constan en `../gates.md`; la decisión de fase no sustituye los resultados técnicos, y las comprobaciones pendientes siguen identificadas allí. ES-0.2–ES-0.4 aún no tienen evidencia de ejecución.
+ES-0.1 fue validada por Toni y promocionada a `main`. Los informes históricos de ejecución y sus límites constan en `../gates.md`; el checklist histórico `9eece1aff64882bb90a76418cae4cae98b6d0938` acredita en Preview subida/asociación PNG, persistencia, 401 anónimo y borrado del adjunto. La etapa 1 documental de ES-0.2 consta en [`../es-0.2-data-flow-inventory.md`](../es-0.2-data-flow-inventory.md); no equivale a ejecución de sus gates. ES-0.2–ES-0.4 no tienen evidencia de implementación/QA de aceptación.
 
 Cuando se ejecute una fase:
 
