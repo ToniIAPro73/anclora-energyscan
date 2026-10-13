@@ -12,14 +12,18 @@ import {
 export type OrphanedBlobPurgeRuntimeDeps = {
   connect: () => Promise<void>;
   query: () => Promise<unknown>;
+  verifyAttachmentReadSchema: () => Promise<unknown>;
   list: (options: { prefix: string; cursor?: string; limit: number; mode: 'expanded' }) => Promise<BlobListPage>;
   findReferencedPaths: (pathnames: string[]) => Promise<string[]>;
   delete: (pathname: string) => Promise<unknown>;
 };
 
+type OrphanedBlobPurgeRuntimeOptions = OrphanedBlobPurgeOptions & { checkOnly?: boolean };
+
 const defaultRuntimeDeps: OrphanedBlobPurgeRuntimeDeps = {
   connect: () => prisma.$connect(),
   query: () => prisma.$queryRaw`SELECT 1`,
+  verifyAttachmentReadSchema: () => prisma.$queryRaw`SELECT "path" FROM "AssessmentAttachment" LIMIT 0`,
   list: ({ prefix, cursor, limit, mode }) => list({ prefix, cursor, limit, mode }),
   findReferencedPaths: async (pathnames) => {
     const records = await prisma.assessmentAttachment.findMany({
@@ -32,13 +36,21 @@ const defaultRuntimeDeps: OrphanedBlobPurgeRuntimeDeps = {
 };
 
 export async function checkOrphanedBlobPurgeDatabase(
-  deps: Pick<OrphanedBlobPurgeRuntimeDeps, 'connect' | 'query'> = defaultRuntimeDeps,
+  deps: OrphanedBlobPurgeRuntimeDeps = defaultRuntimeDeps,
 ): Promise<void> {
+  await runOrphanedAssessmentBlobPurge({ checkOnly: true }, deps);
+}
+
+async function runDatabasePreflight(deps: OrphanedBlobPurgeRuntimeDeps): Promise<void> {
+  let stage: BlobPurgeStage = 'DB_CONNECT';
   try {
     await deps.connect();
+    stage = 'DB_QUERY';
     await deps.query();
+    stage = 'DB_SCHEMA_CHECK';
+    await deps.verifyAttachmentReadSchema();
   } catch (error) {
-    throw new BlobPurgeStageError('DB_CONNECT', error);
+    throw new BlobPurgeStageError(stage, error);
   }
 }
 
@@ -53,27 +65,38 @@ export function getConfiguredBlobPurgeBatchLimit(): number {
 }
 
 export function runOrphanedAssessmentBlobPurge(
-  options: OrphanedBlobPurgeOptions = {},
+  options: OrphanedBlobPurgeRuntimeOptions & { checkOnly: true },
+  deps?: OrphanedBlobPurgeRuntimeDeps,
+  onDeleteFailure?: (diagnostic: BlobPurgeDiagnostic) => void,
+): Promise<void>;
+export function runOrphanedAssessmentBlobPurge(
+  options?: OrphanedBlobPurgeOptions,
+  deps?: OrphanedBlobPurgeRuntimeDeps,
+  onDeleteFailure?: (diagnostic: BlobPurgeDiagnostic) => void,
+): Promise<Awaited<ReturnType<typeof purgeOrphanedAssessmentBlobs>>>;
+export function runOrphanedAssessmentBlobPurge(
+  options: OrphanedBlobPurgeRuntimeOptions = {},
   deps: OrphanedBlobPurgeRuntimeDeps = defaultRuntimeDeps,
   onDeleteFailure?: (diagnostic: BlobPurgeDiagnostic) => void,
-) {
+): Promise<Awaited<ReturnType<typeof purgeOrphanedAssessmentBlobs>> | void> {
   return runWithDiagnostics(options, deps, onDeleteFailure);
 }
 
 async function runWithDiagnostics(
-  options: OrphanedBlobPurgeOptions,
+  options: OrphanedBlobPurgeRuntimeOptions,
   deps: OrphanedBlobPurgeRuntimeDeps,
   onDeleteFailure?: (diagnostic: BlobPurgeDiagnostic) => void,
 ) {
   let stage: BlobPurgeStage = 'CONFIGURATION';
   try {
-    const normalizedOptions = {
-      ...options,
-      batchLimit: options.batchLimit ?? getConfiguredBlobPurgeBatchLimit(),
-    };
+    const { checkOnly = false, ...purgeOptions } = options;
+    const normalizedOptions = checkOnly
+      ? purgeOptions
+      : { ...purgeOptions, batchLimit: purgeOptions.batchLimit ?? getConfiguredBlobPurgeBatchLimit() };
     stage = 'DB_CONNECT';
-    await deps.connect();
+    await runDatabasePreflight(deps);
     stage = 'PURGE';
+    if (checkOnly) return;
     return await purgeOrphanedAssessmentBlobs(
       normalizedOptions,
       {

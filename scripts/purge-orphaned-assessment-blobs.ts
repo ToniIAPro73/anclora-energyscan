@@ -1,5 +1,5 @@
 import { formatOrphanedBlobPurgeReport } from '../src/lib/orphaned-assessment-blob-purge';
-import { checkOrphanedBlobPurgeDatabase, getConfiguredBlobPurgeBatchLimit, runOrphanedAssessmentBlobPurge } from '../src/lib/orphaned-assessment-blob-purge-runtime';
+import { getConfiguredBlobPurgeBatchLimit, runOrphanedAssessmentBlobPurge } from '../src/lib/orphaned-assessment-blob-purge-runtime';
 import { BlobPurgeStageError, formatBlobPurgeDiagnostic, toBlobPurgeDiagnostic, type BlobPurgeStage } from '../src/lib/blob-purge-diagnostics';
 
 function parseArgs(args: string[]) {
@@ -35,8 +35,9 @@ async function main() {
         process.exitCode = 1;
         return;
       }
+      const configuredBatchLimit = getConfiguredBlobPurgeBatchLimit();
       stage = 'DB_CONNECT';
-      await checkOrphanedBlobPurgeDatabase();
+      await runOrphanedAssessmentBlobPurge({ checkOnly: true, batchLimit: configuredBatchLimit });
       console.log('Database check passed (DB_CONNECT).');
       return;
     }
