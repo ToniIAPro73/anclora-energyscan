@@ -1,6 +1,6 @@
 # ES-0.2 — Inventario de flujo, proveedores y retención
 
-**Actualizado:** 2026-10-13 · **Código revisado:** `5edfbd36dfcc6b1d083a57de77739de07f85e3c9` · **Estado:** implementación ES-0.2; QA de adjunto bloqueada por HTTP 400 de Blob en runtime local.
+**Actualizado:** 2026-10-13 · **Código revisado:** `10a04fa7dbb6f94877da250942a79b711c1f72d0` · **Estado:** implementación ES-0.2; subida y persistencia de adjunto pasan en Preview; borrado individual del adjunto queda sin verificar.
 
 ## Decisiones firmes de Toni
 
@@ -151,7 +151,9 @@ Alcance a valorar: texto primero/OCR alternativo local; extracción solo de camp
 
 El código validado es `5edfbd36dfcc6b1d083a57de77739de07f85e3c9`; el informe de gates y el detalle QA están en [`gates.md`](gates.md). En ese SHA pasan `npm run lint`, `npx tsc --noEmit`, `npm test -- --runInBand` (76 suites/491 tests) y `npm run build`. Las pruebas cubren cutoff exacto, denegación de adjunto vencido antes de Blob, purga y borrado, centinelas sintéticos, allowlist `:free`, `data_collection: deny`, fallback, bandera Anthropic, dimensiones y EXIF.
 
-QA funcional autenticada con identidad QA: se creó y borró desde la interfaz una valoración sin adjunto; el DELETE fue HTTP 200 y la interfaz volvió al inicio. Al probar PNG sintético, `POST /api/blob/upload` respondió HTTP 400 y el guardado de valoración con adjunto falló sin mostrar éxito. No se pudo validar asociación/persistencia/borrado de adjunto real en esta sesión. No se usó fecha futura sobre datos live; el vencimiento se simuló en pruebas. Vercel Runtime Logs no se consultaron y la purga no está programada. No hubo migración.
+La ejecución anterior en runtime local registró un 400 al subir PNG; ese resultado no probaba Preview porque Blob no está conectado a localhost. La nueva QA autenticada se realizó en el Preview protegido `dpl_DaKaD7g91bkb3B9LqBxcXCQqkrPn` (`READY`), código `10a04fa7dbb6f94877da250942a79b711c1f72d0`, con identidad QA `qa-es01`: login/session 200; `POST /api/blob/upload` 200; escritura directa a Blob 200; `POST /api/assessment` 200; recarga con `Photos submitted: 1`; borrado owner de la valoración 200; repetición DELETE 404. GET de la ruta de adjunto usando un ID centinela bajo el assessment ya borrado devolvió 404; no es verificación del ID real ni del conteo de objetos/filas. El 400 no se reprodujo, por lo que no se consultaron Runtime Logs de Vercel.
+
+El borrado individual no se pudo probar con esta cuenta: la sección/control de adjuntos solo se representa en el área Premium y la respuesta de creación no expone ID de adjunto. El borrado completo dejó de servir la valoración y su ruta de adjuntos, pero no se obtuvo comprobación separada de cero filas ni del objeto privado Blob. Se intentó el dry-run de `npm run qa:teardown -- --assessment-id …` después del borrado funcional; el script falló cerrado con mensaje genérico y no aplicó cambios. No se utilizó SQL/Prisma para limpiar ni se alteró la identidad QA. No se usó fecha futura sobre datos live; el vencimiento se simuló en pruebas. La purga no está programada. No hubo migración.
 
 ## Decisiones todavía requeridas a Toni
 
