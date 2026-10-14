@@ -1,6 +1,6 @@
 # Índice de specs EnergyScan
 
-Estado global: roadmap activo de desarrollo. ES-0.1, ES-0.2 y ES-0.3 están cerradas y promocionadas a `main` (`3369054` tras la orden `PROMOTE=FULL`). Baseline ES-0.4 aceptado por Toni; evidencia focal parcial de R04 añadida en `development`, sin implementación de comportamiento. Se trabaja directamente en `development`; el piloto de usuarios es opcional y no es prerrequisito de implementación ni aceptación funcional.
+Estado global: roadmap activo de desarrollo. ES-0.1, ES-0.2 y ES-0.3 están cerradas y promocionadas a `main` (`3369054` tras la orden `PROMOTE=FULL`). Baseline ES-0.4 aceptado por Toni; evidencia focal parcial de R04 en `development`; los resultados `local_` se mantienen sin firma y muestran un aviso de estimación no verificada. Se trabaja directamente en `development`; el piloto de usuarios es opcional y no es prerrequisito de implementación ni aceptación funcional.
 
 | ID | Fase | Prioridad | Dependencia | Estado | Spec/tarea | Gate |
 |---|---:|---|---|---|---|---|

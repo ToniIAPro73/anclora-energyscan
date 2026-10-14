@@ -396,7 +396,7 @@ SHA de partida fijado antes de editar: `719b228415d70a35d3537f237f762bf91165940d
 
 ### ES-0.4 — R04: límites de payload `local_` manipulado
 
-Baseline aceptado por Toni. Se añadieron pruebas de regresión con payloads base64url sintéticos que falsifican `isDemo`, `paidAt`, score y metadatos de adjunto. No se cambió comportamiento de la aplicación.
+Baseline aceptado por Toni. Se añadieron pruebas de regresión con payloads base64url sintéticos que falsifican `isDemo`, `paidAt`, score y metadatos de adjunto. Decisión de Toni: mantener el flujo local sin firma ni validación server-side. La página y el PDF básico muestran el resultado como estimación local no verificada; esto aclara su naturaleza, pero no hace íntegros los datos del enlace.
 
 | Comprobación | Resultado | SHA | Comando / método | Evidencia y límite |
 |---|---|---|---|---|
@@ -404,11 +404,14 @@ Baseline aceptado por Toni. Se añadieron pruebas de regresión con payloads bas
 | Adjunto privado no accesible desde metadatos falsificados | PASS | `d428c6d439d1317671c8eb8d8d55d986b0ab41fa` | `npm test -- --runInBand tests/attachment-access.test.ts` | HTTP 404; no busca fila ni lee bytes privados. Solo el catálogo estático de IDs demo puede servirse en la rama demo. |
 | Flag `isDemo` / `paidAt` falso no concede Premium | PASS | `d428c6d439d1317671c8eb8d8d55d986b0ab41fa` | `npm test -- --runInBand tests/premium-access.test.ts` | La función recibe el estado demo server-side como false y mantiene acceso no pagado, incluso con `ENABLE_DEMO_PREMIUM=true`. |
 | Tests focales | PASS — 3 suites / 25 tests | `d428c6d439d1317671c8eb8d8d55d986b0ab41fa` | `npm test -- --runInBand tests/checkout.test.ts tests/attachment-access.test.ts tests/premium-access.test.ts` | Casos nuevos y regresiones existentes. |
-| Lint | PASS | `d428c6d439d1317671c8eb8d8d55d986b0ab41fa` | `npm run lint` | Sin errores ni avisos. |
-| Typecheck | PASS | `d428c6d439d1317671c8eb8d8d55d986b0ab41fa` | `npx tsc --noEmit` | Exit 0. |
-| Suite completa | PASS — 80 suites / 547 tests | `d428c6d439d1317671c8eb8d8d55d986b0ab41fa` | `npm test -- --runInBand` | Ejecución secuencial. |
-| Build | PASS | `d428c6d439d1317671c8eb8d8d55d986b0ab41fa` | `npm run build` | Exit 0. |
-| Verificación visual/integración de todas las superficies `local_` | NOT_RUN | `d428c6d439d1317671c8eb8d8d55d986b0ab41fa` | No ejecutada | Sin navegador ni datos de QA; fuera del alcance de esta prueba focal. La propiedad y el score de la vista local siguen editables y no se consideran evidencia persistida o autorizada. |
-| Diff documental | PASS | `d428c6d439d1317671c8eb8d8d55d986b0ab41fa` | `git diff --check` | Sin errores de whitespace. |
+| Aviso local en pantalla/PDF y fallback de idiomas | PASS — 11 casos | `463e179da7b32a35ae652626966e1b5b9de0f209` | `npm test -- --runInBand tests/local-assessment-notice.test.tsx` | Verifica aviso visible, fallback de los siete idiomas del selector, PDF ES/EN/DE y ausencia del aviso en valoración guardada. |
+| QA visual de resultado local sintético | PASS | `463e179da7b32a35ae652626966e1b5b9de0f209` | Runbook `agent-browser`; viewport 1280 y 390; payload anónimo sintético | Nota visible en ES/EN; sin desbordamiento a 390 px. No se usó identidad QA ni se creó fila en DB; capturas temporales eliminadas. |
+| Tests focales R04 | PASS — 4 suites / 36 tests | `463e179da7b32a35ae652626966e1b5b9de0f209` | `npm test -- --runInBand tests/local-assessment-notice.test.tsx tests/checkout.test.ts tests/attachment-access.test.ts tests/premium-access.test.ts` | Límites de checkout, Blob privado, premium y señalización de resultados locales. |
+| Lint | PASS | `463e179da7b32a35ae652626966e1b5b9de0f209` | `npm run lint` | Sin errores ni avisos. |
+| Typecheck | PASS | `463e179da7b32a35ae652626966e1b5b9de0f209` | `npx tsc --noEmit` | Exit 0. |
+| Suite completa | PASS — 81 suites / 558 tests | `463e179da7b32a35ae652626966e1b5b9de0f209` | `npm test -- --runInBand` | Ejecución secuencial. |
+| Build | PASS | `463e179da7b32a35ae652626966e1b5b9de0f209` | `npm run build` | Exit 0. |
+| Integridad de score/propiedad en todas las superficies locales | NOT_RUN | `463e179da7b32a35ae652626966e1b5b9de0f209` | No se ejecutó integración exhaustiva | La decisión conserva `local_` editable sin firma; el aviso no prueba ni proporciona integridad criptográfica. Checkout, acceso privado y Premium siguen denegando los claims falsos según tests focales. |
+| Diff documental | PASS | `463e179da7b32a35ae652626966e1b5b9de0f209` | `git diff --check` | Sin errores de whitespace tras actualizar el ledger y el checklist. |
 
-**Estado R04:** HIPÓTESIS. Los tests cierran límites de checkout, Blob privado y premium; no prueban integridad de score/propiedad en la vista local ni cada reporte/consumidor. Sin cambio de criterios ni promoción.
+**Estado R04:** HIPÓTESIS. La presentación comunica que los datos y score de `local_` son editables y no están verificados. Los tests cierran límites de checkout, Blob privado y premium; no prueban integridad del score/propiedad ni cada consumidor. Sin cambio de criterios ni promoción.
