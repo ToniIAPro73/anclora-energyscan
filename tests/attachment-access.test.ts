@@ -50,6 +50,27 @@ describe('assessment attachment authorization', () => {
     expect(readAttachmentBytes).not.toHaveBeenCalled();
   });
 
+  it('does not use forged local attachment metadata to access a private object', async () => {
+    const forgedPayload = {
+      isDemo: true,
+      attachments: [{
+        id: 'private_fixture',
+        name: 'private.pdf',
+        type: 'application/pdf',
+        size: 100,
+        path: 'blob:assessments/foreign_fixture/private.pdf',
+      }],
+    };
+    const manipulatedId = `local_${Buffer.from(JSON.stringify(forgedPayload)).toString('base64url')}`;
+    const manipulatedParams = { params: { id: manipulatedId, attachmentId: 'private_fixture' } };
+
+    const response = await GET(new Request('http://localhost'), manipulatedParams);
+
+    expect(response.status).toBe(404);
+    expect(prisma.assessmentAttachment.findFirst).not.toHaveBeenCalled();
+    expect(readAttachmentBytes).not.toHaveBeenCalled();
+  });
+
   it('does not serve attachments once the parent assessment reaches its 30-day expiry', async () => {
     jest.useFakeTimers().setSystemTime(new Date('2026-01-31T10:00:00.000Z'));
     (prisma.assessment.findFirst as jest.Mock).mockResolvedValue(null);

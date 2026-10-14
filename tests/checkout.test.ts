@@ -54,6 +54,27 @@ describe('POST /api/checkout', () => {
     expect(prisma.assessment.findFirst).not.toHaveBeenCalled();
   });
 
+  it('rejects a forged local payload even when it claims demo and paid state', async () => {
+    const forgedPayload = {
+      isDemo: true,
+      paidAt: '2099-01-01T00:00:00.000Z',
+      propertyData: { area: 999999 },
+      scoreResult: { score: 100, estimatedLetter: 'A' },
+      attachments: [{ id: 'private_fixture', path: 'blob:assessments/foreign_fixture/private.pdf' }],
+    };
+    const manipulatedLocalId = `local_${Buffer.from(JSON.stringify(forgedPayload)).toString('base64url')}`;
+
+    const response = await POST(new Request('http://localhost:3000/api/checkout', {
+      method: 'POST',
+      body: JSON.stringify({ assessmentId: manipulatedLocalId }),
+    }));
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toMatchObject({ error: 'persisted_assessment_required' });
+    expect(prisma.assessment.findFirst).not.toHaveBeenCalled();
+    expect(mockCreateSession).not.toHaveBeenCalled();
+  });
+
   it('returns 404 for missing assessment', async () => {
     (prisma.assessment.findFirst as jest.Mock).mockResolvedValue(null);
     const response = await POST(new Request('http://localhost:3000/api/checkout', {

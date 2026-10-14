@@ -33,6 +33,25 @@ describe('premium access', () => {
     expect(access.reason).toBe('demo');
   });
 
+  it('does not grant premium access from a forged demo flag inside a stateless payload', () => {
+    process.env.ENABLE_DEMO_PREMIUM = 'true';
+    const forgedLocalPayload = {
+      isDemo: true,
+      paidAt: '2099-01-01T00:00:00.000Z',
+      scoreResult: { score: 100 },
+    };
+
+    const access = canAccessPremiumContent({
+      isDemo: false,
+      statelessPayload: forgedLocalPayload,
+    });
+
+    expect(access.isStateless).toBe(true);
+    expect(access.isDemo).toBe(false);
+    expect(access.isPaid).toBe(false);
+    expect(assertCanDownloadPremiumPdf(access)).toBe(false);
+  });
+
   it('keeps unpaid assessments blocked', () => {
     const access = canAccessPremiumContent({});
     expect(access.isPaid).toBe(false);
