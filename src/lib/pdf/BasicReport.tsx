@@ -11,6 +11,7 @@ export interface BasicReportData {
   language: PdfLanguage;
   propertyData: Pick<PropertyDataV2, 'year' | 'area' | 'zipcode' | 'propertyType'>;
   scoreResult: Pick<ScoreResultV2, 'estimatedLetter' | 'confidence' | 'climateZone' | 'penalties' | 'strengths'>;
+  isLocalAssessment?: boolean;
   address?: string;
   logoDataUri?: string;
 }
@@ -60,6 +61,8 @@ const s = StyleSheet.create({
   upgradePriceSub: { fontSize: 8, color: '#7A7A7A', marginTop: 2 },
   disclaimer: { marginTop: 16, padding: 10, backgroundColor: '#F4E7C2', borderRadius: 4 },
   disclaimerText: { fontSize: 7, color: '#6F4A00', lineHeight: 1.4, fontStyle: 'italic' },
+  localNotice: { marginBottom: 8, padding: 8, backgroundColor: '#FFF4D6', borderRadius: 4 },
+  localNoticeText: { fontSize: 8, color: '#6F4A00', lineHeight: 1.4 },
   footerRef: { marginTop: 10, fontSize: 7, color: '#A09880', textAlign: 'center' },
 });
 
@@ -69,6 +72,7 @@ const labels = {
     subtitle: 'Informe gratuito orientativo — Anclora EnergyScan',
     free: 'GRATUITO',
     ratingSection: 'Calificación estimada',
+    localEstimateNotice: 'Estimación local no verificada. Los datos de este enlace pueden modificarse y el resultado no está validado por el servidor.',
     letter: 'Letra estimada',
     confidence: 'Confianza del análisis',
     zone: 'Zona climática',
@@ -100,6 +104,7 @@ const labels = {
     subtitle: 'Free indicative report — Anclora EnergyScan',
     free: 'FREE',
     ratingSection: 'Estimated rating',
+    localEstimateNotice: 'Unverified local estimate. The data in this link can be changed, and the result is not validated by the server.',
     letter: 'Estimated letter',
     confidence: 'Analysis confidence',
     zone: 'Climate zone',
@@ -131,6 +136,7 @@ const labels = {
     subtitle: 'Kostenloser Orientierungsbericht — Anclora EnergyScan',
     free: 'KOSTENLOS',
     ratingSection: 'Geschätzte Energieklasse',
+    localEstimateNotice: 'Ungeprüfte lokale Schätzung. Die Daten in diesem Link können geändert werden; das Ergebnis wird vom Server nicht validiert.',
     letter: 'Geschätzte Klasse',
     confidence: 'Analysegenauigkeit',
     zone: 'Klimazone',
@@ -196,6 +202,11 @@ export function BasicReport({ data }: { data: BasicReportData }) {
         {/* Letter + property meta */}
         <View style={s.section}>
           <Text style={s.sectionTitle}>{t.ratingSection}</Text>
+          {data.isLocalAssessment && (
+            <View style={s.localNotice}>
+              <Text style={s.localNoticeText}>{t.localEstimateNotice}</Text>
+            </View>
+          )}
           <View style={s.row}>
             <View style={[s.letterBox, { backgroundColor: letterColor }]}>
               <Text style={s.letterChar}>{letter}</Text>

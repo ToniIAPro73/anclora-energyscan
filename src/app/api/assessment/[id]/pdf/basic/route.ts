@@ -53,6 +53,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
         assessmentRef: getPublicAssessmentRef(params.id),
         date: new Date().toLocaleDateString(dateLocale),
         language: pdfLanguage,
+        isLocalAssessment: true,
         propertyData: {
           year: pd.year,
           area: pd.area,

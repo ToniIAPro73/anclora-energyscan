@@ -32,6 +32,7 @@ import { VisionAnalysisTrigger } from '@/components/VisionAnalysisTrigger';
 import { getAssessmentRetentionCutoff } from '@/lib/assessment-retention';
 import { logSafeError } from '@/lib/safe-logger';
 import { DeleteAssessmentButton } from '@/components/DeleteAssessmentButton';
+import { LocalEstimateNotice } from '@/components/LocalEstimateNotice';
 
 export const dynamic = 'force-dynamic';
 
@@ -156,6 +157,7 @@ export default async function AssessmentResultsPage({ params }: { params: { id: 
   })();
 
   const isDemo = assessment?.isDemo || false;
+  const isLocalAssessment = Boolean(statelessPayload);
   const premiumAccess = canAccessPremiumContent({
     paidAt: assessment?.paidAt,
     isPremium: assessment?.isPremium,
@@ -403,6 +405,9 @@ export default async function AssessmentResultsPage({ params }: { params: { id: 
               <p className="text-muted leading-relaxed">
                 {t.resultCopy} ({formatArea(propertyData.area, measurementSystem, language)}, {propertyData.year}).
               </p>
+              {isLocalAssessment && (
+                <LocalEstimateNotice message={t.localEstimateNotice} />
+              )}
               {isDemo && (
                 <p className="rounded-xl border border-[#FFB020]/30 bg-[#FFB020]/10 p-3 text-xs font-semibold text-[#FFB020]">
                   {t.demoNotice}
