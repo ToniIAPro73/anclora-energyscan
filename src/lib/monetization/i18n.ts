@@ -1443,7 +1443,7 @@ const de: typeof es = {
     statusLOW_REVIEW: 'Niedriger Preis',
     statusINCOMPLETE: 'Unvollstaendig',
     statusREQUIRES_CLARIFICATION: 'Erklaerung erforderlich',
-    statusNO_REFERENCE: 'Keine vergleichbare Referenz',
+    statusNO_REFERENCE: 'Kein Vergleichswert',
     pdfTitle: 'Zweite Meinung zum Angebot',
     pdfSubtitle: 'Orientierende automatische Analyse — Anclora EnergyScan',
     pdfDate: 'Datum',

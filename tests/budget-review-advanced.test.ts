@@ -133,6 +133,13 @@ describe('getFindingStatusLabel', () => {
       expect(getFindingStatusLabel('NO_REFERENCE', lang).length).toBeGreaterThan(10);
     }
   });
+  it('keeps the PDF status label short enough for a 20% column in German', async () => {
+    const { getMonetizationCopy } = await import('../src/lib/monetization/i18n');
+    for (const lang of ['es', 'en', 'de'] as const) {
+      expect(getMonetizationCopy(lang).budgetReview.statusNO_REFERENCE.length).toBeLessThanOrEqual(25);
+    }
+    expect(getMonetizationCopy('de').budgetReview.statusNO_REFERENCE.split(' ').every((word: string) => word.length <= 16)).toBe(true);
+  });
   it('renders persisted legacy price labels as NO_REFERENCE', () => {
     for (const legacy of ['HIGH_REVIEW', 'LOW_REVIEW', 'IN_RANGE'] as const) {
       expect(getFindingStatusLabel(legacy, 'en')).toBe(getFindingStatusLabel('NO_REFERENCE', 'en'));
