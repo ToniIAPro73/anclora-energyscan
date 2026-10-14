@@ -240,10 +240,10 @@ export default function Navbar({
           </Link>
         </div>
       </nav>
-      <div className="flex items-center justify-between border-t border-white/5 px-3 py-2 md:hidden">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/5 px-3 py-2 md:hidden">
         <PreferenceToggles compact variant="popover" />
         {hasAccount && (
-          <div className="relative" ref={mobileAccountRef}>
+          <div className="relative ml-auto shrink-0" ref={mobileAccountRef}>
             <button
               type="button"
               onClick={() => setAccountOpen((v) => !v)}
@@ -257,7 +257,7 @@ export default function Navbar({
                   : <span className="text-[9px] font-black text-[#00DC82]">{initials}</span>}
               </span>
               <span className="flex min-w-0 items-center gap-1.5">
-                <span className="max-w-[8rem] truncate text-xs">{effectiveUserName || effectiveUserEmail || t.navAccount}</span>
+                <span className="hidden max-w-[8rem] truncate text-xs">{effectiveUserName || effectiveUserEmail || t.navAccount}</span>
                 {effectiveIsAdmin && (
                   <span className="shrink-0 rounded-full bg-[#00DC82]/15 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide text-[#00DC82]">
                     {t.navAdminRole}
