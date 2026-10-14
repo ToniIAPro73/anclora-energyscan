@@ -1,7 +1,7 @@
 # Contexto de trabajo EnergyScan — estado a 2026-10-14
 
 **Propósito:** que cualquier agente o persona retome el trabajo sin releer el historial. No contiene secretos ni valores de credenciales.
-**Última promoción:** `development`, `staging`, `production` y `main` se sincronizaron en `73b83dce7c528375a2a51a3aa615480c8b0b7e70`; desde entonces `development` avanza con ES-1.1. No se ha iniciado una promoción de ES-1.1.
+**Última promoción:** `development`, `staging`, `production` y `main` se sincronizaron en `205e84c83180b6b822a19e78063deae78d330a32`. ES-1.1 (código verificado en `13a19448a3ca754bab85d4e924c543651a56c08b`) fue validada por Toni y promovida; ES-1.2 tiene SDD propuesta pendiente de decisiones y no tiene implementación.
 
 ## 1. Cómo se trabaja (flujo v1)
 
@@ -55,16 +55,17 @@ Retención de 30 días, borrado por el propietario, endpoint de purga con `CRON_
 
 1. **ES-0.3:** cerrada y promocionada.
 2. **ES-0.4 (Baseline y plan de validación, P1):** baseline técnico aceptado por Toni, ligado al SHA de partida `719b228415d70a35d3537f237f762bf91165940d`; la fase quedó aceptada y promovida. Tests focales de límites para `local_` manipulado añadidos en `d428c6d`; por decisión de Toni, el flujo local se mantiene sin firma ni validación server-side. En `463e179` se añadió el aviso «estimación local no verificada» a la página y al PDF básico, con pruebas y QA visual sintético; Toni aprobó la promoción en `73b83dce`. R04 mantiene la limitación técnica de que el score/datos del enlace continúan editables. El protocolo de piloto está vacío y es opcional; no se ejecutó piloto.
-3. **ES-1.1:** implementación en curso en `development`; SDD y plan en [`sdd/features/energyscan-budget-extraction-localization/`](../../sdd/features/energyscan-budget-extraction-localization/). La prueba sintética cubre cinco partidas, seis campos y 27 valores aplicables; no mide exactitud sobre documentos reales. El resultado registrado está pendiente de revisión de Toni.
-4. **ES-1.2.R:** spec redactada, sin implementación. Falta el catálogo cerrado de categorías.
-4. Evidencia por SHA de todo lo anterior: `specs/energyscan/000-seguridad-verdad/gates.md`. Estado de hallazgos: `es-0.3-claims-inventory.md`.
+3. **ES-1.1:** validada por Toni y promovida; SDD y evidencia en [`sdd/features/energyscan-budget-extraction-localization/`](../../sdd/features/energyscan-budget-extraction-localization/). La prueba sintética cubre cinco partidas, seis campos y 27 valores aplicables; no mide exactitud sobre documentos reales.
+4. **ES-1.2:** SDD propuesta en [`sdd/features/energyscan-budget-comparability/`](../../sdd/features/energyscan-budget-comparability/). No se ha cambiado comportamiento. La spec propone separar compatibilidad de alcance/unidad/IVA de cualquier juicio de precio; decisiones de Toni pendientes antes de implementación.
+5. **ES-1.2.R:** spec redactada, sin implementación. Falta el catálogo cerrado de categorías.
+6. Evidencia por SHA de F0: `specs/energyscan/000-seguridad-verdad/gates.md`. Estado de hallazgos: `es-0.3-claims-inventory.md`.
 
 ## 5. Próximos pasos (en orden)
 
-1. **ES-1.1 (en curso):** revisar los fixtures sintéticos, la cobertura por campo y las etiquetas de categoría en los siete locales; Toni decide aceptación antes de la siguiente fase.
+1. **ES-1.2:** Toni revisa y resuelve las decisiones del SDD antes de autorizar implementación. No hay gates de código ejecutados para esta propuesta.
 2. Decidir el catálogo de categorías de ES-1.2.R y planificar su implementación dentro de F1.
 3. Mantener visibles en `gates.md` las limitaciones residuales de F0; no se reabren ni se declaran resueltas por ES-1.1.
-4. Después de ES-1.1, continuar F1 con ES-1.2 (comparabilidad de alcance/unidades/IVA) y ES-1.3 (revisión corregible).
+4. Después de ES-1.2, refinar ES-1.3 (revisión corregible).
 
 ## 6. Puntos pendientes de resolver
 

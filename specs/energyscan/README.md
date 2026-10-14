@@ -1,6 +1,6 @@
 # Índice de specs EnergyScan
 
-Estado global: ES-0.1–ES-0.4 aceptadas por Toni y promovidas hasta `main` en `73b83dce7c528375a2a51a3aa615480c8b0b7e70`. El flujo local `local_` se mantiene editable y muestra el aviso de estimación no verificada; la limitación de integridad sigue documentada en F0-R04. ES-1.1 está en implementación en `development` (`13a19448a3ca754bab85d4e924c543651a56c08b`). Se trabaja directamente en `development`; el piloto de usuarios es opcional y no es prerrequisito de implementación ni aceptación funcional.
+Estado global: ES-0.1–ES-0.4 aceptadas por Toni y promovidas; ES-1.1 también validada y promovida en el historial de `main` (código en `13a19448a3ca754bab85d4e924c543651a56c08b`, ramas sincronizadas en `205e84c83180b6b822a19e78063deae78d330a32`). El flujo local `local_` se mantiene editable y muestra el aviso de estimación no verificada; la limitación de integridad sigue documentada en F0-R04. ES-1.2 tiene una SDD propuesta pendiente de decisiones de producto; no se ha implementado. Se trabaja directamente en `development`; el piloto de usuarios es opcional y no es prerrequisito de implementación ni aceptación funcional.
 
 | ID | Fase | Prioridad | Dependencia | Estado | Spec/tarea | Gate |
 |---|---:|---|---|---|---|---|
@@ -8,8 +8,8 @@ Estado global: ES-0.1–ES-0.4 aceptadas por Toni y promovidas hasta `main` en `
 | ES-0.2 | 0 | P0 | Inventario F0 | ACEPTADA POR TONI · PROMOCIONADA A `main` | [`000-seguridad-verdad/es-0.2-data-flow-inventory.md`](000-seguridad-verdad/es-0.2-data-flow-inventory.md) | Retención, borrado, logs y purga de huérfanos registrados en gates; límites restantes no alteran la aceptación de fase |
 | ES-0.3 | 0 | P0 | ES-0.1 inventario | CERRADA · PROMOCIONADA | [`es-0.3-claims-inventory.md`](000-seguridad-verdad/es-0.3-claims-inventory.md) | Claims/procedencia trazables; revisión externa previa a exposición pública cuando aplique |
 | ES-0.4 | 0 | P1 | ES-0.1–0.3 | ACEPTADA POR TONI · PROMOCIONADA A `main` | [`es-0.4-baseline.md`](000-seguridad-verdad/es-0.4-baseline.md), [`es-0.4-pilot-protocol-template.md`](000-seguridad-verdad/es-0.4-pilot-protocol-template.md) | Baseline ligado a SHA; aviso local implementado; R04 conserva su limitación técnica; piloto opcional |
-| ES-1.1 | 1 | P1 | F0 | EN IMPLEMENTACIÓN · PENDIENTE DE REVISIÓN DE TONI | [SDD ES-1.1](../../sdd/features/energyscan-budget-extraction-localization/feature-energyscan-budget-extraction-localization-spec-v1.md) | Extracción y localización medida con fixtures sintéticos; no implica exactitud en documentos reales |
-| ES-1.2 | 1 | P1 | ES-1.1 | PROPUESTA | idem | Comparabilidad explicable, unidades/IVA compatibles |
+| ES-1.1 | 1 | P1 | F0 | VALIDADA POR TONI · PROMOCIONADA | [SDD ES-1.1](../../sdd/features/energyscan-budget-extraction-localization/feature-energyscan-budget-extraction-localization-spec-v1.md) | Extracción y localización medida con fixtures sintéticos; no implica exactitud en documentos reales |
+| ES-1.2 | 1 | P1 | ES-1.1 | SDD PROPUESTA · PENDIENTE DE DECISIONES DE TONI | [SDD ES-1.2](../../sdd/features/energyscan-budget-comparability/feature-energyscan-budget-comparability-spec-v1.md) | Comparabilidad explicable de alcance/unidades/IVA; sin valoración de precio por defecto |
 | ES-1.2.R | 1 | P1 | ES-0.2, ES-0.3 | PROPUESTA (spec redactada) | [`010-referencias-precios/spec.md`](010-referencias-precios/spec.md) | Conjunto de precios anónimo con umbral N/M; sin datos personales; abstención por debajo del umbral |
 | ES-1.3 | 1 | P1 | ES-1.1–1.2 | PROPUESTA | idem | Revisión accionable y corregible |
 | ES-2.1 | 2 | P1 | F0 | PROPUESTA | idem | Procedencia/versiones completas en campos críticos |

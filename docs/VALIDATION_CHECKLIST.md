@@ -1,79 +1,69 @@
-# Checklist de validación — ES-1.1 partidas sintéticas localizadas (2026-10-14)
+# Checklist de validación — SDD ES-1.2 comparabilidad (2026-10-14)
 
 > Este fichero se sobrescribe en cada entrega. El historial queda en Git.
 
 **Repositorio:** anclora-energyscan
-
-**Rama y commit de código:** development @ `13a19448a3ca754bab85d4e924c543651a56c08b`
-
-**Entorno de validación:** local, Jest; no se usaron servicios externos
-
-**Datos:** cinco partidas ficticias versionadas; sin identidad QA ni filas persistentes.
+**Rama y SHA base revisado:** development @ `205e84c83180b6b822a19e78063deae78d330a32`
+**Entorno de validación:** revisión documental local; sin runtime
+**Datos:** solo descripciones y fixtures sintéticos ya versionados; no se crearon registros ni se usó identidad QA.
 
 ## 1. Qué cambia
 
-- La extracción de filas tabulares conserva cantidad, unidad y precio unitario fuera de la descripción.
-- Las categorías canónicas de medidas se muestran traducidas en la importación del wizard y los resultados guardados para ES, CA, EN, DE, FR, IT y PT.
-- Se añade un fixture de texto sintético con formatos inline, tabular y línea de puntos, con cinco partidas y seis campos medidos.
-- No se modifica el esquema, no se añade OCR ni se incorporan proveedores o dependencias.
+- Añade una SDD propuesta para comparabilidad de partidas, alcance, unidades e IVA.
+- Registra explícitamente lo que el código actual sí hace y las decisiones de producto que deben resolverse antes de implementar.
+- Actualiza el índice y el contexto para reflejar ES-1.1 validada/promocionada y ES-1.2 pendiente de revisión.
+- No cambia código ni comportamiento de la aplicación.
 
 ## 2. Ya comprobado por el agente
 
 | Comprobación | Comando o método | Resultado | SHA |
-|---|---|---|---|
-| Prueba focal de extracción/localización, parser y CEE | `npm test -- --runInBand tests/budget-extraction-localization.test.ts tests/budget-ingestion.test.ts tests/ocr-parsers.test.ts tests/cee-parser-premium.test.ts` | PASS — 4 suites / 25 tests | `13a19448a3ca754bab85d4e924c543651a56c08b` |
-| Exactitud fixture por campo | Test `ES-1.1 synthetic budget extraction` | PASS — 27/27 aplicables: descripción 5/5, cantidad 4/4, unidad 4/4, precio unitario 4/4, total 5/5, categoría 5/5 | `13a19448a3ca754bab85d4e924c543651a56c08b` |
-| Categorías traducidas y fallback | Test `ES-1.1 budget category localization` | PASS — 84 combinaciones (12 categorías × 7 locales) | `13a19448a3ca754bab85d4e924c543651a56c08b` |
-| Lint | `npm run lint` | PASS | `13a19448a3ca754bab85d4e924c543651a56c08b` |
-| Typecheck | `npx tsc --noEmit` | PASS | `13a19448a3ca754bab85d4e924c543651a56c08b` |
-| Suite completa | `npm test -- --runInBand` | PASS — 82 suites / 569 tests | `13a19448a3ca754bab85d4e924c543651a56c08b` |
-| Build | `npm run build` | PASS | `13a19448a3ca754bab85d4e924c543651a56c08b` |
-| Diff documental | `git diff --check` | PASS, antes del commit documental | `13a19448a3ca754bab85d4e924c543651a56c08b` |
-
-Los cuatro gates finales se ejecutaron una sola vez, en orden: lint → typecheck → tests completos → build. El SHA de fixture está en `sdd/features/energyscan-budget-extraction-localization/execution-report.md`.
+| --- | --- | --- | --- |
+| Verificación de formato documental | `git diff --check` | PASS — diff de esta entrega basado en el SHA indicado arriba | `205e84c83180b6b822a19e78063deae78d330a32` |
+| Revisión de rutas/tipos del parser y Budget Review | Lectura de `src/lib/ocr/budget-parser.ts`, `src/lib/ingestion/types.ts`, `src/lib/budget-review/service.ts`, `src/lib/budget-review/advanced-analysis.ts` y tests relacionados | PASS — el baseline y sus límites se reflejan en la spec | `205e84c83180b6b822a19e78063deae78d330a32` |
 
 ## 3. Pruebas no ejecutadas (NOT_RUN)
 
 | Prueba | Motivo concreto |
-|---|---|
-| QA visual en navegador con presupuesto importado | Se probaron las etiquetas y el parser con Jest; no se inició un runtime local ni se subió un PDF. Revisión visual manual pendiente. |
-| Fixture PDF, PDF escaneado u OCR | Esta entrega mide el parser de texto; no elige ni implementa motor OCR. |
-| Corpus real autorizado | No se emplearon documentos reales; 27/27 no es una estimación de precisión en producción. |
-| Base de datos, Blob o ruta de importación autenticada | No eran necesarios para las pruebas sintéticas y no se modificó información persistente. |
-| Revisión del copy por Toni | Pendiente de comprobar las etiquetas en contexto de producto, incluidos CA/FR/IT/PT. |
+| --- | --- |
+| Lint, typecheck, tests y build | NOT_RUN — entrega solo documental; la política requiere `git diff --check` |
+| Tests focales de ES-1.2 | NOT_RUN — no existe implementación ni se modificó código |
+| QA visual/runtime o acceso a Neon/Blob | NOT_RUN — no hay cambio de interfaz ni se crearon datos |
 
 ## 4. Checklist para validar en la aplicación
 
+No aplica a esta entrega, que solo define la SDD. Toni debe revisar y decidir los siguientes puntos antes de autorizar código:
+
 | # | Dónde | Pasos | Resultado esperado | Cuenta o configuración | Bloqueante |
-|---|---|---|---|---|---|
-| 1 | `/wizard`, importación de presupuesto | Usar un presupuesto sintético propio con filas por m², ud. y kWp; revisar el resumen y el detalle de medidas en ES, CA, EN, DE, FR, IT y PT. | Cantidad, unidad, precio y total permanecen separados; los nombres de categoría están localizados y no aparecen códigos como `ENVELOPE_FACADE`. | Fixture o presupuesto creado por Toni; no subir un documento real. | Sí |
-| 2 | Resultados de una valoración sintética que ya tenga un presupuesto importado | Abrir los resultados en cada locale soportado. | La categoría se presenta en el idioma seleccionado; se conserva la descripción de la partida. | Solo registro ficticio propio/QA; no crear filas de prueba sin teardown autorizado. | Sí |
-| 3 | Fila no energética o sin categoría | Revisar una línea de gestión/obra general. | Se muestra “Sin clasificar” o su traducción; no se le asigna una medida energética. | Fixture sintético. | Sí |
-| 4 | Vista móvil del detalle | Revisar una etiqueta larga en el ancho habitual de móvil. | El texto envuelve o cabe sin recortar importes ni ampliar horizontalmente la página. | Navegador compartido según el runbook visual. | No |
+| --- | --- | --- | --- | --- | --- |
+| 1 | SDD ES-1.2 §2 y §8 | Confirmar si el flujo inicial compara dos ofertas o solo informa de faltas/diferencias dentro de una oferta. | Alcance explícito que corresponda al flujo aceptado. | Revisión documental de Toni | Sí |
+| 2 | SDD ES-1.2 §8 | Aprobar dimensiones obligatorias, catálogo inicial de inclusiones/exclusiones y comportamiento ante `UNKNOWN`. | Reglas conservadoras y comprensibles, sin equivalencias inferidas. | Revisión documental de Toni | Sí |
+| 3 | SDD ES-1.2 §8 | Confirmar aliases de unidad, conversiones, regla de IVA y si resultados se derivan o persisten. | Decisiones registradas antes de implementación; propuesta por defecto: aliases cerrados, sin conversión, IVA desconocido sin normalizar, sin migración. | Revisión documental de Toni | Sí |
+| 4 | SDD ES-1.2 §8 | Confirmar el límite con ES-1.2.R. | No se muestra juicio de precio con referencias no aprobadas; el estado sigue `NO_REFERENCE` hasta habilitar una fuente gobernada. | Revisión documental de Toni | Sí |
 
 ### Casos negativos y de borde
 
-| # | Caso | Resultado esperado |
-|---|---|---|
-| 1 | Fila tabular `3 kWp` con precio separado | La descripción no incluye cantidad ni precio; unidad y valores quedan en sus campos. |
-| 2 | Categoría técnica desconocida recibida en JSON persistido | Fallback traducido; nunca expone el identificador técnico al usuario. |
-| 3 | Unidad no indicada | Cantidad/unidad/precio unitario no inflan la métrica de cobertura; se conserva descripción y total si existen. |
-| 4 | Texto ambiguo sin evidencia de medida energética | Categoría `UNKNOWN`; no se fuerza equivalencia ni recomendación. |
+| # | Caso para la fase de implementación | Resultado esperado |
+| --- | --- | --- |
+| 1 | Unidad o cantidad desconocida | No comparable; explicación explícita, sin conversión inferida. |
+| 2 | IVA incluido/desglosado/ausente en cada lado | El dato ausente se mantiene desconocido; no se calcula un total normalizado por defecto. |
+| 3 | Descripciones parecidas con alcance diferente o no especificado | No se afirma equivalencia por similitud textual. |
+| 4 | Ítems dimensionalmente compatibles pero sin fuente de precios aprobada | Compatibilidad de dimensiones separada; precio permanece `NO_REFERENCE`. |
 
 ### Estados de interfaz afectados
 
-- [ ] Vacío · [ ] Cargando · [ ] Error · [x] Éxito · [x] Móvil · [x] Escritorio · [ ] Modo oscuro
+- [ ] Vacío · [ ] Cargando · [ ] Error · [ ] Éxito · [ ] Móvil · [ ] Escritorio · [ ] Modo oscuro (sin interfaz modificada en esta entrega)
 
 ## 5. Riesgos y limitaciones
 
-- Los casos son sintéticos y diseñados; la cobertura exacta mide solo ese corpus. No respalda una afirmación de precisión general.
-- El parser sigue siendo heurístico. PDFs escaneados, OCR y variaciones de formato fuera de estos fixtures quedan sin medir.
-- Las traducciones de categorías requieren revisión de Toni. No se ejecutó revisión de copy ni QA visual del flujo.
-- No se cambiaron los criterios de ES-1.1/ES-1.2, el esquema, la retención ni proveedores.
+- El producto actual recibe una oferta por revisión; el flujo de comparar dos ofertas no está verificado ni se asume como existente.
+- `BudgetLineItem` no tiene campos estructurados de IVA, inclusiones, exclusiones o alcance normalizado.
+- Los fixtures de ES-1.1 miden extracción en textos sintéticos; no prueban comparabilidad ni precisión sobre documentos reales.
+- La SDD permanece propuesta hasta que Toni resuelva las decisiones bloqueantes. ES-1.2.R y sus referencias de precios se mantienen separadas.
 
 ## 6. Decisión de Toni
 
-- [ ] Revisé las etiquetas y el comportamiento con partidas sintéticas en todos los locales indicados.
-- [ ] Acepto ES-1.1.
-- [ ] No acepto. Motivo: ______________________
-- [ ] Se promociona: escribir `PROMOTE=FULL` en una instrucción vigente.
+- [ ] Revisé la SDD propuesta de ES-1.2.
+- [ ] Acepto el alcance y las decisiones por defecto.
+- [ ] Solicito cambios antes de autorizar implementación. Motivo: ______________________
+- [ ] Autorizo implementación de ES-1.2 en una instrucción posterior.
+- [ ] No se solicita promoción: no hay cambios de aplicación.
