@@ -29,6 +29,10 @@ Los estados de la última columna reflejan únicamente la etapa de landing C-01�
 
 C-01–C-03 se corrigieron primero en ES, EN y DE. Los locales CA, FR, IT y PT mantenían la estadística «Objetivo classe E» y heredaban la línea de tiempo de ES o EN. Corregidos en una segunda entrega (ver `gates.md`).
 
+## 2 ter. Estado de C-04, C-05 y C-06
+
+C-04 y C-05 corregidos en `d509905172b9ffde3f6eb2893821e239d646ea30` (opción A: sin umbrales, estado `NO_REFERENCE`). C-06 queda parcial: `service.ts` conserva un mensaje en castellano; la pantalla usa la etiqueta localizada.
+
 ## 3. Superficies sin inventariar todavía
 
 Se registran como pendientes, no como correctas:

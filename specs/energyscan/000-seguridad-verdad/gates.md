@@ -289,3 +289,19 @@ El primer bloque solo cubrió ES, EN y DE. Los cuatro locales restantes del sele
 | QA visual CA/FR/IT/PT | NOT_RUN | Pendiente de la validación manual de Toni |
 
 La traducción de la Directiva a CA/FR/IT/PT es fiel al texto aprobado de ES; la revisión de un especialista se agenda antes de publicar afirmaciones normativas.
+
+### ES-0.3.b-2 — alertas de presupuesto sin umbrales universales (código `d509905172b9ffde3f6eb2893821e239d646ea30`)
+
+Opción A decidida por Toni (C-04, C-05, C-06). Requisito F0-R09.
+
+| Comprobación | Resultado | Evidencia |
+|---|---|---|
+| Etiquetas alto/bajo/en rango | PASS | `buildAdvancedFindings` y `buildBudgetReviewFindings` devuelven `NO_REFERENCE`; sin umbrales 450 / 25 |
+| Alerta de total > 30.000 € | PASS | Eliminada; `alertKey` siempre `budget.alert_general` |
+| Etiqueta `NO_REFERENCE` en 7 locales (lógica) y ES/EN/DE (pantalla y PDF) | PASS | Tests de etiqueta; i18n de monetización con fallback para CA/FR/IT/PT |
+| Revisiones persistidas con estado antiguo | PASS | `normalizeFindingStatus` las muestra como `NO_REFERENCE` en lógica, pantalla y PDF |
+| Lint, `tsc`, suite completa (80 suites / 529 tests), build | PASS | En secuencia |
+| QA visual de Budget Review (pantalla y PDF) | NOT_RUN | Pendiente |
+| Mensajes de partida solo en ES en `service.ts` (C-06) | PARCIAL | El texto sigue en castellano; la pantalla usa la etiqueta localizada |
+
+Límite conocido: el resumen guardado de revisiones antiguas conserva el texto «Presupuesto alto» en `summary.alert`.
