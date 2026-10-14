@@ -257,3 +257,21 @@ Ejecuciones reales, 2026-10-13/14, datos ficticios. Autorización de Toni por ca
 | Paquete completo antes de cada commit de riesgo | PASS | lint, `tsc`, 527/528/530 tests, build |
 
 Cambios de código: aceptar la forma legada estricta en la validación de rutas; `failureReasons` sin contenido en la respuesta; omitir el borrado de ficheros con ruta local ajena (solo filas de BD, nunca se toca el disco). Pendiente: aceptación de Toni del gate ES-0.2 y borrado individual de adjuntos (Premium).
+
+### ES-0.3.b — corrección de claims landing C-01–C-03
+
+**SHA de código validado:** `8c38cf1f2bd37f1c6a075eff54660f6ad297fb3b`. El alcance se limita a la timeline ES/EN/DE, las etiquetas `statsTarget` existentes y un test de regresión; no se cambiaron criterios de aceptación ni otros hallazgos.
+
+| Comprobación | Estado | SHA | Comando o método/evidencia |
+|---|---|---|---|
+| SRC-01 respalda los años residenciales 2030 y 2035 (Directiva (UE) 2024/1275, art. 9) | PASS | `8c38cf1f2bd37f1c6a075eff54660f6ad297fb3b` | `rg -n '2030|2035|2024/1275' docs/energyscan-sources.md`; inspección de SRC-01, fecha de consulta 2026-10-12 |
+| Regresión: no se afirma obligación residencial clase E/2033 en landing/i18n | PASS | `8c38cf1f2bd37f1c6a075eff54660f6ad297fb3b` | `npx jest --runInBand tests/landing-regulatory-claims.test.ts` — 1 suite / 1 test |
+| Lint | PASS | `8c38cf1f2bd37f1c6a075eff54660f6ad297fb3b` | `npm run lint` |
+| Typecheck | PASS | `8c38cf1f2bd37f1c6a075eff54660f6ad297fb3b` | `npx tsc --noEmit` |
+| Suite completa | PASS — 80 suites / 531 tests | `8c38cf1f2bd37f1c6a075eff54660f6ad297fb3b` | `npm test -- --runInBand` |
+| Build | PASS | `8c38cf1f2bd37f1c6a075eff54660f6ad297fb3b` | `npm run build` |
+| Visual QA de landing (ES, EN, DE; escritorio 1440×900 y móvil 390×844) | PASS | `8c38cf1f2bd37f1c6a075eff54660f6ad297fb3b` | Runbook `docs/qa/visual-qa-runbook.md`; `agent-browser` con `qa-es01`; se comprobaron título/copy/estado/estadística y ausencia del claim anterior; capturas sintéticas revisadas en `/tmp` y retiradas según runbook |
+| Diferencia de documentación | PASS | `8c38cf1f2bd37f1c6a075eff54660f6ad297fb3b` | `git diff --check` después de editar `docs/` y `specs/` |
+| Validación de producto por Toni | NOT_RUN | `8c38cf1f2bd37f1c6a075eff54660f6ad297fb3b` | Pendiente de la revisión manual de esta entrega |
+
+Resultado visual: en los tres idiomas se presenta el horizonte `2030–2035`, el título y la descripción solicitados, y el estado de regulación. La estadística muestra `Horizonte europeo` / `European horizon` / `Europäischer Horizont`. La evidencia visual fue sintética; no se creó una valoración ni se incluyeron datos personales. El detalle por idioma y viewport está en `docs/VALIDATION_CHECKLIST.md`.
