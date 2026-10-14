@@ -5,8 +5,9 @@ import { useSearchParams } from 'next/navigation';
 import { Download, FileText, UploadCloud } from 'lucide-react';
 import { usePreferences } from '@/components/AppPreferencesProvider';
 import { getMonetizationCopy } from '@/lib/monetization/i18n';
+import { normalizeFindingStatus } from '@/lib/budget-review/advanced-analysis';
 
-type FindingStatus = 'IN_RANGE' | 'HIGH_REVIEW' | 'LOW_REVIEW' | 'INCOMPLETE' | 'REQUIRES_CLARIFICATION';
+type FindingStatus = 'IN_RANGE' | 'HIGH_REVIEW' | 'LOW_REVIEW' | 'INCOMPLETE' | 'REQUIRES_CLARIFICATION' | 'NO_REFERENCE';
 
 type AdvancedFinding = {
   description: string;
@@ -236,13 +237,15 @@ export function BudgetReviewUploader() {
                         LOW_REVIEW: 'text-[#FFB020]',
                         INCOMPLETE: 'text-[#FFB020]',
                         REQUIRES_CLARIFICATION: 'text-[#FFB020]',
+                        NO_REFERENCE: 'text-[#FFB020]',
                       };
-                      const statusKey = `status${f.status}` as keyof typeof copy;
+                      const status = normalizeFindingStatus(f.status);
+                      const statusKey = `status${status}` as keyof typeof copy;
                       return (
                         <div key={i} className="flex items-start gap-2 text-xs">
-                          <span className={`shrink-0 font-bold ${colorMap[f.status]}`}>●</span>
+                          <span className={`shrink-0 font-bold ${colorMap[status]}`}>●</span>
                           <span className="text-muted flex-1 truncate">{f.description}</span>
-                          <span className={`shrink-0 ${colorMap[f.status]}`}>{copy[statusKey] as string}</span>
+                          <span className={`shrink-0 ${colorMap[status]}`}>{copy[statusKey] as string}</span>
                         </div>
                       );
                     })}

@@ -15,10 +15,12 @@ describe('budget review', () => {
     expect(analysis.lineItems.length).toBeGreaterThan(0);
   });
 
-  it('flags line items that need review', () => {
+  it('does not label prices as high or low and shows no amount-based alert', () => {
     const analysis = parseBudgetAnalysisText(BUDGET_TEXT);
-    const findings = buildBudgetReviewFindings(analysis.lineItems, analysis.totalAmount);
-    expect(findings.findings.some((finding) => finding.status === 'HIGH_REVIEW')).toBe(true);
+    const findings = buildBudgetReviewFindings(analysis.lineItems);
+    expect(findings.findings.length).toBeGreaterThan(0);
+    expect(findings.findings.every((finding) => finding.status === 'NO_REFERENCE')).toBe(true);
+    expect(findings.alert).not.toMatch(/alto|elevado/i);
     expect(findings.legalNotice).toContain('orientativo');
   });
 

@@ -11,29 +11,22 @@ export function hashBudgetText(text: string) {
   return createHash('sha256').update(text).digest('hex');
 }
 
-export function buildBudgetReviewFindings(lineItems: BudgetLineItem[], totalAmount?: number) {
+export function buildBudgetReviewFindings(lineItems: BudgetLineItem[]) {
+  // F0-R09: no universal unit-price or total thresholds. A line is only rated against a comparable reference.
   const findings = lineItems.map((item) => {
     const unitPrice = item.unitPrice || (item.total && item.quantity ? item.total / item.quantity : undefined);
-    const high = unitPrice !== undefined && unitPrice > 450;
-    const low = unitPrice !== undefined && unitPrice < 25;
     return {
       description: item.description,
       total: item.total,
       unitPrice,
-      status: high ? 'HIGH_REVIEW' : low ? 'LOW_REVIEW' : 'IN_RANGE',
-      message: high
-        ? 'Partida con precio unitario elevado. Conviene pedir desglose tecnico.'
-        : low
-          ? 'Partida con precio unitario bajo. Revisa alcance, calidades y mediciones.'
-          : 'Partida dentro de un rango orientativo amplio.',
+      status: 'NO_REFERENCE',
+      message: 'Sin referencia comparable. Revisa unidad, alcance y mediciones y pide el desglose técnico.',
     };
   });
 
   return {
     findings,
-    alert: totalAmount && totalAmount > 30000
-      ? 'Presupuesto alto: revisa mediciones, exclusiones, IVA y garantías antes de aceptar.'
-      : 'Revisa siempre mediciones, marcas, garantías e IVA antes de aceptar.',
+    alert: 'Revisa siempre mediciones, marcas, garantías e IVA antes de aceptar.',
     legalNotice: 'Análisis automático orientativo. No sustituye la revisión de un técnico, arquitecto, aparejador ni asesor legal.',
   };
 }
@@ -60,7 +53,7 @@ export async function createBudgetReviewFromText(input: {
   lang?: AppLanguage;
 }): Promise<CreateBudgetReviewResult> {
   const analysis = parseBudgetAnalysisText(input.text);
-  const reviewFindings = buildBudgetReviewFindings(analysis.lineItems, analysis.totalAmount);
+  const reviewFindings = buildBudgetReviewFindings(analysis.lineItems);
   const totalAmountCents = analysis.totalAmount ? Math.round(analysis.totalAmount * 100) : undefined;
 
   // Detect budget category early so we can query KB with meaningful keywords

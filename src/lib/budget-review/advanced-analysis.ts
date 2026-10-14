@@ -6,7 +6,8 @@ export type FindingStatus =
   | 'HIGH_REVIEW'
   | 'LOW_REVIEW'
   | 'INCOMPLETE'
-  | 'REQUIRES_CLARIFICATION';
+  | 'REQUIRES_CLARIFICATION'
+  | 'NO_REFERENCE';
 
 export type AdvancedFinding = {
   description: string;
@@ -40,6 +41,7 @@ const statusLabels: Record<string, Record<FindingStatus, string>> = {
     LOW_REVIEW: 'Precio unitario bajo — revisar alcance',
     INCOMPLETE: 'Partida incompleta',
     REQUIRES_CLARIFICATION: 'Requiere aclaración',
+    NO_REFERENCE: 'Sin referencia comparable — revisar unidad y alcance',
   },
   ca: {
     IN_RANGE: 'Dins del rang orientatiu',
@@ -47,6 +49,7 @@ const statusLabels: Record<string, Record<FindingStatus, string>> = {
     LOW_REVIEW: 'Preu unitari baix — revisar abast',
     INCOMPLETE: 'Partida incompleta',
     REQUIRES_CLARIFICATION: 'Requereix aclariment',
+    NO_REFERENCE: 'Sense referència comparable — revisar unitat i abast',
   },
   en: {
     IN_RANGE: 'Within indicative range',
@@ -54,6 +57,7 @@ const statusLabels: Record<string, Record<FindingStatus, string>> = {
     LOW_REVIEW: 'Low unit price — check scope',
     INCOMPLETE: 'Incomplete line item',
     REQUIRES_CLARIFICATION: 'Requires clarification',
+    NO_REFERENCE: 'No comparable reference — check unit and scope',
   },
   de: {
     IN_RANGE: 'Im orientierenden Bereich',
@@ -61,6 +65,7 @@ const statusLabels: Record<string, Record<FindingStatus, string>> = {
     LOW_REVIEW: 'Niedriger Stückpreis — Umfang prüfen',
     INCOMPLETE: 'Unvollständige Position',
     REQUIRES_CLARIFICATION: 'Erläuterung erforderlich',
+    NO_REFERENCE: 'Keine vergleichbare Referenz — Einheit und Umfang prüfen',
   },
   fr: {
     IN_RANGE: 'Dans la plage indicative',
@@ -68,6 +73,7 @@ const statusLabels: Record<string, Record<FindingStatus, string>> = {
     LOW_REVIEW: 'Prix unitaire bas — vérifier le périmètre',
     INCOMPLETE: 'Poste incomplet',
     REQUIRES_CLARIFICATION: 'Nécessite une clarification',
+    NO_REFERENCE: 'Aucune référence comparable — vérifier unité et périmètre',
   },
   it: {
     IN_RANGE: 'Nell\'intervallo indicativo',
@@ -75,6 +81,7 @@ const statusLabels: Record<string, Record<FindingStatus, string>> = {
     LOW_REVIEW: 'Prezzo unitario basso — verificare il perimetro',
     INCOMPLETE: 'Voce incompleta',
     REQUIRES_CLARIFICATION: 'Richiede chiarimento',
+    NO_REFERENCE: 'Nessun riferimento comparabile — verificare unità e perimetro',
   },
   pt: {
     IN_RANGE: 'Dentro do intervalo indicativo',
@@ -82,11 +89,20 @@ const statusLabels: Record<string, Record<FindingStatus, string>> = {
     LOW_REVIEW: 'Preço unitário baixo — rever âmbito',
     INCOMPLETE: 'Rubrica incompleta',
     REQUIRES_CLARIFICATION: 'Requer esclarecimento',
+    NO_REFERENCE: 'Sem referência comparável — rever unidade e âmbito',
   },
 };
 
+/**
+ * Fixed unit-price thresholds were removed (F0-R09): they ignored unit, category and territory.
+ * Reviews persisted before that change may still carry the old labels; they render as NO_REFERENCE.
+ */
+export function normalizeFindingStatus(status: FindingStatus): FindingStatus {
+  return status === 'HIGH_REVIEW' || status === 'LOW_REVIEW' || status === 'IN_RANGE' ? 'NO_REFERENCE' : status;
+}
+
 export function getFindingStatusLabel(status: FindingStatus, lang: AppLanguage | PdfLanguage = 'es'): string {
-  return (statusLabels[lang] ?? statusLabels.es)[status];
+  return (statusLabels[lang] ?? statusLabels.es)[normalizeFindingStatus(status)];
 }
 
 // --- Category detection ---
@@ -283,9 +299,6 @@ export function getSuggestedQuestions(category: BudgetCategory, lang: AppLanguag
 }
 
 // --- Advanced findings builder ---
-const UNIT_PRICE_HIGH_THRESHOLD = 450;
-const UNIT_PRICE_LOW_THRESHOLD = 25;
-
 export function buildAdvancedFindings(lineItems: BudgetLineItem[]): AdvancedFinding[] {
   return lineItems.map((item) => {
     const unitPrice = item.unitPrice || (item.total && item.quantity ? item.total / item.quantity : undefined);
@@ -310,15 +323,13 @@ export function buildAdvancedFindings(lineItems: BudgetLineItem[]): AdvancedFind
       };
     }
 
-    const high = unitPrice !== undefined && unitPrice > UNIT_PRICE_HIGH_THRESHOLD;
-    const low = unitPrice !== undefined && unitPrice < UNIT_PRICE_LOW_THRESHOLD;
-
+    // No universal price judgement: without a comparable reference (same unit, category and territory) the line is not rated.
     return {
       description: item.description,
       total: item.total,
       unitPrice,
       quantity: item.quantity,
-      status: high ? 'HIGH_REVIEW' : low ? 'LOW_REVIEW' : 'IN_RANGE',
+      status: 'NO_REFERENCE' as FindingStatus,
     };
   });
 }
@@ -355,7 +366,7 @@ const legalNotices: Record<string, string> = {
 
 export function buildBudgetAdvancedAnalysis(
   lineItems: BudgetLineItem[],
-  totalAmount: number | undefined,
+  _totalAmount: number | undefined,
   lang: AppLanguage | PdfLanguage = 'es',
   kbPriceRefs?: KbPriceRef[],
 ): BudgetAdvancedAnalysis {
@@ -365,15 +376,13 @@ export function buildBudgetAdvancedAnalysis(
   const omissions = getOmissionsForCategory(category);
   const questions = getSuggestedQuestions(category, lang);
 
-  const isHighTotal = totalAmount !== undefined && totalAmount > 30000;
-
   return {
     category,
     findings,
     omissions,
     suggestedQuestions: questions,
     legalNotice: legalNotices[lang] ?? legalNotices.es,
-    alertKey: isHighTotal ? 'budget.alert_high_total' : 'budget.alert_general',
+    alertKey: 'budget.alert_general',
     priceReferences: kbPriceRefs,
   };
 }

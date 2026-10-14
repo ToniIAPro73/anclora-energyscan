@@ -34,28 +34,14 @@ describe('detectBudgetCategory', () => {
 });
 
 describe('buildAdvancedFindings', () => {
-  it('marks high unit price as HIGH_REVIEW', () => {
+  it('never rates a line as high, low or in range without a comparable reference', () => {
     const items: BudgetLineItem[] = [
       { description: 'Ventana premium', quantity: 1, unitPrice: 1200, total: 1200 },
-    ];
-    const findings = buildAdvancedFindings(items);
-    expect(findings[0].status).toBe('HIGH_REVIEW');
-  });
-
-  it('marks low unit price as LOW_REVIEW', () => {
-    const items: BudgetLineItem[] = [
       { description: 'Tornillo', quantity: 100, unitPrice: 0.5, total: 50 },
+      ...windowsItems,
     ];
     const findings = buildAdvancedFindings(items);
-    expect(findings[0].status).toBe('LOW_REVIEW');
-  });
-
-  it('marks normal unit price as IN_RANGE', () => {
-    const findings = buildAdvancedFindings(windowsItems);
-    const first = findings[0];
-    expect(first.status).toBe('HIGH_REVIEW'); // 680 > 450
-    const second = findings[1];
-    expect(second.status).toBe('IN_RANGE');
+    expect(findings.map((finding) => finding.status)).toEqual(['NO_REFERENCE', 'NO_REFERENCE', 'NO_REFERENCE', 'NO_REFERENCE']);
   });
 
   it('marks item without total as INCOMPLETE', () => {
@@ -123,14 +109,9 @@ describe('buildBudgetAdvancedAnalysis', () => {
     expect(analysis.legalNotice).toContain('orientativo');
   });
 
-  it('sets high total alert key when total > 30000', () => {
-    const analysis = buildBudgetAdvancedAnalysis(windowsItems, 35000, 'es');
-    expect(analysis.alertKey).toBe('budget.alert_high_total');
-  });
-
-  it('sets general alert key for lower totals', () => {
-    const analysis = buildBudgetAdvancedAnalysis(windowsItems, 2000, 'es');
-    expect(analysis.alertKey).toBe('budget.alert_general');
+  it('uses the general alert regardless of the total amount', () => {
+    expect(buildBudgetAdvancedAnalysis(windowsItems, 35000, 'es').alertKey).toBe('budget.alert_general');
+    expect(buildBudgetAdvancedAnalysis(windowsItems, 2000, 'es').alertKey).toBe('budget.alert_general');
   });
 
   it('works in EN', () => {
@@ -145,11 +126,17 @@ describe('buildBudgetAdvancedAnalysis', () => {
 });
 
 describe('getFindingStatusLabel', () => {
-  it('translates IN_RANGE in ES', () => {
-    expect(getFindingStatusLabel('IN_RANGE', 'es')).toContain('rango');
+  it('translates NO_REFERENCE in every locale', () => {
+    expect(getFindingStatusLabel('NO_REFERENCE', 'es')).toContain('Sin referencia');
+    expect(getFindingStatusLabel('NO_REFERENCE', 'en')).toBe('No comparable reference — check unit and scope');
+    for (const lang of ['ca', 'de', 'fr', 'it', 'pt'] as const) {
+      expect(getFindingStatusLabel('NO_REFERENCE', lang).length).toBeGreaterThan(10);
+    }
   });
-  it('translates HIGH_REVIEW in EN', () => {
-    expect(getFindingStatusLabel('HIGH_REVIEW', 'en')).toBe('High unit price');
+  it('renders persisted legacy price labels as NO_REFERENCE', () => {
+    for (const legacy of ['HIGH_REVIEW', 'LOW_REVIEW', 'IN_RANGE'] as const) {
+      expect(getFindingStatusLabel(legacy, 'en')).toBe(getFindingStatusLabel('NO_REFERENCE', 'en'));
+    }
   });
   it('translates INCOMPLETE in DE', () => {
     expect(getFindingStatusLabel('INCOMPLETE', 'de')).toContain('vollständig');

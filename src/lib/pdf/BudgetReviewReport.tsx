@@ -2,7 +2,7 @@ import React from 'react';
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 import type { AppLanguage, PdfLanguage } from '@/lib/preferences';
 import { getMonetizationCopy } from '@/lib/monetization/i18n';
-import { buildBudgetAdvancedAnalysis, type KbPriceRef } from '@/lib/budget-review/advanced-analysis';
+import { buildBudgetAdvancedAnalysis, normalizeFindingStatus, type KbPriceRef } from '@/lib/budget-review/advanced-analysis';
 import type { BudgetLineItem } from '@/lib/ingestion/types';
 
 const styles = StyleSheet.create({
@@ -40,6 +40,7 @@ const STATUS_COLOR: Record<string, StatusColor> = {
   LOW_REVIEW: 'statusAmber',
   INCOMPLETE: 'statusAmber',
   REQUIRES_CLARIFICATION: 'statusAmber',
+  NO_REFERENCE: 'statusAmber',
 };
 
 export type BudgetReviewReportData = {
@@ -114,7 +115,7 @@ export function BudgetReviewReport({ data }: { data: BudgetReviewReportData }) {
                 <Text style={[styles.col40, styles.text]}>{f.description || '—'}</Text>
                 <Text style={[styles.col20, styles.text]}>{f.unitPrice !== undefined && f.unitPrice !== null ? `${f.unitPrice.toFixed(2)}` : '—'}</Text>
                 <Text style={[styles.col20, styles.text]}>{f.total !== undefined && f.total !== null ? `${f.total.toFixed(2)}` : '—'}</Text>
-                <Text style={[styles.col20, styles.text, styles[STATUS_COLOR[f.status] ?? 'statusAmber']]}>{t[`status${f.status}` as keyof typeof t] as string}</Text>
+                <Text style={[styles.col20, styles.text, styles[STATUS_COLOR[normalizeFindingStatus(f.status)] ?? 'statusAmber']]}>{t[`status${normalizeFindingStatus(f.status)}` as keyof typeof t] as string}</Text>
               </View>
             ))}
           </View>
