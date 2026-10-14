@@ -42,7 +42,7 @@ export const dictionaryPT = {
   confidenceMedium: "Confiança média",
   statsDeficient: "% do parque deficiente",
   statsDate: "Primeira data-chave",
-  statsTarget: "Objectivo classe E",
+  statsTarget: "Horizonte europeu",
   statsSteps: "Passos da análise",
   process: "Processo",
   processTitle: "Quatro passos para o seu pré-diagnóstico",

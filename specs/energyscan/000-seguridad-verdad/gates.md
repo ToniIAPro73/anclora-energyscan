@@ -275,3 +275,17 @@ Cambios de código: aceptar la forma legada estricta en la validación de rutas;
 | Validación de producto por Toni | NOT_RUN | `8c38cf1f2bd37f1c6a075eff54660f6ad297fb3b` | Pendiente de la revisión manual de esta entrega |
 
 Resultado visual: en los tres idiomas se presenta el horizonte `2030–2035`, el título y la descripción solicitados, y el estado de regulación. La estadística muestra `Horizonte europeo` / `European horizon` / `Europäischer Horizont`. La evidencia visual fue sintética; no se creó una valoración ni se incluyeron datos personales. El detalle por idioma y viewport está en `docs/VALIDATION_CHECKLIST.md`.
+
+### ES-0.3 — cobertura de los locales CA, FR, IT y PT en la landing (corrección posterior a `8c38cf1`)
+
+El primer bloque solo cubrió ES, EN y DE. Los cuatro locales restantes del selector usan `i18n-ca/fr/it/pt.ts` (estadística) y, hasta esta corrección, heredaban la línea de tiempo de ES (CA) o EN (FR, IT, PT).
+
+| Comprobación | Resultado | Evidencia |
+|---|---|---|
+| `statsTarget` en CA, FR, IT, PT | PASS | Antes «Objectiu/Objectif/Obiettivo/Objectivo classe E» junto al valor «2030–2035»; ahora «Horitzó europeu», «Horizon européen», «Orizzonte europeo», «Horizonte europeu» |
+| Línea de tiempo propia en CA, FR, IT, PT | PASS | Se indexa por `selectedLanguage`; traducción fiel del texto de ES |
+| Test de regresión ampliado | PASS | Cubre los 7 locales y exige una línea de tiempo por locale |
+| Lint, `tsc`, suite completa (80 suites / 532 tests), build | PASS | Ejecutados en secuencia |
+| QA visual CA/FR/IT/PT | NOT_RUN | Pendiente de la validación manual de Toni |
+
+La traducción de la Directiva a CA/FR/IT/PT es fiel al texto aprobado de ES; la revisión de un especialista se agenda antes de publicar afirmaciones normativas.

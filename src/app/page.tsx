@@ -28,7 +28,27 @@ export default function LandingPage() {
       { year: '2030', title: '16% Reduktion', desc: 'Ziel zur Senkung der Primärenergie.', status: 'EU-Ziel', color: 'bg-[#FFB020]' },
       { year: '2030–2035', title: 'EU-Ziele für den durchschnittlichen Verbrauch', desc: 'Die Richtlinie (EU) 2024/1275 legt nationale Ziele zur Senkung des durchschnittlichen Energieverbrauchs des Wohngebäudebestands fest. Sie begründet keine Verpflichtung für eine einzelne Wohnung.', status: 'Regulierung', color: 'bg-[#FFB020]' },
     ],
-  }[language];
+    ca: [
+      { year: 'Avui', title: 'R.D. 390/2021', desc: 'CEE exigible per a venda o lloguer, si escau.', status: 'Vigent', color: 'bg-[#00DC82]' },
+      { year: '2030', title: 'Reducció 16%', desc: "Meta d'estalvi en energia primària.", status: 'Objectiu UE', color: 'bg-[#FFB020]' },
+      { year: '2030–2035', title: 'Metes europees de consum mitjà', desc: "La Directiva (UE) 2024/1275 fixa objectius nacionals de reducció del consum mitjà del parc residencial. No estableix una obligació per a un habitatge concret.", status: 'Regulació', color: 'bg-[#FFB020]' },
+    ],
+    fr: [
+      { year: "Aujourd'hui", title: 'R.D. 390/2021', desc: 'Certificat de performance énergétique requis pour la vente ou la location, le cas échéant.', status: 'En vigueur', color: 'bg-[#00DC82]' },
+      { year: '2030', title: 'Réduction de 16 %', desc: "Objectif d'économie d'énergie primaire.", status: 'Objectif UE', color: 'bg-[#FFB020]' },
+      { year: '2030–2035', title: 'Objectifs européens de consommation moyenne', desc: "La directive (UE) 2024/1275 fixe des objectifs nationaux de réduction de la consommation moyenne du parc résidentiel. Elle n'établit pas d'obligation pour un logement précis.", status: 'Réglementation', color: 'bg-[#FFB020]' },
+    ],
+    it: [
+      { year: 'Oggi', title: 'R.D. 390/2021', desc: 'Certificato di prestazione energetica richiesto per vendita o locazione, ove applicabile.', status: 'In vigore', color: 'bg-[#00DC82]' },
+      { year: '2030', title: 'Riduzione del 16%', desc: 'Obiettivo di risparmio di energia primaria.', status: 'Obiettivo UE', color: 'bg-[#FFB020]' },
+      { year: '2030–2035', title: 'Obiettivi europei di consumo medio', desc: "La Direttiva (UE) 2024/1275 fissa obiettivi nazionali di riduzione del consumo medio del parco residenziale. Non stabilisce un obbligo per un'abitazione specifica.", status: 'Normativa', color: 'bg-[#FFB020]' },
+    ],
+    pt: [
+      { year: 'Hoje', title: 'R.D. 390/2021', desc: 'Certificado de desempenho energético exigido para venda ou arrendamento, quando aplicável.', status: 'Em vigor', color: 'bg-[#00DC82]' },
+      { year: '2030', title: 'Redução de 16%', desc: 'Meta de poupança de energia primária.', status: 'Meta UE', color: 'bg-[#FFB020]' },
+      { year: '2030–2035', title: 'Metas europeias de consumo médio', desc: 'A Diretiva (UE) 2024/1275 fixa metas nacionais de redução do consumo médio do parque residencial. Não estabelece uma obrigação para uma habitação concreta.', status: 'Regulamentação', color: 'bg-[#FFB020]' },
+    ],
+  }[selectedLanguage];
 
   return (
     <div className="min-h-screen app-shell overflow-x-hidden">

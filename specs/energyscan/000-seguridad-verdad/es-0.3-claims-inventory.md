@@ -25,6 +25,10 @@ Los estados de la última columna reflejan únicamente la etapa de landing C-01�
 | `src/lib/regulatory.ts` — entrada `eu-2030-2033-residential` | Correcta: habla de objetivos de consumo medio del parque; el aviso aclara que no define una obligación individual |
 | PDF `src/lib/pdf/EnerScanReport.tsx:1307` | Reutiliza el texto correcto en CA/EN/DE/FR/IT/PT |
 
+## 2 bis. Corrección de cobertura de locales
+
+C-01–C-03 se corrigieron primero en ES, EN y DE. Los locales CA, FR, IT y PT mantenían la estadística «Objetivo classe E» y heredaban la línea de tiempo de ES o EN. Corregidos en una segunda entrega (ver `gates.md`).
+
 ## 3. Superficies sin inventariar todavía
 
 Se registran como pendientes, no como correctas:

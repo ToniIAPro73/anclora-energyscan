@@ -42,7 +42,7 @@ export const dictionaryIT = {
   confidenceMedium: "Affidabilità media",
   statsDeficient: "% del parco edilizio insufficiente",
   statsDate: "Prima data chiave",
-  statsTarget: "Obiettivo classe E",
+  statsTarget: "Orizzonte europeo",
   statsSteps: "Passaggi dell'analisi",
   process: "Processo",
   processTitle: "Quattro passaggi verso la tua pre-diagnosi",

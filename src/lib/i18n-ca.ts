@@ -42,7 +42,7 @@ export const dictionaryCA = {
   confidenceMedium: "Confiança mitjana",
   statsDeficient: "% del parc deficient",
   statsDate: "Primera data clau",
-  statsTarget: "Objectiu classe E",
+  statsTarget: "Horitzó europeu",
   statsSteps: "Passos de l'anàlisi",
   process: "Procés",
   processTitle: "Quatre passos cap al teu prediagnòstic",
