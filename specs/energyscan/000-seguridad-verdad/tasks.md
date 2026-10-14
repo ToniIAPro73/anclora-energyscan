@@ -1,6 +1,6 @@
 # F0 — Tareas de desarrollo
 
-**Estado:** ES-0.1 fue validada por Toni y promocionada a `main`. ES-0.2 está implementada, promocionada a `main` y verificada en Producción con la purga programada (ver `gates.md`); la aceptación de Toni sigue pendiente. ES-0.3 y ES-0.4 siguen pendientes. Toni valida inicialmente producto y alcance junto con el agente. El agente implementa y aporta evidencia técnica. No hay requisito de panel de validadores ni piloto previo a la implementación. Toda prueba que aún no se haya ejecutado está `NOT_RUN`.
+**Estado:** ES-0.1, ES-0.2 y ES-0.3 están cerradas y promocionadas; las ramas de release observadas están en `ca9dfdc`. ES-0.4 —baseline y plan de validación— queda documentada técnicamente en `es-0.4-baseline.md`; revisión de Toni pendiente. Toni valida inicialmente producto y alcance junto con el agente. El piloto no es prerrequisito de implementación ni aceptación funcional. Toda prueba que no se haya ejecutado para el SHA indicado queda `NOT_RUN`.
 
 ## ES-0.1 — Autorización de adjuntos y upload (P0)
 
@@ -64,6 +64,8 @@
 | 0.4.b Crear fixtures sintéticos y plan de piloto opcional | Agente + Toni | Fixtures para QA; protocolo si se decide piloto | 0,5–1,5 d |
 | 0.4.c Definir criterios y denominadores de comprobación | Agente + Toni | Métricas técnicas reproducibles | 0,5–1 d |
 | 0.4.d Registrar aceptación, riesgos y rollback | Toni + agente | Ledger, decisiones y enlaces a evidencia | 0,5 d |
+
+**Ejecución documental:** baseline fijado en `719b228415d70a35d3537f237f762bf91165940d`; matriz R01–R12, inventario/hash de fixtures sintéticos inline, mapa de CI, denominadores, riesgos y rollback preparados en [`es-0.4-baseline.md`](es-0.4-baseline.md). Plantilla vacía del protocolo opcional en [`es-0.4-pilot-protocol-template.md`](es-0.4-pilot-protocol-template.md). No se añadieron fixtures porque los cuatro escenarios requeridos ya estaban en tests unitarios; no se ejecutó piloto. Ver resultado y SHA documental en `gates.md`. Esta entrega no implica aceptación de Toni.
 
 **Aceptar:** baseline ligado a SHA; requisitos vinculados a tests o limitaciones concretas; fixtures sintéticos y resultados honestos. Si se hace piloto, fijar población, exclusiones, consentimiento, denominadores y errores materiales antes de revisar resultados. No hacer piloto no bloquea desarrollo ni aceptación funcional.
 

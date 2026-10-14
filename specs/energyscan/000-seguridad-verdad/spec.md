@@ -52,7 +52,7 @@ No se afirma explotación, precisión del score, cumplimiento RGPD, validez de a
 - **F0-R08 Regulación:** corregir traducciones/exportaciones con fuente, artículo, ámbito/territorio, fecha de revisión y vigencia. No decir que vivienda individual debe alcanzar E en 2033. Diferenciar metas medias residenciales 2030/2035 de umbrales no residenciales 2030/2033.
 - **F0-R09 Coste/alertas:** 25/450 €/unidad y 30.000 € no se presentan como universales/estándar. Hasta calibración por campo/territorio/unidad/referencia, alerta contextual o abstención; sin precio comparable no decir caro/barato.
 - **F0-R10 Salidas:** PDF, pantalla, landing, manual, SEO y locales cubiertos por matriz; mostrar orientación, incertidumbre y falta de profesional cuando aplique.
-- **F0-R11 Evidencia:** gate PASS vinculado a SHA, comandos, fixture sintético hash, resultado, evidencia anonimizada y revisor. Ejecución en esta tarea: NOT_RUN.
+- **F0-R11 Evidencia:** gate PASS vinculado a SHA, comandos, fixture sintético hash, resultado, evidencia anonimizada y revisor. Baseline técnico ES-0.4: documentado contra `development@719b228415d70a35d3537f237f762bf91165940d`; los hashes identifican fuentes de fixtures unitarios sintéticos existentes. Revisión/aceptación de Toni pendiente; no se declara cerrado el gate de aceptación.
 - **F0-R12 Transferencias externas y sharing:** nada se envía a proveedor/profesional ni se comparte por defecto; consentimiento granular antes de transferencia. Revocar permiso no borra copia descargada por destinatario.
 
 ## 6. Amenazas y privacidad
