@@ -1,7 +1,7 @@
 # Contexto de trabajo EnergyScan — estado a 2026-10-14
 
 **Propósito:** que cualquier agente o persona retome el trabajo sin releer el historial. No contiene secretos ni valores de credenciales.
-**Última promoción:** `development`, `staging`, `production` y `main` en `ca9dfdc`. Este documento se publica en `development` después y viaja con la próxima promoción.
+**Última promoción:** `development`, `staging`, `production` y `main` se sincronizaron en `73b83dce7c528375a2a51a3aa615480c8b0b7e70`; desde entonces `development` avanza con ES-1.1. No se ha iniciado una promoción de ES-1.1.
 
 ## 1. Cómo se trabaja (flujo v1)
 
@@ -30,7 +30,7 @@
 
 ### Infraestructura y gobierno
 1. Hooks de agente verificados en Codex, Claude Code y pre-push de Git; contratos de flujo adoptados en EnergyScan; reorganización de documentación del workspace.
-2. Promociones ES-0.1, ES-0.2 y ES-0.3 por la secuencia gobernada.
+2. Promoción gobernada de ES-0.1–ES-0.4 hasta `main` en `73b83dce7c528375a2a51a3aa615480c8b0b7e70`.
 3. Entorno Preview configurado (secreto de Auth, Neon y Blob).
 4. Runbook de QA visual, herramienta de teardown de datos QA y política de verificación por hitos.
 5. Alerta de secret scanning de Stripe (secreto temporal de `stripe listen`, modo test) cerrada como «Used in tests»; el documento ya estaba redactado.
@@ -54,16 +54,17 @@ Retención de 30 días, borrado por el propietario, endpoint de purga con `CRON_
 ## 4. Dónde se dejó
 
 1. **ES-0.3:** cerrada y promocionada.
-2. **ES-0.4 (Baseline y plan de validación, P1):** baseline técnico aceptado por Toni, ligado al SHA de partida `719b228415d70a35d3537f237f762bf91165940d`. Tests focales de límites para `local_` manipulado añadidos en `d428c6d`; por decisión de Toni, el flujo local se mantiene sin firma ni validación server-side. En `463e179` se añadió el aviso «estimación local no verificada» a la página y al PDF básico, con pruebas y QA visual sintético. R04 sigue HIPÓTESIS porque el score/datos del enlace continúan editables. No se añadieron fixtures porque los casos sintéticos ya existían inline en tests. El protocolo de piloto está vacío y es opcional; no se ejecutó piloto.
-3. **ES-1.2.R:** spec redactada, sin implementación. Falta el catálogo cerrado de categorías.
+2. **ES-0.4 (Baseline y plan de validación, P1):** baseline técnico aceptado por Toni, ligado al SHA de partida `719b228415d70a35d3537f237f762bf91165940d`; la fase quedó aceptada y promovida. Tests focales de límites para `local_` manipulado añadidos en `d428c6d`; por decisión de Toni, el flujo local se mantiene sin firma ni validación server-side. En `463e179` se añadió el aviso «estimación local no verificada» a la página y al PDF básico, con pruebas y QA visual sintético; Toni aprobó la promoción en `73b83dce`. R04 mantiene la limitación técnica de que el score/datos del enlace continúan editables. El protocolo de piloto está vacío y es opcional; no se ejecutó piloto.
+3. **ES-1.1:** implementación en curso en `development`; SDD y plan en [`sdd/features/energyscan-budget-extraction-localization/`](../../sdd/features/energyscan-budget-extraction-localization/). La prueba sintética cubre cinco partidas, seis campos y 27 valores aplicables; no mide exactitud sobre documentos reales. El resultado registrado está pendiente de revisión de Toni.
+4. **ES-1.2.R:** spec redactada, sin implementación. Falta el catálogo cerrado de categorías.
 4. Evidencia por SHA de todo lo anterior: `specs/energyscan/000-seguridad-verdad/gates.md`. Estado de hallazgos: `es-0.3-claims-inventory.md`.
 
 ## 5. Próximos pasos (en orden)
 
-1. **ES-0.4:** baseline aceptado. La decisión sobre resultados `local_` está aplicada: mantener el flujo local y señalizarlo como no verificado; no se firma ni valida el score en el servidor. El piloto solo se plantea si Toni lo decide y se aprueba un protocolo completo antes del reclutamiento.
+1. **ES-1.1 (en curso):** revisar los fixtures sintéticos, la cobertura por campo y las etiquetas de categoría en los siete locales; Toni decide aceptación antes de la siguiente fase.
 2. Decidir el catálogo de categorías de ES-1.2.R y planificar su implementación dentro de F1.
-3. Cerrar el gate padre de F0 (`gates.md`): ES-0.1 conserva límites de cobertura técnica sin evidencia y ES-0.2 el borrado individual de adjuntos.
-4. F1 (ofertas comparables): ES-1.1 extracción y localización, ES-1.2 comparabilidad con la capa de referencias, ES-1.3 revisión corregible.
+3. Mantener visibles en `gates.md` las limitaciones residuales de F0; no se reabren ni se declaran resueltas por ES-1.1.
+4. Después de ES-1.1, continuar F1 con ES-1.2 (comparabilidad de alcance/unidades/IVA) y ES-1.3 (revisión corregible).
 
 ## 6. Puntos pendientes de resolver
 

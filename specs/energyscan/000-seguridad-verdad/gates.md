@@ -415,3 +415,23 @@ Baseline aceptado por Toni. Se añadieron pruebas de regresión con payloads bas
 | Diff documental | PASS | `463e179da7b32a35ae652626966e1b5b9de0f209` | `git diff --check` | Sin errores de whitespace tras actualizar el ledger y el checklist. |
 
 **Estado R04:** HIPÓTESIS. La presentación comunica que los datos y score de `local_` son editables y no están verificados. Los tests cierran límites de checkout, Blob privado y premium; no prueban integridad del score/propiedad ni cada consumidor. Sin cambio de criterios ni promoción.
+
+### ES-1.1 — extracción y localización de partidas
+
+Implementación en `development`, código verificado en SHA `13a19448a3ca754bab85d4e924c543651a56c08b`. La SDD se inició en `d381a53`. Se reutiliza el parser existente; no se añade OCR, proveedor ni migración. Esta evidencia no cambia los criterios de aceptación de F0.
+
+| Comprobación | Resultado | SHA | Comando / método | Evidencia y límite |
+|---|---|---|---|---|
+| Test focal de fixtures, parser y CEE | PASS — 4 suites / 25 tests | `13a19448a3ca754bab85d4e924c543651a56c08b` | `npm test -- --runInBand tests/budget-extraction-localization.test.ts tests/budget-ingestion.test.ts tests/ocr-parsers.test.ts tests/cee-parser-premium.test.ts` | Cinco partidas sintéticas; formatos inline, tabular y línea de puntos. |
+| Exactitud por campo en corpus sintético | PASS — 27/27 valores | `13a19448a3ca754bab85d4e924c543651a56c08b` | Test `ES-1.1 synthetic budget extraction` | Descripción 5/5; cantidad 4/4; unidad 4/4; precio unitario 4/4; total 5/5; categoría canónica 5/5. No estima exactitud real. |
+| Huella del corpus | PASS | `13a19448a3ca754bab85d4e924c543651a56c08b` | `shasum -a 256 tests/fixtures/energyscan/es-1.1/budget-fixtures.json` | `2e1a749eadb9f6e314347615176182f2c8f32a7057cd27306af14a8b5ae6ca12`. |
+| Etiquetas de categoría | PASS — 84 combinaciones | `13a19448a3ca754bab85d4e924c543651a56c08b` | Test `ES-1.1 budget category localization` | 12 categorías × 7 locales, más fallback seguro para categoría/localización desconocida. |
+| Lint | PASS | `13a19448a3ca754bab85d4e924c543651a56c08b` | `npm run lint` | Sin advertencias ni errores ESLint. |
+| Typecheck | PASS | `13a19448a3ca754bab85d4e924c543651a56c08b` | `npx tsc --noEmit` | Exit 0. |
+| Suite completa | PASS — 82 suites / 569 tests | `13a19448a3ca754bab85d4e924c543651a56c08b` | `npm test -- --runInBand` | Secuencial, sin paralelizar con typecheck/build. |
+| Build | PASS | `13a19448a3ca754bab85d4e924c543651a56c08b` | `npm run build` | Build Next.js completado. |
+| QA visual con presupuesto importado | NOT_RUN | `13a19448a3ca754bab85d4e924c543651a56c08b` | Revisión manual pendiente | Las pruebas verifican función y parser, no layout/renderizado en navegador; Toni revisará el flujo con fixture sintético. |
+| Documento/PDF real o escaneado | NOT_RUN | `13a19448a3ca754bab85d4e924c543651a56c08b` | No se usaron documentos | OCR y corpus de documentos autorizados quedan fuera de esta implementación. |
+| Limpieza documental | PASS | `13a19448a3ca754bab85d4e924c543651a56c08b` | `git diff --check` | Aplicado a los cambios de `specs/`, `sdd/` y checklist antes del commit documental. |
+
+**Estado ES-1.1:** implementación preparada para revisión de Toni; no se declara aceptada ni promocionada. Los resultados 27/27 solo corresponden al corpus sintético versionado. Las etiquetas localizadas requieren revisión de producto antes de promoción.

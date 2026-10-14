@@ -1,71 +1,79 @@
-# Checklist de validación — Aviso de estimación local no verificada (2026-10-14)
+# Checklist de validación — ES-1.1 partidas sintéticas localizadas (2026-10-14)
+
+> Este fichero se sobrescribe en cada entrega. El historial queda en Git.
 
 **Repositorio:** anclora-energyscan
 
-**Rama y commits:** development · código `463e179da7b32a35ae652626966e1b5b9de0f209` · documentación pendiente de commit
+**Rama y commit de código:** development @ `13a19448a3ca754bab85d4e924c543651a56c08b`
 
-**Entorno de validación:** runtime local de development con `vc env run`; revisión visual con `agent-browser`
-**Datos:** solicitud anónima sintética; no se usó identidad QA ni se creó una fila persistente.
+**Entorno de validación:** local, Jest; no se usaron servicios externos
+
+**Datos:** cinco partidas ficticias versionadas; sin identidad QA ni filas persistentes.
 
 ## 1. Qué cambia
 
-- Resultados con payload `local_` muestran «Estimación local no verificada» y explican que los datos del enlace pueden modificarse y el resultado no está validado por el servidor.
-- El PDF básico del payload local muestra el mismo aviso localizado en ES, EN y DE.
-- Valoraciones guardadas no reciben el aviso local.
-- Se mantiene el flujo sin firma ni validación server-side, según decisión de Toni. El aviso no aporta integridad criptográfica.
+- La extracción de filas tabulares conserva cantidad, unidad y precio unitario fuera de la descripción.
+- Las categorías canónicas de medidas se muestran traducidas en la importación del wizard y los resultados guardados para ES, CA, EN, DE, FR, IT y PT.
+- Se añade un fixture de texto sintético con formatos inline, tabular y línea de puntos, con cinco partidas y seis campos medidos.
+- No se modifica el esquema, no se añade OCR ni se incorporan proveedores o dependencias.
 
 ## 2. Ya comprobado por el agente
 
 | Comprobación | Comando o método | Resultado | SHA |
-| --- | --- | --- | --- |
-| Test focal de aviso, página/PDF y locales | `npm test -- --runInBand tests/local-assessment-notice.test.tsx` | PASS — 11 casos | `463e179da7b32a35ae652626966e1b5b9de0f209` |
-| Regresiones de límites `local_` | `npm test -- --runInBand tests/local-assessment-notice.test.tsx tests/checkout.test.ts tests/attachment-access.test.ts tests/premium-access.test.ts` | PASS — 4 suites / 36 tests | `463e179da7b32a35ae652626966e1b5b9de0f209` |
-| Aviso en resultados, escritorio y móvil | Runbook; `agent-browser`; payload anónimo sintético; 1280 px y 390 px | PASS — nota visible en EN/ES; `scrollWidth=390` a 390 px | `463e179da7b32a35ae652626966e1b5b9de0f209` |
-| Lint | `npm run lint` | PASS | `463e179da7b32a35ae652626966e1b5b9de0f209` |
-| Typecheck | `npx tsc --noEmit` | PASS | `463e179da7b32a35ae652626966e1b5b9de0f209` |
-| Suite completa | `npm test -- --runInBand` | PASS — 81 suites / 558 tests | `463e179da7b32a35ae652626966e1b5b9de0f209` |
-| Build | `npm run build` | PASS | `463e179da7b32a35ae652626966e1b5b9de0f209` |
-| Limpieza de whitespace | `git diff --check` | PASS | `463e179da7b32a35ae652626966e1b5b9de0f209` |
+|---|---|---|---|
+| Prueba focal de extracción/localización, parser y CEE | `npm test -- --runInBand tests/budget-extraction-localization.test.ts tests/budget-ingestion.test.ts tests/ocr-parsers.test.ts tests/cee-parser-premium.test.ts` | PASS — 4 suites / 25 tests | `13a19448a3ca754bab85d4e924c543651a56c08b` |
+| Exactitud fixture por campo | Test `ES-1.1 synthetic budget extraction` | PASS — 27/27 aplicables: descripción 5/5, cantidad 4/4, unidad 4/4, precio unitario 4/4, total 5/5, categoría 5/5 | `13a19448a3ca754bab85d4e924c543651a56c08b` |
+| Categorías traducidas y fallback | Test `ES-1.1 budget category localization` | PASS — 84 combinaciones (12 categorías × 7 locales) | `13a19448a3ca754bab85d4e924c543651a56c08b` |
+| Lint | `npm run lint` | PASS | `13a19448a3ca754bab85d4e924c543651a56c08b` |
+| Typecheck | `npx tsc --noEmit` | PASS | `13a19448a3ca754bab85d4e924c543651a56c08b` |
+| Suite completa | `npm test -- --runInBand` | PASS — 82 suites / 569 tests | `13a19448a3ca754bab85d4e924c543651a56c08b` |
+| Build | `npm run build` | PASS | `13a19448a3ca754bab85d4e924c543651a56c08b` |
+| Diff documental | `git diff --check` | PASS, antes del commit documental | `13a19448a3ca754bab85d4e924c543651a56c08b` |
+
+Los cuatro gates finales se ejecutaron una sola vez, en orden: lint → typecheck → tests completos → build. El SHA de fixture está en `sdd/features/energyscan-budget-extraction-localization/execution-report.md`.
 
 ## 3. Pruebas no ejecutadas (NOT_RUN)
 
 | Prueba | Motivo concreto |
-| --- | --- |
-| QA con identidad persistente | No era necesaria: el caso de uso es stateless/anónimo y no se escribieron datos de valoración. |
-| Extracción del texto de un PDF generado en runtime | La prueba inspecciona el árbol React de `BasicReport`; no renderiza bytes PDF ni prueba el endpoint con autenticación. |
-| Integridad del score/propiedad de cada variante `local_` | No se implementó firma ni validación server-side; la decisión aceptada es mantener el flujo local y advertirlo. |
+|---|---|
+| QA visual en navegador con presupuesto importado | Se probaron las etiquetas y el parser con Jest; no se inició un runtime local ni se subió un PDF. Revisión visual manual pendiente. |
+| Fixture PDF, PDF escaneado u OCR | Esta entrega mide el parser de texto; no elige ni implementa motor OCR. |
+| Corpus real autorizado | No se emplearon documentos reales; 27/27 no es una estimación de precisión en producción. |
+| Base de datos, Blob o ruta de importación autenticada | No eran necesarios para las pruebas sintéticas y no se modificó información persistente. |
+| Revisión del copy por Toni | Pendiente de comprobar las etiquetas en contexto de producto, incluidos CA/FR/IT/PT. |
 
 ## 4. Checklist para validar en la aplicación
 
 | # | Dónde | Pasos | Resultado esperado | Cuenta o configuración | Bloqueante |
-| --- | --- | --- | --- | --- | --- |
-| 1 | `/assessment/[id]` | Abrir una valoración local sintética; comprobar la nota debajo del texto de resultado en ES, EN y DE. | El aviso indica que es una estimación local no verificada y que el contenido del enlace puede modificarse. | Payload sintético `local_`; sin cuenta personal. | Sí |
-| 2 | `/assessment/[id]` | Abrir una valoración local en CA, FR, IT y PT. | La nota aparece con los fallbacks actuales: CA usa ES; FR/IT/PT usan EN. | Payload sintético `local_`. | Sí |
-| 3 | `/api/assessment/[id]/pdf/basic` | Descargar el PDF básico local en ES, EN y DE. | El PDF muestra la nota localizada junto a la calificación estimada. | Payload sintético; no iniciar pagos. | Sí |
-| 4 | `/assessment/[id]` | Abrir una valoración guardada propia. | No aparece la etiqueta de estimación local. | Identidad QA persistente solo si se necesita una valoración guardada preexistente. | No |
-| 5 | `/assessment/[id]` | Alterar un campo del enlace local de forma controlada y recargar. | El aviso sigue visible; el score continúa sin validación criptográfica y no debe tratarse como registro oficial ni como entitlement. | Solo URL/payload sintético; no compartir datos reales. | Sí |
+|---|---|---|---|---|---|
+| 1 | `/wizard`, importación de presupuesto | Usar un presupuesto sintético propio con filas por m², ud. y kWp; revisar el resumen y el detalle de medidas en ES, CA, EN, DE, FR, IT y PT. | Cantidad, unidad, precio y total permanecen separados; los nombres de categoría están localizados y no aparecen códigos como `ENVELOPE_FACADE`. | Fixture o presupuesto creado por Toni; no subir un documento real. | Sí |
+| 2 | Resultados de una valoración sintética que ya tenga un presupuesto importado | Abrir los resultados en cada locale soportado. | La categoría se presenta en el idioma seleccionado; se conserva la descripción de la partida. | Solo registro ficticio propio/QA; no crear filas de prueba sin teardown autorizado. | Sí |
+| 3 | Fila no energética o sin categoría | Revisar una línea de gestión/obra general. | Se muestra “Sin clasificar” o su traducción; no se le asigna una medida energética. | Fixture sintético. | Sí |
+| 4 | Vista móvil del detalle | Revisar una etiqueta larga en el ancho habitual de móvil. | El texto envuelve o cabe sin recortar importes ni ampliar horizontalmente la página. | Navegador compartido según el runbook visual. | No |
 
 ### Casos negativos y de borde
 
 | # | Caso | Resultado esperado |
-| --- | --- | --- |
-| 1 | Payload local con `isDemo` manipulado | Sigue etiquetado como local porque la condición usa la existencia del payload stateless, no el claim `isDemo`. |
-| 2 | Valoración guardada | No recibe el aviso local. |
-| 3 | Vista móvil | El aviso se envuelve dentro de la tarjeta sin ampliar el documento horizontalmente. |
+|---|---|---|
+| 1 | Fila tabular `3 kWp` con precio separado | La descripción no incluye cantidad ni precio; unidad y valores quedan en sus campos. |
+| 2 | Categoría técnica desconocida recibida en JSON persistido | Fallback traducido; nunca expone el identificador técnico al usuario. |
+| 3 | Unidad no indicada | Cantidad/unidad/precio unitario no inflan la métrica de cobertura; se conserva descripción y total si existen. |
+| 4 | Texto ambiguo sin evidencia de medida energética | Categoría `UNKNOWN`; no se fuerza equivalencia ni recomendación. |
 
 ### Estados de interfaz afectados
 
-- [x] Éxito · [x] Móvil · [x] Escritorio · [x] Modo oscuro · [ ] Vacío · [ ] Cargando · [ ] Error
+- [ ] Vacío · [ ] Cargando · [ ] Error · [x] Éxito · [x] Móvil · [x] Escritorio · [ ] Modo oscuro
 
 ## 5. Riesgos y limitaciones
 
-- Los datos y el score siguen embebidos en una URL editable; el aviso informa de ello, pero el usuario puede alterar el contenido. No equivale a validación ni certificación.
-- No se añadieron proveedores ni costes; el cambio es de presentación y pruebas.
-- La spec mantiene R04 como HIPÓTESIS hasta que se revise la cobertura de todos los consumidores, según su criterio existente.
+- Los casos son sintéticos y diseñados; la cobertura exacta mide solo ese corpus. No respalda una afirmación de precisión general.
+- El parser sigue siendo heurístico. PDFs escaneados, OCR y variaciones de formato fuera de estos fixtures quedan sin medir.
+- Las traducciones de categorías requieren revisión de Toni. No se ejecutó revisión de copy ni QA visual del flujo.
+- No se cambiaron los criterios de ES-1.1/ES-1.2, el esquema, la retención ni proveedores.
 
 ## 6. Decisión de Toni
 
-- [ ] Revisé el aviso en resultados ES/EN/DE y fallbacks CA/FR/IT/PT.
-- [ ] Revisé el aviso en el PDF básico.
-- [x] Toni decidió mantener `local_` editable sin validación server-side, identificado como no verificado.
-- [x] No se promociona. Cualquier promoción requiere orden vigente `PROMOTE=FULL`.
+- [ ] Revisé las etiquetas y el comportamiento con partidas sintéticas en todos los locales indicados.
+- [ ] Acepto ES-1.1.
+- [ ] No acepto. Motivo: ______________________
+- [ ] Se promociona: escribir `PROMOTE=FULL` en una instrucción vigente.
