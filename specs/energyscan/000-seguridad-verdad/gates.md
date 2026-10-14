@@ -241,3 +241,19 @@ Los formatos desconocidos ya no abortan la ejecución. La salida muestra histogr
 | Blob real / `--apply` | NOT_RUN | Toni hará primero simulación con token real y `--batch-limit 5` |
 
 La forma elegible añadida se limita a `assessment-drafts/{uuid-v4}/{file}` con exactamente tres segmentos, UUID v4, nombre no vacío y sin `..` ni barras. Se vuelve a consultar `findReferencedPaths` con y sin `blob:` inmediatamente antes del borrado. Una referencia aparecida durante la ejecución cancela el borrado, actualiza la matriz a `a-legacy` y suma `skipped_referenced`. El informe incluye referencias/huérfanos legados por edad sin exponer rutas ni nombres. Ninguna otra forma `d` se hace elegible.
+
+### ES-0.2 — purga real en Producción y workflow programado (códigos `413e181`, `823a632`, `0aaffac`)
+
+Ejecuciones reales, 2026-10-13/14, datos ficticios. Autorización de Toni por cada acción.
+
+| Comprobación | Resultado | Evidencia |
+|---|---|---|
+| Purga CLI de huérfanos Blob | PASS | 8 objetos (14,7 MB) borrados en dos lotes (5 + 3); simulación final: 0 candidatos |
+| Workflow `purge-expired-assessments` con `CRON_SECRET` en Repository secrets y variable `ENERGYSCAN_PRODUCTION_URL` | PASS | Autorización correcta; respuesta 401 inicial resuelta tras alinear el secreto en GitHub y Vercel |
+| Endpoint en Producción, ejecución 1 (`488f100`) | FAIL parcial | `http_status=503`: 15 borradas, 15 con error por ruta legada `assessment-drafts/{uuid-v4}/{file}` rechazada |
+| Endpoint, ejecución 2 (`413e181`) | FAIL parcial | `http_status=503`: 13 borradas, 2 con error; los 59 objetos legados desaparecieron del Blob |
+| Endpoint, ejecución 3 (`823a632`) | FAIL parcial, causa identificada | `failureReasons={"unexpected_path:local_path":2}`: rutas de disco de otra máquina (BD compartida con desarrollo local) |
+| Endpoint, ejecución 4 (`0aaffac`) | PASS | `http_status=200`, `considered=2 deleted=2 failed=0`, `failureReasons={}`; quedó solo el adjunto actual (1 objeto, 117 KB) |
+| Paquete completo antes de cada commit de riesgo | PASS | lint, `tsc`, 527/528/530 tests, build |
+
+Cambios de código: aceptar la forma legada estricta en la validación de rutas; `failureReasons` sin contenido en la respuesta; omitir el borrado de ficheros con ruta local ajena (solo filas de BD, nunca se toca el disco). Pendiente: aceptación de Toni del gate ES-0.2 y borrado individual de adjuntos (Premium).

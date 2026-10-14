@@ -1,6 +1,6 @@
 # F0 — Tareas de desarrollo
 
-**Estado:** ES-0.1 fue validada por Toni y promocionada a `main`. ES-0.2 tiene implementación en `development`; la simulación histórica de Blob Preview está bloqueada por falta de token Preview accesible al CLI y la aceptación de Toni sigue pendiente. ES-0.3 y ES-0.4 siguen pendientes. Toni valida inicialmente producto y alcance junto con el agente. El agente implementa y aporta evidencia técnica. No hay requisito de panel de validadores ni piloto previo a la implementación. Toda prueba que aún no se haya ejecutado está `NOT_RUN`.
+**Estado:** ES-0.1 fue validada por Toni y promocionada a `main`. ES-0.2 está implementada, promocionada a `main` y verificada en Producción con la purga programada (ver `gates.md`); la aceptación de Toni sigue pendiente. ES-0.3 y ES-0.4 siguen pendientes. Toni valida inicialmente producto y alcance junto con el agente. El agente implementa y aporta evidencia técnica. No hay requisito de panel de validadores ni piloto previo a la implementación. Toda prueba que aún no se haya ejecutado está `NOT_RUN`.
 
 ## ES-0.1 — Autorización de adjuntos y upload (P0)
 
