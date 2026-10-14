@@ -358,3 +358,18 @@ Decisión de Toni: buscar fuente (B) y, si no existe, retirar (A). Se encontró 
 | Valores por defecto a 0 en costes y score | PASS (búsqueda en código) | Sin coincidencias; los datos ausentes se registran como `missingData` y bajan la confianza |
 | Etiquetas de la matriz en CA, FR, IT y PT | LÍMITE | Solo ES, EN y DE; los demás idiomas usan el respaldo |
 | Comprobación funcional con casos límite (campo ausente, conflicto) | NOT_RUN | Pendiente si Toni lo exige para cerrar ES-0.3 |
+
+### ES-0.3 — casos límite de la matriz de evidencias (código `fa5eefb360f3164a92751d44d1c7a46c07ce8aad`)
+
+Toni pidió comprobar campo ausente y conflicto antes de cerrar ES-0.3. F0-R06.
+
+| Caso | Antes | Ahora | Resultado |
+|---|---|---|---|
+| Superficie 0, negativa o NaN | Mostrada como dato declarado (0) | `not_available`, confianza desconocida, requiere revisión | CORREGIDO |
+| Año 0 o NaN | Mostrado como declarado | `not_available`, requiere revisión | CORREGIDO |
+| Código postal vacío | Declarado con valor vacío | `not_available`, requiere revisión | CORREGIDO |
+| Calefacción y agua caliente sin valor con CEE adjunto | Atribuidas al CEE con confianza alta | `not_available` | CORREGIDO |
+| Año declarado distinto del catastral | El Catastro sustituía sin avisar | Fuente Catastro y requiere revisión | CORREGIDO |
+| Superficie declarada distinta del Catastro (>20 m²) | Requiere revisión | Sin cambios | PASS |
+| Valor con CEE adjunto | Fuente CEE | Sin cambios | PASS |
+| Lint, `tsc`, suite (80 suites / 544 tests), build | PASS | PASS | En secuencia |

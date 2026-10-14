@@ -68,11 +68,13 @@ Sin `userId`, `assessmentId`, `budgetReviewId`, descripción, proveedor ni nombr
 
 **Rechazar:** cualquier dato personal en el almacén; referencia mostrada con menos de N/M; fila creada sin consentimiento; presentar el rango como precio de mercado.
 
-## 9. Decisiones abiertas (las toma Toni)
+## 9. Decisiones de Toni (2026-10-14)
 
-1. Valores de **N** y **M** (propuesta inicial: N ≥ 30 observaciones y M ≥ 10 presupuestos distintos).
-2. Territorio: provincia (propuesta) o comunidad autónoma para empezar.
-3. Si el consentimiento incluye una contrapartida (por ejemplo, un informe adicional) o no.
-4. Revisión legal del texto de consentimiento y del uso comercial antes de activar la captura en Producción.
-5. Catálogo cerrado de categorías de la primera versión.
-6. Mientras no haya datos suficientes, el producto mantiene `NO_REFERENCE` (comportamiento actual).
+Toni aceptó las propuestas de esta sección. El punto 3 se registra con el valor por defecto indicado.
+
+1. **N y M:** N ≥ 30 observaciones y M ≥ 10 presupuestos distintos (ACEPTADO).
+2. **Territorio:** provincia (ACEPTADO).
+3. **Contrapartida por contribuir:** ninguna en la primera versión (valor por defecto; Toni puede cambiarlo).
+4. **Revisión legal** del texto de consentimiento y del uso comercial antes de activar la captura en Producción (ACEPTADO).
+
+Pendiente de decidir: catálogo cerrado de categorías de la primera versión. Mientras no haya datos suficientes, el producto mantiene `NO_REFERENCE`.
