@@ -1,13 +1,13 @@
 # Índice de specs EnergyScan
 
-Estado global: roadmap activo de desarrollo. ES-0.1, ES-0.2 y ES-0.3 están cerradas y promocionadas a `main` (`ca9dfdc`). ES-0.4 tiene baseline técnico documentado en `development`, pendiente de revisión de Toni. Se trabaja directamente en `development`; Toni valida inicialmente cada entrega junto con el agente. El piloto de usuarios es opcional y no es prerrequisito de implementación ni aceptación funcional.
+Estado global: roadmap activo de desarrollo. ES-0.1, ES-0.2 y ES-0.3 están cerradas y promocionadas a `main` (`3369054` tras la orden `PROMOTE=FULL`). Baseline ES-0.4 aceptado por Toni; evidencia focal parcial de R04 añadida en `development`, sin implementación de comportamiento. Se trabaja directamente en `development`; el piloto de usuarios es opcional y no es prerrequisito de implementación ni aceptación funcional.
 
 | ID | Fase | Prioridad | Dependencia | Estado | Spec/tarea | Gate |
 |---|---:|---|---|---|---|---|
 | ES-0.1 | 0 | P0 | Ninguna | VALIDADA POR TONI · PROMOCIONADA A MAIN | [000-seguridad-verdad/spec.md](000-seguridad-verdad/spec.md), [tasks.md](000-seguridad-verdad/tasks.md) | AuthZ completa y matriz sin acceso cruzado |
 | ES-0.2 | 0 | P0 | Inventario F0 | ACEPTADA POR TONI · PROMOCIONADA A `main` | [`000-seguridad-verdad/es-0.2-data-flow-inventory.md`](000-seguridad-verdad/es-0.2-data-flow-inventory.md) | Inventario y comparativas registrados; controles de minimización/redacción y QA siguen pendientes |
 | ES-0.3 | 0 | P0 | ES-0.1 inventario | CERRADA · PROMOCIONADA | [`es-0.3-claims-inventory.md`](000-seguridad-verdad/es-0.3-claims-inventory.md) | Claims/procedencia trazables; revisión externa previa a exposición pública cuando aplique |
-| ES-0.4 | 0 | P1 | ES-0.1–0.3 | BASELINE DOCUMENTADO · REVISIÓN DE TONI PENDIENTE | [`es-0.4-baseline.md`](000-seguridad-verdad/es-0.4-baseline.md), [`es-0.4-pilot-protocol-template.md`](000-seguridad-verdad/es-0.4-pilot-protocol-template.md) | Baseline reproducible ligado a SHA; piloto opcional y no bloqueante |
+| ES-0.4 | 0 | P1 | ES-0.1–0.3 | BASELINE ACEPTADO · R04 CON EVIDENCIA PARCIAL | [`es-0.4-baseline.md`](000-seguridad-verdad/es-0.4-baseline.md), [`es-0.4-pilot-protocol-template.md`](000-seguridad-verdad/es-0.4-pilot-protocol-template.md) | Baseline reproducible ligado a SHA; piloto opcional y no bloqueante |
 | ES-1.1 | 1 | P1 | F0 | PROPUESTA | [Roadmap](../../docs/energyscan-roadmap.md#registro-de-tareas-padre-22) | Exactitud/cobertura por campo en corpus autorizado |
 | ES-1.2 | 1 | P1 | ES-1.1 | PROPUESTA | idem | Comparabilidad explicable, unidades/IVA compatibles |
 | ES-1.2.R | 1 | P1 | ES-0.2, ES-0.3 | PROPUESTA (spec redactada) | [`010-referencias-precios/spec.md`](010-referencias-precios/spec.md) | Conjunto de precios anónimo con umbral N/M; sin datos personales; abstención por debajo del umbral |

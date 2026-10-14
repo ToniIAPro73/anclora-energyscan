@@ -54,13 +54,13 @@ Retención de 30 días, borrado por el propietario, endpoint de purga con `CRON_
 ## 4. Dónde se dejó
 
 1. **ES-0.3:** cerrada y promocionada.
-2. **ES-0.4 (Baseline y plan de validación, P1):** baseline técnico documentado en `development`, ligado al SHA de partida `719b228415d70a35d3537f237f762bf91165940d`; revisión de Toni pendiente. No se añadieron fixtures porque los casos sintéticos ya existían inline en tests. El protocolo de piloto está vacío y es opcional; no se ejecutó piloto.
+2. **ES-0.4 (Baseline y plan de validación, P1):** baseline técnico aceptado por Toni, ligado al SHA de partida `719b228415d70a35d3537f237f762bf91165940d`. Tests focales de límites para `local_` manipulado añadidos en `d428c6d`; R04 aún tiene límite de integridad del score visible. No se añadieron fixtures porque los casos sintéticos ya existían inline en tests. El protocolo de piloto está vacío y es opcional; no se ejecutó piloto.
 3. **ES-1.2.R:** spec redactada, sin implementación. Falta el catálogo cerrado de categorías.
 4. Evidencia por SHA de todo lo anterior: `specs/energyscan/000-seguridad-verdad/gates.md`. Estado de hallazgos: `es-0.3-claims-inventory.md`.
 
 ## 5. Próximos pasos (en orden)
 
-1. **ES-0.4:** Toni revisa `es-0.4-baseline.md`, sus estados/denominadores y `es-0.4-pilot-protocol-template.md`. R04 sigue pendiente de prueba directa del payload stateless manipulado. El piloto solo se plantea si Toni lo decide y se aprueba un protocolo completo antes del reclutamiento.
+1. **ES-0.4:** baseline aceptado. Revisar resultados R04 y decidir si el score/propiedad editable de la vista local requiere firma, servidor o una etiqueta de no confiable. El piloto solo se plantea si Toni lo decide y se aprueba un protocolo completo antes del reclutamiento.
 2. Decidir el catálogo de categorías de ES-1.2.R y planificar su implementación dentro de F1.
 3. Cerrar el gate padre de F0 (`gates.md`): ES-0.1 conserva límites de cobertura técnica sin evidencia y ES-0.2 el borrado individual de adjuntos.
 4. F1 (ofertas comparables): ES-1.1 extracción y localización, ES-1.2 comparabilidad con la capa de referencias, ES-1.3 revisión corregible.

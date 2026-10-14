@@ -381,10 +381,10 @@ SHA de partida fijado antes de editar: `719b228415d70a35d3537f237f762bf91165940d
 | Comprobación | Resultado | SHA base | Comando / método | Evidencia y límite |
 |---|---|---|---|---|
 | Estado de Git y referencias | PASS | `719b228415d70a35d3537f237f762bf91165940d` | `git status --short`; `git fetch origin --prune`; `git pull --ff-only origin development`; `git rev-parse HEAD`; `git show-ref` | Árbol inicial limpio; desarrollo coincidía con origin; referencias de release en `ca9dfdc`. |
-| Matriz F0-R01..R12 y auditoría de casos | PASS | `7348a838f2d2a95785603ab8febe39d37b52f4d4` | Inspección de `spec.md` §5 y archivos/casos de test enlazados en [`es-0.4-baseline.md`](es-0.4-baseline.md) | 11/12 requisitos tienen al menos un test directo mapeado; 0/12 quedan confirmados a nivel integral; R04 pendiente de prueba de payload manipulado. No se declara cobertura adicional. |
+| Matriz F0-R01..R12 y auditoría de casos | PASS | `7348a838f2d2a95785603ab8febe39d37b52f4d4`, actualizada en `d428c6d439d1317671c8eb8d8d55d986b0ab41fa` | Inspección de `spec.md` §5 y archivos/casos de test enlazados en [`es-0.4-baseline.md`](es-0.4-baseline.md) | 12/12 requisitos tienen una comprobación mapeada (11 test de código y R11 documental); 0/12 quedan confirmados a nivel integral; R04 tiene evidencia parcial de payload manipulado. |
 | Inventario y hash de fixtures | PASS | `7348a838f2d2a95785603ab8febe39d37b52f4d4` | `rg --files tests scripts/qa`; `shasum -a 256 tests/budget-ingestion.test.ts tests/cee-parser-premium.test.ts tests/evidence-matrix.test.ts` | Los cuatro escenarios existen inline; sin ficheros nuevos ni datos reales. Hashes y nombres de casos en baseline. |
 | Mapa de workflows CI | PASS | `7348a838f2d2a95785603ab8febe39d37b52f4d4` | Lectura de `.github/workflows/ci.yml` y `.github/workflows/validate-agent-branch.yml` | Registrados disparadores y pasos. `tsc --noEmit` explícito, QA visual, servicios reales y piloto no están cubiertos por estos workflows. |
-| Métricas/denominadores | PASS | `7348a838f2d2a95785603ab8febe39d37b52f4d4` | Recuento manual y tabla reproducible en `es-0.4-baseline.md`; ejecutar comandos allí enlazados | Test mapeado 11/12; casos negativos de la matriz acotada 5/12. No representa la superficie completa de auth. |
+| Métricas/denominadores | PASS | `7348a838f2d2a95785603ab8febe39d37b52f4d4`, actualizada en `d428c6d439d1317671c8eb8d8d55d986b0ab41fa` | Recuento manual y tabla reproducible en `es-0.4-baseline.md`; ejecutar comandos allí enlazados | Comprobación mapeada 12/12 (11 tests de código + R11 documental); casos negativos de la matriz acotada 5/12. No representa la superficie completa de auth. |
 | Protocolo de piloto | PASS | `7348a838f2d2a95785603ab8febe39d37b52f4d4` | Revisión de `es-0.4-pilot-protocol-template.md` | Plantilla vacía; no ejecutada. El piloto no bloquea la aceptación de desarrollo. |
 | Lint | NOT_RUN | `7348a838f2d2a95785603ab8febe39d37b52f4d4` | `npm run lint` | Solo cambios de documentación; política de hitos exige `git diff --check`. |
 | Typecheck | NOT_RUN | `7348a838f2d2a95785603ab8febe39d37b52f4d4` | `npx tsc --noEmit` | Solo cambios de documentación; no hubo código, tests ni fixtures nuevos. |
@@ -392,4 +392,23 @@ SHA de partida fijado antes de editar: `719b228415d70a35d3537f237f762bf91165940d
 | Build | NOT_RUN | `7348a838f2d2a95785603ab8febe39d37b52f4d4` | `npm run build` | Solo cambios de documentación; no hubo cambios de aplicación. |
 | Diff documental | PASS | `7348a838f2d2a95785603ab8febe39d37b52f4d4` | `git diff --check` | Diff sin errores; vuelve a ejecutarse antes del commit de gates/checklist. |
 
-**Resultado ES-0.4:** baseline documental preparado; revisión de Toni pendiente. No se cambian criterios de aceptación de F0, no se inicia piloto y no se promociona.
+**Resultado ES-0.4:** baseline documental aceptado por Toni. No se cambian criterios de aceptación de F0, no se inicia piloto ni se promueve como parte de esta actualización.
+
+### ES-0.4 — R04: límites de payload `local_` manipulado
+
+Baseline aceptado por Toni. Se añadieron pruebas de regresión con payloads base64url sintéticos que falsifican `isDemo`, `paidAt`, score y metadatos de adjunto. No se cambió comportamiento de la aplicación.
+
+| Comprobación | Resultado | SHA | Comando / método | Evidencia y límite |
+|---|---|---|---|---|
+| Checkout rechaza payload `local_` manipulado | PASS | `d428c6d439d1317671c8eb8d8d55d986b0ab41fa` | `npm test -- --runInBand tests/checkout.test.ts` | HTTP 400; sin consulta a DB ni creación de sesión Stripe pese a los claims falsos. |
+| Adjunto privado no accesible desde metadatos falsificados | PASS | `d428c6d439d1317671c8eb8d8d55d986b0ab41fa` | `npm test -- --runInBand tests/attachment-access.test.ts` | HTTP 404; no busca fila ni lee bytes privados. Solo el catálogo estático de IDs demo puede servirse en la rama demo. |
+| Flag `isDemo` / `paidAt` falso no concede Premium | PASS | `d428c6d439d1317671c8eb8d8d55d986b0ab41fa` | `npm test -- --runInBand tests/premium-access.test.ts` | La función recibe el estado demo server-side como false y mantiene acceso no pagado, incluso con `ENABLE_DEMO_PREMIUM=true`. |
+| Tests focales | PASS — 3 suites / 25 tests | `d428c6d439d1317671c8eb8d8d55d986b0ab41fa` | `npm test -- --runInBand tests/checkout.test.ts tests/attachment-access.test.ts tests/premium-access.test.ts` | Casos nuevos y regresiones existentes. |
+| Lint | PASS | `d428c6d439d1317671c8eb8d8d55d986b0ab41fa` | `npm run lint` | Sin errores ni avisos. |
+| Typecheck | PASS | `d428c6d439d1317671c8eb8d8d55d986b0ab41fa` | `npx tsc --noEmit` | Exit 0. |
+| Suite completa | PASS — 80 suites / 547 tests | `d428c6d439d1317671c8eb8d8d55d986b0ab41fa` | `npm test -- --runInBand` | Ejecución secuencial. |
+| Build | PASS | `d428c6d439d1317671c8eb8d8d55d986b0ab41fa` | `npm run build` | Exit 0. |
+| Verificación visual/integración de todas las superficies `local_` | NOT_RUN | `d428c6d439d1317671c8eb8d8d55d986b0ab41fa` | No ejecutada | Sin navegador ni datos de QA; fuera del alcance de esta prueba focal. La propiedad y el score de la vista local siguen editables y no se consideran evidencia persistida o autorizada. |
+| Diff documental | PASS | `d428c6d439d1317671c8eb8d8d55d986b0ab41fa` | `git diff --check` | Sin errores de whitespace. |
+
+**Estado R04:** HIPÓTESIS. Los tests cierran límites de checkout, Blob privado y premium; no prueban integridad de score/propiedad en la vista local ni cada reporte/consumidor. Sin cambio de criterios ni promoción.
