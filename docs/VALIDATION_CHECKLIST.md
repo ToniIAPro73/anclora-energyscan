@@ -1,69 +1,84 @@
-# Checklist de validación — SDD ES-1.2 comparabilidad (2026-10-14)
+# Checklist de validación — ES-1.2 comparabilidad de presupuestos
 
-> Este fichero se sobrescribe en cada entrega. El historial queda en Git.
+> Este fichero se sobrescribe en cada entrega. La evidencia permanente queda en Git.
 
-**Repositorio:** anclora-energyscan
-**Rama y SHA base revisado:** development @ `205e84c83180b6b822a19e78063deae78d330a32`
-**Entorno de validación:** revisión documental local; sin runtime
-**Datos:** solo descripciones y fixtures sintéticos ya versionados; no se crearon registros ni se usó identidad QA.
+**Repositorio:** `anclora-energyscan`
+**Rama:** `development`
+**SHA de implementación validado:** `7111ef151af875a3e85c9fb2820c38440e7edb84`
+**Runtime:** local con variables development; identidad persistente QA `qa-es01`
+**Datos:** dos textos sintéticos; no se crearon revisiones, valoraciones, adjuntos ni pagos.
 
-## 1. Qué cambia
+## 1. Qué cambió
 
-- Añade una SDD propuesta para comparabilidad de partidas, alcance, unidades e IVA.
-- Registra explícitamente lo que el código actual sí hace y las decisiones de producto que deben resolverse antes de implementar.
-- Actualiza el índice y el contexto para reflejar ES-1.1 validada/promocionada y ES-1.2 pendiente de revisión.
-- No cambia código ni comportamiento de la aplicación.
+- Comparación estructural y transitoria de dos presupuestos de texto en `/budget-review`.
+- Endpoint `POST /api/budget-review/compare`, sin persistencia, telemetría ni logs de contenido.
+- Emparejamiento por descripción normalizada exacta. Duplicados se alinean por orden; excedentes ambiguos quedan sin emparejar.
+- Categoría, unidad y cantidad muestran `MATCH`, `MISMATCH` o `UNKNOWN` localizados. Alcance e IVA siempre indican desconocido.
+- Importes reconocidos se muestran por separado en EUR. No se calcula diferencia, ranking ni valoración de precio; todas las partidas conservan `NO_REFERENCE`.
+- Copy de comparación en ES, CA, EN, DE, FR, IT y PT. Ajuste de espaciado móvil en Budget Review para evitar que el navbar tape el título.
+- Sin cambios de esquema, proveedores, dependencias, ni uso de Blob/Neon para la comparación. El análisis individual, pagos y PDF siguen en su flujo actual.
 
-## 2. Ya comprobado por el agente
+## 2. Gates ejecutados
 
-| Comprobación | Comando o método | Resultado | SHA |
+Todos corresponden al contenido de implementación `7111ef151af875a3e85c9fb2820c38440e7edb84`; se ejecutaron secuencialmente antes de documentar y hacer push.
+
+| Gate | Comando | Resultado | SHA |
 | --- | --- | --- | --- |
-| Verificación de formato documental | `git diff --check` | PASS — diff de esta entrega basado en el SHA indicado arriba | `205e84c83180b6b822a19e78063deae78d330a32` |
-| Revisión de rutas/tipos del parser y Budget Review | Lectura de `src/lib/ocr/budget-parser.ts`, `src/lib/ingestion/types.ts`, `src/lib/budget-review/service.ts`, `src/lib/budget-review/advanced-analysis.ts` y tests relacionados | PASS — el baseline y sus límites se reflejan en la spec | `205e84c83180b6b822a19e78063deae78d330a32` |
+| Lint | `npm run lint` | PASS — sin warnings ni errores | `7111ef151af875a3e85c9fb2820c38440e7edb84` |
+| Typecheck | `npx tsc --noEmit` | PASS | `7111ef151af875a3e85c9fb2820c38440e7edb84` |
+| Suite completa | `npm test -- --runInBand` | PASS — 84 suites, 580 tests | `7111ef151af875a3e85c9fb2820c38440e7edb84` |
+| Build | `npm run build` | PASS — compilación y generación de páginas correctas | `7111ef151af875a3e85c9fb2820c38440e7edb84` |
+| Diff documental | `git diff --check` | PASS | commit documental posterior |
 
-## 3. Pruebas no ejecutadas (NOT_RUN)
+No hay gates NOT_RUN de código para esta entrega.
 
-| Prueba | Motivo concreto |
-| --- | --- |
-| Lint, typecheck, tests y build | NOT_RUN — entrega solo documental; la política requiere `git diff --check` |
-| Tests focales de ES-1.2 | NOT_RUN — no existe implementación ni se modificó código |
-| QA visual/runtime o acceso a Neon/Blob | NOT_RUN — no hay cambio de interfaz ni se crearon datos |
+## 3. QA realizado
 
-## 4. Checklist para validar en la aplicación
-
-No aplica a esta entrega, que solo define la SDD. Toni debe revisar y decidir los siguientes puntos antes de autorizar código:
-
-| # | Dónde | Pasos | Resultado esperado | Cuenta o configuración | Bloqueante |
-| --- | --- | --- | --- | --- | --- |
-| 1 | SDD ES-1.2 §2 y §8 | Confirmar si el flujo inicial compara dos ofertas o solo informa de faltas/diferencias dentro de una oferta. | Alcance explícito que corresponda al flujo aceptado. | Revisión documental de Toni | Sí |
-| 2 | SDD ES-1.2 §8 | Aprobar dimensiones obligatorias, catálogo inicial de inclusiones/exclusiones y comportamiento ante `UNKNOWN`. | Reglas conservadoras y comprensibles, sin equivalencias inferidas. | Revisión documental de Toni | Sí |
-| 3 | SDD ES-1.2 §8 | Confirmar aliases de unidad, conversiones, regla de IVA y si resultados se derivan o persisten. | Decisiones registradas antes de implementación; propuesta por defecto: aliases cerrados, sin conversión, IVA desconocido sin normalizar, sin migración. | Revisión documental de Toni | Sí |
-| 4 | SDD ES-1.2 §8 | Confirmar el límite con ES-1.2.R. | No se muestra juicio de precio con referencias no aprobadas; el estado sigue `NO_REFERENCE` hasta habilitar una fuente gobernada. | Revisión documental de Toni | Sí |
-
-### Casos negativos y de borde
-
-| # | Caso para la fase de implementación | Resultado esperado |
+| Comprobación | Método | Resultado |
 | --- | --- | --- |
-| 1 | Unidad o cantidad desconocida | No comparable; explicación explícita, sin conversión inferida. |
-| 2 | IVA incluido/desglosado/ausente en cada lado | El dato ausente se mantiene desconocido; no se calcula un total normalizado por defecto. |
-| 3 | Descripciones parecidas con alcance diferente o no especificado | No se afirma equivalencia por similitud textual. |
-| 4 | Ítems dimensionalmente compatibles pero sin fuente de precios aprobada | Compatibilidad de dimensiones separada; precio permanece `NO_REFERENCE`. |
+| Identidad QA | Runbook `docs/qa/visual-qa-runbook.md`; login de `qa-es01`; sesión HTTP 200 autenticada | PASS |
+| Flujo dos textos | Introducción sintética por la interfaz; coincidencia estructural, importe separado y etiqueta `NO_REFERENCE` | PASS |
+| Contrato del endpoint | `POST /api/budget-review/compare` con textos sintéticos | PASS — estado 200, `Cache-Control: no-store`, `scope=UNKNOWN`, `vat=UNKNOWN`, `priceStatus=NO_REFERENCE` |
+| Privacidad | Test con centinela en cabecera sintética; inspección de ruta sin logs/analytics/persistencia | PASS — centinela ausente de `console.log`, `console.warn` y `console.error`; no se escribieron datos |
+| Siete idiomas | Navegación y comprobación de título del comparador en ES, CA, EN, DE, FR, IT y PT; tests de copy y estados para los siete locales | PASS |
+| Móvil, 390×844 | `agent-browser`; captura revisada y retirada; título queda debajo del navbar; `scrollWidth=390` | PASS |
+| Escritorio, 1440×900 | `agent-browser`; captura revisada y retirada; `scrollWidth=1440`; espaciado superior conservado | PASS |
+| Datos/pagos/PDF | Revisión del flujo stateless; no se creó una revisión ni se inició pago | PASS — teardown no necesario; comparación de PDFs no forma parte de esta fase |
 
-### Estados de interfaz afectados
+### Fixtures sintéticos y cobertura
 
-- [ ] Vacío · [ ] Cargando · [ ] Error · [ ] Éxito · [ ] Móvil · [ ] Escritorio · [ ] Modo oscuro (sin interfaz modificada en esta entrega)
+| Fixture | SHA-256 | Casos representados |
+| --- | --- | --- |
+| `tests/fixtures/budget-comparison-a.txt` | `ea5487ca28045206a6941d4c850a103745dc61cc2ee0b9bd18222ae21fd18689` | Dos partidas con unidades y cantidades ficticias |
+| `tests/fixtures/budget-comparison-b.txt` | `327d01ff8bafa8769c742f363aa7d9e8388017387c633e03320f067c380199e0` | Las mismas partidas con cantidad e importe distintos |
 
-## 5. Riesgos y limitaciones
+- Pruebas focalizadas: 11 tests de comparador/API/localización, PASS.
+- Cobertura de dimensiones en pruebas: 3 dimensiones comparables (categoría, unidad, cantidad); 2 dimensiones abstencionistas (alcance e IVA siempre `UNKNOWN`).
+- La suite completa ejecutada contiene 84 suites y 580 tests.
 
-- El producto actual recibe una oferta por revisión; el flujo de comparar dos ofertas no está verificado ni se asume como existente.
-- `BudgetLineItem` no tiene campos estructurados de IVA, inclusiones, exclusiones o alcance normalizado.
-- Los fixtures de ES-1.1 miden extracción en textos sintéticos; no prueban comparabilidad ni precisión sobre documentos reales.
-- La SDD permanece propuesta hasta que Toni resuelva las decisiones bloqueantes. ES-1.2.R y sus referencias de precios se mantienen separadas.
+## 4. Pasos manuales para Toni
+
+1. Revisar `/budget-review` y confirmar que la separación entre análisis individual y comparación de dos ofertas resulta clara.
+2. Pegar dos presupuestos ficticios en los campos A y B. Confirmar partidas emparejadas/no emparejadas, importes independientes en EUR y etiquetas localizadas.
+3. Confirmar que alcance e IVA indican desconocido y que no aparecen diferencias monetarias, ranking, recomendación o juicio de precio.
+4. Revisar la copia en ES, CA, EN, DE, FR, IT y PT, y el layout en escritorio y móvil.
+5. Confirmar el límite de ES-1.2 con ES-1.2.R: aquí no se consumen referencias de precio. La aceptación de Toni queda pendiente; no se ha promovido.
+
+## 5. Casos de borde y riesgos
+
+- Descripción distinta o ausente: no se empareja por similitud; aparece bajo “solo en A/B”.
+- Descripciones duplicadas con el mismo número: se emparejan en orden de entrada. Si sobra alguna en un lado, se marca ambigua.
+- Unidad no reconocida o ausente: estado desconocido; no hay conversión entre magnitudes.
+- Cantidad ausente o distinta: desconocido o no coincide; no se modifica la cantidad.
+- Categoría inferida solo desde texto por el clasificador existente; no equivale a validación profesional.
+- Alcance y tratamiento de IVA no se extraen en v1; permanecen desconocidos y pueden impedir una comparación real.
+- Se acepta texto pegado (20 a 80.000 caracteres por oferta); PDF/OCR comparativo queda fuera de ES-1.2.
+- Las ofertas pueden contener datos personales: el endpoint no las persiste ni registra, pero el usuario debe evitar pegar información identificativa innecesaria.
+- `NO_REFERENCE` no es una valoración de precio. La fase ES-1.2.R requiere autorización y evidencia separadas.
 
 ## 6. Decisión de Toni
 
-- [ ] Revisé la SDD propuesta de ES-1.2.
-- [ ] Acepto el alcance y las decisiones por defecto.
-- [ ] Solicito cambios antes de autorizar implementación. Motivo: ______________________
-- [ ] Autorizo implementación de ES-1.2 en una instrucción posterior.
-- [ ] No se solicita promoción: no hay cambios de aplicación.
+- [x] Flujo de dos presupuestos confirmado.
+- [ ] Revisé y acepto la implementación ES-1.2.
+- [ ] Solicito cambios antes de aceptar. Motivo: ______________________________
+- [ ] Cuando esté aceptada, autorizo promoción con `PROMOTE=FULL` en una instrucción explícita.

@@ -56,13 +56,13 @@ Retención de 30 días, borrado por el propietario, endpoint de purga con `CRON_
 1. **ES-0.3:** cerrada y promocionada.
 2. **ES-0.4 (Baseline y plan de validación, P1):** baseline técnico aceptado por Toni, ligado al SHA de partida `719b228415d70a35d3537f237f762bf91165940d`; la fase quedó aceptada y promovida. Tests focales de límites para `local_` manipulado añadidos en `d428c6d`; por decisión de Toni, el flujo local se mantiene sin firma ni validación server-side. En `463e179` se añadió el aviso «estimación local no verificada» a la página y al PDF básico, con pruebas y QA visual sintético; Toni aprobó la promoción en `73b83dce`. R04 mantiene la limitación técnica de que el score/datos del enlace continúan editables. El protocolo de piloto está vacío y es opcional; no se ejecutó piloto.
 3. **ES-1.1:** validada por Toni y promovida; SDD y evidencia en [`sdd/features/energyscan-budget-extraction-localization/`](../../sdd/features/energyscan-budget-extraction-localization/). La prueba sintética cubre cinco partidas, seis campos y 27 valores aplicables; no mide exactitud sobre documentos reales.
-4. **ES-1.2:** SDD propuesta en [`sdd/features/energyscan-budget-comparability/`](../../sdd/features/energyscan-budget-comparability/). No se ha cambiado comportamiento. La spec propone separar compatibilidad de alcance/unidad/IVA de cualquier juicio de precio; decisiones de Toni pendientes antes de implementación.
+4. **ES-1.2:** implementación en `development` (`7111ef151af875a3e85c9fb2820c38440e7edb84`), aceptación de Toni pendiente. Compara dos textos mediante `/api/budget-review/compare`; procesamiento transitorio, sin persistencia/telemetría, y sin valoración de precio. Alcance e IVA siguen desconocidos. Evidencia de ejecución en [`docs/VALIDATION_CHECKLIST.md`](../../docs/VALIDATION_CHECKLIST.md).
 5. **ES-1.2.R:** spec redactada, sin implementación. Falta el catálogo cerrado de categorías.
 6. Evidencia por SHA de F0: `specs/energyscan/000-seguridad-verdad/gates.md`. Estado de hallazgos: `es-0.3-claims-inventory.md`.
 
 ## 5. Próximos pasos (en orden)
 
-1. **ES-1.2:** Toni revisa y resuelve las decisiones del SDD antes de autorizar implementación. No hay gates de código ejecutados para esta propuesta.
+1. **ES-1.2:** Toni revisa y acepta la implementación en `development`; no promover hasta aceptación explícita y `PROMOTE=FULL`.
 2. Decidir el catálogo de categorías de ES-1.2.R y planificar su implementación dentro de F1.
 3. Mantener visibles en `gates.md` las limitaciones residuales de F0; no se reabren ni se declaran resueltas por ES-1.1.
 4. Después de ES-1.2, refinar ES-1.3 (revisión corregible).

@@ -2,24 +2,23 @@
 
 ## Decisions and discovery
 
-- [ ] Toni accepts the scope boundary between compatibility analysis and price-reference ratings.
-- [ ] Toni selects the initial workflow: compare two offers, or assess completeness/differences within one offer.
-- [ ] Toni approves mandatory comparison dimensions and the initial scope catalog.
-- [ ] Toni approves unit aliases and confirms whether v1 needs any unit conversions.
-- [ ] Toni confirms VAT handling and whether persistence should remain derived at read time.
-- [ ] Audit whether the existing product supports two offers in a single review flow; record concrete routes and payloads.
+- [x] Toni accepts the scope boundary between compatibility analysis and price-reference ratings.
+- [x] Toni selects two budgets as the initial workflow.
+- [x] Conservative dimensions fixed: category/unit/quantity; scope and VAT remain unknown.
+- [x] Fixed aliases only, no conversions; VAT unknown; comparison remains transient.
+- [x] Audit confirmed the original product handled one offer per review; comparison now uses a separate transient route.
 
 ## Synthetic evidence and tests
 
-- [ ] Create synthetic fixtures only after decisions are resolved; include mixed units, VAT states, scope inclusions/exclusions, missing data, and ambiguous descriptions.
-- [ ] Add tests first for match/mismatch/unknown per dimension and overall abstention.
-- [ ] Assert no `HIGH_REVIEW`, `LOW_REVIEW`, `IN_RANGE`, expensive/cheap wording, or numerical verdict without an approved reference dataset.
-- [ ] Add localization and privacy sentinel tests for any new user-facing copy/logging.
+- [x] Added two synthetic text fixtures; their hash and current test evidence are recorded in `docs/VALIDATION_CHECKLIST.md`.
+- [x] Added match/mismatch/unknown, duplicate, unmatched, fixture, and API abstention tests.
+- [x] Asserted `NO_REFERENCE` and absence of price verdict/delta fields.
+- [x] Added privacy sentinel assertion and localized comparison copy in all seven locales.
 
 ## Implementation and closure
 
-- [ ] Implement the typed comparison model and accepted UI/API flow without expanding provider or dependency scope.
-- [ ] Confirm data retention and deletion continue to cover any persisted derived comparison data.
-- [ ] Assess migration need and rollback; if required, meet `QA_MINIMUM_FOR_DATABASE_MIGRATION=FULL`.
-- [ ] Update the spec status and execution report with fixture hashes, denominators, gates, and SHA.
-- [ ] Complete the validation checklist; get Toni's acceptance before promotion.
+- [x] Implemented typed comparison model and UI/API without provider or dependency additions.
+- [x] No comparison data is persisted, so existing retention/deletion paths are unchanged.
+- [x] No migration is required; rollback is reverting the application commit.
+- [x] Record final gates, visual QA, fixture hashes, and implementation SHA in the validation checklist.
+- [ ] Toni reviews and accepts the phase before any promotion.
