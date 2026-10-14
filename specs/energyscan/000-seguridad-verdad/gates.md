@@ -349,3 +349,12 @@ Decisión de Toni: buscar fuente (B) y, si no existe, retirar (A). Se encontró 
 | Landing en 7 locales | PASS | «75 %» con etiqueta «Edificios de la UE con bajo rendimiento energético» (y equivalentes); sin «%» inicial en la etiqueta |
 | Test de regresión, lint, `tsc`, suite (80 suites / 536 tests), build | PASS | En secuencia |
 | QA visual de la estadística (etiqueta más larga en la tarjeta) | NOT_RUN | Pendiente de Toni |
+
+### ES-0.3 — procedencia en resultados (`development@97703cc`)
+
+| Comprobación | Resultado | Evidencia |
+|---|---|---|
+| Matriz de evidencias con fuente, confianza y «no disponible» | PASS (lectura de código) | `src/lib/evidence/evidence-matrix.ts`; usada en `assessment/[id]/page.tsx` y `EnerScanReport.tsx` |
+| Valores por defecto a 0 en costes y score | PASS (búsqueda en código) | Sin coincidencias; los datos ausentes se registran como `missingData` y bajan la confianza |
+| Etiquetas de la matriz en CA, FR, IT y PT | LÍMITE | Solo ES, EN y DE; los demás idiomas usan el respaldo |
+| Comprobación funcional con casos límite (campo ausente, conflicto) | NOT_RUN | Pendiente si Toni lo exige para cerrar ES-0.3 |

@@ -10,6 +10,7 @@ Estado global: roadmap activo de desarrollo. ES-0.1 fue validada por Toni y prom
 | ES-0.4 | 0 | P1 | ES-0.1–0.3 | PENDIENTE | idem | Baseline reproducible; piloto y método son validación posterior |
 | ES-1.1 | 1 | P1 | F0 | PROPUESTA | [Roadmap](../../docs/energyscan-roadmap.md#registro-de-tareas-padre-22) | Exactitud/cobertura por campo en corpus autorizado |
 | ES-1.2 | 1 | P1 | ES-1.1 | PROPUESTA | idem | Comparabilidad explicable, unidades/IVA compatibles |
+| ES-1.2.R | 1 | P1 | ES-0.2, ES-0.3 | PROPUESTA (spec redactada) | [`010-referencias-precios/spec.md`](010-referencias-precios/spec.md) | Conjunto de precios anónimo con umbral N/M; sin datos personales; abstención por debajo del umbral |
 | ES-1.3 | 1 | P1 | ES-1.1–1.2 | PROPUESTA | idem | Revisión accionable y corregible |
 | ES-2.1 | 2 | P1 | F0 | PROPUESTA | idem | Procedencia/versiones completas en campos críticos |
 | ES-2.2 | 2 | P0 | ES-0.1 | PROPUESTA | idem | Permiso y revocación en todas las rutas |

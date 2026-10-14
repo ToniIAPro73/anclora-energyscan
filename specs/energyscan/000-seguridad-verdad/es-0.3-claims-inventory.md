@@ -43,7 +43,7 @@ C-04 y C-05 corregidos en `d509905172b9ffde3f6eb2893821e239d646ea30` (opción A:
 | OK | Copy de `pricing`, `proveedores`, `profesional` (`src/lib/monetization/i18n.ts`) | Avisos de no-CEE y de no-garantía correctos; sin cifras de ahorro absolutas |
 | OK | Emails (`src/lib/email.ts`) | Aviso legal correcto en ES, EN y DE |
 | INFO | Emails solo en ES, EN y DE | CA, FR, IT y PT no tienen plantilla propia; registrar el comportamiento de respaldo |
-| PENDIENTE | Textos de resultado de score y ahorro en `scoring.ts`, `costs/` y PDF `EnerScanReport` (más allá de la regulación) | Falta comprobar si distinguen declarado, documentado, estimado y no disponible (F0-R06) |
+| OK con límites | Procedencia de campos (F0-R06): `src/lib/evidence/evidence-matrix.ts` | Existe una matriz con fuente (declarado, Catastro, CEE, presupuesto, foto, regla, no disponible), confianza y revisión; visible en la valoración y en el PDF. No se encontraron valores por defecto a 0 en costes ni score. Límite: etiquetas de la matriz solo en ES, EN y DE |
 
 ## 3. Superficies sin inventariar todavía (lista original, resuelta arriba salvo lo marcado PENDIENTE)
 
