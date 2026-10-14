@@ -40,7 +40,7 @@ export const dictionaryCA = {
   heroPotentialHigh: "Alt",
   howItWorks: "Veure com funciona",
   confidenceMedium: "Confiança mitjana",
-  statsDeficient: "% del parc deficient",
+  statsDeficient: "Edificis de la UE amb baix rendiment energètic",
   statsDate: "Primera data clau",
   statsTarget: "Horitzó europeu",
   statsSteps: "Passos de l'anàlisi",

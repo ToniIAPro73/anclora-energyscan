@@ -40,7 +40,7 @@ export const dictionaryIT = {
   heroPotentialHigh: "Alto",
   howItWorks: "Scopri come funziona",
   confidenceMedium: "Affidabilità media",
-  statsDeficient: "% del parco edilizio insufficiente",
+  statsDeficient: "Edifici UE a bassa prestazione energetica",
   statsDate: "Prima data chiave",
   statsTarget: "Orizzonte europeo",
   statsSteps: "Passaggi dell'analisi",

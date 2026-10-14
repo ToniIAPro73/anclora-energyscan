@@ -40,7 +40,7 @@ export const dictionaryPT = {
   heroPotentialHigh: "Alto",
   howItWorks: "Ver como funciona",
   confidenceMedium: "Confiança média",
-  statsDeficient: "% do parque deficiente",
+  statsDeficient: "Edifícios da UE com baixo desempenho energético",
   statsDate: "Primeira data-chave",
   statsTarget: "Horizonte europeu",
   statsSteps: "Passos da análise",

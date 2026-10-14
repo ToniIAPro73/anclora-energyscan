@@ -22,4 +22,14 @@ describe('landing regulatory claims', () => {
       expect(landingSource).toMatch(new RegExp(`\\n    ${locale}: \\[`));
     }
   });
+
+  it('shows only the sourced EU building-stock statistic, not an unsourced national share', () => {
+    expect(landingSource).not.toMatch(/val:\s*['"]80%['"]/);
+    expect(landingSource).toMatch(/label:\s*t\.statsDeficient,\s*val:\s*['"]75%['"]/);
+    const sources = fs.readFileSync(path.join(process.cwd(), 'docs/energyscan-sources.md'), 'utf8');
+    expect(sources).toMatch(/SRC-11[^\n]*75 %/);
+    for (const source of [i18nSource, ...localeSources]) {
+      expect(source).not.toMatch(/statsDeficient:\s*["']\s*%/);
+    }
+  });
 });

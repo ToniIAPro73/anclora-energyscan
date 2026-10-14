@@ -141,7 +141,7 @@ export default function LandingPage() {
             {/* STATS */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-12 lg:mt-16">
               {[
-                { label: t.statsDeficient, val: '80%', color: 'text-premium' },
+                { label: t.statsDeficient, val: '75%', color: 'text-premium' },
                 { label: t.statsDate, val: '2030', color: 'text-[#FFB020]' },
                 { label: t.statsTarget, val: '2030–2035', color: 'text-[#FFB020]' },
                 { label: t.statsSteps, val: '7', color: 'text-[#00DC82]' },
