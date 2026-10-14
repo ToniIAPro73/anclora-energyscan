@@ -93,8 +93,9 @@ Retención de 30 días, borrado por el propietario, endpoint de purga con `CRON_
 1. Aplicar los parches de contrato al resto de repositorios: GuestHub primero (con la retirada de Memanto), después ShiftImport, FileStudio y SecureFlow; luego CleanSheet y PurgeDoc; luego los 3 repositorios de Cloudflare. Después, scripts de arranque de QA en cada uno.
 2. Mods de flujo (`anclora-mods`): comando `/anclora-close`, banner, afinado de la guarda para `rm -f`, clave de contrato `QA_VISUAL_RUNBOOK` inyectada al inicio.
 3. `.anclora/global`: enlace simbólico roto (el VPS está inactivo) y archivos de contexto de ecosistema ausentes; algunos agentes se detienen al no encontrarlos.
-4. Hermes: bloque en `~/.hermes/config.yaml` si se usa. agy: verificar hooks.
-5. `CLAUDE.md` exige registrar el cierre en Memanto (`memanto remember … --type event` y `memanto memory sync`); no ejecutado en esta sesión remota. Hacerlo desde un entorno con la CLI.
+4. Hermes: bloque en `~/.hermes/config.yaml` si se usa.
+5. Agy (Google Antigravity CLI): adaptador de `anclora-mods` implementado y verificado (guarda, puertas e inyección de contexto; `/hooks` lo muestra activo; bloqueó un `git push --force` real). Los commits (`e61abf3`, `c0add4b`, `80cd9a9`, `b620ce3`) están **solo en local**; decidir si se publican. Límites: Agy no tiene evento de prompt, así que no recibe `PROMOTE=FULL` y las promociones se hacen desde Claude Code, Codex o GitHub Actions; la guarda solo actúa en repositorios adoptados (`ANCLORA_FLOW_VERSION=1`) y bajo el matcher configurado. El hook de Agy apunta a una ruta absoluta del equipo de Toni; si `anclora-mods` se mueve, hay que reinstalar. Comprobar que el hook de telemetría ajeno (`dak-telemetry`, matcher `*`) no envía comandos ni secretos fuera del equipo.
+6. `CLAUDE.md` exige registrar el cierre en Memanto (`memanto remember … --type event` y `memanto memory sync`); no ejecutado en esta sesión remota. Hacerlo desde un entorno con la CLI.
 
 ## 7. Referencias rápidas
 
