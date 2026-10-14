@@ -33,7 +33,19 @@ C-01–C-03 se corrigieron primero en ES, EN y DE. Los locales CA, FR, IT y PT m
 
 C-04 y C-05 corregidos en `d509905172b9ffde3f6eb2893821e239d646ea30` (opción A: sin umbrales, estado `NO_REFERENCE`). C-06 queda parcial: `service.ts` conserva un mensaje en castellano; la pantalla usa la etiqueta localizada.
 
-## 3. Superficies sin inventariar todavía
+## 2 quater. Inventario de las superficies restantes (2026-10-14, `development@ed40558`)
+
+| ID | Superficie | Resultado |
+|---|---|---|
+| C-09 | `src/app/page.tsx:144` y `statsDeficient` en los 7 locales: «80 % del parque deficiente» | **Sin fuente** en `docs/energyscan-sources.md`. Cifra fija presentada como dato. Requiere fuente verificada o retirada (F0-R06, F0-R08) |
+| OK | Línea de tiempo: «Reducción 16 %» en 2030 | Respaldada por SRC-01 (descenso del promedio nacional residencial ≥16 % en 2030, 20–22 % en 2035) |
+| OK | Manuales PDF ES/EN/DE | Sin «2033» ni obligación de clase E; avisos «no garantiza ahorros, costes, subvenciones» presentes |
+| OK | Copy de `pricing`, `proveedores`, `profesional` (`src/lib/monetization/i18n.ts`) | Avisos de no-CEE y de no-garantía correctos; sin cifras de ahorro absolutas |
+| OK | Emails (`src/lib/email.ts`) | Aviso legal correcto en ES, EN y DE |
+| INFO | Emails solo en ES, EN y DE | CA, FR, IT y PT no tienen plantilla propia; registrar el comportamiento de respaldo |
+| PENDIENTE | Textos de resultado de score y ahorro en `scoring.ts`, `costs/` y PDF `EnerScanReport` (más allá de la regulación) | Falta comprobar si distinguen declarado, documentado, estimado y no disponible (F0-R06) |
+
+## 3. Superficies sin inventariar todavía (lista original, resuelta arriba salvo lo marcado PENDIENTE)
 
 Se registran como pendientes, no como correctas:
 

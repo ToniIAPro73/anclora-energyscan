@@ -327,3 +327,13 @@ QA visual (2026-10-15): reemplaza el bloqueo histórico por falta de teardown. E
 | Lint, `tsc`, suite completa (80 suites / 535 tests), build | PASS | En secuencia |
 | Verificación visual del PDF DE tras la corrección | NOT_RUN | Pendiente de Toni: `/api/budget-review/demo/pdf?lang=de` |
 | Cabecera móvil (corrección del agente, `0780750`) | PASS | 84 casos autenticados y 9 anónimos según el informe del agente |
+
+### ES-0.3 — inventario de superficies restantes (`development@ed40558`)
+
+| Comprobación | Resultado | Evidencia |
+|---|---|---|
+| Manuales PDF ES/EN/DE | PASS | `pdftotext`: sin «2033» ni obligación de clase E; avisos de no-garantía presentes |
+| Copy de pricing, proveedores y profesional; emails ES/EN/DE | PASS | Avisos de no-CEE y no-garantía presentes |
+| «Reducción 16 %» (landing) | PASS | SRC-01 |
+| «80 % del parque deficiente» (landing) | FAIL | Sin fuente registrada (C-09); decisión de Toni pendiente |
+| Textos de score y ahorro; PDF `EnerScanReport` | NOT_RUN | Pendiente: procedencia declarado/documentado/estimado/no disponible (F0-R06) |
