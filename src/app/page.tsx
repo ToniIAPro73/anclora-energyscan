@@ -16,17 +16,17 @@ export default function LandingPage() {
     es: [
       { year: 'Hoy', title: 'R.D. 390/2021', desc: 'CEE obligatorio para venta/alquiler.', status: 'Vigente', color: 'bg-[#00DC82]' },
       { year: '2030', title: 'Reducción 16%', desc: 'Meta de ahorro en energía primaria.', status: 'Objetivo UE', color: 'bg-[#FFB020]' },
-      { year: '2033', title: 'Clase E', desc: 'Objetivo residencial obligatorio.', status: 'Regulación', color: 'bg-[#EF4444]' },
+      { year: '2030–2035', title: 'Metas europeas de consumo medio', desc: 'La Directiva (UE) 2024/1275 fija objetivos nacionales de reducción del consumo medio del parque residencial. No establece una obligación para una vivienda concreta.', status: 'Regulación', color: 'bg-[#FFB020]' },
     ],
     en: [
       { year: 'Today', title: 'R.D. 390/2021', desc: 'EPC required for sale or rental where applicable.', status: 'Current', color: 'bg-[#00DC82]' },
       { year: '2030', title: '16% reduction', desc: 'Primary energy savings target.', status: 'EU target', color: 'bg-[#FFB020]' },
-      { year: '2033', title: 'Class E', desc: 'Residential target under regulatory development.', status: 'Regulation', color: 'bg-[#EF4444]' },
+      { year: '2030–2035', title: 'EU average-consumption targets', desc: 'Directive (EU) 2024/1275 sets national targets for reducing the average energy consumption of the residential building stock. It does not establish an obligation for any specific dwelling.', status: 'Regulation', color: 'bg-[#FFB020]' },
     ],
     de: [
       { year: 'Heute', title: 'R.D. 390/2021', desc: 'Energieausweis für Verkauf oder Vermietung, sofern anwendbar.', status: 'Gültig', color: 'bg-[#00DC82]' },
       { year: '2030', title: '16% Reduktion', desc: 'Ziel zur Senkung der Primärenergie.', status: 'EU-Ziel', color: 'bg-[#FFB020]' },
-      { year: '2033', title: 'Klasse E', desc: 'Wohngebäudeziel in regulatorischer Entwicklung.', status: 'Regulierung', color: 'bg-[#EF4444]' },
+      { year: '2030–2035', title: 'EU-Ziele für den durchschnittlichen Verbrauch', desc: 'Die Richtlinie (EU) 2024/1275 legt nationale Ziele zur Senkung des durchschnittlichen Energieverbrauchs des Wohngebäudebestands fest. Sie begründet keine Verpflichtung für eine einzelne Wohnung.', status: 'Regulierung', color: 'bg-[#FFB020]' },
     ],
   }[language];
 
@@ -123,7 +123,7 @@ export default function LandingPage() {
               {[
                 { label: t.statsDeficient, val: '80%', color: 'text-premium' },
                 { label: t.statsDate, val: '2030', color: 'text-[#FFB020]' },
-                { label: t.statsTarget, val: '2033', color: 'text-[#EF4444]' },
+                { label: t.statsTarget, val: '2030–2035', color: 'text-[#FFB020]' },
                 { label: t.statsSteps, val: '7', color: 'text-[#00DC82]' },
               ].map((s, i) => (
                 <div key={i} className="p-3 rounded-xl surface-2 border text-center">
