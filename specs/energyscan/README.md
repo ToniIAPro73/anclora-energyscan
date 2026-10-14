@@ -5,8 +5,8 @@ Estado global: roadmap activo de desarrollo. ES-0.1 fue validada por Toni y prom
 | ID | Fase | Prioridad | Dependencia | Estado | Spec/tarea | Gate |
 |---|---:|---|---|---|---|---|
 | ES-0.1 | 0 | P0 | Ninguna | VALIDADA POR TONI · PROMOCIONADA A MAIN | [000-seguridad-verdad/spec.md](000-seguridad-verdad/spec.md), [tasks.md](000-seguridad-verdad/tasks.md) | AuthZ completa y matriz sin acceso cruzado |
-| ES-0.2 | 0 | P0 | Inventario F0 | EN CURSO · ETAPA 1 DOCUMENTAL | [`000-seguridad-verdad/es-0.2-data-flow-inventory.md`](000-seguridad-verdad/es-0.2-data-flow-inventory.md) | Inventario y comparativas registrados; controles de minimización/redacción y QA siguen pendientes |
-| ES-0.3 | 0 | P0 | ES-0.1 inventario | PENDIENTE | idem | Claims/procedencia trazables; revisión externa previa a exposición pública cuando aplique |
+| ES-0.2 | 0 | P0 | Inventario F0 | ACEPTADA POR TONI · PROMOCIONADA A `main` | [`000-seguridad-verdad/es-0.2-data-flow-inventory.md`](000-seguridad-verdad/es-0.2-data-flow-inventory.md) | Inventario y comparativas registrados; controles de minimización/redacción y QA siguen pendientes |
+| ES-0.3 | 0 | P0 | ES-0.1 inventario | EN CURSO · 0.3.a INVENTARIO | [`es-0.3-claims-inventory.md`](000-seguridad-verdad/es-0.3-claims-inventory.md) | Claims/procedencia trazables; revisión externa previa a exposición pública cuando aplique |
 | ES-0.4 | 0 | P1 | ES-0.1–0.3 | PENDIENTE | idem | Baseline reproducible; piloto y método son validación posterior |
 | ES-1.1 | 1 | P1 | F0 | PROPUESTA | [Roadmap](../../docs/energyscan-roadmap.md#registro-de-tareas-padre-22) | Exactitud/cobertura por campo en corpus autorizado |
 | ES-1.2 | 1 | P1 | ES-1.1 | PROPUESTA | idem | Comparabilidad explicable, unidades/IVA compatibles |
