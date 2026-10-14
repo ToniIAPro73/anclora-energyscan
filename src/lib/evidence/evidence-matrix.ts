@@ -196,6 +196,11 @@ export type EvidenceMatrixInput = {
   photoCount: number;
 };
 
+/** A missing number is never a declared 0: only finite, positive values count as data. */
+function isPositiveNumber(value: number | null | undefined): value is number {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0;
+}
+
 export function buildEvidenceMatrix(input: EvidenceMatrixInput): EvidenceItem[] {
   const { assessment, cadastralRecord, hasCeeDocument, hasBudgetDocument, photoCount } = input;
   const hasCatastro = Boolean(cadastralRecord);
@@ -225,38 +230,45 @@ export function buildEvidenceMatrix(input: EvidenceMatrixInput): EvidenceItem[] 
   });
 
   // Postal code
+  const postalCodeValue = cadastralRecord?.postalCode || assessment.zipcode || null;
   items.push({
     key: 'postalCode',
     labelKey: 'postalCode',
-    value: cadastralRecord?.postalCode ?? assessment.zipcode,
-    source: hasCatastro ? 'catastro' : 'user_declared',
-    confidence: hasCatastro ? 'high' : 'medium',
+    value: postalCodeValue,
+    source: !postalCodeValue ? 'not_available' : hasCatastro && cadastralRecord?.postalCode ? 'catastro' : 'user_declared',
+    confidence: !postalCodeValue ? 'unknown' : hasCatastro && cadastralRecord?.postalCode ? 'high' : 'medium',
     usedInScore: true,
+    requiresReview: !postalCodeValue,
   });
 
-  // Year built
-  const yearFromCatastro = hasCatastro && cadastralRecord?.yearBuilt;
+  // Year built — a declared year that conflicts with the cadastre is flagged for review
+  const yearFromCatastro = isPositiveNumber(cadastralRecord?.yearBuilt) ? cadastralRecord!.yearBuilt! : null;
+  const declaredYear = isPositiveNumber(assessment.year) ? assessment.year : null;
+  const yearValue = yearFromCatastro ?? declaredYear;
   items.push({
     key: 'yearBuilt',
     labelKey: 'yearBuilt',
-    value: yearFromCatastro ? cadastralRecord!.yearBuilt! : assessment.year,
-    source: yearFromCatastro ? 'catastro' : 'user_declared',
-    confidence: yearFromCatastro ? 'high' : 'medium',
+    value: yearValue,
+    source: yearFromCatastro ? 'catastro' : declaredYear ? 'user_declared' : 'not_available',
+    confidence: yearFromCatastro ? 'high' : declaredYear ? 'medium' : 'unknown',
     usedInScore: true,
-    requiresReview: !yearFromCatastro && assessment.year < 1950,
+    requiresReview: yearFromCatastro
+      ? declaredYear !== null && declaredYear !== yearFromCatastro
+      : declaredYear === null || declaredYear < 1950,
   });
 
   // Used area — upgrade to catastro/high when consistent with cadastral surface (diff ≤ 20 m²)
+  const declaredArea = isPositiveNumber(assessment.area) ? assessment.area : null;
   const cadastralSurface = cadastralRecord?.surfaceBuiltM2 ?? null;
-  const areaMatchesCatastro = hasCatastro && cadastralSurface != null && Math.abs(assessment.area - cadastralSurface) <= 20;
+  const areaMatchesCatastro = hasCatastro && cadastralSurface != null && declaredArea !== null && Math.abs(declaredArea - cadastralSurface) <= 20;
   items.push({
     key: 'usedAreaM2',
     labelKey: 'usedAreaM2',
-    value: assessment.area,
-    source: areaMatchesCatastro ? 'catastro' : 'user_declared',
-    confidence: areaMatchesCatastro ? 'high' : 'medium',
+    value: declaredArea,
+    source: declaredArea === null ? 'not_available' : areaMatchesCatastro ? 'catastro' : 'user_declared',
+    confidence: declaredArea === null ? 'unknown' : areaMatchesCatastro ? 'high' : 'medium',
     usedInScore: true,
-    requiresReview: hasCatastro && cadastralSurface != null && Math.abs(assessment.area - cadastralSurface) > 20,
+    requiresReview: declaredArea === null || (hasCatastro && cadastralSurface != null && Math.abs(declaredArea - cadastralSurface) > 20),
   });
 
   // Cadastral built area
@@ -268,7 +280,7 @@ export function buildEvidenceMatrix(input: EvidenceMatrixInput): EvidenceItem[] 
       source: 'catastro',
       confidence: 'high',
       usedInScore: false,
-      requiresReview: Math.abs(assessment.area - cadastralRecord.surfaceBuiltM2) > 20,
+      requiresReview: declaredArea === null || Math.abs(declaredArea - cadastralRecord.surfaceBuiltM2) > 20,
     });
   }
 
@@ -321,8 +333,8 @@ export function buildEvidenceMatrix(input: EvidenceMatrixInput): EvidenceItem[] 
     key: 'heating',
     labelKey: 'heating',
     value: assessment.heating ?? null,
-    source: hasCeeDocument ? 'cee_document' : assessment.heating ? 'user_declared' : 'not_available',
-    confidence: hasCeeDocument ? 'high' : assessment.heating ? 'medium' : 'unknown',
+    source: !assessment.heating ? 'not_available' : hasCeeDocument ? 'cee_document' : 'user_declared',
+    confidence: !assessment.heating ? 'unknown' : hasCeeDocument ? 'high' : 'medium',
     usedInScore: true,
     requiresReview: !assessment.heating,
   });
@@ -332,8 +344,8 @@ export function buildEvidenceMatrix(input: EvidenceMatrixInput): EvidenceItem[] 
     key: 'waterHeating',
     labelKey: 'waterHeating',
     value: assessment.waterHeating ?? null,
-    source: hasCeeDocument ? 'cee_document' : assessment.waterHeating ? 'user_declared' : 'not_available',
-    confidence: hasCeeDocument ? 'high' : assessment.waterHeating ? 'medium' : 'unknown',
+    source: !assessment.waterHeating ? 'not_available' : hasCeeDocument ? 'cee_document' : 'user_declared',
+    confidence: !assessment.waterHeating ? 'unknown' : hasCeeDocument ? 'high' : 'medium',
     usedInScore: true,
     requiresReview: !assessment.waterHeating,
   });

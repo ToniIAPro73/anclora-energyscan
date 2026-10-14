@@ -187,4 +187,73 @@ describe('evidence label helpers', () => {
   it('returns field label in EN', () => {
     expect(getEvidenceFieldLabel('windows', 'en')).toBe('Windows');
   });
+
+describe('buildEvidenceMatrix edge cases (F0-R06)', () => {
+  const base = {
+    assessment: { year: 1985, area: 80, zipcode: '07001', propertyType: 'apartment', windows: 'single', facadeInsulation: 'none', roofInsulation: 'none', heating: 'gas', waterHeating: 'gas', cooling: null, renewables: null },
+    hasCeeDocument: false,
+    hasBudgetDocument: false,
+    photoCount: 0,
+  };
+  const find = (items: ReturnType<typeof buildEvidenceMatrix>, key: string) => items.find((item) => item.key === key)!;
+
+  it('never reports a missing or non-positive area as a declared value of 0', () => {
+    for (const area of [0, -5, Number.NaN]) {
+      const item = find(buildEvidenceMatrix({ ...base, assessment: { ...base.assessment, area } }), 'usedAreaM2');
+      expect(item.value).toBeNull();
+      expect(item.source).toBe('not_available');
+      expect(item.confidence).toBe('unknown');
+      expect(item.requiresReview).toBe(true);
+    }
+  });
+
+  it('never reports a missing year as a declared value', () => {
+    for (const year of [0, Number.NaN]) {
+      const item = find(buildEvidenceMatrix({ ...base, assessment: { ...base.assessment, year } }), 'yearBuilt');
+      expect(item.value).toBeNull();
+      expect(item.source).toBe('not_available');
+      expect(item.requiresReview).toBe(true);
+    }
+  });
+
+  it('does not attribute heating or hot water to the EPC when the value is missing', () => {
+    const items = buildEvidenceMatrix({ ...base, hasCeeDocument: true, assessment: { ...base.assessment, heating: null, waterHeating: undefined } });
+    for (const key of ['heating', 'waterHeating']) {
+      const item = find(items, key);
+      expect(item.value).toBeNull();
+      expect(item.source).toBe('not_available');
+      expect(item.confidence).toBe('unknown');
+      expect(item.requiresReview).toBe(true);
+    }
+  });
+
+  it('keeps the EPC as source when the value exists', () => {
+    const item = find(buildEvidenceMatrix({ ...base, hasCeeDocument: true }), 'heating');
+    expect(item.source).toBe('cee_document');
+  });
+
+  it('flags a conflict between declared and cadastral year for review', () => {
+    const items = buildEvidenceMatrix({ ...base, cadastralRecord: { yearBuilt: 1970 } });
+    const year = find(items, 'yearBuilt');
+    expect(year.source).toBe('catastro');
+    expect(year.requiresReview).toBe(true);
+  });
+
+  it('does not flag a year that agrees with the cadastre', () => {
+    const year = find(buildEvidenceMatrix({ ...base, cadastralRecord: { yearBuilt: 1985 } }), 'yearBuilt');
+    expect(year.requiresReview).toBe(false);
+  });
+
+  it('flags a declared area that conflicts with the cadastral surface', () => {
+    const area = find(buildEvidenceMatrix({ ...base, cadastralRecord: { surfaceBuiltM2: 140 } }), 'usedAreaM2');
+    expect(area.source).toBe('user_declared');
+    expect(area.requiresReview).toBe(true);
+  });
+
+  it('treats an empty postal code as not available', () => {
+    const item = find(buildEvidenceMatrix({ ...base, assessment: { ...base.assessment, zipcode: '' } }), 'postalCode');
+    expect(item.value).toBeNull();
+    expect(item.source).toBe('not_available');
+  });
+});
 });
