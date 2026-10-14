@@ -301,7 +301,9 @@ Opción A decidida por Toni (C-04, C-05, C-06). Requisito F0-R09.
 | Etiqueta `NO_REFERENCE` en 7 locales (lógica) y ES/EN/DE (pantalla y PDF) | PASS | Tests de etiqueta; i18n de monetización con fallback para CA/FR/IT/PT |
 | Revisiones persistidas con estado antiguo | PASS | `normalizeFindingStatus` las muestra como `NO_REFERENCE` en lógica, pantalla y PDF |
 | Lint, `tsc`, suite completa (80 suites / 529 tests), build | PASS | En secuencia |
-| QA visual de Budget Review (pantalla y PDF) | NOT_RUN | Pendiente |
+| QA visual de Budget Review (pantalla, locales, responsive y PDF) | BLOCKED | SHA de código: `d509905172b9ffde3f6eb2893821e239d646ea30`. Método: `vc env run -- sh -c 'AUTH_URL=http://localhost:3000 npm run dev'`; login `qa-es01`; dashboard de solo lectura mostraba 0 presupuestos y ningún presupuesto guardado antiguo. No se crearon A/B porque `npm run qa:teardown` no acepta ID de `BudgetReview`: solo `--assessment-id`, `--attachments-only` o borrado de toda la identidad. Sin limpieza acotada autorizada no se puede escribir en la base compartida. No se revisaron PDFs ni locales visuales. |
 | Mensajes de partida solo en ES en `service.ts` (C-06) | PARCIAL | El texto sigue en castellano; la pantalla usa la etiqueta localizada |
 
 Límite conocido: el resumen guardado de revisiones antiguas conserva el texto «Presupuesto alto» en `summary.alert`.
+
+Bloqueo de QA (2026-10-14): no hay datos previos de `BudgetReview` en la identidad QA y el teardown contractual no puede borrar un presupuesto individual por ID. No se hizo mutación de DB ni se usó SQL/Prisma para limpiar. No se confirma defecto de pantalla: la comprobación visual pedida permanece sin ejecutar hasta que haya una ruta de teardown acotada y aprobada o datos QA existentes autorizados.
