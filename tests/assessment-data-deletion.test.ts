@@ -1,7 +1,7 @@
 jest.mock('@/lib/prisma', () => ({ prisma: {} }));
 jest.mock('@/lib/blob-storage', () => ({ deleteStoredAttachment: jest.fn() }));
 
-import { deleteAssessmentData, purgeExpiredAssessmentData, validateAssessmentAttachmentPath } from '@/lib/assessment-data-deletion';
+import { deleteAssessmentData, isForeignLocalAttachmentPath, purgeExpiredAssessmentData, validateAssessmentAttachmentPath } from '@/lib/assessment-data-deletion';
 import type { PrismaClient } from '@prisma/client';
 
 function createTx() {
@@ -85,6 +85,24 @@ describe('assessment data deletion and retention purge', () => {
     expect(() => validateAssessmentAttachmentPath(`blob:assessment-drafts/${legacyId}/../x.png`, 'assessment_fixture', 'owner_fixture')).toThrow();
     expect(() => validateAssessmentAttachmentPath(`blob:assessment-drafts/${legacyId}/a/b.png`, 'assessment_fixture', 'owner_fixture')).toThrow();
     expect(() => validateAssessmentAttachmentPath('blob:assessment-drafts/not-a-uuid/file.png', 'assessment_fixture', 'owner_fixture')).toThrow();
+  });
+
+  it('treats a local path recorded by another environment as foreign and never touches it', () => {
+    const foreign = '/Users/dev/app/uploads/assessments/assessment_fixture/photo.png';
+    expect(isForeignLocalAttachmentPath(foreign, 'assessment_fixture', 'owner_fixture')).toBe(true);
+    expect(isForeignLocalAttachmentPath('C:\\dev\\uploads\\assessments\\assessment_fixture\\photo.png', 'assessment_fixture', 'owner_fixture')).toBe(true);
+    expect(isForeignLocalAttachmentPath('/Users/dev/app/uploads/assessments/other/photo.png', 'assessment_fixture', 'owner_fixture')).toBe(false);
+    expect(isForeignLocalAttachmentPath('/Users/dev/app/uploads/assessments/assessment_fixture/../x/photo.png', 'assessment_fixture', 'owner_fixture')).toBe(false);
+    expect(isForeignLocalAttachmentPath('/etc/passwd', 'assessment_fixture', 'owner_fixture')).toBe(false);
+    expect(isForeignLocalAttachmentPath('blob:assessments/assessment_fixture/photo.png', 'assessment_fixture', 'owner_fixture')).toBe(false);
+  });
+
+  it('deletes the rows of an assessment with a foreign local attachment without unlinking the file', async () => {
+    const { deps, tx } = createDeps();
+    tx.assessmentAttachment.findMany.mockResolvedValue([{ id: 'att_foreign', path: '/Users/dev/app/uploads/assessments/assessment_fixture/photo.png' }]);
+    await expect(deleteAssessmentData('assessment_fixture', 'owner_fixture', deps)).resolves.toBe(true);
+    expect(deps.deleteStoredAttachment).not.toHaveBeenCalled();
+    expect(tx.assessment.deleteMany).toHaveBeenCalledWith({ where: { id: { in: ['assessment_fixture'] } } });
   });
 
   it('reports content-free failure reasons for assessments that cannot be purged', async () => {

@@ -63,6 +63,30 @@ export function validateAssessmentAttachmentPath(pathValue: string, assessmentId
   }
 }
 
+/**
+ * True for a local-disk path recorded by another environment (the database is shared between local
+ * development and Vercel) that this runtime cannot own: `.../uploads/assessments/{assessmentId}/{file}`.
+ * Its file is never touched here; only the database rows are removed.
+ */
+export function isForeignLocalAttachmentPath(pathValue: string, assessmentId: string, userId?: string | null): boolean {
+  if (pathValue.startsWith('demo://') || pathValue.startsWith('blob:')) return false;
+  const segments = pathValue.replace(/\\/g, '/').split('/');
+  const index = segments.lastIndexOf('uploads');
+  const structural = index >= 0 &&
+    segments.length === index + 4 &&
+    segments[index + 1] === 'assessments' &&
+    segments[index + 2] === assessmentId &&
+    segments[index + 3].length > 0 &&
+    !segments.includes('..');
+  if (!structural) return false;
+  try {
+    validateAssessmentAttachmentPath(pathValue, assessmentId, userId);
+    return false;
+  } catch {
+    return true;
+  }
+}
+
 /** Explicitly deletes non-cascading children; shared by owner deletion, expiry purge, and QA teardown. */
 export async function deleteAssessmentRowsInTransaction(tx: Prisma.TransactionClient, assessmentIds: string[], attachmentIds: string[]) {
   if (!assessmentIds.length) return;
@@ -102,6 +126,7 @@ export async function deleteAssessmentData(
       select: { id: true, path: true },
     });
     for (const attachment of attachments) {
+      if (isForeignLocalAttachmentPath(attachment.path, assessmentId, assessment.userId)) continue;
       validateAssessmentAttachmentPath(attachment.path, assessmentId, assessment.userId);
       if (!attachment.path.startsWith('demo://')) await deps.deleteStoredAttachment(attachment.path);
     }
