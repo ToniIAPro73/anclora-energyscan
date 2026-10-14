@@ -318,3 +318,12 @@ QA visual (2026-10-15): reemplaza el bloqueo histórico por falta de teardown. E
 | Typecheck | PASS | SHA `078075016e83688ab2f734985b1f6945b6ce1716`; `npx tsc --noEmit` |
 | Tests completos | PASS — 80 suites / 534 tests | SHA `078075016e83688ab2f734985b1f6945b6ce1716`; `npm test -- --runInBand` |
 | Build | PASS | SHA `078075016e83688ab2f734985b1f6945b6ce1716`; `npm run build` |
+
+### ES-0.3.b-2 — etiqueta alemana en el PDF (código `73477b5bd7a5b79b91321708ec3b29c195c65979`)
+
+| Comprobación | Resultado | Evidencia |
+|---|---|---|
+| Etiqueta DE «Keine vergleichbare Referenz» truncada en la columna de estado del PDF | CORREGIDO | Etiqueta acortada a «Kein Vergleichswert»; test de longitud por locale (ES/EN/DE) |
+| Lint, `tsc`, suite completa (80 suites / 535 tests), build | PASS | En secuencia |
+| Verificación visual del PDF DE tras la corrección | NOT_RUN | Pendiente de Toni: `/api/budget-review/demo/pdf?lang=de` |
+| Cabecera móvil (corrección del agente, `0780750`) | PASS | 84 casos autenticados y 9 anónimos según el informe del agente |
