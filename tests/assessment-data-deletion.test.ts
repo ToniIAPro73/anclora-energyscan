@@ -87,6 +87,17 @@ describe('assessment data deletion and retention purge', () => {
     expect(() => validateAssessmentAttachmentPath('blob:assessment-drafts/not-a-uuid/file.png', 'assessment_fixture', 'owner_fixture')).toThrow();
   });
 
+  it('reports content-free failure reasons for assessments that cannot be purged', async () => {
+    const { deps, prisma } = createDeps();
+    prisma.assessment.findMany.mockResolvedValue([{ id: 'assessment_a', userId: 'owner_fixture' }, { id: 'assessment_b', userId: 'owner_fixture' }]);
+    prisma.assessment.findFirst.mockResolvedValueOnce({ id: 'assessment_a', userId: 'owner_fixture' }).mockResolvedValueOnce({ id: 'assessment_b', userId: 'owner_fixture' });
+    prisma.$transaction.mockRejectedValueOnce(Object.assign(new Error('secret detail'), { code: 'P2034' }))
+      .mockRejectedValueOnce(Object.assign(new Error('Unexpected attachment storage path.'), { shape: 'local_path' }));
+    const result = await purgeExpiredAssessmentData(new Date('2026-02-01T00:00:00.000Z'), deps);
+    expect(result).toMatchObject({ considered: 2, deleted: 0, failed: 2, failureReasons: { 'prisma:P2034': 1, 'unexpected_path:local_path': 1 } });
+    expect(JSON.stringify(result.failureReasons)).not.toContain('secret detail');
+  });
+
   it('purges only records whose parent creation date is at or before the 30-day cutoff', async () => {
     const { deps, prisma } = createDeps();
     prisma.assessment.findMany.mockResolvedValue([{ id: 'assessment_fixture', userId: 'owner_fixture' }]);

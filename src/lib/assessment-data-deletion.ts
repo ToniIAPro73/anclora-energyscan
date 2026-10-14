@@ -20,6 +20,29 @@ const defaultAssessmentDataDeps: AssessmentDataDeps = {
   },
 };
 
+const UNEXPECTED_PATH_MESSAGE = 'Unexpected attachment storage path.';
+
+/** Content-free token describing where a rejected attachment path lives; never includes ids or file names. */
+function classifyAttachmentPathShape(pathValue: string): string {
+  if (pathValue.startsWith('blob:assessments/')) return 'blob_assessments';
+  if (pathValue.startsWith('blob:assessment-drafts/')) return 'blob_drafts';
+  if (pathValue.startsWith('blob:')) return 'blob_other';
+  return 'local_path';
+}
+
+function unexpectedPathError(pathValue: string) {
+  return Object.assign(new Error(UNEXPECTED_PATH_MESSAGE), { shape: classifyAttachmentPathShape(pathValue) });
+}
+
+/** Maps a purge failure to a short content-free reason code for the cron response. */
+export function classifyPurgeFailure(error: unknown): string {
+  const candidate = error as { message?: unknown; shape?: unknown; code?: unknown; name?: unknown } | null;
+  if (candidate?.message === UNEXPECTED_PATH_MESSAGE && typeof candidate.shape === 'string') return `unexpected_path:${candidate.shape}`;
+  if (typeof candidate?.code === 'string' && /^P\d{4}$/.test(candidate.code)) return `prisma:${candidate.code}`;
+  if (typeof candidate?.name === 'string') return `error:${candidate.name.replace(/[^A-Za-z0-9_]/g, '').slice(0, 40) || 'Unknown'}`;
+  return 'error:Unknown';
+}
+
 export function validateAssessmentAttachmentPath(pathValue: string, assessmentId: string, userId?: string | null) {
   if (pathValue.startsWith('demo://')) return;
   if (pathValue.startsWith('blob:')) {
@@ -28,7 +51,7 @@ export function validateAssessmentAttachmentPath(pathValue: string, assessmentId
       Boolean(userId && path.startsWith(`assessment-drafts/${userId}/`)) ||
       isLegacyEnergyScanDraftBlobPath(path);
     if (!path || path.startsWith('/') || path.split('/').includes('..') || !allowed) {
-      throw new Error('Unexpected attachment storage path.');
+      throw unexpectedPathError(pathValue);
     }
     return;
   }
@@ -36,7 +59,7 @@ export function validateAssessmentAttachmentPath(pathValue: string, assessmentId
   const resolved = resolve(pathValue);
   const rel = relative(root, resolved);
   if (!isAbsolute(pathValue) || rel.startsWith('..') || isAbsolute(rel)) {
-    throw new Error('Unexpected attachment storage path.');
+    throw unexpectedPathError(pathValue);
   }
 }
 
@@ -98,11 +121,14 @@ export async function purgeExpiredAssessmentData(now: Date | number = Date.now()
 
   let deleted = 0;
   let failed = 0;
+  const failureReasons: Record<string, number> = {};
   for (const assessment of expired) {
     try {
       if (await deleteAssessmentData(assessment.id, assessment.userId, deps)) deleted += 1;
-    } catch {
+    } catch (error) {
       failed += 1;
+      const reason = classifyPurgeFailure(error);
+      failureReasons[reason] = (failureReasons[reason] ?? 0) + 1;
     }
   }
   const orphanedBlobs = deps.purgeOrphanedBlobs
@@ -128,5 +154,5 @@ export async function purgeExpiredAssessmentData(now: Date | number = Date.now()
       skippedReferenced: 0,
       deferred: 0,
     } satisfies OrphanedBlobPurgeResult;
-  return { considered: expired.length, deleted, failed, orphanedBlobs };
+  return { considered: expired.length, deleted, failed, failureReasons, orphanedBlobs };
 }
