@@ -5,31 +5,35 @@ import { deleteAssessmentRowsInTransaction, validateAssessmentAttachmentPath } f
 const QA_EMAIL = 'qa.energyscan@anclora.local'
 type Deps = { prisma: any; deleteStoredAttachment: (path: string) => Promise<unknown> }
 
-type Options = { mode: 'assessments' | 'attachments' | 'identity'; ids: string[]; apply: boolean; confirm?: string }
+type Options = { mode: 'assessments' | 'attachments' | 'identity' | 'budgetReviews'; ids: string[]; apply: boolean; confirm?: string }
 
 function parseArgs(args: string[]): Options {
   const result: Options = { mode: 'assessments', ids: [], apply: false }
   let identityMode = false
   let attachmentsMode = false
+  let budgetMode = false
   for (let i = 0; i < args.length; i++) {
     const arg = args[i]
-    if (arg === '--assessment-id' || arg === '--attachments-only' || arg === '--confirm') {
+    if (arg === '--assessment-id' || arg === '--attachments-only' || arg === '--confirm' || arg === '--budget-review-id') {
       const value = args[++i]
       if (!value || value.startsWith('--')) throw new Error('An explicit identifier is required.')
       if (arg === '--confirm') result.confirm = value
       else {
         if (arg === '--attachments-only') attachmentsMode = true
+        if (arg === '--budget-review-id') budgetMode = true
         result.ids.push(value)
       }
     } else if (arg === '--delete-identity') identityMode = true
     else if (arg === '--apply') result.apply = true
     else throw new Error('Unsupported teardown option.')
   }
+  if (budgetMode && (identityMode || attachmentsMode || args.includes('--assessment-id'))) throw new Error('Choose one teardown mode.')
   if (identityMode && (attachmentsMode || result.ids.length)) throw new Error('Choose one teardown mode.')
   if (!identityMode && !result.ids.length) throw new Error('An explicit assessment ID or identity mode is required.')
   if (attachmentsMode && result.ids.length !== 1) throw new Error('Attachments-only mode accepts one assessment ID.')
   if (result.confirm && !identityMode) throw new Error('Confirmation is only valid for identity teardown.')
   if (identityMode) result.mode = 'identity'
+  else if (budgetMode) result.mode = 'budgetReviews'
   else result.mode = attachmentsMode ? 'attachments' : 'assessments'
   return result
 }
@@ -54,11 +58,28 @@ async function countSnapshot(tx: any, assessmentIds: string[], attachmentIds: st
   return values
 }
 
+/** Deletes only BudgetReview rows owned by the QA identity; fails closed on any stored file or foreign ID. */
+async function runBudgetReviewTeardown(options: Options, userId: string, deps: Deps): Promise<string> {
+  const ids = Array.from(new Set(options.ids))
+  const reviews = await deps.prisma.budgetReview.findMany({ where: { id: { in: ids }, userId }, select: { id: true, filePath: true } })
+  if (reviews.length !== ids.length) throw new Error('Budget review is not owned by QA identity or does not exist; teardown aborted.')
+  if (reviews.some((review: { filePath?: string | null }) => review.filePath)) throw new Error('Budget review has a stored file; teardown aborted.')
+  const dryRun = `budgetReviews: ${reviews.length}`
+  if (!options.apply) return `DRY RUN — no changes made\n${dryRun}`
+  await deps.prisma.$transaction(async (tx: any) => {
+    await tx.budgetReview.deleteMany({ where: { id: { in: ids }, userId } })
+    const left = Number(await tx.budgetReview.count({ where: { id: { in: ids } } }))
+    if (left !== 0) throw new Error('Post-delete verification failed; transaction rolled back.')
+  }, { isolationLevel: 'Serializable' })
+  return 'APPLIED — VERIFIED ZERO\nbudgetReviews: 0'
+}
+
 export async function runQaTeardown(args: string[], deps: Deps): Promise<string> {
   const options = parseArgs(args)
   const user = await deps.prisma.user.findUnique({ where: { email: QA_EMAIL }, select: { id: true } })
   if (!user) throw new Error('Contract QA identity is unavailable; teardown aborted.')
   if (options.mode === 'identity' && options.confirm !== user.id) throw new Error('Identity confirmation does not match; teardown aborted.')
+  if (options.mode === 'budgetReviews') return runBudgetReviewTeardown(options, user.id, deps)
 
   let assessments: Array<{id:string; userId?:string|null}>
   if (options.mode === 'identity') assessments = await deps.prisma.assessment.findMany({ where: { userId: user.id }, select: { id: true, userId: true } })

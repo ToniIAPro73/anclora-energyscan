@@ -123,6 +123,13 @@ rmdir "$QA_SHOTS"
 
   Se verificó la sintaxis con la herramienta contractual `scripts/qa/teardown-qa-data.ts`. No uses SQL ni Prisma directamente. No uses `--delete-identity`: la cuenta QA es persistente.
 
+- Si creaste una revisión de presupuesto (Budget Review) de prueba, asigna a `QA_BUDGET_REVIEW_ID` su ID, visible en la respuesta de la acción de análisis (campo `id`). Revisa el dry-run y aplica solo si el recuento es exactamente el de las revisiones que acabas de crear. Acepta uno o varios `--budget-review-id`, no se combina con otros modos y aborta si la revisión no es de la identidad QA o tiene un archivo guardado:
+
+  ```bash
+  npm run qa:teardown -- --budget-review-id "$QA_BUDGET_REVIEW_ID"
+  npm run qa:teardown -- --budget-review-id "$QA_BUDGET_REVIEW_ID" --apply
+  ```
+
 En la validación de este runbook no se crearon valoraciones ni adjuntos; por eso no se ejecutó teardown de datos.
 
 ## 5. Trampas conocidas

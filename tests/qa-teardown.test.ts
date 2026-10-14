@@ -133,4 +133,44 @@ describe('QA data teardown', () => {
     expect(output).not.toContain('BLOB_READ_WRITE_TOKEN');
     expect(output).not.toContain(ATTACHMENT_PATH);
   });
+
+  describe('budget review teardown', () => {
+    it('dry-run counts only reviews owned by the QA identity and deletes nothing', async () => {
+      const { prisma, tx } = createHarness();
+      tx.budgetReview.findMany.mockResolvedValue([{ id: 'review_a', filePath: null }]);
+      const output = await runQaTeardown(['--budget-review-id', 'review_a'], { prisma, deleteStoredAttachment: jest.fn() });
+      expect(output).toContain('DRY RUN');
+      expect(output).toContain('budgetReviews: 1');
+      expect(tx.budgetReview.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: { id: { in: ['review_a'] }, userId: QA_USER_ID } }));
+      expect(tx.budgetReview.deleteMany).not.toHaveBeenCalled();
+    });
+
+    it('with --apply deletes the owned reviews and verifies zero', async () => {
+      const { prisma, tx } = createHarness();
+      tx.budgetReview.findMany.mockResolvedValue([{ id: 'review_a', filePath: null }]);
+      const output = await runQaTeardown(['--budget-review-id', 'review_a', '--apply'], { prisma, deleteStoredAttachment: jest.fn() });
+      expect(output).toContain('APPLIED — VERIFIED ZERO');
+      expect(tx.budgetReview.deleteMany).toHaveBeenCalledWith({ where: { id: { in: ['review_a'] }, userId: QA_USER_ID } });
+    });
+
+    it('aborts when a review is not owned or does not exist', async () => {
+      const { prisma, tx } = createHarness();
+      tx.budgetReview.findMany.mockResolvedValue([]);
+      await expect(runQaTeardown(['--budget-review-id', 'review_x', '--apply'], { prisma, deleteStoredAttachment: jest.fn() })).rejects.toThrow('not owned');
+      expect(tx.budgetReview.deleteMany).not.toHaveBeenCalled();
+    });
+
+    it('aborts when the review has a stored file', async () => {
+      const { prisma, tx } = createHarness();
+      tx.budgetReview.findMany.mockResolvedValue([{ id: 'review_a', filePath: 'blob:somewhere/file.pdf' }]);
+      await expect(runQaTeardown(['--budget-review-id', 'review_a', '--apply'], { prisma, deleteStoredAttachment: jest.fn() })).rejects.toThrow('stored file');
+      expect(tx.budgetReview.deleteMany).not.toHaveBeenCalled();
+    });
+
+    it('rejects mixing budget review mode with other teardown modes', async () => {
+      const { prisma } = createHarness();
+      await expect(runQaTeardown(['--budget-review-id', 'review_a', '--assessment-id', 'assessment_qa_fixture'], { prisma, deleteStoredAttachment: jest.fn() })).rejects.toThrow('Choose one teardown mode');
+      await expect(runQaTeardown(['--budget-review-id', 'review_a', '--delete-identity'], { prisma, deleteStoredAttachment: jest.fn() })).rejects.toThrow('Choose one teardown mode');
+    });
+  });
 });
