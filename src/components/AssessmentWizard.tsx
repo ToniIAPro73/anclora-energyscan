@@ -20,6 +20,7 @@ import { MAX_ATTACHMENTS, MAX_ATTACHMENT_SIZE, formatFileSize, isAllowedPhotoAtt
 import { usePreferences } from './AppPreferencesProvider';
 import { getLegalDisclaimer } from '@/lib/i18n';
 import type { EnergyCertificateCEE, RehabBudgetAnalysis } from '@/lib/ingestion/types';
+import { getBudgetCategoryLabel } from '@/lib/ingestion/budget-category-localization';
 import { trackEvent } from '@/lib/analytics';
 
 const PropertyMap = dynamic(() => import('./PropertyMap'), { ssr: false, loading: () => <div className="w-full h-full min-h-[300px] bg-white/5 animate-pulse rounded-2xl" /> });
@@ -137,7 +138,7 @@ export default function AssessmentWizard() {
   const budgetFileInputRef = useRef<HTMLInputElement | null>(null);
   const attachmentFileInputRef = useRef<HTMLInputElement | null>(null);
   const fileDialogScrollRef = useRef<{ x: number; y: number } | null>(null);
-  const { dictionary: t, language, formatCurrency, formatArea } = usePreferences();
+  const { dictionary: t, language, selectedLanguage, formatCurrency, formatArea } = usePreferences();
 
   useEffect(() => {
     trackEvent('wizard_started', { source: searchParams.get('source') || 'direct' });
@@ -659,11 +660,6 @@ export default function AssessmentWizard() {
     amount === undefined ? '---' : `${amount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`
   );
 
-  const formatBudgetCategory = (category: string) => category
-    .toLowerCase()
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, (letter) => letter.toUpperCase());
-
   const renderMetricRows = (
     title: string,
     partial?: EnergyCertificateCEE['extractedSections'] extends infer T
@@ -855,7 +851,7 @@ export default function AssessmentWizard() {
                 {budget.detectedMeasures.map((measure) => (
                   <div key={`${measure.category}-${measure.cost || 0}`} className="rounded-xl border border-white/10 bg-black/20 p-3 text-xs">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="font-bold text-[#00DC82]">{formatBudgetCategory(measure.category)}</p>
+                      <p className="font-bold text-[#00DC82]">{getBudgetCategoryLabel(measure.category, selectedLanguage)}</p>
                       <p className="font-bold text-premium">{formatBudgetAmount(measure.cost)}</p>
                     </div>
                     <p className="mt-2 text-muted">{measure.description}</p>
@@ -900,7 +896,7 @@ export default function AssessmentWizard() {
                 </div>
                 <div className="rounded-xl border border-[#FFB020]/20 bg-[#FFB020]/5 p-3 text-xs">
                   <p className="font-bold text-premium">{t.wizardBudgetMissingMeasures}</p>
-                  <p className="mt-2 text-[#FFB020]">{budget.missingMeasures.map(formatBudgetCategory).join(', ') || '---'}</p>
+                  <p className="mt-2 text-[#FFB020]">{budget.missingMeasures.map((category) => getBudgetCategoryLabel(category, selectedLanguage)).join(', ') || '---'}</p>
                 </div>
                 <div className="rounded-xl border border-white/10 bg-black/20 p-3 text-xs">
                   <p className="font-bold text-premium">{t.wizardBudgetDetailWarnings}</p>
@@ -1032,10 +1028,10 @@ export default function AssessmentWizard() {
             <span className="rounded-full bg-black/20 px-2 py-0.5 text-[10px] font-bold text-muted">{budgetImport.data.impactConfidence}</span>
           </div>
           <p className="text-muted">{t.wizardBudgetTotal}: <b className="text-premium">{budgetImport.data.totalAmount ? `${budgetImport.data.totalAmount.toLocaleString('es-ES')} €` : '---'}</b></p>
-          <p className="mt-2 text-muted">{t.wizardBudgetDetectedMeasures}: <b className="text-premium">{budgetImport.data.detectedMeasures.map((measure) => measure.category).join(', ') || '---'}</b></p>
+          <p className="mt-2 text-muted">{t.wizardBudgetDetectedMeasures}: <b className="text-premium">{budgetImport.data.detectedMeasures.map((measure) => getBudgetCategoryLabel(measure.category, selectedLanguage)).join(', ') || '---'}</b></p>
           <p className="mt-2 text-premium">{t.wizardBudgetEstimatedImpact}: {budgetImport.data.analysisSummary}</p>
           {budgetImport.data.missingMeasures.length > 0 && (
-            <p className="mt-2 text-[10px] text-[#FFB020]">{t.wizardBudgetMissingMeasures}: {budgetImport.data.missingMeasures.join(', ')}</p>
+            <p className="mt-2 text-[10px] text-[#FFB020]">{t.wizardBudgetMissingMeasures}: {budgetImport.data.missingMeasures.map((category) => getBudgetCategoryLabel(category, selectedLanguage)).join(', ')}</p>
           )}
           {budgetAppliedNotice && <p className="mt-2 rounded-lg border border-[#00DC82]/20 bg-[#00DC82]/10 px-2 py-1 text-[10px] font-semibold text-[#00DC82]">{t.wizardBudgetApplied}</p>}
           {budgetImport.warnings.map((warning) => <p key={warning} className="mt-1 text-[10px] text-[#FFB020]">{warning}</p>)}

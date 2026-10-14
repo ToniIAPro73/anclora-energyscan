@@ -40,6 +40,7 @@ const TERMINAL_LOOSE_RE = new RegExp(String.raw`(${AMOUNT_PAT})\s*€?\s*$`);
 
 // Budget-code prefix: 01.01, 01.01.01, A01, CAP-1 etc.
 const CODE_PREFIX_RE = /^(?:[A-Z]{0,3}\d+(?:[.\-]\d+){0,3})\s+/i;
+const QUANTITY_UNIT_RE = new RegExp(String.raw`^\d+(?:[,.]\d+)?\s*(?:${UNIT_PAT})$`, 'i');
 
 // ─── Line classification ──────────────────────────────────────────────────────
 
@@ -114,6 +115,8 @@ function buildItem(
 }
 
 function extractAmountFromField(col: string): number | undefined {
+  const unitPrice = col.trim().match(UPRICE_RE);
+  if (unitPrice) return parseCurrencyAmount(unitPrice[1]);
   const m = col.trim().match(TERMINAL_LOOSE_RE);
   if (!m) return undefined;
   return parseCurrencyAmount(m[1]);
@@ -150,7 +153,9 @@ function tryTabular(line: string, pending: string): BudgetLineItem | null {
   for (let i = startIdx; i < totalIdx; i++) {
     const isNumeric = /^[\d.,€%\-]+$/.test(cols[i]) || /^[\d.,]+\s*€?\s*$/.test(cols[i]);
     const isUnit = new RegExp(`^(?:${UNIT_PAT})$`, 'i').test(cols[i]);
-    if (isNumeric || isUnit) {
+    const isQuantityWithUnit = QUANTITY_UNIT_RE.test(cols[i]);
+    const isUnitPrice = UPRICE_RE.test(cols[i]);
+    if (isNumeric || isUnit || isQuantityWithUnit || isUnitPrice) {
       if (firstNumericIdx === totalIdx) firstNumericIdx = i;
     } else {
       descCols.push(cols[i]);

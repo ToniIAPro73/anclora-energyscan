@@ -1,0 +1,25 @@
+[
+  {
+    "id": "inline-mixed-units",
+    "text": "PRESUPUESTO DE REFORMA SINTETICO\n01.01 Aislamiento de fachada SATE 10 m2 80,00 €/m2 800,00 €\n01.02 Sustitución de ventanas PVC 2 ud 500,00 €/ud 1.000,00 €\nIMPORTE TOTAL 1.800,00 €",
+    "expected": [
+      { "description": "Aislamiento de fachada SATE", "quantity": 10, "unit": "m2", "unitPrice": 80, "total": 800, "category": "ENVELOPE_FACADE" },
+      { "description": "Sustitución de ventanas PVC", "quantity": 2, "unit": "ud", "unitPrice": 500, "total": 1000, "category": "WINDOWS" }
+    ]
+  },
+  {
+    "id": "tabular-kilowatt-peak",
+    "text": "PRESUPUESTO DE REFORMA SINTETICO\nCódigo\tPartida\tMedición\tPrecio unitario\tImporte\n03\tInstalación fotovoltaica\t3 kWp\t1.200,00 €/kWp\t3.600,00 €\n04\tRevisión técnica\t1 ud\t250,00 €/ud\t250,00 €\nIMPORTE TOTAL 3.850,00 €",
+    "expected": [
+      { "description": "Instalación fotovoltaica", "quantity": 3, "unit": "kWp", "unitPrice": 1200, "total": 3600, "category": "PV" },
+      { "description": "Revisión técnica", "quantity": 1, "unit": "ud", "unitPrice": 250, "total": 250, "category": "UNKNOWN" }
+    ]
+  },
+  {
+    "id": "dotted-leader-unitless",
+    "text": "PRESUPUESTO DE REFORMA SINTETICO\nGestión y coordinación de obra ........ 300,00 €\nIMPORTE TOTAL 300,00 €",
+    "expected": [
+      { "description": "Gestión y coordinación de obra", "total": 300, "category": "UNKNOWN" }
+    ]
+  }
+]

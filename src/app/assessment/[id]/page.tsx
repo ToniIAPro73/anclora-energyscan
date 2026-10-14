@@ -14,12 +14,13 @@ import { AlertTriangle, CheckCircle2, HelpCircle, Lightbulb, FileText } from 'lu
 import { AssessmentAttachment, PropertyDataV2, ScoreResultV2, EnergyLetter, PropertyType, HeatingSystem, CoolingSystem, WaterHeatingSystem, WindowType, RenewableSystem, InsulationLevel, BudgetRange, AssessmentObjective, ConfidenceLevel, PropertyOrientation, RoofType, VentilationType, TimelineHorizon } from '@/lib/domain/energy-assessment';
 import { parseStatelessAssessmentId } from '@/lib/stateless-assessment';
 import { cookies } from 'next/headers';
-import { getPreferencesForLanguage, normalizeCurrency, normalizeLanguage, normalizeMeasurementSystem } from '@/lib/preferences';
+import { getPreferencesForLanguage, normalizeCurrency, normalizeLanguage, normalizeMeasurementSystem, normalizeSelectedLocale } from '@/lib/preferences';
 import { formatArea } from '@/lib/formatters';
 import { getDictionary, getLegalDisclaimer, formatValueLabel, translateClimateZone, translateConfidence, translateScoreText } from '@/lib/i18n';
 import { localizeScenarios, localizeSubsidies } from '@/lib/scenario-i18n';
 import { prismaCertificateToDto } from '@/lib/ingestion/persistence';
 import type { RehabBudgetAnalysis } from '@/lib/ingestion/types';
+import { getBudgetCategoryLabel } from '@/lib/ingestion/budget-category-localization';
 import { canAccessPremiumContent } from '@/lib/premium-access';
 import { trackEvent } from '@/lib/analytics';
 import { lightAuth as auth } from '@/auth.config';
@@ -53,6 +54,7 @@ async function loadPremiumSourcesForAssessment(assessmentId: string) {
 export default async function AssessmentResultsPage({ params }: { params: { id: string } }) {
   const cookieStore = cookies();
   const language = normalizeLanguage(cookieStore.get('enerscan-language')?.value);
+  const selectedLocale = normalizeSelectedLocale(cookieStore.get('enerscan-language')?.value);
   const defaults = getPreferencesForLanguage(language);
   const currency = normalizeCurrency(cookieStore.get('enerscan-currency')?.value || defaults.currency);
   const measurementSystem = normalizeMeasurementSystem(cookieStore.get('enerscan-measurement-system')?.value || defaults.measurementSystem);
@@ -566,7 +568,7 @@ export default async function AssessmentResultsPage({ params }: { params: { id: 
                     <div><p className="text-[10px] uppercase text-muted">{t.importedTargetReached}</p><p className="font-bold text-premium">{budget.targetReached === undefined ? '---' : budget.targetReached ? t.importedYes : t.importedNo}</p></div>
                   </div>
                   <p className="mt-4 text-sm text-premium">{budget.analysisSummary}</p>
-                  <p className="mt-2 text-xs text-[#FFB020]">{t.importedMeasures}: {budget.detectedMeasures.map((measure) => measure.category).join(', ') || '---'}</p>
+                  <p className="mt-2 text-xs text-[#FFB020]">{t.importedMeasures}: {budget.detectedMeasures.map((measure) => getBudgetCategoryLabel(measure.category, selectedLocale)).join(', ') || '---'}</p>
                 </div>
               ))}
             </section>
