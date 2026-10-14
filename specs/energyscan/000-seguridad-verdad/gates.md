@@ -337,3 +337,15 @@ QA visual (2026-10-15): reemplaza el bloqueo histórico por falta de teardown. E
 | «Reducción 16 %» (landing) | PASS | SRC-01 |
 | «80 % del parque deficiente» (landing) | FAIL | Sin fuente registrada (C-09); decisión de Toni pendiente |
 | Textos de score y ahorro; PDF `EnerScanReport` | NOT_RUN | Pendiente: procedencia declarado/documentado/estimado/no disponible (F0-R06) |
+
+### ES-0.3 — estadística de la landing (código `be12a23608ebff509488db5f8f32c0d995344e55`)
+
+Decisión de Toni: buscar fuente (B) y, si no existe, retirar (A). Se encontró una fuente oficial de la UE, no de España.
+
+| Comprobación | Resultado | Evidencia |
+|---|---|---|
+| Fuente | PASS | Comisión Europea, DG Energy: «75 % de los edificios de la UE tienen un rendimiento energético deficiente» (Eurostat/AEMA 2023); registrada como SRC-11 |
+| Cifra española oficial | NO ENCONTRADA | Las cifras de prensa y entidades privadas (81 %, 86,9 %, 94,2 %) difieren entre sí; no se usan |
+| Landing en 7 locales | PASS | «75 %» con etiqueta «Edificios de la UE con bajo rendimiento energético» (y equivalentes); sin «%» inicial en la etiqueta |
+| Test de regresión, lint, `tsc`, suite (80 suites / 536 tests), build | PASS | En secuencia |
+| QA visual de la estadística (etiqueta más larga en la tarjeta) | NOT_RUN | Pendiente de Toni |

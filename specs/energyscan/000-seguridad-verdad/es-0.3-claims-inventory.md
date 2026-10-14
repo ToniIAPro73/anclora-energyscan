@@ -37,7 +37,7 @@ C-04 y C-05 corregidos en `d509905172b9ffde3f6eb2893821e239d646ea30` (opción A:
 
 | ID | Superficie | Resultado |
 |---|---|---|
-| C-09 | `src/app/page.tsx:144` y `statsDeficient` en los 7 locales: «80 % del parque deficiente» | **Sin fuente** en `docs/energyscan-sources.md`. Cifra fija presentada como dato. Requiere fuente verificada o retirada (F0-R06, F0-R08) |
+| C-09 (**corregido en `be12a23608ebff509488db5f8f32c0d995344e55`**: «75 %» con alcance UE y fuente SRC-11) | `src/app/page.tsx:144` y `statsDeficient` en los 7 locales: «80 % del parque deficiente» | **Sin fuente** en `docs/energyscan-sources.md`. Cifra fija presentada como dato. Requiere fuente verificada o retirada (F0-R06, F0-R08) |
 | OK | Línea de tiempo: «Reducción 16 %» en 2030 | Respaldada por SRC-01 (descenso del promedio nacional residencial ≥16 % en 2030, 20–22 % en 2035) |
 | OK | Manuales PDF ES/EN/DE | Sin «2033» ni obligación de clase E; avisos «no garantiza ahorros, costes, subvenciones» presentes |
 | OK | Copy de `pricing`, `proveedores`, `profesional` (`src/lib/monetization/i18n.ts`) | Avisos de no-CEE y de no-garantía correctos; sin cifras de ahorro absolutas |
