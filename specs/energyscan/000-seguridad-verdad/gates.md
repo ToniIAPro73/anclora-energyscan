@@ -373,3 +373,23 @@ Toni pidió comprobar campo ausente y conflicto antes de cerrar ES-0.3. F0-R06.
 | Superficie declarada distinta del Catastro (>20 m²) | Requiere revisión | Sin cambios | PASS |
 | Valor con CEE adjunto | Fuente CEE | Sin cambios | PASS |
 | Lint, `tsc`, suite (80 suites / 544 tests), build | PASS | PASS | En secuencia |
+
+### ES-0.4 — baseline reproducible y plan de validación
+
+SHA de partida fijado antes de editar: `719b228415d70a35d3537f237f762bf91165940d` (`development`, árbol limpio y alineado con `origin/development`). Al fijarlo, `origin/staging`, `origin/production` y `origin/main` estaban en `ca9dfdc2a5e0d65a75d80755f4a7ba2328ae1ea1`. Esto fija el objeto revisado; no significa que cada requisito F0 esté completamente demostrado.
+
+| Comprobación | Resultado | SHA base | Comando / método | Evidencia y límite |
+|---|---|---|---|---|
+| Estado de Git y referencias | PASS | `719b228415d70a35d3537f237f762bf91165940d` | `git status --short`; `git fetch origin --prune`; `git pull --ff-only origin development`; `git rev-parse HEAD`; `git show-ref` | Árbol inicial limpio; desarrollo coincidía con origin; referencias de release en `ca9dfdc`. |
+| Matriz F0-R01..R12 y auditoría de casos | PASS | `7348a838f2d2a95785603ab8febe39d37b52f4d4` | Inspección de `spec.md` §5 y archivos/casos de test enlazados en [`es-0.4-baseline.md`](es-0.4-baseline.md) | 11/12 requisitos tienen al menos un test directo mapeado; 0/12 quedan confirmados a nivel integral; R04 pendiente de prueba de payload manipulado. No se declara cobertura adicional. |
+| Inventario y hash de fixtures | PASS | `7348a838f2d2a95785603ab8febe39d37b52f4d4` | `rg --files tests scripts/qa`; `shasum -a 256 tests/budget-ingestion.test.ts tests/cee-parser-premium.test.ts tests/evidence-matrix.test.ts` | Los cuatro escenarios existen inline; sin ficheros nuevos ni datos reales. Hashes y nombres de casos en baseline. |
+| Mapa de workflows CI | PASS | `7348a838f2d2a95785603ab8febe39d37b52f4d4` | Lectura de `.github/workflows/ci.yml` y `.github/workflows/validate-agent-branch.yml` | Registrados disparadores y pasos. `tsc --noEmit` explícito, QA visual, servicios reales y piloto no están cubiertos por estos workflows. |
+| Métricas/denominadores | PASS | `7348a838f2d2a95785603ab8febe39d37b52f4d4` | Recuento manual y tabla reproducible en `es-0.4-baseline.md`; ejecutar comandos allí enlazados | Test mapeado 11/12; casos negativos de la matriz acotada 5/12. No representa la superficie completa de auth. |
+| Protocolo de piloto | PASS | `7348a838f2d2a95785603ab8febe39d37b52f4d4` | Revisión de `es-0.4-pilot-protocol-template.md` | Plantilla vacía; no ejecutada. El piloto no bloquea la aceptación de desarrollo. |
+| Lint | NOT_RUN | `7348a838f2d2a95785603ab8febe39d37b52f4d4` | `npm run lint` | Solo cambios de documentación; política de hitos exige `git diff --check`. |
+| Typecheck | NOT_RUN | `7348a838f2d2a95785603ab8febe39d37b52f4d4` | `npx tsc --noEmit` | Solo cambios de documentación; no hubo código, tests ni fixtures nuevos. |
+| Tests | NOT_RUN | `7348a838f2d2a95785603ab8febe39d37b52f4d4` | `npm test` | Solo cambios de documentación; los tests citados son inventariados, no ejecutados en esta tarea. |
+| Build | NOT_RUN | `7348a838f2d2a95785603ab8febe39d37b52f4d4` | `npm run build` | Solo cambios de documentación; no hubo cambios de aplicación. |
+| Diff documental | PASS | `7348a838f2d2a95785603ab8febe39d37b52f4d4` | `git diff --check` | Diff sin errores; vuelve a ejecutarse antes del commit de gates/checklist. |
+
+**Resultado ES-0.4:** baseline documental preparado; revisión de Toni pendiente. No se cambian criterios de aceptación de F0, no se inicia piloto y no se promociona.
