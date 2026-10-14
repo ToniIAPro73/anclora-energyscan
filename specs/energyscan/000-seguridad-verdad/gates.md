@@ -307,3 +307,14 @@ Opción A decidida por Toni (C-04, C-05, C-06). Requisito F0-R09.
 Límite conocido: el resumen guardado de revisiones antiguas conserva el texto «Presupuesto alto» en `summary.alert`.
 
 QA visual (2026-10-15): reemplaza el bloqueo histórico por falta de teardown. El teardown acotado `--budget-review-id` ya existe y se verificó con dos registros sintéticos. La comprobación de pantalla encontró el recorte horizontal de cabecera indicado en la fila; no se modifica código en esta tarea. La descarga de PDFs queda pendiente porque requiere una revisión pagada y la prueba se detuvo al hallar el defecto móvil.
+
+### Revalidación de cabecera móvil y PDF demo (2026-10-14)
+
+| Comprobación | Resultado | Evidencia |
+|---|---|---|
+| Cabecera móvil | PASS | Código `078075016e83688ab2f734985b1f6945b6ce1716`. `agent-browser` con identidad QA: `/`, `/dashboard` y `/budget-review`, 320/360/390/430×844, los 7 idiomas (84 casos); además ES/EN/DE con y sin sesión a 390×844. `document.documentElement.scrollWidth` coincide con `innerWidth`; ningún elemento de cabecera rebasa el viewport. En sesión anónima `/dashboard` redirige a `/auth`, también sin overflow. En 320 px, el título alemán de Budget Review era el contenido que ampliaba el documento; su tamaño ahora se reduce bajo `sm`. El halo decorativo de la landing se extiende fuera del viewport, pero `.app-shell` lo recorta y el documento no se ensancha. Escritorio 1440×900: sin overflow y tamaño de título 36 px. Capturas temporales revisadas y retiradas. |
+| PDF | FAIL | Código `078075016e83688ab2f734985b1f6945b6ce1716`. Método b: descarga de `/api/budget-review/demo/pdf?lang=es|en|de`, que renderiza `BudgetReviewReport`; extracción de texto con `pdftotext`. Sin pagos ni revisiones persistentes. ES y EN: cinco etiquetas localizadas completas y sin estados antiguos de precio. DE: las cinco celdas cortan `Keine vergleichbare Referenz` como `Keine vergleichbare Ref-`; defecto en la columna de estado de `src/lib/pdf/BudgetReviewReport.tsx` (ancho 20%). |
+| Lint | PASS | SHA `078075016e83688ab2f734985b1f6945b6ce1716`; `npm run lint` |
+| Typecheck | PASS | SHA `078075016e83688ab2f734985b1f6945b6ce1716`; `npx tsc --noEmit` |
+| Tests completos | PASS — 80 suites / 534 tests | SHA `078075016e83688ab2f734985b1f6945b6ce1716`; `npm test -- --runInBand` |
+| Build | PASS | SHA `078075016e83688ab2f734985b1f6945b6ce1716`; `npm run build` |
