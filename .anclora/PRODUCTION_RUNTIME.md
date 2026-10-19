@@ -1,6 +1,32 @@
 # Anclora Energyscan — Production Runtime Manifest
 
 PRODUCTION_RUNTIME_MANIFEST_VERSION=2.0
+PROMOTION_STOP_ON_GATE_FAILURE=true
+PROMOTION_REQUIRES_PRE_STEP_GATES=true
+PROMOTION_AUTHORIZATION_TOKEN=PROMOTE=FULL
+PROMOTION_MECHANISM=.github/workflows/promote.yml
+PROMOTION_FLOW=development->staging->production->main
+PROMOTION_SUPPORTED=true
+SECRET_COMMIT_FORBIDDEN=true
+SECRET_OUTPUT_FORBIDDEN=true
+PROMOTION_FORCE_PUSH_ALLOWED=false
+PROMOTION_AUTHORIZATION_CLEAR_ON_UNAUTHORIZED_PROMPT=true
+PROMOTION_AUTHORIZATION_CLEAR_ON_NEW_SESSION=true
+PROMOTION_AUTHORIZATION_SCOPE=CURRENT_TASK_OR_CONVERSATION
+AUTO_PROMOTE=false
+TEST_EXECUTION_POLICY=BATCHED
+STOP_WHEN_SUFFICIENT_EVIDENCE=true
+CAVEMAN_GRANULARITY=TASK
+CAVEMAN_MODE_DEFAULT=AUTO
+TOKEN_ECONOMY_POLICY=ADAPTIVE
+QA_MODE_DEFAULT=AUTO
+STOP_AFTER_DEVELOPMENT_PUSH=true
+PUSH_TARGET=origin/development
+FEATURE_BRANCHES=DISALLOWED
+DEFAULT_BRANCH=development
+WORKING_BRANCH=development
+ANCLORA_FLOW_CONTRACT_VERSION=2.0
+ANCLORA_FLOW_VERSION=1
 RUNTIME_CONTRACT_AUTHORITY=CANONICAL
 STATUS=PRODUCTION_RUNTIME_CONFIRMED
 LOCAL_RUNTIME_MODEL=PRODUCTION_BACKED
@@ -86,18 +112,12 @@ manifest override generic agent defaults or home-directory agent policies.
 ## QA Contract
 
 QA_POLICY=WORKSPACE_PROPORTIONAL
-QA_MODE_DEFAULT=AUTO
 FAST_TARGETED_TESTING_POLICY=MINIMUM_SUFFICIENT_SET
 FAST_FULL_TEST_SUITE_ALLOWED=false
-STOP_WHEN_SUFFICIENT_EVIDENCE=true
-TEST_EXECUTION_POLICY=BATCHED
 FULL_GATES_AFTER_EVERY_EDIT=false
 REPEAT_UNCHANGED_SUCCESSFUL_GATES=false
 VISUAL_QA_EXECUTION=BY_QA_MODE
 
-TOKEN_ECONOMY_POLICY=ADAPTIVE
-CAVEMAN_MODE_DEFAULT=AUTO
-CAVEMAN_GRANULARITY=TASK
 QA_MINIMUM_FOR_DATABASE_MIGRATION=FULL
 QA_MINIMUM_FOR_AUTH=FULL
 QA_MINIMUM_FOR_RELEASE_PROMOTION=FULL
@@ -118,7 +138,6 @@ For dedicated human QA: Use designated production test identity. Never use Toni'
 
 ## 11. Git Branch & Operational Policy
 
-DEFAULT_BRANCH=development
 PROMOTION_POLICY=Default development-only operation; no automatic promotion. Explicit current-task user authorization permits only the repository-supported governed promotion path, subject to all gates.
 
 ## Anclora Single Flow v1 (flujo único)
@@ -126,24 +145,10 @@ PROMOTION_POLICY=Default development-only operation; no automatic promotion. Exp
 Fuente canónica: `../anclora-mods/ANCLORA_FLUJO_UNICO_V1.md`. Este bloque prevalece sobre cualquier valor anterior de las mismas claves en este fichero; si una clave aparece más de una vez, vale la última.
 
 ```text
-ANCLORA_FLOW_VERSION=1
 ANCLORA_MODS_DIR=../anclora-mods
 
 GIT_WORKFLOW_MODEL=FULL_PROMOTION
-WORKING_BRANCH=development
-DEFAULT_BRANCH=development
-FEATURE_BRANCHES=DISALLOWED
-PUSH_TARGET=origin/development
-STOP_AFTER_DEVELOPMENT_PUSH=true
-PROMOTION_FLOW=development->staging->production->main
-PROMOTION_MECHANISM=.github/workflows/promote.yml
-AUTO_PROMOTE=false
 EXPLICIT_PROMOTION_ALLOWED=true
-PROMOTION_AUTHORIZATION_TOKEN=PROMOTE=FULL
-PROMOTION_AUTHORIZATION_SCOPE=UNTIL_CHAIN_COMPLETE
-PROMOTION_REQUIRES_PRE_STEP_GATES=true
-PROMOTION_STOP_ON_GATE_FAILURE=true
-PROMOTION_FORCE_PUSH_ALLOWED=false
 PROMOTION_OLD_AUTHORIZATION_PERSISTS=false
 POST_PROMOTION_QA=REQUIRED
 
@@ -176,3 +181,8 @@ VALIDATION_CHECKLIST_FILE=docs/VALIDATION_CHECKLIST.md
 Las credenciales de QA siguen el estándar de `ANCLORA_FLUJO_UNICO_V1.md` §5: cuenta persistente, credenciales en `.env.qa.local`, que se cargan sin imprimirlas.
 
 QA_TEARDOWN_TOOL=scripts/qa/teardown-qa-data.ts
+
+<!-- ANCLORA-MODS:START -->
+ANCLORA_MODS_COMMON_CONTRACT_VERSION=1.0.0
+Canonical shared rules: [Anclora Common Agent Contract](../anclora-mods/contracts/ANCLORA_COMMON_AGENT_CONTRACT_V1.md) and [Flow Amendment v2](../anclora-mods/ANCLORA_FLUJO_UNICO_V2.md). Repository-specific facts remain in this repository's `.anclora/` contracts.
+<!-- ANCLORA-MODS:END -->
