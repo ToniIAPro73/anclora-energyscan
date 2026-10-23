@@ -56,7 +56,7 @@ Toda feature o fix sigue este flujo antes de escribir código:
 - Crear tasks: `sdd/features/<nombre>/<nombre>-tasks-v1.md`
 - Implementar tarea a tarea (tests primero)
 - Validar contra criterios de aceptación de la spec
-- PR contra `development`, con referencia a la spec
+- Con la spec validada, presentar los cambios en el entorno `development` y esperar la validación expresa de Toni antes del commit/push; no crear un PR para el flujo normal.
 
 ### Reglas obligatorias
 
