@@ -34,7 +34,7 @@ Todo desarrollo en este repo sigue la metodología SDD unificada del ecosistema 
 
 - Rama de trabajo: **`development`** (trabajo directo, sin ramas temporales salvo orden expresa de Toni)
 - Push solo a `origin/development`; nunca con force
-- Promoción: `development → staging → production → main` con `promote.yml`, solo tras `PROMOTE=FULL` escrito por Toni
+- Tras implementar, espera la validación expresa de Toni en development antes del commit/push. Después de la revisión de Preview, solo `PROMOTE=FULL` autoriza un workflow asíncrono para `development → staging → production → main`; no esperes ni verifiques cada salto.
 - Nunca commitear directamente en `main`, `staging` ni `production`
 
 ### Principios de desarrollo (Specboot)

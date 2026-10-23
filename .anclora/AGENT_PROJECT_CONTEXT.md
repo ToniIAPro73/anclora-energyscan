@@ -144,7 +144,7 @@ Fuente canónica: sección «Anclora Single Flow v1» de `PRODUCTION_RUNTIME.md`
 2. Verifica antes de entregar: gates (`QA_MODE`) y comprobación funcional y visual con la cuenta de QA (credenciales de `.env.qa.local`, cargadas sin imprimirlas). Los datos de la aplicación son ficticios.
 3. Sobrescribe `docs/VALIDATION_CHECKLIST.md` (plantilla: `../anclora-mods/anclora-workflow/templates/validation-checklist.md`) en el mismo commit.
 4. Detente tras el push. No declares la fase aceptada: la acepta Toni.
-5. Promociona (`staging → production → main`, con `promote.yml`) solo tras `PROMOTE=FULL` escrito por Toni, un salto cada vez y parando ante el primer fallo.
+5. Espera la validación expresa de Toni en development antes de hacer commit y push a `origin/development`. Tras la revisión de Preview, `PROMOTE=FULL` escrito por Toni autoriza un único workflow asíncrono que actualiza `staging → production → main` en orden; no esperes su finalización ni verifiques los branches entre saltos. Toni revisa los entornos resultantes.
 6. Controles automáticos: `../anclora-mods/README.md`. Si un control bloquea algo legítimo, no lo evites: explícalo.
 
 Esta sección prevalece sobre cualquier cláusula de `AGENTS.md`, `CLAUDE.md`, `GEMINI.md` o `docs/` que ordene ramas por agente o prohíba trabajar en `development`.
