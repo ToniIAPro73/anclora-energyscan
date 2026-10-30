@@ -177,7 +177,7 @@ PROMOTION_POLICY=Default development-only operation; no automatic promotion. Exp
 
 ## Anclora Single Flow v1 (flujo único)
 
-Fuente canónica: `../anclora-mods/ANCLORA_FLUJO_UNICO_V1.md`. Este bloque prevalece sobre cualquier valor anterior de las mismas claves en este fichero; si una clave aparece más de una vez, vale la última.
+Fuente canónica: `anclora-governance` (`AGENT_OPERATING_STANDARD` §10); `anclora-mods` conserva solo el tooling de hooks y el V1 histórico. Este bloque prevalece sobre cualquier valor anterior de las mismas claves en este fichero; si una clave aparece más de una vez, vale la última.
 
 ```text
 ANCLORA_MODS_DIR=../anclora-mods
@@ -213,7 +213,7 @@ VALIDATION_CHECKLIST_REQUIRED=true
 VALIDATION_CHECKLIST_FILE=docs/VALIDATION_CHECKLIST.md
 ```
 
-Las credenciales de QA siguen el estándar de `ANCLORA_FLUJO_UNICO_V1.md` §5: cuenta persistente, credenciales en `.env.qa.local`, que se cargan sin imprimirlas.
+Las credenciales de QA siguen el estándar de `anclora-governance` (`AGENT_OPERATING_STANDARD` §10): cuenta persistente, credenciales en `.env.qa.local`, que se cargan sin imprimirlas.
 
 QA_TEARDOWN_TOOL=scripts/qa/teardown-qa-data.ts
 

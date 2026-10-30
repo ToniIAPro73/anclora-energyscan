@@ -4,9 +4,8 @@ This file is the repository-local entry point for the shared Anclora workflow. I
 
 ## Canonical sources
 
-- [Workspace agent policy](../../../ANCLORA_WORKSPACE_AGENT_POLICY.md)
-- [Anclora Mods Flow Amendment v2](../../../anclora-mods/ANCLORA_FLUJO_UNICO_V2.md)
-- [Anclora common agent contract](../../../anclora-mods/contracts/ANCLORA_COMMON_AGENT_CONTRACT_V1.md)
+- [AOS Adoption Standard (authority: anclora-governance)](../../../anclora-governance/standards/AOS_ADOPTION_STANDARD.md)
+- [Agent Operating Standard §10 — Git, QA and promotion](../../../anclora-governance/standards/AGENT_OPERATING_STANDARD.md)
 - [Repository runtime and Git profile](../PRODUCTION_RUNTIME.md)
 
 ## Required workflow

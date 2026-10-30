@@ -49,7 +49,7 @@ Adoption and exceptions: [`AOS_ADOPTION.md`](AOS_ADOPTION.md). Load each only wh
 
 ## Flujo único Anclora v1
 
-Fuente canónica: sección «Anclora Single Flow v1» de `PRODUCTION_RUNTIME.md` y `../anclora-mods/ANCLORA_FLUJO_UNICO_V1.md`.
+Fuente canónica: sección «Anclora Single Flow v1» de `PRODUCTION_RUNTIME.md` y `../../anclora-governance/standards/AGENT_OPERATING_STANDARD.md` §10.
 
 1. Trabaja directamente en `development`, sin ramas temporales (salvo orden expresa de Toni). Push solo a `origin/development`, nunca con force.
 2. Verifica antes de entregar: gates (`QA_MODE`) y comprobación funcional y visual con la cuenta de QA (credenciales de `.env.qa.local`, cargadas sin imprimirlas). Los datos de la aplicación son ficticios.
