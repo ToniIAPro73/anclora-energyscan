@@ -16,3 +16,9 @@ No asumir infraestructura compartida entre productos. Validar siempre hosting, b
 <!-- ANCLORA-ECOSYSTEM-CONTEXT-END -->
 
 Antes de cualquier verificación o prueba visual, lee docs/qa/visual-qa-runbook.md
+
+<!-- ANCLORA-AOS:START -->
+# Gemini adapter
+
+This repository follows AOS. Use `AGENTS.md` as bootstrap and resolve canonical Governance and the repository runtime contract from it. Provider-specific behavior must not override AOS.
+<!-- ANCLORA-AOS:END -->
